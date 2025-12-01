@@ -265,7 +265,10 @@ export function EnhancedAppSidebar({ ...props }: React.ComponentProps<typeof Sid
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">{user.name || user.email}</p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {user.role === 'parent' ? 'Responsável' : 'Profissional'}
+                      {user.role === 'owner' ? 'Proprietário' : 
+                       user.role === 'admin' ? 'Administrador' : 
+                       user.role === 'parent' ? 'Responsável' : 
+                       'Profissional'}
                     </p>
                   </div>
                 )}
