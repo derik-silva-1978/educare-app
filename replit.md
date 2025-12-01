@@ -184,8 +184,38 @@ The workflow orchestrates:
 - Removed hardcoded localhost URLs in favor of environment variables
 - Security fix: Removed debug middleware that logged credentials
 
+## Configuration Status
+
+### ✅ Completed
+- Stripe integration fully functional (webhook configured with STRIPE_WEBHOOK_SECRET)
+- Frontend subscription page with role-based access (owner-only)
+- Vite configuration fixed for Replit proxy compatibility
+- Redirect URLs fixed with /educare-app prefix
+- Both workflows running successfully (Backend on :3001, Frontend on :5000)
+
 ## Next Steps
-1. Configure STRIPE_WEBHOOK_SECRET environment variable
-2. Create products/prices in Stripe Dashboard and link to SubscriptionPlan table via metadata
-3. Implement WhatsApp webhook endpoints for n8n integration
-4. Test end-to-end flow: WhatsApp → n8n → Backend → Response
+
+### 2. Create Stripe Products and Prices
+- Go to Stripe Dashboard → Products
+- Create subscription plans matching your SubscriptionPlan table
+- Add price IDs to SubscriptionPlan records via metadata (e.g., `stripePriceId: "price_xyz"`)
+- Test checkout flow with test card: 4242 4242 4242 4242
+
+### 3. Configure Webhook in Stripe Dashboard
+- Navigate to Developers → Webhooks
+- Add endpoint: `https://your-domain.com/api/stripe/webhook`
+- Subscribe to events: `customer.subscription.*`, `invoice.*`, `checkout.session.completed`
+- Copy signing secret (whsec_*) - already configured as STRIPE_WEBHOOK_SECRET
+
+### 4. Test End-to-End Subscription Flow
+- Login as owner role user
+- Navigate to `/educare-app/subscription`
+- Click "Assinar Plano" to create checkout session
+- Complete payment with test card
+- Verify webhook events process successfully in backend logs
+- Check local Subscription table for updated records
+
+### 5. WhatsApp Integration (Future)
+- Configure n8n workflow with Replit backend API endpoints
+- Implement WhatsApp webhook: `/api/whatsapp/webhook`
+- Test message flow: WhatsApp → n8n → Backend → OpenAI → Response
