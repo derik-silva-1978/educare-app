@@ -158,9 +158,25 @@ The workflow orchestrates:
 
 ## Recent Changes
 
-**2025-12-01**: 
-- Fixed OpenAI integration propagation in Replit workflows
+**2025-12-01 (Stripe Integration)**: 
+- Implemented full Stripe integration replacing Asaas payment gateway
+- Created stripeClient.js with credential caching (5-min TTL) using Replit connector API
+- Created stripeService.js for Stripe business logic (customers, checkout, subscriptions, products)
+- Created stripeRoutes.js with endpoints: /config, /checkout, /portal, /subscriptions
+- Created webhookHandlers.js with event handlers for subscription lifecycle
+- Webhook routes added BEFORE express.json() middleware for signature verification
+- Added User model fields: stripeCustomerId, stripeSubscriptionId
+- Health check endpoint shows Stripe integration status
+
+**2025-12-01 (OpenAI Integration)**: 
+- Fixed OpenAI integration propagation in Replit workflows using $(printenv OPENAI_API_KEY) pattern
 - TitiNauta AI service layer implemented with lazy initialization
 - Health check endpoints added for monitoring integrations status
 - Removed hardcoded localhost URLs in favor of environment variables
 - Security fix: Removed debug middleware that logged credentials
+
+## Next Steps
+1. Configure STRIPE_WEBHOOK_SECRET environment variable
+2. Create products/prices in Stripe Dashboard and link to SubscriptionPlan table via metadata
+3. Implement WhatsApp webhook endpoints for n8n integration
+4. Test end-to-end flow: WhatsApp → n8n → Backend → Response
