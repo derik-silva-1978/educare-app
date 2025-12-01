@@ -3,8 +3,9 @@
  * Gerencia o conteúdo das jornadas de desenvolvimento infantil
  */
 
-const { JourneyBotQuestion, JourneyBotSession, JourneyBotResponse } = require('../models');
+const { JourneyBotQuestion, JourneyBotSession, JourneyBotResponse, Child } = require('../models');
 const { Op } = require('sequelize');
+const openaiService = require('../services/openaiService');
 
 /**
  * Busca o conteúdo da jornada para uma criança com base na idade
@@ -329,6 +330,256 @@ exports.getAnswerHistory = async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Erro ao buscar histórico de respostas'
+    });
+  }
+};
+
+/**
+ * Chat com TitiNauta usando IA
+ */
+exports.chat = async (req, res) => {
+  try {
+    const { childId } = req.params;
+    const { message, conversationHistory = [] } = req.body;
+
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        error: 'Mensagem não fornecida'
+      });
+    }
+
+    if (!openaiService.isConfigured()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Serviço de IA não configurado'
+      });
+    }
+
+    let childContext = null;
+    
+    if (childId) {
+      try {
+        const child = await Child.findByPk(childId);
+        if (child) {
+          const birthDate = new Date(child.birthDate);
+          const today = new Date();
+          const ageInMonths = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24 * 30.44));
+          
+          childContext = {
+            name: child.firstName || child.name,
+            ageInMonths,
+            gender: child.gender
+          };
+        }
+      } catch (childError) {
+        console.warn('Erro ao buscar dados da criança:', childError);
+      }
+    }
+
+    const messages = [
+      ...conversationHistory.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      })),
+      { role: 'user', content: message }
+    ];
+
+    const result = await openaiService.chat(messages, childContext);
+
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        error: result.error || 'Erro ao processar mensagem'
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        message: result.content,
+        usage: result.usage
+      }
+    });
+  } catch (error) {
+    console.error('Erro no chat TitiNauta:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao processar mensagem'
+    });
+  }
+};
+
+/**
+ * Gera feedback de IA para uma resposta de quiz
+ */
+exports.generateAIFeedback = async (req, res) => {
+  try {
+    const { questionId, userAnswer } = req.body;
+
+    if (!questionId || !userAnswer) {
+      return res.status(400).json({
+        success: false,
+        error: 'Dados incompletos'
+      });
+    }
+
+    if (!openaiService.isConfigured()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Serviço de IA não configurado'
+      });
+    }
+
+    const question = await JourneyBotQuestion.findByPk(questionId);
+    
+    if (!question) {
+      return res.status(404).json({
+        success: false,
+        error: 'Pergunta não encontrada'
+      });
+    }
+
+    const questionContext = {
+      question: question.domain_question || question.question,
+      domain: question.domain,
+      minMonths: question.meta_min_months,
+      maxMonths: question.meta_max_months
+    };
+
+    const result = await openaiService.generateFeedback(questionContext, userAnswer);
+
+    if (!result.success) {
+      return res.json({
+        success: true,
+        data: {
+          feedback: question.domain_feedback_1 || 'Obrigado pela sua resposta! Vamos continuar.'
+        }
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        feedback: result.feedback
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao gerar feedback:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao gerar feedback'
+    });
+  }
+};
+
+/**
+ * Analisa o progresso de desenvolvimento da criança
+ */
+exports.analyzeProgress = async (req, res) => {
+  try {
+    const { childId } = req.params;
+
+    if (!childId) {
+      return res.status(400).json({
+        success: false,
+        error: 'ID da criança não fornecido'
+      });
+    }
+
+    if (!openaiService.isConfigured()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Serviço de IA não configurado'
+      });
+    }
+
+    const child = await Child.findByPk(childId);
+    
+    if (!child) {
+      return res.status(404).json({
+        success: false,
+        error: 'Criança não encontrada'
+      });
+    }
+
+    const birthDate = new Date(child.birthDate);
+    const today = new Date();
+    const ageInMonths = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24 * 30.44));
+
+    const responses = await JourneyBotResponse.findAll({
+      where: { child_id: childId },
+      include: [{
+        model: JourneyBotQuestion,
+        as: 'question',
+        attributes: ['domain_question', 'domain']
+      }],
+      order: [['created_at', 'DESC']],
+      limit: 20
+    });
+
+    if (responses.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          analysis: 'Ainda não há respostas suficientes para gerar uma análise. Continue acompanhando o desenvolvimento da criança através das perguntas da jornada.'
+        }
+      });
+    }
+
+    const formattedResponses = responses.map(r => ({
+      question: r.question?.domain_question || 'Pergunta não disponível',
+      answer: r.answer_text
+    }));
+
+    const childContext = {
+      name: child.firstName || child.name,
+      ageInMonths,
+      gender: child.gender
+    };
+
+    const result = await openaiService.analyzeProgress(formattedResponses, childContext);
+
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        error: result.error || 'Erro ao analisar progresso'
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        analysis: result.analysis,
+        responsesAnalyzed: responses.length
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao analisar progresso:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao analisar progresso'
+    });
+  }
+};
+
+/**
+ * Verifica o status da integração OpenAI
+ */
+exports.getAIStatus = async (req, res) => {
+  try {
+    return res.json({
+      success: true,
+      data: {
+        configured: openaiService.isConfigured(),
+        provider: 'OpenAI'
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao verificar status da IA:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao verificar status'
     });
   }
 };
