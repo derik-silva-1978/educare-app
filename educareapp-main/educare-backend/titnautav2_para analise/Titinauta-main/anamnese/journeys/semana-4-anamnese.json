@@ -1,0 +1,20 @@
+
+{
+  "deprecated": "This JSON file is a legacy asset and is not used by the application. The authoritative data is in /data/anamnesis-data.js.",
+  "phase": "newborn",
+  "title": "Recém-nascido (0-28 dias) - Triagens Obrigatórias",
+  "content": {
+    "blocks": [
+      {
+        "h": "Triagens Neonatais Essenciais",
+        "items": [
+          { "id": "triagens.pezinho", "title": "Teste do Pezinho", "when": "Entre 3º e 5º dia", "why": "Coleta de gotas de sangue do calcanhar para rastrear doenças graves como fenilcetonúria, hipotireoidismo congênito, doença falciforme, fibrose cística, entre outras, permitindo tratamento precoce.", "audio": "Quando fazer: Entre 3º e 5º dia. Por que é importante: Coleta de gotas de sangue do calcanhar para rastrear doenças graves como fenilcetonúria, hipotireoidismo congênito, doença falciforme, fibrose cística, entre outras, permitindo tratamento precoce." },
+          { "id": "triagens.coracaozinho", "title": "Teste do Coraçãozinho (Oximetria de Pulso)", "when": "24 a 48h de vida", "why": "Mede a oxigenação no sangue para detectar cardiopatias congênitas críticas que podem necessitar de intervenção cirúrgica urgente.", "audio": "Quando fazer: 24 a 48h de vida. Por que é importante: Mede a oxigenação no sangue para detectar cardiopatias congênitas críticas que podem necessitar de intervenção cirúrgica urgente." },
+          { "id": "triagens.orelhinha", "title": "Teste da Orelhinha (Triagem Auditiva)", "when": "Antes da alta hospitalar", "why": "Avalia a integridade da via auditiva. A detecção precoce de qualquer grau de surdez é fundamental para o desenvolvimento da fala e da linguagem.", "audio": "Quando fazer: Antes da alta hospitalar. Por que é importante: Avalia a integridade da via auditiva. A detecção precoce de qualquer grau de surdez é fundamental para o desenvolvimento da fala e da linguagem." },
+          { "id": "triagens.olhinho", "title": "Teste do Olhinho (Reflexo Vermelho)", "when": "Antes da alta hospitalar", "why": "Busca identificar alterações que impeçam a luz de chegar à retina, como catarata congênita, glaucoma ou retinoblastoma, que podem levar à cegueira se não tratadas.", "audio": "Quando fazer: Antes da alta hospitalar. Por que é importante: Busca identificar alterações que impeçam a luz de chegar à retina, como catarata congênita, glaucoma ou retinoblastoma, que podem levar à cegueira se não tratadas." },
+          { "id": "triagens.linguinha", "title": "Teste da Linguinha (Frênulo Lingual)", "when": "Nas primeiras horas", "why": "Avalia o frênulo lingual para identificar a anquiloglossia ('língua presa'), que pode dificultar a amamentação e o ganho de peso do bebê.", "audio": "Quando fazer: Nas primeiras horas. Por que é importante: Avalia o frênulo lingual para identificar a anquiloglossia ('língua presa'), que pode dificultar a amamentação e o ganho de peso do bebê." }
+        ]
+      }
+    ]
+  }
+}

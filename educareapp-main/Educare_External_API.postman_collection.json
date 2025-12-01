@@ -1,0 +1,401 @@
+{
+	"info": {
+		"_postman_id": "educare-external-api-2025",
+		"name": "Educare - External API",
+		"description": "Collection para testar as APIs externas do Educare em produção",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Buscar Usuário",
+			"item": [
+				{
+					"name": "Buscar por Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/external/user?api_key={{api_key}}&email=pai@gmail.com",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"external",
+								"user"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "{{api_key}}",
+									"description": "Chave de API para autenticação"
+								},
+								{
+									"key": "email",
+									"value": "pai@gmail.com",
+									"description": "Email do usuário"
+								}
+							]
+						},
+						"description": "Busca um usuário pelo email cadastrado"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar por Telefone",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/external/user?api_key={{api_key}}&phone=+5511999999999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"external",
+								"user"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "{{api_key}}",
+									"description": "Chave de API para autenticação"
+								},
+								{
+									"key": "phone",
+									"value": "+5511999999999",
+									"description": "Telefone do usuário (formato internacional)"
+								}
+							]
+						},
+						"description": "Busca um usuário pelo telefone cadastrado"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar por CPF/CNPJ",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/external/user?api_key={{api_key}}&cpf_cnpj=12345678909",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"external",
+								"user"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "{{api_key}}",
+									"description": "Chave de API para autenticação"
+								},
+								{
+									"key": "cpf_cnpj",
+									"value": "12345678909",
+									"description": "CPF ou CNPJ do usuário"
+								}
+							]
+						},
+						"description": "Busca um usuário pelo CPF ou CNPJ cadastrado"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para buscar informações de usuários"
+		},
+		{
+			"name": "2. Buscar Crianças",
+			"item": [
+				{
+					"name": "Buscar Crianças por Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/external/children?api_key={{api_key}}&email=pai@gmail.com",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"external",
+								"children"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "{{api_key}}",
+									"description": "Chave de API para autenticação"
+								},
+								{
+									"key": "email",
+									"value": "pai@gmail.com",
+									"description": "Email do responsável"
+								}
+							]
+						},
+						"description": "Busca todas as crianças vinculadas a um usuário pelo email"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Crianças por Telefone",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/external/children?api_key={{api_key}}&phone=+5511999999999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"external",
+								"children"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "{{api_key}}",
+									"description": "Chave de API para autenticação"
+								},
+								{
+									"key": "phone",
+									"value": "+5511999999999",
+									"description": "Telefone do responsável (formato internacional)"
+								}
+							]
+						},
+						"description": "Busca todas as crianças vinculadas a um usuário pelo telefone"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Crianças por CPF/CNPJ",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/external/children?api_key={{api_key}}&cpf_cnpj=12345678909",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"external",
+								"children"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "{{api_key}}",
+									"description": "Chave de API para autenticação"
+								},
+								{
+									"key": "cpf_cnpj",
+									"value": "12345678909",
+									"description": "CPF ou CNPJ do responsável"
+								}
+							]
+						},
+						"description": "Busca todas as crianças vinculadas a um usuário pelo CPF/CNPJ"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para buscar crianças vinculadas a um usuário"
+		},
+		{
+			"name": "3. Progresso da Criança",
+			"item": [
+				{
+					"name": "Buscar Progresso Geral",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/external/child/:childId/progress?api_key={{api_key}}&phone=+5511999999999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"external",
+								"child",
+								":childId",
+								"progress"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "{{api_key}}",
+									"description": "Chave de API para autenticação"
+								},
+								{
+									"key": "phone",
+									"value": "+5511999999999",
+									"description": "Telefone do responsável"
+								}
+							],
+							"variable": [
+								{
+									"key": "childId",
+									"value": "1",
+									"description": "ID da criança"
+								}
+							]
+						},
+						"description": "Busca o progresso geral de uma criança específica"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para buscar progresso de desenvolvimento da criança"
+		},
+		{
+			"name": "4. Respostas de Quizzes",
+			"item": [
+				{
+					"name": "Buscar Respostas de Quizzes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/external/child/:childId/quiz-responses?api_key={{api_key}}&phone=+5511999999999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"external",
+								"child",
+								":childId",
+								"quiz-responses"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "{{api_key}}",
+									"description": "Chave de API para autenticação"
+								},
+								{
+									"key": "phone",
+									"value": "+5511999999999",
+									"description": "Telefone do responsável"
+								}
+							],
+							"variable": [
+								{
+									"key": "childId",
+									"value": "1",
+									"description": "ID da criança"
+								}
+							]
+						},
+						"description": "Busca todas as respostas de quizzes de uma criança específica"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Respostas por Semana",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/external/child/:childId/quiz-responses?api_key={{api_key}}&phone=+5511999999999&week=95",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"external",
+								"child",
+								":childId",
+								"quiz-responses"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "{{api_key}}",
+									"description": "Chave de API para autenticação"
+								},
+								{
+									"key": "phone",
+									"value": "+5511999999999",
+									"description": "Telefone do responsável"
+								},
+								{
+									"key": "week",
+									"value": "95",
+									"description": "Número da semana (opcional)"
+								}
+							],
+							"variable": [
+								{
+									"key": "childId",
+									"value": "1",
+									"description": "ID da criança"
+								}
+							]
+						},
+						"description": "Busca respostas de quizzes de uma semana específica"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para buscar respostas de quizzes e avaliações"
+		},
+		{
+			"name": "5. Health Check",
+			"item": [
+				{
+					"name": "Verificar Status da API",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Verifica se a API está online e funcionando"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoint para verificar saúde da API"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://educare.whatscall.com.br/api",
+			"type": "string"
+		},
+		{
+			"key": "api_key",
+			"value": "educare_external_api_key_2025",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,260 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jornada Infantil Educare+</title>
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Tela de Boas-Vindas -->
+        <main id="welcomeScreen" class="screen">
+            <div class="welcome-card card">
+                <img src="./assets/images/logo-mascote.png" alt="TitiNauta, o mascote astronauta." class="welcome-logo">
+                <h1>Bem-vindo(a) ao Educare+ app!</h1>
+                <p>Sua jornada de cuidado nos primeiros meses do bebê começa aqui. Vamos configurar seu perfil.</p>
+                <form id="welcomeForm" class="welcome-form">
+                    <div class="form-group">
+                        <label for="babyName">Nome do bebê:</label>
+                        <input type="text" id="babyName" required placeholder="Ex: Lua, Davi">
+                    </div>
+                    <div class="form-group">
+                        <label for="babyDob">Data de Nascimento:</label>
+                        <input type="date" id="babyDob" required>
+                        <small id="calculatedAge" class="calculated-age"></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="babySex">Sexo do bebê:</label>
+                        <select id="babySex" required>
+                            <option value="" disabled selected>Selecione...</option>
+                            <option value="F">Feminino</option>
+                            <option value="M">Masculino</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Começar Jornada</button>
+                </form>
+            </div>
+        </main>
+
+        <!-- Tela da Jornada -->
+        <main id="journeyScreen" class="screen hidden">
+            <header class="header">
+                <div class="avatar-section" role="button" tabindex="0" aria-label="Ver minhas conquistas">
+                     <img src="./assets/images/logo-mascote.png" alt="Mascote TitiNauta" class="avatar-img">
+                    <div class="avatar-info">
+                        <h1 id="welcomeText">Jornada do Bebê</h1>
+                        <p id="badgeCounter" class="badge-counter">
+                            <span id="badgeCounterText">Acompanhe seu progresso e aprenda a cada dia.</span>
+                        </p>
+                    </div>
+                </div>
+                 <div class="card progress-card">
+                    <div class="progress-container">
+                        <div class="progress-item">
+                            <div class="progress-label"><span>Trilha do Bebê 👶</span><span id="babyTrailProgress">0%</span></div>
+                            <div class="progress-bar"><div id="babyTrailProgressBar" class="progress-fill"></div></div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label"><span>Trilha da Mãe 💜</span><span id="motherTrailProgress">0%</span></div>
+                            <div class="progress-bar"><div id="motherTrailProgressBar" class="progress-fill"></div></div>
+                        </div>
+                         <div class="progress-item total-progress">
+                            <div class="progress-label"><span>Progresso da Jornada</span><span id="journeyCompleteProgress">0%</span></div>
+                            <div class="progress-bar"><div id="journeyCompleteProgressBar" class="progress-fill"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="journey-map-container card">
+                 <div id="journeyTabs" class="journey-tabs" role="tablist" aria-label="Trilhas de Aprendizado">
+                    <!-- Tabs will be rendered here -->
+                </div>
+                <div id="babyJourneyMap" role="tabpanel" aria-labelledby="baby-tab"></div>
+                <div id="motherJourneyMap" class="hidden" role="tabpanel" aria-labelledby="mother-tab"></div>
+                <div id="anamnesisJourneyMap" class="hidden" role="tabpanel" aria-labelledby="anamnesis-tab">
+                     <!-- Anamnesis content will be rendered here by JS -->
+                </div>
+                
+                <button id="continueJourneyBtn" class="btn btn-primary">Continuar Jornada</button>
+            </div>
+        </main>
+        
+        <!-- Tela de Check-in -->
+        <main id="checkInScreen" class="screen hidden">
+             <!-- Content is rendered by JS -->
+        </main>
+
+        <!-- Tela de Quiz Semanal -->
+        <main id="weeklyQuizScreen" class="screen hidden">
+            <div class="card weekly-quiz-card">
+                <h2 id="weeklyQuizTitle"></h2>
+                <p id="weeklyQuizDescription"></p>
+                
+                <div id="weeklyQuizDomainsContainer" aria-live="polite">
+                    <!-- Domain question will be rendered here -->
+                </div>
+        
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="weeklyQuizNotes">Suas anotações:</label>
+                    <textarea id="weeklyQuizNotes" placeholder="Alguma observação importante sobre esta semana?"></textarea>
+                </div>
+                
+                <div class="quiz-navigation">
+                    <div id="weeklyQuizProgress" class="quiz-progress-dots" role="navigation" aria-label="Progresso do Quiz"></div>
+                    <div class="quiz-navigation-buttons">
+                        <button id="weeklyQuizBackBtn" class="btn btn-secondary">Voltar</button>
+                        <button id="weeklyQuizNextBtn" class="btn btn-primary">Próxima</button>
+                        <button id="weeklyQuizCompleteBtn" class="btn btn-primary hidden">Concluir Quiz</button>
+                    </div>
+                </div>
+                <button id="backFromQuizBtn" class="btn btn-secondary btn-full-width">Voltar para a Jornada</button>
+            </div>
+        </main>
+        
+        <!-- Tela de Temas -->
+        <main id="themeScreen" class="screen hidden">
+            <div class="card theme-selection-card">
+                 <h2 id="themeSelectionTitle">Qual tema você quer explorar agora?</h2>
+                 <p id="themeSelectionDescription">Escolha um dos temas disponíveis para continuar sua jornada.</p>
+                 <div id="themeOptions" class="theme-options">
+                     <!-- Theme pills rendered here -->
+                 </div>
+                 <button id="backFromThemeBtn" class="btn btn-secondary btn-full-width">Voltar para a Jornada</button>
+            </div>
+        </main>
+
+        <!-- Tela de Conteúdo -->
+        <main id="contentScreen" class="screen hidden">
+            <div class="card content-card">
+                <div class="content-header">
+                    <span id="contentIcon" class="content-icon"></span>
+                    <h2 id="contentTitle">Título do Conteúdo</h2>
+                </div>
+
+                <div class="microcard" id="microcard">
+                    <!-- Microcard content here -->
+                </div>
+                
+                <div class="action-tabs" id="action-tabs" role="tablist" aria-label="Formato do Conteúdo">
+                    <button id="textTab" role="tab" aria-controls="textContent" class="action-tab active" aria-selected="true">📖 Texto</button>
+                    <button id="audioTab" role="tab" aria-controls="audioContent" class="action-tab" aria-selected="false">🎧 Áudio</button>
+                </div>
+
+                <div id="textContent" role="tabpanel" aria-labelledby="textTab">
+                    <!-- Text content here -->
+                </div>
+
+                <div id="audioContent" class="hidden" role="tabpanel" aria-labelledby="audioTab">
+                    <div class="audio-player">
+                        <div class="audio-illustration-container">
+                             <div id="audioIllustration" class="audio-illustration"></div>
+                             <div id="soundWaves" class="sound-waves hidden">
+                                 <span></span><span></span><span></span><span></span>
+                             </div>
+                        </div>
+                        <p id="audioStatus">Toque para ouvir as orientações do TitiNauta</p>
+                        <button id="playAudioBtn" class="btn btn-secondary audio-btn">
+                            <span id="audioIcon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="audio-icon">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </span>
+                            <span id="audioLabel">Tocar Narração</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="extra-content">
+                    <h3>Para saber mais:</h3>
+                    <div id="extraLinks">
+                        <!-- Extra links here -->
+                    </div>
+                </div>
+
+                <button id="completeBtn" class="btn btn-primary">Aprendi! Concluir Tema</button>
+                 <button id="backFromContentBtn" class="btn btn-secondary btn-full-width">Voltar para a Jornada</button>
+            </div>
+        </main>
+
+        <!-- Tela da Galeria de Conquistas -->
+        <main id="badgeGalleryScreen" class="screen hidden">
+             <div class="card badge-gallery-card">
+                <div class="badge-gallery-header">
+                    <h2>🏆 Minhas Conquistas</h2>
+                    <button id="closeGalleryBtn" class="btn-close" aria-label="Fechar galeria">&times;</button>
+                </div>
+                 <p>Cada conquista representa um novo superpoder de cuidado que você adquiriu!</p>
+
+                 <div id="badgeGalleryTabs" class="journey-tabs">
+                     <button class="journey-tab active" data-badge-tab="baby" role="tab" aria-controls="babyBadgeGallery" aria-selected="true">Bebê 👶 <span id="babyBadgeCount" class="badge-tab-counter"></span></button>
+                     <button class="journey-tab" data-badge-tab="mother" role="tab" aria-controls="motherBadgeGallery" aria-selected="false">Mãe 💜 <span id="motherBadgeCount" class="badge-tab-counter"></span></button>
+                </div>
+
+                <div id="babyBadgeGallery" class="badge-gallery" role="tabpanel" aria-labelledby="baby-tab">
+                    <!-- Baby badges rendered here -->
+                </div>
+                 <div id="motherBadgeGallery" class="badge-gallery hidden" role="tabpanel" aria-labelledby="mother-tab">
+                    <!-- Mother badges rendered here -->
+                </div>
+             </div>
+        </main>
+    </div>
+    
+     <!-- Footer Fixo -->
+    <footer class="footer">
+        <div class="footer-buttons">
+            <button id="samuBtn" class="footer-btn"><span>🚑</span><span>SAMU 192</span></button>
+            <button id="cvvBtn" class="footer-btn"><span>💬</span><span>CVV 188</span></button>
+            <button id="ligue180Btn" class="footer-btn"><span>⚖️</span><span>Ligue 180</span></button>
+        </div>
+        <a href="#" id="resetAppBtn" class="footer-reset">Apagar dados e recomeçar</a>
+    </footer>
+
+    <!-- Animação de Conquista -->
+    <div id="badgeEarned" class="badge-earned hidden" role="alert" aria-live="assertive">
+        <div class="badge-earned-content">
+            <div id="badgeIcon" class="badge-icon-large"></div>
+            <p>Conquista Desbloqueada!</p>
+            <h3 id="badgeName"></h3>
+        </div>
+    </div>
+    
+     <!-- Modal Genérico (Usado para reengajamento, etc) -->
+    <div id="modal" class="modal-overlay hidden" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+        <div class="modal-content">
+            <h2 id="modalTitle">Título do Modal</h2>
+            <p id="modalText">Texto do modal...</p>
+            <div id="modalButtons" class="modal-buttons">
+                <!-- Botões renderizados aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal do Anamnese (para detalhes dos exames) -->
+    <div id="anamnesisModal" class="modal-overlay hidden" role="dialog" aria-labelledby="anamnesisModalTitle" aria-modal="true">
+        <div class="modal-content anamnesis-modal-content">
+            <div class="anamnesis-modal-header">
+                <h2 id="anamnesisModalTitle">Detalhes do Exame</h2>
+                <button id="anamnesisModalCloseBtn" class="btn-close" aria-label="Fechar">&times;</button>
+            </div>
+            <div id="anamnesisModalContent">
+                <!-- Conteúdo do painel de detalhes renderizado aqui -->
+            </div>
+    </div>
+</div>
+
+<script>
+    // Fallback para dados básicos caso o carregamento falhe
+    window.fallbackData = {
+        badges: [],
+        quizzes: {},
+        babyJourney: [],
+        motherJourney: []
+    };
+</script>
+<script type="module" src="./index.js"></script>
+</body>
+</html>

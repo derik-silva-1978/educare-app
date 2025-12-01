@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "title": "2-3 meses",
+    "min_months": 2,
+    "max_months": 3,
+    "description": "Fortalecendo vínculos e primeiras descobertas motoras"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "category": "motor",
+      "categoryName": "Motor",
+      "categoryIcon": "🤲",
+      "question": "Seu bebê já consegue manter a cabeça mais firme quando está sentado com apoio?",
+      "importance": "O controle cefálico é um marco essencial para os próximos movimentos como rolar e sentar.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, mantém firme", "emoji": "💪" },
+        { "value": 2, "text": "⚠️ Às vezes consegue", "emoji": "💡" },
+        { "value": 3, "text": "❌ Ainda não consegue", "emoji": "🤲" }
+      ],
+      "feedbacks": {
+        "1": "🎉 Que força! Ele está se preparando para explorar ainda mais o mundo.",
+        "2": "💡 Apoie o bebê sentado no seu colo e incentive movimentos suaves com brinquedos chamativos.",
+        "3": "💡 Continue incentivando o tempo de bruços, respeitando o tempo dele."
+      },
+      "activity": "Sente-se com o bebê no colo, dando apoio no tronco, e brinque com chocalhos ou rostos sorridentes à frente."
+    },
+    {
+      "id": 2,
+      "category": "cognitive",
+      "categoryName": "Cognitivo",
+      "categoryIcon": "🧠",
+      "question": "O bebê parece reconhecer padrões ou reage de forma diferente a vozes e sons familiares?",
+      "importance": "Reconhecer estímulos repetitivos mostra memória e início da aprendizagem.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, reconhece padrões", "emoji": "🧠" },
+        { "value": 2, "text": "⚠️ Às vezes reconhece", "emoji": "💡" },
+        { "value": 3, "text": "❌ Não demonstra reconhecimento", "emoji": "🔍" }
+      ],
+      "feedbacks": {
+        "1": "🎉 Que bebê atento! Isso mostra que ele está começando a entender o ambiente.",
+        "2": "💡 Use sempre as mesmas canções e expressões em momentos do dia.",
+        "3": "💡 Reforce a rotina com músicas, vozes e objetos que ele já conhece."
+      },
+      "activity": "Toque uma música tranquila sempre no mesmo horário e observe se ele se acalma ao ouvir."
+    },
+    {
+      "id": 3,
+      "category": "social",
+      "categoryName": "Social",
+      "categoryIcon": "😊",
+      "question": "O bebê sorri para você de forma espontânea, mesmo sem estímulo direto?",
+      "importance": "O sorriso social espontâneo mostra bem-estar e conexão com o cuidador.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, sorri espontaneamente", "emoji": "😊" },
+        { "value": 2, "text": "⚠️ Às vezes sorri", "emoji": "💡" },
+        { "value": 3, "text": "❌ Não sorri espontaneamente", "emoji": "🤱" }
+      ],
+      "feedbacks": {
+        "1": "🎉 Que amor! Ele já reconhece você como fonte de alegria!",
+        "2": "💡 Continue sorrindo, tocando e falando com carinho ao interagir.",
+        "3": "💡 Crie momentos de brincadeira leve e expressiva, olhando nos olhos dele."
+      },
+      "activity": "Jogue o jogo do 'cadê?' com as mãos ou um paninho, e sorria muito nas interações!"
+    },
+    {
+      "id": 4,
+      "category": "language",
+      "categoryName": "Linguagem",
+      "categoryIcon": "🗣️",
+      "question": "Seu bebê faz sons em resposta quando você fala ou canta para ele?",
+      "importance": "Responder com sons é uma forma de diálogo inicial e estimula o desenvolvimento da linguagem.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, responde com sons", "emoji": "🎵" },
+        { "value": 2, "text": "⚠️ Às vezes responde", "emoji": "💡" },
+        { "value": 3, "text": "❌ Não responde com sons", "emoji": "🗣️" }
+      ],
+      "feedbacks": {
+        "1": "🎉 Que delícia de conversa! Ele está começando o diálogo afetivo!",
+        "2": "💡 Espere a vez dele após falar e responda aos balbucios com entusiasmo.",
+        "3": "💡 Use expressões faciais e repita sons que ele fizer como se estivessem conversando."
+      },
+      "activity": "Converse com ele durante o banho ou a troca de roupa e pause esperando respostas sonoras."
+    },
+    {
+      "id": 5,
+      "category": "maternal_health",
+      "categoryName": "Saúde Materna",
+      "categoryIcon": "💆‍♀️",
+      "question": "Você tem conseguido dormir um pouco mais ou dividir tarefas com alguém?",
+      "importance": "A qualidade do descanso do cuidador é essencial para um cuidado saudável e contínuo.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, estou descansando", "emoji": "😴" },
+        { "value": 2, "text": "⚠️ Às vezes consigo", "emoji": "💡" },
+        { "value": 3, "text": "❌ Muito difícil descansar", "emoji": "😓" }
+      ],
+      "feedbacks": {
+        "1": "🎉 Que bom! Compartilhar tarefas fortalece o bem-estar da família toda.",
+        "2": "💡 Delegue tarefas sempre que possível. Você também merece descanso!",
+        "3": "💡 Peça ajuda sem culpa. Cuidar de si é parte do cuidar do bebê."
+      },
+      "activity": "Tente dormir ou relaxar ao menos uma vez ao dia, mesmo que por 20 minutos. Se precisar, peça esse tempo."
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+
+{
+  "deprecated": "This JSON file is a legacy asset and is not used by the application. The authoritative data is in /data/anamnesis-data.js.",
+  "phase": "thirdTrimester",
+  "title": "Terceiro trimestre (28s → parto)",
+  "content": {
+    "blocks": [
+      {
+        "h": "Rastreamento Final",
+        "items": [
+          { "id": "prenatal.exams.gbs", "title": "Pesquisa de Streptococcus B (GBS)", "when": "35ª a 37ª semana", "why": "Coleta de amostra vaginal e retal para identificar a bactéria. Se positivo, a gestante recebe antibióticos durante o parto para prevenir infecções graves no recém-nascido, como sepse e meningite.", "audio": "Quando fazer: 35ª a 37ª semana. Por que é importante: Coleta de amostra vaginal e retal para identificar a bactéria. Se positivo, a gestante recebe antibióticos durante o parto para prevenir infecções graves no recém-nascido, como sepse e meningite." }
+        ]
+      }
+    ],
+    "additionalBlocks": [
+        { 
+          "h": "Ultrassom 3º Trimestre (após 28s)", 
+          "items": [ 
+            { "k": "Objetivo", "v": "Monitora o crescimento fetal, o volume de líquido amniótico, o bem-estar fetal (pode incluir Doppler) e a localização da placenta, importante para o planejamento do parto." }
+          ]
+        }
+    ]
+  }
+}

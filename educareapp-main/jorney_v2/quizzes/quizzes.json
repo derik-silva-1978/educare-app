@@ -1,0 +1,741 @@
+{
+    "week5": {
+        "trail": "quiz",
+        "month": 2,
+        "week": 5,
+        "title": "Quiz da Semana 5",
+        "icon": "🧠",
+        "description": "Acompanhe os marcos e apoie o desenvolvimento do bebê e o seu bem-estar.",
+        "baby_domains": [
+            {
+                "id": "motor_w5",
+                "title": "🤲 Motor",
+                "question": "Nesta semana, {nome} conseguiu levantar a cabeça por alguns segundos quando estava de bruços (Tummy Time)?",
+                "options": ["Sim, com facilidade", "Sim, mas por pouco tempo", "Ainda não"],
+                "feedback": {
+                    "positivo": "Ótimo! O controle cervical está evoluindo. Continue com o tummy time diário.",
+                    "negativo": "Tudo bem se ainda não conseguiu. Cada bebê tem seu tempo. Continue incentivando com sessões curtas e supervisão."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": [
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23ede9fe;%7D.b%7Bfill:%23c4b5fd;%7D.c%7Bfill:%23a78bfa;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M25,50 C40,55 60,55 75,50 V40 H25 Z'/%3E%3Ccircle class='c' cx='70' cy='30' r='10'/%3E%3Cpath class='b' d='M68,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M72,32 Q70,34 68,32'/%3E%3C/svg%3E",
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f0f9ff;%7D.b%7Bfill:%23bae6fd;%7D.c%7Bfill:%237dd3fc;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='c' d='M50,45 C40,55 25,50 20,40 L30,35 C35,45 45,45 50,40 Z'/%3E%3Cpath class='b' d='M50,45 C60,55 75,50 80,40 L70,35 C65,45 55,45 50,40 Z'/%3E%3Ccircle class='c' cx='50' cy='25' r='10'/%3E%3C/svg%3E"
+                    ],
+                    "text": "O 'Tummy Time' (hora da barriguinha) é o principal exercício para fortalecer os músculos do pescoço, ombros e costas. Essa força é a base para marcos futuros, como rolar, sentar e engatinhar. Mesmo que o bebê reclame no início, sessões curtas e frequentes são muito eficazes.",
+                    "audio": "O Tummy Time é o exercício que fortalece o pescoço e as costas do bebê. Ele é a base para conseguir rolar e sentar no futuro. Mesmo que o bebê não goste, comece com poucos minutos, várias vezes ao dia.",
+                    "links": [
+                        { "titulo": "Para saber mais: Tummy Time divertido", "url": "#" }
+                    ]
+                }
+            },
+            {
+                "id": "social_emocional_w5",
+                "title": "❤️ Social-Emocional",
+                "question": "{nome} já sorri de volta quando você sorri para ele(a)? (Sorriso Social)",
+                "options": ["Sim, sempre", "Às vezes", "Ainda não"],
+                "feedback": {
+                    "positivo": "Maravilha! Esse é o sorriso social, um sinal claro de vínculo e da primeira grande interação social do bebê.",
+                    "negativo": "Continue sorrindo e olhando nos olhos, isso estimula a resposta afetiva. Ele está quase lá!"
+                },
+                 "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f0fdf4;%7D.b%7Bfill:%23bbf7d0;%7D.c%7Bfill:%234ade80;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='35' cy='30' r='15'/%3E%3Ccircle class='c' cx='65' cy='30' r='15'/%3E%3Cpath d='M30,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M40,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M28,35 Q35,42 42,35' stroke='%2314532d' fill='none' stroke-width='2'/%3E%3Cpath d='M60,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M70,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M58,35 Q65,42 72,35' stroke='%2314532d' fill='none' stroke-width='2'/%3E%3C/svg%3E"],
+                    "text": "O sorriso social é mais do que uma gracinha, é a primeira forma de 'conversa' do bebê. Ele mostra que o bebê reconhece um rosto, responde a um estímulo afetivo e está desenvolvendo suas capacidades sociais. É um marco fundamental na criação de vínculo.",
+                    "audio": "O sorriso social é a primeira forma de conversa do bebê. Ele mostra que o bebê te reconhece e responde ao seu carinho. É um marco muito importante para o vínculo de vocês.",
+                    "links": [
+                        { "titulo": "Para saber mais: A importância do vínculo", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "mother_domains": [
+            {
+                "id": "autocuidado_materno_w5",
+                "title": "🧘‍♀️ Autocuidado Materno",
+                "question": "Você conseguiu reservar ao menos alguns minutos por dia para descansar, se hidratar e se alimentar bem?",
+                "options": ["Sim, diariamente", "Alguns dias", "Ainda não"],
+                "feedback": {
+                    "positivo": "Muito bem! O autocuidado fortalece sua energia para cuidar do bebê. Continue se priorizando.",
+                    "negativo": "Lembre-se: cuidar de você é a melhor forma de cuidar do bebê. Tente incluir pequenas pausas na rotina e peça apoio sempre que possível."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f5f3ff;%7D.b%7Bfill:%23c4b5fd;%7D.c%7Bfill:%238b5cf6;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M30,40 L35,20 L40,40 L45,25 L50,40 L55,30 L60,40 L65,22 L70,40' stroke='%238b5cf6' stroke-width='3' fill='none'/%3E%3Cpath class='c' d='M25,50 Q50,45 75,50' stroke='%23a78bfa' stroke-width='2' fill='none'/%3E%3C/svg%3E"],
+                    "text": "No puerpério, o autocuidado não é sobre luxos, mas sobre o básico: beber água, comer algo nutritivo e fechar os olhos por 5 minutos. A privação desses elementos básicos afeta o humor, a paciência e a produção de leite. Delegar tarefas e aceitar ajuda é fundamental para garantir esses mínimos.",
+                    "audio": "Seu autocuidado agora é focar no básico: beber água, se alimentar e descansar. A falta disso afeta seu humor e até o leite. Peça ajuda para garantir esses cuidados mínimos.",
+                    "links": [
+                        { "titulo": "Para saber mais: 5 minutos para você", "url": "#" }
+                    ]
+                }
+            },
+            {
+                "id": "saude_mental_w5",
+                "title": "🧠 Saúde Mental",
+                "question": "Como você tem se sentido? Seus sentimentos de tristeza ou ansiedade, se existiram, parecem estar diminuindo (caracterizando o 'Baby Blues')?",
+                "options": ["Sim, sinto-me melhor", "Estou na mesma", "Sinto que piorou"],
+                "feedback": {
+                    "positivo": "Que bom! É um sinal de que você está se adaptando a essa nova fase. Continue se observando com carinho.",
+                    "negativo": "É importante observar a persistência dos sentimentos. Se a tristeza ou ansiedade não melhorarem após 2-3 semanas do parto, converse com seu médico. Não hesite em pedir ajuda."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23eff6ff;%7D.b%7Bfill:%2393c5fd;%7D.c%7Bfill:%233b82f6;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='c' d='M25 30 A 15 15, 0, 0, 0, 50 30' fill='none' stroke-width='4'/%3E%3Cpath class='b' d='M50 30 A 15 15, 0, 0, 1, 75 30' fill='none' stroke-width='4'/%3E%3Cpath class='b' d='M30,45 Q37.5,50 45,45' fill='none' stroke-width='3' stroke='%2360a5fa'/%3E%3Cpath class='c' d='M55,45 Q62.5,40 70,45' fill='none' stroke-width='3'/%3E%3C/svg%3E"],
+                    "text": "O 'Baby Blues' é comum, atinge até 80% das mães, e se caracteriza por choro fácil e instabilidade de humor que dura até 15 dias após o parto. Já a Depressão Pós-Parto é uma condição mais séria, com tristeza profunda e persistente. Ficar atenta a essa diferença de tempo é crucial para buscar ajuda se necessário.",
+                    "audio": "O 'Baby Blues' é uma tristeza leve que passa em até 15 dias. Se a tristeza for profunda e não melhorar depois desse tempo, pode ser Depressão Pós-Parto. Nesse caso, é muito importante procurar um médico.",
+                     "links": [
+                        { "titulo": "Para saber mais: Onde buscar ajuda", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "badge_on_complete": {
+            "baby": { "id": "quiz-bebe-semana-5", "nome": "Detetive do Bebê (S5)", "icone": "🕵️‍♀️", "description": "Concluiu o quiz de desenvolvimento do bebê da Semana 5." },
+            "mother": { "id": "quiz-mae-semana-5", "nome": "Guardiã de Si (S5)", "icone": "🧘‍♀️", "description": "Concluiu o quiz de bem-estar da mãe da Semana 5." }
+        }
+    },
+    "week6": {
+        "trail": "quiz",
+        "month": 2,
+        "week": 6,
+        "title": "Quiz da Semana 6",
+        "icon": "👂",
+        "description": "Acompanhando os sons, os sentidos e o seu bem-estar.",
+        "baby_domains": [
+            {
+                "id": "sensorial_w6",
+                "title": "👁️ Sensorial e Auditivo",
+                "question": "{nome} vira a cabeça na direção da sua voz ou de sons familiares?",
+                "options": ["Sim, quase sempre", "Às vezes", "Raramente"],
+                "feedback": {
+                    "positivo": "Maravilha! Isso mostra que ele reconhece sons importantes e o sistema auditivo está se desenvolvendo bem.",
+                    "negativo": "Continue conversando e cantando para {nome}. A repetição é a chave para o aprendizado nesta fase."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                     "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23fefce8;%7D.b%7Bfill:%23fde047;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M30,30 C35,15 45,15 50,30 S65,45 70,30' stroke='%23ca8a04' stroke-width='3' fill='none'/%3E%3Cpath d='M20,30 L80,30' stroke='%23eab308' stroke-width='2' stroke-dasharray='5 5'/%3E%3C/svg%3E"],
+                    "text": "A capacidade de virar a cabeça em direção a um som é um marco importante. Mostra que o bebê não apenas ouve, mas também consegue localizar a fonte do som, uma habilidade fundamental para o desenvolvimento da atenção e da linguagem no futuro.",
+                    "audio": "Virar a cabeça para um som mostra que o bebê consegue localizar de onde ele vem. Essa é uma habilidade muito importante para desenvolver a atenção e a fala.",
+                    "links": [
+                        { "titulo": "Para saber mais: Estímulos na medida certa", "url": "#" }
+                    ]
+                }
+            },
+            {
+                "id": "comunicacao_w6",
+                "title": "💬 Comunicação",
+                "question": "Além do choro, {nome} tem emitido mais sons guturais e vogais ('arrulhos') quando você interage com ele(a)?",
+                "options": ["Sim, está bem tagarela", "Sim, alguns sons", "Ainda não"],
+                "feedback": {
+                    "positivo": "Que ótimo! Esses 'arrulhos' são os blocos de construção da fala. Continue essas 'conversas'!",
+                    "negativo": "Cada bebê tem seu tempo para 'falar'. Continue imitando os sons que ele faz e conversando muito."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f0f9ff;%7D.b%7Bfill:%237dd3fc;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M25,25 Q30,20 40,25 T 55,25' stroke='%230ea5e9' fill='none' stroke-width='3'/%3E%3Cpath class='b' d='M45,40 Q50,35 60,40 T 75,40' stroke='%230ea5e9' fill='none' stroke-width='3'/%3E%3C/svg%3E"],
+                    "text": "Os arrulhos são diferentes do choro e representam as primeiras tentativas voluntárias de comunicação vocal do bebê. Responder a esses sons, imitando-os e conversando, ensina ao bebê o conceito de 'turno' em uma conversa, que é a base do diálogo.",
+                    "audio": "Os 'arrulhos' são as primeiras tentativas de fala do bebê. Quando você responde a eles, ensina ao bebê como funciona uma conversa, um de cada vez. Isso é a base para aprender a dialogar.",
+                     "links": [
+                        { "titulo": "Para saber mais: Conversando com o bebê", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "mother_domains": [
+            {
+                "id": "saude_mamas_w6",
+                "title": "🤱 Saúde das Mamas",
+                "question": "Como estão suas mamas? Você sentiu dor intensa, notou áreas avermelhadas ou teve febre?",
+                "options": ["Tudo tranquilo", "Algum desconforto leve", "Sim, tive sinais preocupantes"],
+                "feedback": {
+                    "positivo": "Ótimo! Manter a pega correta e a livre demanda são os segredos para evitar problemas.",
+                    "negativo": "Desconforto leve pode ser normal, mas dor intensa com febre pode ser mastite. Na dúvida, procure orientação médica."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f1f5f9;%7D.b%7Bfill:%2394a3b8;%7D.c%7Bfill:%23e2e8f0;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='c' cx='50' cy='30' r='20'/%3E%3Cpath class='b' d='M40,20 L60,20 L60,40 L40,40 Z' transform='rotate(45 50 30)'/%3E%3Cpath fill='%23f8fafc' d='M42,22 L58,22 L58,38 L42,38 Z' transform='rotate(45 50 30)'/%3E%3C/svg%3E"],
+                    "text": "A recomendação mais atual para ingurgitamento (mama muito cheia e dolorida) é o uso de compressas FRIAS para reduzir a inflamação. Massagens vigorosas e calor podem piorar o quadro. Se houver febre e uma área vermelha bem definida, pode ser mastite, que exige avaliação médica com urgência.",
+                    "audio": "Se a mama estiver muito cheia e doendo, use compressas frias. Elas ajudam a desinflamar. Não use calor nem faça massagens fortes. Se tiver febre e uma mancha vermelha, procure um médico rápido, pois pode ser mastite.",
+                     "links": [
+                        { "titulo": "Para saber mais: Lidando com a mastite", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "badge_on_complete": {
+            "baby": { "id": "quiz-bebe-semana-6", "nome": "Detetive do Bebê (S6)", "icone": "🕵️‍♂️", "description": "Concluiu o quiz de desenvolvimento do bebê da Semana 6." },
+            "mother": { "id": "quiz-mae-semana-6", "nome": "Guardiã de Si (S6)", "icone": "🧘‍♂️", "description": "Concluiu o quiz de bem-estar da mãe da Semana 6." }
+        }
+    },
+    "week7": {
+        "trail": "quiz",
+        "month": 2,
+        "week": 7,
+        "title": "Quiz da Semana 7",
+        "icon": "💉",
+        "description": "Foco na saúde, segurança e na retomada do seu ritmo.",
+        "baby_domains": [
+            {
+                "id": "saude_bebe_w7",
+                "title": "💉 Saúde do Bebê",
+                "question": "As importantes vacinas do 2º mês de {nome} já foram aplicadas ou estão agendas?",
+                "options": ["Sim, tudo em dia", "Estão agendadas", "Ainda não"],
+                "feedback": {
+                    "positivo": "Excelente! A vacinação é o maior ato de proteção e amor.",
+                    "negativo": "Não deixe para depois! As vacinas protegem contra doenças graves. Verifique o posto de saúde mais próximo."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f0fdfa;%7D.b%7Bfill:%235eead4;%7D.c%7Bfill:%23ccfbf1;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Crect class='c' x='30' y='20' width='40' height='20' rx='5'/%3E%3Cpath class='b' d='M70,25 v10 l10,-5 z'/%3E%3Cpath class='b' d='M20,30 h10' stroke='%2314b8a6' stroke-width='3'/%3E%3C/svg%3E"],
+                    "text": "Nesta fase, o bebê recebe vacinas importantes como a Pentavalente (contra difteria, tétano, coqueluche, Haemophilus influenzae tipo b e hepatite B), a VIP (contra a poliomielite), a Pneumocócica 10-valente e a Rotavírus. Elas são essenciais para proteger o bebê de doenças graves nos primeiros meses de vida.",
+                    "audio": "As vacinas dos dois meses protegem o bebê contra doenças muito sérias, como coqueluche, poliomielite e meningite. Manter o calendário em dia é fundamental para a saúde dele.",
+                     "links": [
+                        { "titulo": "Para saber mais: Lidando com as reações da vacina", "url": "#" }
+                    ]
+                }
+            },
+            {
+                "id": "motor_w7",
+                "title": "💪 Motor",
+                "question": "Durante o tummy time, {nome} já consegue erguer a cabeça a 45 graus, mesmo que por pouco tempo?",
+                "options": ["Sim", "Às vezes", "Ainda não"],
+                "feedback": {
+                    "positivo": "Que progresso! O pescocinho está cada vez mais forte, preparando para os próximos marcos.",
+                    "negativo": "Continue com as sessões curtas e supervisionadas. Cada segundo de bruços é um grande exercício para ele."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                     "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23fdf2f8;%7D.b%7Bfill:%23fbcfe8;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M20,50 Q50,20 80,50' stroke='%23db2777' stroke-width='4' fill='none'/%3E%3Cpath d='M25,50 L50,30 L75,50' stroke='%23f9a8d4' stroke-width='3' fill='none'/%3E%3C/svg%3E"],
+                    "text": "Conseguir erguer a cabeça a 45 graus é um sinal claro de que os músculos do pescoço e da parte superior das costas estão se fortalecendo. Este é um passo crucial que antecede a capacidade de apoiar-se nos antebraços e, eventually, rolar.",
+                    "audio": "Quando o bebê levanta a cabeça a 45 graus, mostra que os músculos do pescoço e das costas estão mais fortes. Este é um passo importante para depois conseguir rolar.",
+                     "links": [
+                        { "titulo": "Para saber mais: Evoluindo no Tummy Time", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "mother_domains": [
+            {
+                "id": "saude_materna_w7",
+                "title": "🗓️ Saúde Materna",
+                "question": "Você já pensou ou conversou com seu médico sobre métodos contraceptivos para o pós-parto?",
+                "options": ["Sim, já decidi/conversei", "Estou pensando sobre isso", "Ainda não"],
+                "feedback": {
+                    "positivo": "Muito bem! Planejamento familiar é um ato de autocuidado e responsabilidade com sua saúde.",
+                    "negativo": "É um ótimo tema para sua próxima consulta. Existem muitas opções seguras para quem está amamentando."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23fafafa;%7D.b%7Bfill:%23d4d4d8;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Crect class='b' x='20' y='15' width='60' height='30' rx='5'/%3E%3Crect fill='white' x='25' y='20' width='50' height='20' rx='3'/%3E%3Cpath fill='%2371717a' d='M30,25h5v10h-5z M40,25h5v10h-5z M50,25h5v10h-5z M60,25h5v10h-5z'/%3E%3C/svg%3E"],
+                    "text": "É possível engravidar mesmo antes da primeira menstruação pós-parto. Por isso, é importante usar um método contraceptivo seguro. Opções como o DIU (hormonal ou de cobre), o implante e as minipílulas (apenas de progestagênio) são seguras durante a amamentação e não interferem na produção de leite.",
+                    "audio": "Você pode engravidar antes de menstruar de novo. Por isso, converse com seu médico. Métodos como o DIU, implante e pílulas só de progestagênio são seguros e não atrapalham a amamentação.",
+                    "links": [
+                        { "titulo": "Para saber mais: Planejamento familiar", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "badge_on_complete": {
+            "baby": { "id": "quiz-bebe-semana-7", "nome": "Detetive do Bebê (S7)", "icone": "🕵️‍♀️", "description": "Concluiu o quiz de desenvolvimento do bebê da Semana 7." },
+            "mother": { "id": "quiz-mae-semana-7", "nome": "Guardiã de Si (S7)", "icone": "🧘‍♀️", "description": "Concluiu o quiz de bem-estar da mãe da Semana 7." }
+        }
+    },
+    "week8": {
+        "trail": "quiz",
+        "month": 2,
+        "week": 8,
+        "title": "Quiz da Semana 8",
+        "icon": "🧩",
+        "description": "Revisando os marcos e preparando para as próximas fases.",
+        "baby_domains": [
+            {
+                "id": "cognitivo_w8",
+                "title": "🧠 Cognitivo",
+                "question": "{nome} parece mais alerta, observando atentamente rostos, objetos e o ambiente ao redor?",
+                "options": ["Sim, muito!", "Sim, um pouco mais", "Não notei diferença"],
+                "feedback": {
+                    "positivo": "A curiosidade está a mil! O cérebro de {nome} está fazendo novas conexões a cada segundo.",
+                    "negativo": "Continue estimulando com conversas, cantigas e mostrando objetos coloridos. A interação é o melhor combustível."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f3f4f6;%7D.b%7Bfill:%239ca3af;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='50' cy='30' r='15'/%3E%3Ccircle fill='white' cx='50' cy='30' r='10'/%3E%3Ccircle fill='black' cx='50' cy='30' r='5'/%3E%3Cpath fill='none' stroke='%239ca3af' stroke-width='2' d='M20,15 L35,25 M80,15 L65,25 M20,45 L35,35 M80,45 L65,35'/%3E%3C/svg%3E"],
+                    "text": "Nesta fase, a visão do bebê melhora, permitindo que ele foque em objetos mais distantes e siga-os com o olhar. Essa maior percepção visual é um salto cognitivo. Ele não apenas vê, mas começa a processar e se interessar pelo que vê, um passo fundamental para o aprendizado.",
+                    "audio": "A visão do bebê está melhorando. Ele agora consegue focar e seguir objetos. Essa curiosidade é um grande passo no desenvolvimento do cérebro e na forma como ele aprende sobre o mundo.",
+                    "links": [
+                        { "titulo": "Para saber mais: Brincadeiras para o 2º mês", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "mother_domains": [
+            {
+                "id": "intimidade_w8",
+                "title": "💞 Intimidade e Conexão",
+                "question": "Independentemente de ter retomado a vida sexual, você e seu parceiro(a) têm encontrado formas de manter a intimidade (conversar, carinho)?",
+                "options": ["Sim, estamos conectados", "Tentamos, mas é difícil", "Não muito"],
+                "feedback": {
+                    "positivo": "Maravilha! Manter a conexão do casal é um pilar de força para toda a família.",
+                    "negativo": "É um desafio com a nova rotina. Tentem reservar 5 minutos antes de dormir apenas para conversar, sem falar do bebê. Isso pode ajudar a reconectar."
+                },
+                 "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23fff1f2;%7D.b%7Bfill:%23fda4af;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M50,25 C40,10 20,15 25,30 C30,45 50,50 50,50 C50,50 70,45 75,30 C80,15 60,10 50,25 Z'/%3E%3C/svg%3E"],
+                    "text": "No puerpério, a intimidade do casal se transforma. Com o cansaço e as novas demandas, é fundamental nutrir a conexão através de gestos simples: uma conversa honesta sobre o dia, um abraço sem pressa, um elogio. Esses pequenos atos fortalecem a parceria e o apoio mútuo, que são a base para a saúde emocional da família.",
+                    "audio": "No pós-parto, a intimidade do casal muda. É importante manter a conexão com gestos simples, como uma conversa sincera ou um abraço. Isso fortalece a parceria e a saúde emocional de toda a família.",
+                     "links": [
+                        { "titulo": "Para saber mais: Cuidando do relacionamento", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "badge_on_complete": {
+            "baby": { "id": "quiz-bebe-semana-8", "nome": "Detetive do Bebê (S8)", "icone": "🕵️‍♂️", "description": "Concluiu o quiz de desenvolvimento do bebê da Semana 8." },
+            "mother": { "id": "quiz-mae-semana-8", "nome": "Guardiã de Si (S8)", "icone": "🧘‍♂️", "description": "Concluiu o quiz de bem-estar da mãe da Semana 8." }
+        }
+    },
+    "month2Summary": {
+        "trail": "quiz",
+        "month": 2,
+        "summary": true,
+        "title": "Fechamento do Mês 2",
+        "icon": "🌟",
+        "description": "Vamos revisar os principais marcos e aprendizados deste mês incrível.",
+        "baby_domains": [
+            {
+                "id": "marco_social_m2",
+                "title": "😊 Marco Social do Bebê",
+                "question": "O sorriso social se tornou uma forma de comunicação frequente entre você e {nome} este mês?",
+                "options": ["Sim, todos os dias!", "De vez em quando", "Raramente"],
+                "feedback": {
+                    "positivo": "Essa conexão é a base para todo o desenvolvimento social e emocional. Continuem 'conversando'!",
+                    "negativo": "Lembre-se que cada bebê é único. A interação constante é o caminho para fortalecer essa comunicação."
+                },
+                 "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f0fdf4;%7D.b%7Bfill:%23bbf7d0;%7D.c%7Bfill:%234ade80;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='35' cy='30' r='15'/%3E%3Ccircle class='c' cx='65' cy='30' r='15'/%3E%3Cpath d='M30,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M40,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M28,35 Q35,42 42,35' stroke='%2314532d' fill='none' stroke-width='2'/%3E%3Cpath d='M60,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M70,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M58,35 Q65,42 72,35' stroke='%2314532d' fill='none' stroke-width='2'/%3E%3C/svg%3E"],
+                    "text": "O sorriso social, que se firma no segundo mês, é um dos marcos mais importantes. Ele indica que o bebê está desenvolvendo a capacidade de interagir, reconhecer rostos familiares e criar laços afetivos, que são a fundação para a saúde mental e social futuras.",
+                    "audio": "O sorriso social é um marco que mostra que o bebê está aprendendo a interagir e a criar laços de afeto. Essa é a base para a saúde mental e social dele no futuro.",
+                     "links": [
+                        { "titulo": "Para saber mais: Resumo do 2º Mês do Bebê", "url": "#" }
+                    ]
+                }
+            },
+            {
+                "id": "marco_motor_m2",
+                "title": "💪 Marco Motor do Bebê",
+                "question": "No geral, como você avalia a evolução do controle da cabeça e pescoço de {nome} durante o 'Tummy Time' este mês?",
+                "options": ["Melhorou muito!", "Melhorou um pouco", "Não notei muita mudança"],
+                "feedback": {
+                    "positivo": "Fantástico! Essa força é essencial para as próximas conquistas, como rolar e sentar.",
+                    "negativo": "A consistência é a chave. Continue com as sessões curtas e frequentes de 'Tummy Time' para ver o progresso."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23ede9fe;%7D.b%7Bfill:%23c4b5fd;%7D.c%7Bfill:%23a78bfa;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M25,50 C40,55 60,55 75,50 V40 H25 Z'/%3E%3Ccircle class='c' cx='70' cy='30' r='10'/%3E%3Cpath class='b' d='M68,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M72,32 Q70,34 68,32'/%3E%3C/svg%3E"],
+                    "text": "O fortalecimento do pescoço e do tronco é o alicerce do desenvolvimento motor. É essa força que permitirá ao bebê sustentar a cabeça para explorar o mundo, rolar para alcançar objetos e, mais tarde, sentar-se sem apoio. Cada minuto de Tummy Time é um investimento para o futuro.",
+                    "audio": "Fortalecer o pescoço e o tronco é a base para o desenvolvimento motor. É isso que vai permitir que o bebê sustente a cabeça, role e depois se sente. O Tummy Time é um investimento no futuro dele.",
+                     "links": [
+                        { "titulo": "Para saber mais: Próximos passos motores", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "mother_domains": [
+             {
+                "id": "bem_estar_mae_m2",
+                "title": "💜 Bem-estar da Mãe",
+                "question": "Pensando no último mês, você sentiu que conseguiu comunicar suas necessidades e acionar sua rede de apoio de forma mais eficaz?",
+                "options": ["Sim, me senti bem amparada", "Poderia ser melhor", "Não tive muito apoio ou não pedi"],
+                "feedback": {
+                    "positivo": "Que bom! Uma mãe bem amparada tem mais energia para cuidar do bebê e de si mesma.",
+                    "negativo": "Não hesite em ser mais específica ao pedir ajuda. Diga exatamente o que você precisa, como 'Você pode ficar com o bebê por 1h para eu dormir?'."
+                },
+                 "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f5f5f5;%7D.b%7Bfill:%23a3a3a3;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='35' cy='30' r='10'/%3E%3Ccircle class='b' cx='65' cy='30' r='10'/%3E%3Cpath fill='none' stroke='%23a3a3a3' stroke-width='3' d='M45,30 h10'/%3E%3Cpath fill='none' stroke='%23737373' stroke-width='2' stroke-linecap='round' d='M35,20 L25,10 M65,20 L75,10'/%3E%3C/svg%3E"],
+                    "text": "Pedir ajuda não é um sinal de fraqueza, mas de inteligência e força. Uma rede de apoio eficaz alivia a carga física e mental da mãe, prevenindo o esgotamento (burnout parental). Ser clara e específica nos pedidos (ex: 'Pode trazer o almoço amanhã?') é mais eficiente do que um pedido vago de 'ajuda'.",
+                    "audio": "Pedir ajuda é um sinal de força. Uma boa rede de apoio alivia o cansaço físico e mental. Seja específica no que você precisa, como 'pode me trazer o almoço?'. Isso funciona muito melhor.",
+                     "links": [
+                        { "titulo": "Para saber mais: Resumo do 2º Mês da Mãe", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "recomendacao_geral": "Anote os pontos que mais te chamaram a atenção este mês e leve para a próxima consulta com o pediatra. Você está fazendo um trabalho incrível!",
+        "badge_on_complete": {
+            "id": "badge-mes-2",
+            "nome": "Explorador do Mês 2",
+            "icone": "🌟",
+            "descricao": "Concluiu o fechamento e os aprendizados do incrível Mês 2."
+        }
+    },
+    "week9": {
+        "trail": "quiz",
+        "month": 3,
+        "week": 9,
+        "title": "Quiz da Semana 9",
+        "icon": "😄",
+        "description": "Terceiro mês começando: gargalhadas, mais força e vínculo afetivo!",
+        "baby_domains": [
+            {
+                "id": "motor_w9",
+                "title": "🤲 Motor",
+                "question": "{nome} já consegue sustentar melhor a cabeça quando está de bruços?",
+                "options": ["Sim, com firmeza", "Sim, mas por pouco tempo", "Ainda não"],
+                "feedback": {
+                    "positivo": "Excelente! O controle cervical está avançando muito bem.",
+                    "negativo": "Continue estimulando com tummy time frequente e supervisão atenta."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23ede9fe;%7D.b%7Bfill:%23c4b5fd;%7D.c%7Bfill:%23a78bfa;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M25,50 C40,55 60,55 75,50 V40 H25 Z'/%3E%3Ccircle class='c' cx='70' cy='30' r='10'/%3E%3Cpath class='b' d='M68,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M72,32 Q70,34 68,32'/%3E%3C/svg%3E"],
+                    "text": "Aos 3 meses, muitos bebês conseguem manter a cabeça erguida por mais tempo. Esse é um marco importante para futuros movimentos como rolar e sentar.",
+                    "audio": "Aos 3 meses, {nome} já está ficando mais forte e pode manter a cabeça erguida. Isso prepara para rolar e, depois, sentar.",
+                    "links": [
+                        { "titulo": "Para saber mais: Força no Tummy Time", "url": "#" }
+                    ]
+                }
+            },
+            {
+                "id": "social_emocional_w9",
+                "title": "❤️ Social-Emocional",
+                "question": "{nome} já soltou as primeiras gargalhadas quando você brinca ou faz caretas?",
+                "options": ["Sim, várias vezes", "Uma ou duas vezes", "Ainda não"],
+                "feedback": {
+                    "positivo": "Que alegria! As gargalhadas mostram vínculo afetivo e desenvolvimento social.",
+                    "negativo": "Continue interagindo com caretas e sons engraçados, logo ele(a) vai responder com risadinhas."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f0fdf4;%7D.b%7Bfill:%23bbf7d0;%7D.c%7Bfill:%234ade80;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='35' cy='30' r='15'/%3E%3Ccircle class='c' cx='65' cy='30' r='15'/%3E%3Cpath d='M30,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M40,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M28,35 Q35,42 42,35' stroke='%2314532d' fill='none' stroke-width='2'/%3E%3Cpath d='M60,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M70,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M58,35 Q65,42 72,35' stroke='%2314532d' fill='none' stroke-width='2'/%3E%3C/svg%3E"],
+                    "text": "Rir é um marco social que mostra que o bebê está se conectando emocionalmente e interagindo de forma mais ativa.",
+                    "audio": "As gargalhadas são sinais de vínculo e desenvolvimento social. Brinque muito com {nome} para estimular essa conquista!",
+                    "links": [
+                        { "titulo": "Para saber mais: Brincadeiras para estimular risadas", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "mother_domains": [
+            {
+                "id": "autocuidado_w9",
+                "title": "🧘‍♀️ Autocuidado Materno",
+                "question": "Você tem conseguido se hidratar e se alimentar regularmente durante o dia?",
+                "options": ["Sim, sempre", "Às vezes", "Não consigo"],
+                "feedback": {
+                    "positivo": "Muito bem! Alimentação e hidratação sustentam sua energia e produção de leite.",
+                    "negativo": "Tente preparar lanches fáceis e peça apoio para garantir esses cuidados mínimos."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f5f3ff;%7D.b%7Bfill:%23c4b5fd;%7D.c%7Bfill:%238b5cf6;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M30,40 L35,20 L40,40 L45,25 L50,40 L55,30 L60,40 L65,22 L70,40' stroke='%238b5cf6' stroke-width='3' fill='none'/%3E%3Cpath class='c' d='M25,50 Q50,45 75,50' stroke='%23a78bfa' stroke-width='2' fill='none'/%3E%3C/svg%3E"],
+                    "text": "O autocuidado básico ajuda na recuperação, no bem-estar e até na produção de leite. Pequenas pausas fazem grande diferença.",
+                    "audio": "Cuidar de você é cuidar de {nome}. Água, descanso e uma boa alimentação fazem toda a diferença.",
+                    "links": [
+                        { "titulo": "Para saber mais: Nutrição no pós-parto", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "badge_on_complete": {
+            "baby": { "id": "quiz-bebe-semana-9", "nome": "Explorador Alegre (S9)", "icone": "😄", "description": "Concluiu o quiz de desenvolvimento do bebê da Semana 9." },
+            "mother": { "id": "quiz-mae-semana-9", "nome": "Cuidadora Atenta (S9)", "icone": "💧", "description": "Concluiu o quiz de bem-estar da mãe da Semana 9." }
+        }
+    },
+    "week10": {
+        "trail": "quiz",
+        "month": 3,
+        "week": 10,
+        "title": "Quiz da Semana 10",
+        "icon": "👂",
+        "description": "Mais firmeza, atenção e sons no ar!",
+        "baby_domains": [
+            {
+                "id": "motor_w10",
+                "title": "💪 Motor",
+                "question": "{nome} já consegue se apoiar nos antebraços quando está de bruços?",
+                "options": ["Sim, com firmeza", "Sim, mas ainda instável", "Ainda não"],
+                "feedback": {
+                    "positivo": "Ótimo! Esse apoio é o início da preparação para rolar.",
+                    "negativo": "Continue oferecendo tummy time em superfícies seguras e estimulantes."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23fdf2f8;%7D.b%7Bfill:%23fbcfe8;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M20,50 Q50,20 80,50' stroke='%23db2777' stroke-width='4' fill='none'/%3E%3Cpath d='M25,50 L50,30 L75,50' stroke='%23f9a8d4' stroke-width='3' fill='none'/%3E%3C/svg%3E"],
+                    "text": "Apoiar-se nos antebraços fortalece o tronco e prepara o bebê para rolar e engatinhar no futuro.",
+                    "audio": "Apoiar-se nos braços mostra que {nome} está ganhando força para novas conquistas como rolar e engatinhar.",
+                    "links": [
+                        { "titulo": "Para saber mais: Próximos passos motores", "url": "#" }
+                    ]
+                }
+            },
+            {
+                "id": "sensorial_w10",
+                "title": "👂 Sensorial",
+                "question": "{nome} já vira a cabeça para sons familiares, como sua voz?",
+                "options": ["Sim, quase sempre", "Às vezes", "Ainda não"],
+                "feedback": {
+                    "positivo": "Maravilha! Ele(a) está reconhecendo sons importantes.",
+                    "negativo": "Continue conversando e chamando {nome} pelo nome para estimular a resposta auditiva."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23fefce8;%7D.b%7Bfill:%23fde047;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M30,30 C35,15 45,15 50,30 S65,45 70,30' stroke='%23ca8a04' stroke-width='3' fill='none'/%3E%3Cpath d='M20,30 L80,30' stroke='%23eab308' stroke-width='2' stroke-dasharray='5 5'/%3E%3C/svg%3E"],
+                    "text": "Localizar sons é um marco cognitivo e auditivo importante, que prepara para a comunicação futura.",
+                    "audio": "{nome} aprende que a sua voz vem de um lugar específico, desenvolvendo atenção e percepção auditiva.",
+                    "links": [
+                        { "titulo": "Para saber mais: Estimulando a audição", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "mother_domains": [
+            {
+                "id": "saude_mental_w10",
+                "title": "🧠 Saúde Mental",
+                "question": "Você tem sentido melhora no humor e na adaptação à rotina?",
+                "options": ["Sim, estou bem melhor", "Mais ou menos", "Sinto-me sobrecarregada"],
+                "feedback": {
+                    "positivo": "Ótimo! Essa adaptação mostra que você está encontrando equilíbrio.",
+                    "negativo": "Converse com alguém de confiança e, se necessário, procure apoio profissional."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23eff6ff;%7D.b%7Bfill:%2393c5fd;%7D.c%7Bfill:%233b82f6;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='c' d='M25 30 A 15 15, 0, 0, 0, 50 30' fill='none' stroke-width='4'/%3E%3Cpath class='b' d='M50 30 A 15 15, 0, 0, 1, 75 30' fill='none' stroke-width='4'/%3E%3Cpath class='b' d='M30,45 Q37.5,50 45,45' fill='none' stroke-width='3' stroke='%2360a5fa'/%3E%3Cpath class='c' d='M55,45 Q62.5,40 70,45' fill='none' stroke-width='3'/%3E%3C/svg%3E"],
+                    "text": "É comum oscilar no humor, mas sentir melhora progressiva é esperado. Persistência de sintomas pode indicar necessidade de apoio.",
+                    "audio": "O pós-parto pode ser desafiador. Se a tristeza ou cansaço não melhorarem, peça ajuda.",
+                    "links": [
+                        { "titulo": "Para saber mais: Cuidando da sua mente", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "badge_on_complete": {
+            "baby": { "id": "quiz-bebe-semana-10", "nome": "Detetive dos Sons (S10)", "icone": "👂", "description": "Concluiu o quiz de desenvolvimento do bebê da Semana 10." },
+            "mother": { "id": "quiz-mae-semana-10", "nome": "Mente Serena (S10)", "icone": "🧠", "description": "Concluiu o quiz de bem-estar da mãe da Semana 10." }
+        }
+    },
+    "week11": {
+        "trail": "quiz",
+        "month": 3,
+        "week": 11,
+        "title": "Quiz da Semana 11",
+        "icon": "🤸",
+        "description": "Tentativas de rolar, sons variados e novas descobertas!",
+        "baby_domains": [
+            {
+                "id": "motor_w11",
+                "title": "🔄 Motor",
+                "question": "{nome} já tenta rolar ou virar de lado quando está deitado?",
+                "options": ["Sim, várias vezes", "Algumas tentativas", "Ainda não"],
+                "feedback": {
+                    "positivo": "Que avanço! As tentativas de rolar mostram força e coordenação.",
+                    "negativo": "Coloque brinquedos ao lado de {nome} para estimular o movimento."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f7fee7;%7D.b%7Bfill:%23a3e635;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M25,30 A 25 25 0 0 1 75 30' stroke='%2365a30d' stroke-width='4' fill='none'/%3E%3Cpath d='M75,30 L85,25 M75,30 L85,35' stroke='%2365a30d' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"],
+                    "text": "O rolar é um marco motor fundamental que amplia a mobilidade e prepara para engatinhar.",
+                    "audio": "Quando {nome} tenta rolar, está mostrando coordenação motora e preparando-se para engatinhar.",
+                    "links": [
+                        { "titulo": "Para saber mais: Incentivando o rolar", "url": "#" }
+                    ]
+                }
+            },
+            {
+                "id": "comunicacao_w11",
+                "title": "💬 Comunicação",
+                "question": "{nome} está emitindo sons variados, como vogais e balbucios diferentes do choro?",
+                "options": ["Sim, bastante", "Pouco", "Ainda não"],
+                "feedback": {
+                    "positivo": "Ótimo! Esses sons são blocos de construção da fala.",
+                    "negativo": "Responda e imite os sons de {nome}, isso incentiva novas vocalizações."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f0f9ff;%7D.b%7Bfill:%237dd3fc;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M25,25 Q30,20 40,25 T 55,25' stroke='%230ea5e9' fill='none' stroke-width='3'/%3E%3Cpath class='b' d='M45,40 Q50,35 60,40 T 75,40' stroke='%230ea5e9' fill='none' stroke-width='3'/%3E%3C/svg%3E"],
+                    "text": "Além do choro, os bebês começam a emitir sons mais variados, explorando as cordas vocais e aprendendo a se comunicar.",
+                    "audio": "Esses sons são o treino inicial da fala. Responder incentiva {nome} a continuar.",
+                    "links": [
+                        { "titulo": "Para saber mais: O desenvolvimento da fala", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "mother_domains": [
+            {
+                "id": "rede_apoio_w11",
+                "title": "🤝 Rede de Apoio",
+                "question": "Você tem conseguido dividir as tarefas ou pedir ajuda prática à sua rede de apoio?",
+                "options": ["Sim, sempre", "Às vezes", "Ainda não"],
+                "feedback": {
+                    "positivo": "Excelente! Delegar ajuda a preservar sua energia.",
+                    "negativo": "Não hesite em pedir ajuda de forma clara e prática, isso é um ato de autocuidado."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f5f5f5;%7D.b%7Bfill:%23a3a3a3;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='35' cy='30' r='10'/%3E%3Ccircle class='b' cx='65' cy='30' r='10'/%3E%3Cpath fill='none' stroke='%23a3a3a3' stroke-width='3' d='M45,30 h10'/%3E%3Cpath fill='none' stroke='%23737373' stroke-width='2' stroke-linecap='round' d='M35,20 L25,10 M65,20 L75,10'/%3E%3C/svg%3E"],
+                    "text": "A rede de apoio reduz a sobrecarga da mãe. Pedir ajuda prática é essencial para saúde emocional e física.",
+                    "audio": "Compartilhar tarefas com sua rede é cuidar de você e de {nome}.",
+                    "links": [
+                        { "titulo": "Para saber mais: Ativando sua rede", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "badge_on_complete": {
+            "baby": { "id": "quiz-bebe-semana-11", "nome": "Pequeno Acrobata (S11)", "icone": "🤸", "description": "Concluiu o quiz de desenvolvimento do bebê da Semana 11." },
+            "mother": { "id": "quiz-mae-semana-11", "nome": "Líder da Rede (S11)", "icone": "🤝", "description": "Concluiu o quiz de bem-estar da mãe da Semana 11." }
+        }
+    },
+    "week12": {
+        "trail": "quiz",
+        "month": 3,
+        "week": 12,
+        "title": "Quiz da Semana 12",
+        "icon": "🌈",
+        "description": "Três meses completos: conquistas motoras e vínculo cada vez maior!",
+        "baby_domains": [
+            {
+                "id": "motor_w12",
+                "title": "🤸 Motor",
+                "question": "{nome} já consegue rolar completamente (da barriga para as costas ou vice-versa)?",
+                "options": ["Sim, várias vezes", "Algumas vezes", "Ainda não"],
+                "feedback": {
+                    "positivo": "Fantástico! Esse é um marco importante para mobilidade.",
+                    "negativo": "Continue estimulando o rolar em superfícies seguras."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f7fee7;%7D.b%7Bfill:%23a3e635;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M25,30 A 25 25 0 0 1 75 30' stroke='%2365a30d' stroke-width='4' fill='none'/%3E%3Cpath d='M75,30 L85,25 M75,30 L85,35' stroke='%2365a30d' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"],
+                    "text": "Rolar é uma grande conquista motora e abre portas para explorar o ambiente.",
+                    "audio": "Quando {nome} rola sozinho, significa que está pronto para explorar mais o mundo.",
+                    "links": [
+                        { "titulo": "Para saber mais: Segurança na fase do rolar", "url": "#" }
+                    ]
+                }
+            },
+            {
+                "id": "cognitivo_w12",
+                "title": "🧠 Cognitivo",
+                "question": "{nome} demonstra curiosidade ao observar objetos novos e coloridos?",
+                "options": ["Sim, muito", "Um pouco", "Ainda não"],
+                "feedback": {
+                    "positivo": "Ótimo! A curiosidade mostra avanço no desenvolvimento cognitivo.",
+                    "negativo": "Mostre objetos de cores vivas e texturas diferentes para estimular a atenção."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f3f4f6;%7D.b%7Bfill:%239ca3af;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='50' cy='30' r='15'/%3E%3Ccircle fill='white' cx='50' cy='30' r='10'/%3E%3Ccircle fill='black' cx='50' cy='30' r='5'/%3E%3Cpath fill='none' stroke='%239ca3af' stroke-width='2' d='M20,15 L35,25 M80,15 L65,25 M20,45 L35,35 M80,45 L65,35'/%3E%3C/svg%3E"],
+                    "text": "A curiosidade é sinal de novas conexões cerebrais e interesse pelo mundo.",
+                    "audio": "Ao se interessar por objetos novos, {nome} está mostrando evolução cognitiva.",
+                    "links": [
+                        { "titulo": "Para saber mais: Brincadeiras para o 3º mês", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "mother_domains": [
+            {
+                "id": "intimidade_w12",
+                "title": "💞 Intimidade e Conexão",
+                "question": "Você e seu parceiro(a) têm conseguido reservar um tempo, mesmo pequeno, para conversar ou ter momentos juntos?",
+                "options": ["Sim, sempre", "Às vezes", "Ainda não"],
+                "feedback": {
+                    "positivo": "Muito bem! Manter a intimidade fortalece a relação e o bem-estar da família.",
+                    "negativo": "Mesmo alguns minutos de conversa diária podem reforçar a conexão entre vocês."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23fff1f2;%7D.b%7Bfill:%23fda4af;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M50,25 C40,10 20,15 25,30 C30,45 50,50 50,50 C50,50 70,45 75,30 C80,15 60,10 50,25 Z'/%3E%3C/svg%3E"],
+                    "text": "No puerpério, a intimidade se redefine. Pequenos gestos de carinho são tão importantes quanto o contato físico.",
+                    "audio": "Reserve alguns minutos do dia para conversar e se reconectar emocionalmente.",
+                    "links": [
+                        { "titulo": "Para saber mais: Cuidando da relação", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "badge_on_complete": {
+            "baby": { "id": "quiz-bebe-semana-12", "nome": "Explorador de 3 Meses", "icone": "🌈", "description": "Concluiu o quiz de desenvolvimento do bebê da Semana 12." },
+            "mother": { "id": "quiz-mae-semana-12", "nome": "Parceira Forte (S12)", "icone": "💞", "description": "Concluiu o quiz de bem-estar da mãe da Semana 12." }
+        }
+    },
+    "month3Summary": {
+        "trail": "quiz",
+        "month": 3,
+        "summary": true,
+        "title": "Fechamento do Mês 3",
+        "icon": "🌟",
+        "description": "Hora de celebrar três meses de conquistas incríveis!",
+        "baby_domains": [
+            {
+                "id": "marco_motor_m3",
+                "title": "💪 Marco Motor",
+                "question": "Você percebeu evolução significativa no controle da cabeça, apoio nos braços e nas tentativas de rolar de {nome}?",
+                "options": ["Sim, muito", "Um pouco", "Ainda não"],
+                "feedback": {
+                    "positivo": "Fantástico! Isso mostra que o desenvolvimento motor está no caminho certo.",
+                    "negativo": "Continue incentivando com tummy time, brinquedos e brincadeiras supervisionadas."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23fdf2f8;%7D.b%7Bfill:%23fbcfe8;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M20,50 Q50,20 80,50' stroke='%23db2777' stroke-width='4' fill='none'/%3E%3Cpath d='M25,50 L50,30 L75,50' stroke='%23f9a8d4' stroke-width='3' fill='none'/%3E%3C/svg%3E"],
+                    "text": "Esses marcos constroem a base para sentar e engatinhar nos próximos meses.",
+                    "audio": "O progresso motor de {nome} mostra que ele está pronto para as próximas conquistas.",
+                    "links": [
+                        { "titulo": "Para saber mais: Resumo Motor do 3º Mês", "url": "#" }
+                    ]
+                }
+            },
+            {
+                "id": "marco_social_m3",
+                "title": "😊 Marco Social",
+                "question": "{nome} já sorri e gargalha com frequência quando você interage?",
+                "options": ["Sim, muito", "Às vezes", "Ainda não"],
+                "feedback": {
+                    "positivo": "Que maravilha! O vínculo afetivo está cada vez mais forte.",
+                    "negativo": "Continue interagindo com carinho e estímulos afetivos."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f0fdf4;%7D.b%7Bfill:%23bbf7d0;%7D.c%7Bfill:%234ade80;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='35' cy='30' r='15'/%3E%3Ccircle class='c' cx='65' cy='30' r='15'/%3E%3Cpath d='M30,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M40,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M28,35 Q35,42 42,35' stroke='%2314532d' fill='none' stroke-width='2'/%3E%3Cpath d='M60,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M70,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M58,35 Q65,42 72,35' stroke='%2314532d' fill='none' stroke-width='2'/%3E%3C/svg%3E"],
+                    "text": "O sorriso e a gargalhada são sinais de vínculo, interação social e desenvolvimento emocional.",
+                    "audio": "As risadas e sorrisos são conquistas sociais muito importantes para {nome}.",
+                    "links": [
+                        { "titulo": "Para saber mais: O vínculo no 3º Mês", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "mother_domains": [
+            {
+                "id": "bem_estar_mae_m3",
+                "title": "💜 Bem-Estar da Mãe",
+                "question": "Você conseguiu organizar melhor a rotina de autocuidado e rede de apoio neste mês?",
+                "options": ["Sim, bastante", "Um pouco", "Ainda não"],
+                "feedback": {
+                    "positivo": "Ótimo! Uma mãe bem apoiada é mais disponível para si e para o bebê.",
+                    "negativo": "Continue buscando apoio e reservando tempo para você sempre que possível."
+                },
+                "knowledge": {
+                    "title": "Por que é importante?",
+                    "image_urls": ["data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f5f5f5;%7D.b%7Bfill:%23a3a3a3;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='35' cy='30' r='10'/%3E%3Ccircle class='b' cx='65' cy='30' r='10'/%3E%3Cpath fill='none' stroke='%23a3a3a3' stroke-width='3' d='M45,30 h10'/%3E%3Cpath fill='none' stroke='%23737373' stroke-width='2' stroke-linecap='round' d='M35,20 L25,10 M65,20 L75,10'/%3E%3C/svg%3E"],
+                    "text": "O equilíbrio entre cuidar de si e do bebê é essencial para saúde física e emocional.",
+                    "audio": "Quanto mais você cuida de si, mais energia terá para cuidar de {nome}.",
+                    "links": [
+                        { "titulo": "Para saber mais: Resumo de Autocuidado do 3º Mês", "url": "#" }
+                    ]
+                }
+            }
+        ],
+        "recomendacao_geral": "Anote os principais avanços e dúvidas para levar à próxima consulta pediátrica.",
+        "badge_on_complete": {
+            "id": "badge-mes-3",
+            "nome": "Explorador do Mês 3",
+            "icone": "🌟",
+            "description": "Concluiu o fechamento e os aprendizados do incrível Mês 3."
+        }
+    }
+}

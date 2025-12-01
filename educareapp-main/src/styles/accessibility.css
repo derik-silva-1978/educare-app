@@ -1,0 +1,351 @@
+
+/* Base Accessibility CSS Variables */
+:root {
+  --focus-ring-color: rgba(59, 130, 246, 0.5);
+  --focus-ring-width: 3px;
+  --animation-duration: 0.2s;
+  --animation-timing: ease-in-out;
+}
+
+/* Focus Styles */
+.focus-visible:focus,
+.focus-visible:focus-visible,
+.focus-visible *:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+/* Text Size Adjustments */
+.text-size--2 {
+  font-size: 0.75em;
+}
+
+.text-size--1 {
+  font-size: 0.875em;
+}
+
+.text-size-0 {
+  font-size: 1em;
+}
+
+.text-size-1 {
+  font-size: 1.125em;
+}
+
+.text-size-2 {
+  font-size: 1.25em;
+}
+
+.text-size-3 {
+  font-size: 1.375em;
+}
+
+/* High Contrast Mode */
+.high-contrast {
+  --background: #000000;
+  --foreground: #ffffff;
+  --primary: #ffff00;
+  --secondary: #00ffff;
+  --border: #ffffff;
+  --muted: #666666;
+  --muted-foreground: #eeeeee;
+  
+  color: var(--foreground);
+  background-color: var(--background);
+}
+
+.high-contrast button,
+.high-contrast a {
+  outline: 1px solid var(--border);
+}
+
+.high-contrast img {
+  filter: contrast(1.5);
+}
+
+/* Simplified Interface */
+.simplified-ui .decorative-element,
+.simplified-ui .complex-animation,
+.simplified-ui .non-essential-graphic {
+  display: none !important;
+}
+
+.simplified-ui .layout-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.simplified-ui .card, 
+.simplified-ui .button,
+.simplified-ui .input {
+  border-radius: 4px !important;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.reduce-motion *,
+.reduce-motion ::before,
+.reduce-motion ::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Screen Reader Optimizations */
+.screen-reader-optimized .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.screen-reader-optimized .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.screen-reader-optimized .sr-only-focusable:active,
+.screen-reader-optimized .sr-only-focusable:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Screen Reader Announcer */
+.sr-announcer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Improved font spacing for screen readers */
+.screen-reader-optimized {
+  letter-spacing: 0.12em;
+  word-spacing: 0.16em;
+}
+
+/* Skip navigation link */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 8px;
+  z-index: 100;
+  transition: top 0.2s;
+}
+
+.skip-to-content:focus {
+  top: 0;
+}
+
+/* Enhanced text contrast for accessibility - Updated for better contrast */
+.text-contrast-improved {
+  color: #000000 !important;
+}
+
+.bg-contrast-improved {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Chat messages with improved contrast - Updated for better readability */
+.chat-message-user {
+  background-color: #00398F !important;
+  color: white !important;
+  border: 1px solid #002766 !important;
+}
+
+.chat-message-bot {
+  background-color: #E1EBF8 !important; 
+  color: #00224D !important;
+  border: 1px solid #B8D1ED !important;
+}
+
+/* Card content with improved contrast */
+.card-content-high-contrast {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border: 1px solid #333333 !important;
+}
+
+/* Buttons with improved contrast */
+.button-high-contrast {
+  background-color: #00398F !important;
+  color: white !important;
+  border: 2px solid #00398F !important;
+}
+
+.button-high-contrast:hover {
+  background-color: #01255E !important;
+}
+
+/* Text inputs with improved contrast */
+.input-high-contrast {
+  background-color: white !important;
+  color: black !important;
+  border: 2px solid #333333 !important;
+}
+
+.input-high-contrast::placeholder {
+  color: #555555 !important;
+}
+
+/* AI Assistant Specific Contrast Improvements */
+.ai-assistant-header {
+  background-color: #9A0C28 !important;
+  color: #FFFFFF !important;
+}
+
+.ai-assistant-header-title {
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+}
+
+.ai-assistant-tab {
+  background-color: #FFF !important;
+  color: #700018 !important;
+  font-weight: 500 !important;
+  border-bottom: 2px solid transparent !important;
+}
+
+.ai-assistant-tab[data-state="active"] {
+  background-color: #FFFFFF !important;
+  color: #9A0C28 !important;
+  border-bottom: 2px solid #9A0C28 !important;
+}
+
+.ai-assistant-message-bot {
+  background-color: #F5E6EA !important;
+  color: #410811 !important;
+  border-left: 3px solid #9A0C28 !important;
+}
+
+.ai-assistant-message-user {
+  background-color: #E6EDF8 !important;
+  color: #002766 !important;
+  border-left: 3px solid #004FC4 !important;
+}
+
+.ai-assistant-input {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border: 2px solid #9A0C28 !important;
+}
+
+.ai-assistant-button {
+  background-color: #9A0C28 !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  font-weight: 600 !important;
+}
+
+.ai-assistant-button:hover {
+  background-color: #700018 !important;
+}
+
+.ai-assistant-footer {
+  background-color: #F5F5F5 !important;
+  color: #333333 !important;
+  border-top: 1px solid #DDDDDD !important;
+}
+
+/* Admin Panel High Contrast Improvements */
+.admin-high-contrast {
+  --admin-background: #FFFFFF !important;
+  --admin-foreground: #000000 !important;
+  --admin-card: #FFFFFF !important;
+  --admin-cardBorder: #000000 !important;
+  --admin-tableHeader: #F8F9FA !important;
+  --admin-tableBorder: #000000 !important;
+  --admin-tableHover: #E9ECEF !important;
+  --admin-input: #FFFFFF !important;
+  --admin-inputBorder: #000000 !important;
+  --admin-button: #000080 !important;
+  --admin-buttonText: #FFFFFF !important;
+}
+
+.admin-high-contrast .card,
+.admin-high-contrast .button,
+.admin-high-contrast .input {
+  border: 2px solid #000000 !important;
+}
+
+.admin-high-contrast .text-slate-600 {
+  color: #333333 !important;
+}
+
+.admin-high-contrast .text-muted-foreground {
+  color: #444444 !important;
+}
+
+/* Admin Focus Indicators */
+.admin-focus-enhanced *:focus,
+.admin-focus-enhanced *:focus-visible {
+  outline: 3px solid #0066CC !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 5px #0066CC !important;
+}
+
+/* Admin Screen Reader Optimizations */
+.admin-screen-reader-optimized {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  line-height: 1.6 !important;
+  letter-spacing: 0.05em !important;
+}
+
+.admin-screen-reader-optimized h1,
+.admin-screen-reader-optimized h2,
+.admin-screen-reader-optimized h3 {
+  margin-bottom: 0.75em !important;
+  line-height: 1.3 !important;
+}
+
+.admin-screen-reader-optimized p {
+  margin-bottom: 1em !important;
+}
+
+/* Admin Simplified Interface */
+.admin-simplified-ui .gradient,
+.admin-simplified-ui .shadow-xl,
+.admin-simplified-ui .shadow-lg {
+  background: var(--admin-background) !important;
+  box-shadow: none !important;
+}
+
+.admin-simplified-ui .rounded-xl,
+.admin-simplified-ui .rounded-lg {
+  border-radius: 4px !important;
+}

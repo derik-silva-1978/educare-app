@@ -1,0 +1,72 @@
+
+{
+  "deprecated": "This JSON file is a legacy asset and is not used by the application. The authoritative data is in /data/journey.js and the corresponding theme files in /data/themes.",
+  "week": 2,
+  "trail": "mother",
+  "title": "Semana 2 - Saúde Mental e Apoio",
+  "description": "Cuidando da mente e fortalecendo seus laços de ajuda.",
+  "interactive_flow": {
+    "quiz": {
+      "questions": [
+        {
+          "id": "urgency",
+          "question": "Como você está se sentindo agora?",
+          "options": [
+            "Bem, apenas com dúvidas comuns da recuperação",
+            "Cansada, mas seguindo em frente",
+            "Preocupada com algo na minha saúde",
+            "Acho que preciso de orientação urgente"
+          ],
+          "type": "urgency"
+        },
+        {
+          "id": "main_concern_mother",
+          "question": "Qual sua principal preocupação com você hoje?",
+          "options": [
+            "Minha recuperação física (cicatrização, dores)",
+            "Minha saúde emocional (cansaço, tristeza)",
+            "Cuidados com as mamas e amamentação",
+            "Planejamento futuro (contracepção, consultas)"
+          ],
+          "type": "theme"
+        }
+      ]
+    }
+  },
+  "topics": [
+    {
+      "title": "Saúde Mental Materna",
+      "content": {
+        "trail": "mother",
+        "microcard": {
+          "titulo": "💜 Saúde Mental no Puerpério",
+          "itens": [
+            "**Baby Blues:** comum, transitório (até 2 sem), choro fácil.",
+            "**Depressão Pós-Parto (DPP):** tristeza profunda, persistente (>2 sem), apatia.",
+            "**Psicose Pós-Parto:** emergência rara, confusão, delírios.",
+            "Não é sua culpa!",
+            "Converse sobre seus sentimentos",
+            "DPP tem tratamento eficaz"
+          ]
+        },
+        "acaoTexto": "Sua saúde mental é tão importante quanto a física. É crucial entender o espectro dos transtornos de humor no pós-parto. O **'Baby Blues'** é uma reação emocional comum, afetando até 85% das mulheres. Caracteriza-se por choro fácil e sensibilidade, mas **resolve-se sozinho em até duas semanas**. Já a **Depressão Pós-Parto (DPP)** é uma condição clínica mais grave e persistente. Os sinais de alerta são tristeza profunda que **não passa após duas semanas**, perda de prazer nas atividades, culpa excessiva e, em casos graves, pensamentos sobre se machucar. **DPP não é frescura e tem tratamento**. A forma mais rara e grave é a **Psicose Pós-Parto**, uma emergência médica com início súbito, confusão mental e delírios. Se você se sentir persistentemente triste, **converse com sua rede de apoio e procure ajuda profissional**. Cuidar de você é o melhor presente que você pode dar a {nome}.",
+        "acaoAudio": "TitiNauta aqui para um papo sério e necessário sobre sua saúde mental. Vamos diferenciar. 'Baby Blues': chorar por tudo, se sentir super sensível. É normal, passa em até duas semanas. Depressão Pós-Parto: a tristeza não vai embora, você perde o interesse nas coisas, se sente culpada. Se isso durar mais de duas semanas, não é mais 'Baby Blues'. É hora de procurar ajuda. E existe tratamento! Psicose Pós-Parto: é raro, mas é uma emergência. Confusão, ver ou ouvir coisas. Nesse caso, é hospital na hora. O mais importante: não é sua culpa. Fale sobre o que sente. Peça ajuda. Você não está sozinha.",
+        "audioIllustration": "💬",
+        "badge": { "id": "autocuidado", "nome": "Mestre do Autocuidado", "icone": "💜" },
+        "extraContent": [{ "titulo": "Entendendo a Depressão Pós-Parto (MS)", "url": "https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/d/depressao-pos-parto" }, { "titulo": "CVV - Centro de Valorização da Vida (Ligue 188)", "url": "https://www.cvv.org.br/" }]
+      }
+    },
+    {
+      "title": "Rede de Apoio",
+      "content": {
+        "trail": "mother",
+        "microcard": { "titulo": "🤝 Rede de Apoio: Seu Time", "itens": ["Liste pessoas que podem ajudar", "Peça ajuda específica e prática", "Ex: 'Pode trazer o almoço amanhã?'", "Divida as tarefas noturnas", "Ensine sua rede a 'Ouvir Ela' (Hear Her)", "Validar sentimentos, não minimizar", "Aceite ajuda sem culpa", "Apoio emocional é tão vital quanto o prático"] },
+        "acaoTexto": "Você não precisa passar por isso sozinha. Sua **rede de apoio** é sua maior aliada. Mas para que ela funcione, você precisa ser a líder. **Seja específica nos pedidos**: em vez de 'preciso de ajuda', diga 'você pode vir ficar com o bebê por 1h para eu tomar um banho em paz?'. Eduque sua rede sobre o conceito da campanha **'Hear Her' (Ouça Ela)**: eles não devem apenas oferecer ajuda, mas **ouvir ativamente** suas preocupações, **validar seus sentimentos** sem julgamento ('é normal se sentir assim') e **agir**. Se você disser que algo não está bem, eles devem te ajudar a procurar um profissional. **Divida as madrugadas** com seu parceiro(a). E lembre-se: **aceitar ajuda não é sinal de fraqueza**, é sinal de força e inteligência.",
+        "acaoAudio": "TitiNauta aqui para montar seu time de campeões! Sua rede de apoio. Regra 1: peça coisas claras e diretas. 'Traz comida', 'Lava a louça', 'Fica com o bebê pra eu dormir'. Regra 2: ensine seu time a te ouvir de verdade. Se você falar que está exausta, a resposta não é 'você dá conta', e sim 'o que posso fazer para te ajudar agora?'. Isso é validar seus sentimentos. Regra 3: divida a noite com seu parceiro, se puder. E regra 4, a mais importante: aceite a ajuda. Deixe-se cuidar. Você merece.",
+        "audioIllustration": "📣",
+        "badge": { "id": "lider-apoio", "nome": "Líder da Rede de Apoio", "icone": "🌐" },
+        "extraContent": [{ "titulo": "Campanha 'Hear Her' (CDC - em inglês)", "url": "https://www.cdc.gov/hearher/index.html" }, { "titulo": "Como Pedir Ajuda (e o que pedir)", "url": "https://www.healthline.com/health/parenting/how-to-ask-for-help#sample-scripts" }]
+      }
+    }
+  ]
+}

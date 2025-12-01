@@ -1,0 +1,13 @@
+
+:root {
+  --communication-color: #3b82f6;  /* blue-500 */
+  --motor-color: #22c55e;          /* green-500 */
+  --social_emotional-color: #8b5cf6; /* purple-500 */
+  --cognitive-color: #f59e0b;      /* amber-500 */
+  --self_care-color: #ec4899;      /* pink-500 */
+  --maternal_health-color: #ef4444; /* red-500 */
+}
+
+.progress-indicator {
+  transition: width 0.5s ease-in-out;
+}

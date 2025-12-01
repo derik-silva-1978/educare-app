@@ -1,0 +1,47 @@
+
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+@import './accessibility.css';
+
+/* Loading spinner animations */
+@keyframes spinner {
+  to {transform: rotate(360deg);}
+}
+
+.loading-spinner {
+  position: relative;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+}
+
+.loading-spinner:before {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid #ccc;
+  border-top-color: #3b82f6;
+  animation: spinner .6s linear infinite;
+}
+
+/* Skeleton loading animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+.skeleton-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Other custom styles here */

@@ -1,0 +1,74 @@
+{
+  "badges": [
+    {
+      "id": "welcome",
+      "nome": "Bem-vindo",
+      "icone": "👋",
+      "description": "Parabéns por iniciar sua jornada!",
+      "type": "both"
+    },
+    {
+      "id": "first_quiz",
+      "nome": "Primeiro Quiz",
+      "icone": "🎯",
+      "description": "Completou seu primeiro quiz com sucesso!",
+      "type": "both"
+    },
+    {
+      "id": "baby_care_master",
+      "nome": "Mestre do Cuidado",
+      "icone": "👶",
+      "description": "Dominou os cuidados básicos com o bebê",
+      "type": "baby"
+    },
+    {
+      "id": "feeding_expert",
+      "nome": "Especialista em Amamentação",
+      "icone": "🍼",
+      "description": "Aprendeu tudo sobre amamentação",
+      "type": "baby"
+    },
+    {
+      "id": "safety_first",
+      "nome": "Segurança em Primeiro Lugar",
+      "icone": "🛡️",
+      "description": "Aprendeu sobre a segurança do bebê",
+      "type": "baby"
+    },
+    {
+      "id": "sleep_master",
+      "nome": "Mestre do Sono",
+      "icone": "😴",
+      "description": "Especialista em sono seguro do bebê",
+      "type": "baby"
+    },
+    {
+      "id": "mother_care",
+      "nome": "Autocuidado",
+      "icone": "💜",
+      "description": "Prioriza o autocuidado materno",
+      "type": "mother"
+    },
+    {
+      "id": "emotional_balance",
+      "nome": "Equilíbrio Emocional",
+      "icone": "🧘‍♀️",
+      "description": "Mantém o equilíbrio emocional",
+      "type": "mother"
+    },
+    {
+      "id": "health_tracking",
+      "nome": "Saúde em Dia",
+      "icone": "❤️",
+      "description": "Acompanha a saúde regularmente",
+      "type": "mother"
+    },
+    {
+      "id": "support_network",
+      "nome": "Rede de Apoio",
+      "icone": "🤝",
+      "description": "Construiu uma rede de apoio",
+      "type": "mother"
+    }
+  ]
+}

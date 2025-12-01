@@ -1,0 +1,195 @@
+{
+  "trail": "mother",
+  "title": "Jornada da Mãe - Mês 1",
+  "journey": [
+    {
+      "week": 1,
+      "title": "Semana 1 - Recuperação Física",
+      "description": "Foco total na sua recuperação física imediata.",
+      "topics": [
+        {
+          "title": "Sinais de Alerta (Mãe)",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "⚠️ Sinais de Alerta Urgentes na Mãe",
+              "itens": [
+                "**Sangramento intenso:** enche >1 absorvente/hora",
+                "**Dor de cabeça forte** que não melhora, com visão turva",
+                "**Febre** >38°C com calafrios",
+                "**Dor no peito** ou falta de ar súbita",
+                "**Dor e inchaço** em apenas uma das pernas",
+                "**Convulsões**",
+                "Pensamentos de se machucar ou machucar o bebê"
+              ]
+            },
+            "acaoTexto": "O pós-parto é um período de alto risco para complicações graves. Conhecer os sinais de alerta pode salvar sua vida. **Procure um serviço de emergência imediatamente** se apresentar qualquer um destes sintomas: **Hemorragia:** sangramento vaginal que encharca mais de um absorvente noturno por hora ou eliminação de coágulos grandes. **Pré-eclâmpsia pós-parto:** dor de cabeça forte e persistente que não alivia com remédios, alterações na visão (pontos brilhantes, visão turva) ou dor intensa na parte superior do abdômen. **Infecção:** febre acima de 38°C, calafrios ou secreção com mau cheiro. **Tromboembolismo:** dor, inchaço e vermelhidão em apenas uma das pernas (pode ser Trombose) ou dor súbita no peito e falta de ar intensa (pode ser Embolia Pulmonar). **Não minimize seus sintomas**. Na dúvida, sempre procure ajuda.",
+            "acaoAudio": "Alerta máximo do TitiNauta para a sua saúde, mãe! Estes são sinais de emergência, procure um hospital IMEDIATAMENTE se tiver: sangramento muito intenso. Dor de cabeça fortíssima com visão embaçada. Febre alta com calafrios. Dor forte no peito ou falta de ar que veio do nada. Dor e inchaço em uma perna só. Qualquer um desses sinais não é normal. Não espere para ver se melhora. Sua vida é a prioridade. Vá para a emergência.",
+            "audioIllustration": "🚑",
+            "badge": { "id": "vigilante-mae", "nome": "Vigilante da Mãe", "icone": "⚠️" },
+            "extraContent": [{ "titulo": "Checklist de Sinais de Alerta Pós-Parto (CDC)", "url": "https://www.cdc.gov/hearher/resources/download-share/docs/pdf/Warning-Signs-Poster_LTR_whitebkg_Portuguese-BR.pdf" }, { "titulo": "Entendendo a Pré-eclâmpsia Pós-Parto", "url": "https://www.preeclampsia.org/postpartum-preeclampsia" }]
+          }
+        },
+        {
+          "title": "Cuidados com a Ferida Operatória",
+          "content": {
+            "trail": "mother",
+            "microcard": { "titulo": "🩹 Cuidado com a Cicatrização", "itens": ["Lavar com água e sabão neutro", "Secar bem, sem esfregar", "Manter a área limpa e seca", "Usar roupas folgadas e de algodão", "Observar sinais de infecção", "Vermelhidão, pus ou dor piorando = médico", "Evitar esforço físico pesado", "Para dor perineal: banho de assento"] },
+            "acaoTexto": "Sua recuperação física é uma prioridade. **Se você fez cesariana:** lave a incisão delicadamente com água e sabão no banho, seque com uma toalha limpa dando batidinhas, sem esfregar. Mantenha a área seca e arejada. **Se teve parto vaginal com laceração:** a higiene é a mesma. Lave a região com água após urinar e evacuar. Banhos de assento com água morna podem aliviar o desconforto. Para ambos os casos, fique atenta a **sinais de infecção:** vermelhidão que se espalha, calor excessivo no local, inchaço, secreção amarelada (pus) ou dor que piora com o tempo. Se notar algo, **fale com seu médico**. **Evite carregar peso** (qualquer coisa mais pesada que o bebê) e fazer esforço abdominal. Respeite os limites do seu corpo.",
+            "acaoAudio": "TitiNauta cuidando de você agora. Vamos falar da sua cicatrização. Seja cesárea ou parto normal, a regra é: limpeza e secura. Lave o local dos pontos com água e sabão neutro, todo dia no banho. Depois, seque muito bem, com batidinhas leves. Deixe a área respirar, use roupas folgadas. Fique de olho: se ficar vermelho, inchado, quente ou sair secreção, ligue para o seu médico. Nada de pegar peso, hein? Só o bebê! Respeite seu tempo. Cuidar de você é cuidar {preposicao} {nome} também.",
+            "audioIllustration": "🩹",
+            "badge": { "id": "recuperacao-ativa", "nome": "Recuperação Ativa", "icone": "🩹" },
+            "extraContent": [{ "titulo": "Recuperação Pós-Cesárea", "url": "https://www.msdmanuals.com/pt/casa/problemas-de-sa%C3%BAde-feminina/o-per%C3%ADodo-p%C3%B3s-parto/cesariana" }, { "titulo": "Cuidados com Laceração Perineal", "url": "https://www.msdmanuals.com/pt/profissional/ginecologia-e-obstetr%C3%ADcia/anormalidades-e-complica%C3%A7%C3%B5es-do-trabalho-de-parto-e-parto/lacera%C3%A7%C3%A3o-perineal" }]
+          }
+        },
+        {
+          "title": "Cuidados com as Mamas",
+          "content": {
+            "trail": "mother",
+            "microcard": { "titulo": "🤱 Saúde das Mamas: Protocolo 2022", "itens": ["Fissuras: a causa é a pega incorreta", "Tratamento da fissura: leite materno", "Ingurgitamento: amamentar e compressa FRIA", "NÃO usar compressas quentes ou massagear", "Sutiã de boa sustentação", "Mastite: febre e área vermelha na mama", "Suspeita de mastite = avaliação médica URGENTE"] },
+            "acaoTexto": "Cuidar das suas mamas é fundamental para o sucesso da amamentação. **Fissuras nos mamilos** são quase sempre causadas pela pega incorreta de {nome}: foque em corrigi-la. Para tratar, passe o **próprio leite materno** e deixe secar ao ar. Se a mama estiver muito cheia e dolorida (**ingurgitamento**), a nova recomendação (Protocolo ABM 2022) é aplicar **compressas FRIAS ou gelo** para reduzir a inflamação e a dor. **NÃO FAÇA** massagens vigorosas ou compressas quentes, pois pioram o inchaço. A amamentação em demanda normal ajuda a regular a produção. Fique atenta aos **sinais de mastite:** uma área da mama fica vermelha, quente e dolorida, acompanhada de febre e mal-estar (como uma gripe forte). Se suspeitar de mastite, **procure avaliação médica imediatamente**, pois pode ser necessário o uso de antibióticos.",
+            "acaoAudio": "TitiNauta com informações atualizadas para a saúde das suas mamas! Mamilo machucado? O problema é a pega do bebê. Corrija a pega e passe seu próprio leite para cicatrizar. Seio empedrado, doendo muito? A nova orientação é compressa FRIA ou gelo! Isso mesmo, FRIA. Ela desinflama. Esqueça as compressas quentes e as massagens fortes, elas podem piorar. Atenção máxima agora: se uma parte do seio ficar vermelha, quente, dolorida e você tiver febre, pode ser mastite. Isso é sério. Fale com seu médico na hora!",
+            "audioIllustration": "🧊",
+            "badge": { "id": "amiga-peito", "nome": "Amiga do Peito", "icone": "🤱" },
+            "extraContent": [{ "titulo": "Protocolo de Mastite ABM 2022 (Resumo)", "url": "https://abm.memberclicks.net/assets/DOCUMENTS/PROTOCOLS/36-mitchell-et-al-2022-academy-of-breastfeeding-medicine-clinical-protocol-36-the-mastitis-spectrum-revised-2022.pdf" }, { "titulo": "Como fazer ordenha de alívio", "url": "https://www.pennmedicine.org/updates/blogs/health-and-wellness/2020/march/how-to-hand-express-breast-milk" }]
+          }
+        }
+      ]
+    },
+    {
+      "week": 2,
+      "title": "Semana 2 - Saúde Mental e Apoio",
+      "description": "Cuidando da mente e fortalecendo seus laços de ajuda.",
+      "topics": [
+        {
+          "title": "Saúde Mental Materna",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "💜 Saúde Mental no Puerpério",
+              "itens": [
+                "**Baby Blues:** comum, transitório (até 2 sem), choro fácil.",
+                "**Depressão Pós-Parto (DPP):** tristeza profunda, persistente (>2 sem), apatia.",
+                "**Psicose Pós-Parto:** emergência rara, confusão, delírios.",
+                "Não é sua culpa!",
+                "Converse sobre seus sentimentos",
+                "DPP tem tratamento eficaz"
+              ]
+            },
+            "acaoTexto": "Sua saúde mental é tão importante quanto a física. É crucial entender o espectro dos transtornos de humor no pós-parto. O **'Baby Blues'** é uma reação emocional comum, afetando até 85% das mulheres. Caracteriza-se por choro fácil e sensibilidade, mas **resolve-se sozinho em até duas semanas**. Já a **Depressão Pós-Parto (DPP)** é uma condição clínica mais grave e persistente. Os sinais de alerta são tristeza profunda que **não passa após duas semanas**, perda de prazer nas atividades, culpa excessiva e, em casos graves, pensamentos sobre se machucar. **DPP não é frescura e tem tratamento**. A forma mais rara e grave é a **Psicose Pós-Parto**, uma emergência médica com início súbito, confusão mental e delírios. Se você se sentir persistentemente triste, **converse com sua rede de apoio e procure ajuda profissional**. Cuidar de você é o melhor presente que você pode dar a {nome}.",
+            "acaoAudio": "TitiNauta aqui para um papo sério e necessário sobre sua saúde mental. Vamos diferenciar. 'Baby Blues': chorar por tudo, se sentir super sensível. É normal, passa em até duas semanas. Depressão Pós-Parto: a tristeza não vai embora, você perde o interesse nas coisas, se sente culpada. Se isso durar mais de duas semanas, não é mais 'Baby Blues'. É hora de procurar ajuda. E existe tratamento! Psicose Pós-Parto: é raro, mas é uma emergência. Confusão, ver ou ouvir coisas. Nesse caso, é hospital na hora. O mais importante: não é sua culpa. Fale sobre o que sente. Peça ajuda. Você não está sozinha.",
+            "audioIllustration": "💬",
+            "badge": { "id": "autocuidado", "nome": "Mestre do Autocuidado", "icone": "💜" },
+            "extraContent": [{ "titulo": "Entendendo a Depressão Pós-Parto (MS)", "url": "https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/d/depressao-pos-parto" }, { "titulo": "CVV - Centro de Valorização da Vida (Ligue 188)", "url": "https://www.cvv.org.br/" }]
+          }
+        },
+        {
+          "title": "Rede de Apoio",
+          "content": {
+            "trail": "mother",
+            "microcard": { "titulo": "🤝 Rede de Apoio: Seu Time", "itens": ["Liste pessoas que podem ajudar", "Peça ajuda específica e prática", "Ex: 'Pode trazer o almoço amanhã?'", "Divida as tarefas noturnas", "Ensine sua rede a 'Ouvir Ela' (Hear Her)", "Validar sentimentos, não minimizar", "Aceite ajuda sem culpa", "Apoio emocional é tão vital quanto o prático"] },
+            "acaoTexto": "Você não precisa passar por isso sozinha. Sua **rede de apoio** é sua maior aliada. Mas para que ela funcione, você precisa ser a líder. **Seja específica nos pedidos**: em vez de 'preciso de ajuda', diga 'você pode vir ficar com o bebê por 1h para eu tomar um banho em paz?'. Eduque sua rede sobre o conceito da campanha **'Hear Her' (Ouça Ela)**: eles não devem apenas oferecer ajuda, mas **ouvir ativamente** suas preocupações, **validar seus sentimentos** sem julgamento ('é normal se sentir assim') e **agir**. Se você disser que algo não está bem, eles devem te ajudar a procurar um profissional. **Divida as madrugadas** com seu parceiro(a). E lembre-se: **aceitar ajuda não é sinal de fraqueza**, é sinal de força e inteligência.",
+            "acaoAudio": "TitiNauta aqui para montar seu time de campeões! Sua rede de apoio. Regra 1: peça coisas claras e diretas. 'Traz comida', 'Lava a louça', 'Fica com o bebê pra eu dormir'. Regra 2: ensine seu time a te ouvir de verdade. Se você falar que está exausta, a resposta não é 'você dá conta', e sim 'o que posso fazer para te ajudar agora?'. Isso é validar seus sentimentos. Regra 3: divida a noite com seu parceiro, se puder. E regra 4, a mais importante: aceite a ajuda. Deixe-se cuidar. Você merece.",
+            "audioIllustration": "📣",
+            "badge": { "id": "lider-apoio", "nome": "Líder da Rede de Apoio", "icone": "🌐" },
+            "extraContent": [{ "titulo": "Campanha 'Hear Her' (CDC - em inglês)", "url": "https://www.cdc.gov/hearher/index.html" }, { "titulo": "Como Pedir Ajuda (e o que pedir)", "url": "https://www.healthline.com/health/parenting/how-to-ask-for-help#sample-scripts" }]
+          }
+        }
+      ]
+    },
+    {
+      "week": 3,
+      "title": "Semana 3 - Energia e Bem-Estar",
+      "description": "Restaurando suas energias e cuidando do seu corpo.",
+      "topics": [
+        {
+          "title": "Sono e Descanso da Mãe",
+          "content": {
+            "trail": "mother",
+            "microcard": { "titulo": "😴 Seu Descanso é Prioridade", "itens": ["**Durma quando o bebê dormir**", "A louça e a roupa podem esperar", "Cochilos curtos (20-30 min) revitalizam", "Divida os cuidados noturnos", "Peça ajuda para ter pausas durante o dia", "Desconecte-se do celular antes de dormir", "Um ambiente escuro e quieto ajuda", "Descansar não é luxo, é necessidade"] },
+            "acaoTexto": "A privação de sono é um dos maiores desafios do puerpério e afeta sua saúde física e mental. A estratégia mais eficaz é simples, mas difícil de executar: **durma sempre que {nome} dormir**. A pilha de louça, as roupas para lavar e a casa para arrumar podem esperar. **Sua recuperação é a tarefa mais importante agora**. Peça para sua rede de apoio assumir as tarefas domésticas para que você possa focar em descansar. **Divida os turnos da madrugada** com seu parceiro(a), se possível, para que ambos consigam algumas horas de sono contínuo. Mesmo cochilos de 20 minutos durante o dia podem fazer uma diferença enorme. Lembre-se: estar descansada te deixa mais paciente, alerta e presente para {nome}. **Priorize seu sono sem culpa**.",
+            "acaoAudio": "TitiNauta com uma ordem direta para você, mãe: DESCANSE! A regra de ouro do puerpério é: o bebê dormiu, você dorme junto. Esqueça a casa, a louça, o mundo. Seu corpo precisa se recuperar e sua mente precisa de paz. Peça ajuda! 'Fique com o bebê por uma hora, vou apagar'. Divida a noite com seu parceiro. Cada um tira um turno. Não se sinta culpada por descansar. Uma mãe descansada é uma mãe mais feliz e um bebê mais seguro. O sono não é um luxo, é sua ferramenta de trabalho número um.",
+            "audioIllustration": "😴",
+            "badge": { "id": "rainha-descanso", "nome": "Rainha do Descanso", "icone": "👑" },
+            "extraContent": [{ "titulo": "Técnicas de Relaxamento Rápido", "url": "https://www.verywellmind.com/how-to-relax-in-5-minutes-5214631" }, { "titulo": "A Importância do Sono no Pós-Parto", "url": "https://www.sleepfoundation.org/postpartum-sleep" }]
+          }
+        },
+        {
+          "title": "Nutrição e Atividade Física",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "💪 Energia e Força no Pós-Parto",
+              "itens": [
+                "Beba muita água, especialmente ao amamentar",
+                "Qualidade sobre quantidade: coma comida de verdade",
+                "Tenha lanches saudáveis sempre à mão",
+                "Evite alimentos ultraprocessados",
+                "Retorno à atividade física deve ser gradual",
+                "Comece com caminhadas leves",
+                "Foco na reabilitação do core e assoalho pélvico"
+              ]
+            },
+            "acaoTexto": "Recuperar sua energia depende de dois pilares: nutrição e movimento. **Nutrição:** Amamentar exige um acréscimo de 300-400 calorias por dia. Foque na **qualidade dos alimentos**: frutas, verduras, grãos integrais e proteínas. Tenha uma **garrafa de água** sempre com você. Deixe lanches saudáveis (castanhas, frutas) à mão para não pular refeições. Evite ultraprocessados. **Atividade Física:** O retorno deve ser **lento e gradual**, respeitando seu corpo. Comece com **caminhadas leves**, que melhoram o humor e o estresse. O foco inicial não é perder peso, mas a **reabilitação**. Exercícios para o **core (músculos abdominais profundos) e assoalho pélvico** são fundamentais para recuperar a estabilidade e prevenir dores nas costas e incontinência urinária. Converse com seu médico antes de retomar atividades mais intensas.",
+            "acaoAudio": "TitiNauta abastecendo sua energia, mãe! Seu corpo é uma máquina poderosa e precisa do combustível certo. Regra 1: Água, muita água! Especialmente quando for amamentar. Regra 2: Coma comida de verdade. Frutas, legumes, proteínas. Isso te dá força e enriquece o leite. E o corpo em movimento? Comece devagar. Caminhadas leves são ótimas. O objetivo agora não é virar atleta, é reabilitar. Foque em fortalecer a barriga e o assoalho pélvico. Isso previne problemas no futuro. Comida boa e movimento gentil: a dupla perfeita para sua recuperação.",
+            "audioIllustration": "🏋️‍♀️",
+            "badge": { "id": "maquina-nutrientes", "nome": "Máquina de Nutrientes", "icone": "💪" },
+            "extraContent": [{ "titulo": "Guia Alimentar para a População Brasileira", "url": "https://bvsms.saude.gov.br/bvs/publicacoes/guia_alimentar_populacao_brasileira_2ed.pdf" }, { "titulo": "Exercícios para o Assoalho Pélvico", "url": "https://www.mayoclinic.org/healthy-lifestyle/womens-health/in-depth/kegel-exercises/art-20045283" }]
+          }
+        }
+      ]
+    },
+    {
+      "week": 4,
+      "title": "Semana 4 - Olhando para o Futuro",
+      "description": "Planejamento e organização da sua saúde a longo prazo.",
+      "topics": [
+        {
+          "title": "Saúde Sexual e Contracepção",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🗓️ Saúde Sexual e Planejamento",
+              "itens": [
+                "Retomada da vida sexual: sem prazo fixo, decisão pessoal",
+                "É normal sentir desconforto ou falta de desejo",
+                "Lubrificantes à base de água podem ajudar",
+                "Planejamento contraceptivo é crucial",
+                "Opções seguras na amamentação: minipílula, DIU, implante",
+                "Vacina dTpa no puerpério é URGENTE se não tomou na gestação"
+              ]
+            },
+            "acaoTexto": "O puerpério é um momento de grandes mudanças, inclusive na sua vida sexual e reprodutiva. **Retomada da Vida Sexual:** Não existe um 'prazo' fixo. A decisão é pessoal e deve ser baseada em três fatores: cicatrização física completa, conforto emocional e desejo. É normal a libido estar diminuída. Converse abertamente com seu parceiro(a). **Contracepção:** O retorno da fertilidade é imprevisível. É crucial discutir métodos contraceptivos com seu médico. Durante a amamentação, são seguras as opções **apenas com progestagênio** (minipílula, implante, injeção trimestral) e os **DIUs** (hormonal ou de cobre). Métodos com estrogênio devem ser evitados nas primeiras 4 a 6 semanas. **Vacinação:** O puerpério é uma janela de oportunidade para se proteger e proteger {nome}. Se você não tomou a **vacina dTpa (tríplice bacteriana)** durante a gestação, deve tomá-la o mais rápido possível.",
+            "acaoAudio": "TitiNauta falando sobre intimidade e planejamento. Retomar a vida sexual? Só quando você se sentir pronta. Física e emocionalmente. Sem pressão. E é normal o desejo demorar a voltar. Converse com seu parceiro. Sobre o futuro: evitar uma nova gravidez agora é importante. Existem pílulas, DIUs e outros métodos seguros para quem amamenta. Fale com seu médico para escolher o melhor pra você. E por último, vacinas! Se não tomou a vacina da coqueluche na gravidez, tome agora. É uma proteção extra para {nome} que passa pelo seu leite.",
+            "audioIllustration": "💞",
+            "badge": { "id": "planejamento-consciente", "nome": "Planejamento Consciente", "icone": "🗓️" },
+            "extraContent": [{ "titulo": "Contracepção no Pós-Parto (FEBRASGO)", "url": "https://www.febrasgo.org.br/pt/noticias/item/130-anticoncepcao-no-puerperio" }, { "titulo": "Vacinação da Puérpera (SBIm)", "url": "https://sbim.org.br/images/calendarios/calend-sbim-gestante.pdf" }]
+          }
+        },
+        {
+          "title": "Consultas Pós-Parto",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🩺 Preparando-se para a Consulta",
+              "itens": [
+                "Consulta puerperal: 7 a 42 dias pós-parto",
+                "Leve uma lista de dúvidas",
+                "Fale sobre sua saúde mental (como se sente?)",
+                "Discuta a recuperação física (cicatrização, sangramento)",
+                "Pergunte sobre amamentação",
+                "Converse sobre contracepção e vida sexual",
+                "Verifique sua vacinação (dTpa)"
+              ]
+            },
+            "acaoTexto": "O acompanhamento pós-parto é essencial para a sua saúde. A **consulta puerperal** (geralmente entre 7 e 42 dias após o parto) é a sua oportunidade de tirar todas as dúvidas. Para otimizar o tempo, **prepare-se levando uma lista de perguntas**. Anote tudo o que te preocupa. O checklist deve incluir: **Saúde Mental:** Como você está se sentindo emocionalmente? Fale sobre qualquer sintoma de tristeza ou ansiedade. **Recuperação Física:** Como está a cicatrização? O sangramento (lóquios)? Sente alguma dor? **Amamentação:** Está com alguma dificuldade? Dor? Preocupação com a produção de leite? **Contracepção:** Quais são as opções seguras para você agora? **Vacinação:** Você tomou a vacina dTpa? Outras vacinas estão em dia? Ser uma parceira ativa no seu cuidado é fundamental. Não saia do consultório com dúvidas.",
+            "acaoAudio": "TitiNauta agendando sua saúde, mãe! A consulta pós-parto é o seu momento. E pra aproveitar ao máximo, faça uma colinha. Anote suas dúvidas. O que perguntar? Primeiro, como você está se sentindo? De verdade. Sem medo de falar sobre tristeza. Segundo, seu corpo. Como está a cicatrização? O sangramento? Terceiro, amamentação. Alguma dor ou problema? Quarto, futuro. Converse sobre métodos para evitar outra gravidez agora. E quinto, vacinas. Veja se está tudo em dia. Chegue na consulta preparada. Você é a maior especialista em você mesma.",
+            "audioIllustration": "📝",
+            "badge": { "id": "agenda-saude", "nome": "Agenda da Saúde", "icone": "🩺" },
+            "extraContent": [{ "titulo": "A Importância do Cuidado Pós-Parto (OMS)", "url": "https://www.paho.org/pt/noticias/30-3-2022-oms-pede-atencao-qualidade-para-mulheres-e-recem-nascidos-nas-primeiras-semanas" }, { "titulo": "Checklist para a Consulta Pós-Parto", "url": "https://www.acog.org/womens-health/faqs/postpartum-checklist" }]
+          }
+        }
+      ]
+    }
+  ]
+}

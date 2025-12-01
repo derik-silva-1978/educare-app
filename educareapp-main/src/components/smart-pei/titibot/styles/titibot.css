@@ -1,0 +1,118 @@
+
+/* Import all Titibot sub-stylesheets */
+@import './titibot-layout.css';
+@import './titibot-messages.css';
+@import './titibot-input.css';
+@import './titibot-animations.css';
+@import './titibot-position.css';
+
+/* Base Titibot Styles */
+.titibot-container {
+  display: flex;
+  flex-direction: column;
+  background-color: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.titibot-launcher {
+  border: none;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.titibot-launcher:hover {
+  background-color: hsl(var(--primary-hover, var(--primary)));
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Premium styles */
+.titibot-premium {
+  background: linear-gradient(135deg, #fff8e1, #fffde7);
+}
+
+.titibot-premium-header {
+  background: linear-gradient(90deg, #ffa000, #ffca28);
+  color: white;
+}
+
+.titibot-premium-icon {
+  background: linear-gradient(135deg, #ffd54f, #ffb300);
+  padding: 8px;
+  border-radius: 50%;
+  color: white;
+  box-shadow: 0 2px 10px rgba(255, 183, 0, 0.3);
+}
+
+.titibot-premium-badge {
+  background: linear-gradient(90deg, #ffa000, #ffca28);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(255, 193, 7, 0.3);
+}
+
+/* Dark mode adjustments */
+.dark .titibot-container {
+  background-color: hsl(var(--background));
+  border-color: hsl(var(--border));
+}
+
+.dark .titibot-premium {
+  background: linear-gradient(135deg, rgba(255, 248, 225, 0.05), rgba(255, 253, 231, 0.1));
+}
+
+/* Accessibility improvements */
+.titibot-launcher:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Ensure tab content is properly contained */
+.titibot-container [role="tabpanel"] {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Add responsive styles for mobile devices */
+@media (max-width: 640px) {
+  .titibot-launcher-container {
+    bottom: 1rem !important;
+    right: 1rem !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+  }
+  
+  .titibot-container {
+    width: calc(100vw - 32px) !important;
+    max-width: 350px;
+    height: 60vh !important;
+    max-height: 500px;
+  }
+}
+
+/* Premium animation effects */
+.titibot-premium-pulse {
+  animation: premium-pulse 2s infinite;
+}
+
+@keyframes premium-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+  }
+}

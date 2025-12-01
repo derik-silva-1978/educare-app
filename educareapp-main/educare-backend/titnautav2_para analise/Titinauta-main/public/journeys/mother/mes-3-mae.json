@@ -1,0 +1,318 @@
+
+{
+  "deprecated": "This JSON file is a legacy asset that serves as a complete blueprint of the mother journey for Month 3. The authoritative data is loaded from individual monthly files.",
+  "trail": "mother",
+  "title": "Jornada da Mãe — Mês 3",
+  "month": 3,
+  "journey": [
+    {
+      "week": 9,
+      "title": "Semana 9 - Corpo em Reabilitação",
+      "description": "Consolidando a recuperação: assoalho pélvico, core e postura no dia a dia.",
+      "interactive_flow": { "quiz_ref": "week9" },
+      "topics": [
+        {
+          "title": "Assoalho Pélvico 101",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🏗️ Base do Centro do Corpo",
+              "itens": [
+                "Respiração diafragmática + contração suave",
+                "Contraia ao tossir/espirrar (manobra antiesforço)",
+                "Evite prender a respiração",
+                "Sinais de alerta: perda de urina/dor",
+                "Procure fisio se houver dificuldade"
+              ]
+            },
+            "acaoTexto": "O assoalho pélvico é a base do seu core. Treine contrações suaves coordenadas com a respiração: ao expirar, ative de leve (como segurar xixi e gás); ao inspirar, relaxe. Use a manobra antiesforço (exalar e contrair suavemente) para tossir, espirrar ou pegar {nome}. Se houver dor, sensação de peso perineal ou perda de urina, procure avaliação com fisioterapia pélvica.",
+            "acaoAudio": "TitiNauta na base do core! Inspire, relaxe. Expire, ative de leve. Use essa ativação quando tossir, espirrar ou pegar {nome}. Dor ou escapes? Hora de conversar com a fisio.",
+            "audioIllustration": "🌬️",
+            "badge": { "id": "base-forte", "nome": "Base Forte", "icone": "🏗️" },
+            "extraContent": [
+              { "titulo": "Guia rápido de assoalho pélvico", "url": "https://example.org/assoalho_pelvico" },
+              { "titulo": "Quando procurar fisioterapia pélvica", "url": "https://example.org/fisio_pelvica" }
+            ]
+          }
+        },
+        {
+          "title": "Core & Postura no Cotidiano",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🧘 Postura que Protege",
+              "itens": [
+                "Pegue o bebê dobrando joelhos",
+                "Traga {nome} perto do corpo",
+                "Evite torções com peso",
+                "Ative o baixo-ventre ao erguer",
+                "Pausas e alongamentos simples"
+              ]
+            },
+            "acaoTexto": "No dia a dia, proteja a lombar: para pegar {nome}, flexione joelhos, aproxime ao tronco e ative levemente o abdome baixo antes de erguer. Evite torções com peso; gire pés/quadris juntos. Faça pausas curtas para abrir o peito e alongar pescoço e costas.",
+            "acaoAudio": "Ergonomia da vida real: agache, traga {nome} pertinho, ative a barriga de leve e só então levante. Nada de torção com peso. Pausas salvam colunas!",
+            "audioIllustration": "🧘",
+            "badge": { "id": "postura-pro", "nome": "Postura PRO", "icone": "🧘" },
+            "extraContent": [
+              { "titulo": "Ergonomia com o bebê", "url": "https://example.org/ergonomia_mae" }
+            ]
+          }
+        },
+        {
+          "title": "Volta ao Movimento (Progressão Segura)",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🏃‍♀️ Passo a Passo",
+              "itens": [
+                "Caminhadas regulares",
+                "Exercícios de baixo impacto",
+                "Aumente volume lentamente",
+                "Sem dor aguda ou sangramento",
+                "Sinal verde do profissional"
+              ]
+            },
+            "acaoTexto": "Se liberada, aumente gradualmente o tempo de caminhada e exercícios de baixo impacto (mobilidade, fortalecimento leve). Critérios de segurança: sem dor pélvica/lombar, sem sangramento aumentado, sem sensação de instabilidade. Em qualquer sinal de alerta, reduza e peça orientação.",
+            "acaoAudio": "Devagar é avançar! Caminhe um pouco mais a cada semana, fortaleça leve e observe sinais. Dor ou sangramento? Dê um passo atrás e peça ajuda.",
+            "audioIllustration": "🚦",
+            "badge": { "id": "movimento-inteligente", "nome": "Movimento Inteligente", "icone": "📈" },
+            "extraContent": [
+              { "titulo": "Progressão de esforço no puerpério", "url": "https://example.org/progressao_puerperio" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "week": 10,
+      "title": "Semana 10 - Amamentação, Ordenha & Rotina",
+      "description": "Ajustes finos: livre demanda, ordenha, armazenamento e rede de apoio.",
+      "interactive_flow": { "quiz_ref": "week10" },
+      "topics": [
+        {
+          "title": "Amamentação no 3º Mês (Ritmo & Picos)",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "⏱️ Ritmo que Muda",
+              "itens": [
+                "Picos de crescimento = mais demanda",
+                "Dor indica ajuste de pega",
+                "Evite relógio rígido",
+                "Observe sinais de fome/ saciedade",
+                "Hidratação & descanso contam"
+              ]
+            },
+            "acaoTexto": "No 3º mês, picos de crescimento são comuns e a demanda pode aumentar por alguns dias. Siga sinais de fome/saciedade e ajuste pega/posição se houver dor. Mantenha hidratação e cochilos curtos quando possível — seu corpo responde melhor assim.",
+            "acaoAudio": "Mais mamadas por alguns dias? Normal! Sinais de fome guiam o ritmo. Se doer, reposicione. Água e descanso ajudam sua produção.",
+            "audioIllustration": "🍼",
+            "badge": { "id": "ritmo-ajustado", "nome": "Ritmo Ajustado", "icone": "⏱️" },
+            "extraContent": [
+              { "titulo": "Picos de crescimento e livre demanda", "url": "https://example.org/picos_m3" }
+            ]
+          }
+        },
+        {
+          "title": "Ordenha & Armazenamento de Leite",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🧊 Leite Seguro",
+              "itens": [
+                "Higiene de mãos e equipamento",
+                "Rotular data e volume",
+                "Regras básicas de armazenamento",
+                "Descongelar na geladeira/banho-maria",
+                "Nunca ferver o leite"
+              ]
+            },
+            "acaoTexto": "Lave bem as mãos e higienize o equipamento. Armazene em recipientes próprios, datados. Orientações gerais: temperatura ambiente por período curto, geladeira por até alguns dias, freezer por semanas (siga protocolo local). Descongele preferencialmente na geladeira e aqueça em banho-maria morno. Não ferva; descarte sobras de mamada.",
+            "acaoAudio": "Ordem e higiene: mãos limpas, frascos datados. Geladeira e freezer com regras claras. Para usar: descongele com calma e aqueça sem ferver. Sobras? Descarte.",
+            "audioIllustration": "🥛",
+            "badge": { "id": "mestre-ordenha", "nome": "Mestre da Ordenha", "icone": "🧴" },
+            "extraContent": [
+              { "titulo": "Tabela prática de armazenamento", "url": "https://example.org/armazenamento_leite" }
+            ]
+          }
+        },
+        {
+          "title": "Rede de Apoio na Rotina de Alimentação",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🤝 Dividir para Fluir",
+              "itens": [
+                "Delegue tarefas não essenciais",
+                "Alguém cuida da casa enquanto você amamenta",
+                "Turnos noturnos combinados",
+                "Pedidos claros e objetivos",
+                "Tempo para descanso agendado"
+              ]
+            },
+            "acaoTexto": "Amamentar exige energia. Combine tarefas objetivas com sua rede (comida, louça, organização), planeje turnos noturnos quando possível e agende pausas de descanso para recuperar-se. Pedidos claros funcionam melhor: diga exatamente o que precisa.",
+            "acaoAudio": "Peça ajuda como líder do time: tarefa clara, hora combinada. Você amamenta; o time cuida do resto. Isso faz a rotina fluir.",
+            "audioIllustration": "🧭",
+            "badge": { "id": "lider-rotina", "nome": "Líder da Rotina", "icone": "🧭" },
+            "extraContent": [
+              { "titulo": "Roteiros de pedidos práticos", "url": "https://example.org/rede_pedidos" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "week": 11,
+      "title": "Semana 11 - Mente & Relações",
+      "description": "Cuidando da saúde mental, do vínculo do casal e dos limites pessoais.",
+      "interactive_flow": { "quiz_ref": "week11" },
+      "topics": [
+        {
+          "title": "Check-in de Saúde Mental (3º Mês)",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🧠 Sinais que Importam",
+              "itens": [
+                "Tristeza persistente >2 semanas?",
+                "Culpa excessiva/apatia",
+                "Ansiedade que atrapalha o dia",
+                "Alterações de sono/alimentação",
+                "Procure ajuda sem demora"
+              ]
+            },
+            "acaoTexto": "Oscilações são comuns, mas tristeza profunda que não melhora após 2–3 semanas, ansiedade intensa, culpa excessiva e apatia pedem avaliação. Fale com um profissional e acione sua rede. Saúde mental tratada é proteção para você e {nome}.",
+            "acaoAudio": "Se o peso emocional não passa, é hora de falar. Procurar ajuda é um ato de coragem e cuidado com você e com {nome}.",
+            "audioIllustration": "💬",
+            "badge": { "id": "mente-em-dia", "nome": "Mente em Dia", "icone": "🧠" },
+            "extraContent": [
+              { "titulo": "Onde buscar ajuda", "url": "https://example.org/saude_mental_apoio" }
+            ]
+          }
+        },
+        {
+          "title": "Intimidade & Comunicação com o Parceiro(a)",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "💞 Conectar é Cuidar",
+              "itens": [
+                "Conversas curtas e frequentes",
+                "Carinho sem pressão",
+                "Lubrificação pode estar reduzida",
+                "Dor não é normal: avalie",
+                "Contracepção definida = tranquilidade"
+              ]
+            },
+            "acaoTexto": "No puerpério, a intimidade muda. Priorize diálogo honesto e gestos de carinho sem pressão. Lubrificantes à base de água podem ajudar. Dor persistente não é normal: procure avaliação. Definir contracepção traz segurança ao casal.",
+            "acaoAudio": "Conversem cinco minutinhos por dia, de verdade. Carinho sem pressa, respeito ao seu tempo e conforto como regra.",
+            "audioIllustration": "🗝️",
+            "badge": { "id": "parceria-viva", "nome": "Parceria Viva", "icone": "🤝" },
+            "extraContent": [
+              { "titulo": "Diálogo no puerpério", "url": "https://example.org/dialogo_puerperio" }
+            ]
+          }
+        },
+        {
+          "title": "Limites & Autocuidado Social",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🛡️ Dizer Não é Cuidar",
+              "itens": [
+                "Defina horários de visitas",
+                "Regras: lavar mãos, nada de beijos",
+                "Priorize seu descanso",
+                "Peça tarefas em vez de conselhos",
+                "Proteja seu tempo com {nome}"
+              ]
+            },
+            "acaoTexto": "Estabeleça limites amorosos com visitas e rotina. Explique regras de higiene e priorize seu descanso. Direcione sua rede para tarefas práticas. Você decide como, quando e por quanto tempo receber pessoas.",
+            "acaoAudio": "Limites claros, vida leve. Você cuida de {nome} e de você ao mesmo tempo quando diz o que precisa.",
+            "audioIllustration": "🧱",
+            "badge": { "id": "limites-claros", "nome": "Limites Claros", "icone": "🛡️" },
+            "extraContent": [
+              { "titulo": "Limites saudáveis com a família", "url": "https://example.org/limites_familia" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "week": 12,
+      "title": "Semana 12 - Preparando os Próximos Passos",
+      "description": "Consulta de seguimento, vacinação do círculo e planejamento prático.",
+      "interactive_flow": { "quiz_ref": "week12" },
+      "topics": [
+        {
+          "title": "Checklist para a Consulta (Mês 3)",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🗂️ Organização que Ajuda",
+              "itens": [
+                "Relate rotina (sono, humor, alimentação)",
+                "Dores, sangramentos, perdas urinárias?",
+                "Amamentação: dúvidas e ordenha",
+                "Contracepção: revisar/definir",
+                "Vacinação da mãe em dia?"
+              ]
+            },
+            "acaoTexto": "Leve anotações objetivas: sono e humor, desconfortos (dor lombar/pelve), perdas urinárias, dúvidas da amamentação/ordenha e contracepção. Verifique seu status vacinal (dTpa, influenza conforme calendário local). Informação organizada torna a consulta mais resolutiva.",
+            "acaoAudio": "Caderneta da mãe, perguntas e relatos claros. Você chega preparada e sai com plano!",
+            "audioIllustration": "📝",
+            "badge": { "id": "gestora-consulta", "nome": "Gestora da Consulta", "icone": "🗂️" },
+            "extraContent": [
+              { "titulo": "Roteiro de consulta eficiente", "url": "https://example.org/consulta_mae_m3" }
+            ]
+          }
+        },
+        {
+          "title": "Vacinas do Círculo de Contato (Cocooning)",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🛡️ Proteção em Camadas",
+              "itens": [
+                "Reforço dTpa para cuidadores se indicado",
+                "Influenza conforme estação",
+                "Mantenha calendário da família",
+                "Tire dúvidas na UBS",
+                "Anote datas e comprovantes"
+              ]
+            },
+            "acaoTexto": "Reforce a proteção ao redor de {nome}: verifique a situação vacinal de quem convive de perto (dTpa/coqueluche, influenza e demais vacinas conforme calendário local). Essa barreira reduz risco de doenças respiratórias no bebê.",
+            "acaoAudio": "Casulo de proteção: quem cuida de {nome} também se vacina. Menos riscos, mais tranquilidade.",
+            "audioIllustration": "🫧",
+            "badge": { "id": "casulo-protetor", "nome": "Casulo Protetor", "icone": "🛡️" },
+            "extraContent": [
+              { "titulo": "Vacinação de contatos próximos", "url": "https://example.org/cocooning" }
+            ]
+          }
+        },
+        {
+          "title": "Planejamento Prático (Rotina & Retorno ao Trabalho, se aplicável)",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🧭 Roteiro de Transição",
+              "itens": [
+                "Simular rotina da nova fase",
+                "Banco de leite: comece aos poucos",
+                "Alinhamento com rede/cuidador",
+                "Check-list de logística diária",
+                "Planos B e C para imprevistos"
+              ]
+            },
+            "acaoTexto": "Se o retorno ao trabalho estiver próximo, faça simulações de horários, organize um pequeno banco de leite, alinhe combinados com quem cuidará de {nome} e tenha um check-list diário (mochila, fraldas, leite, contatos). Planeje alternativas para imprevistos.",
+            "acaoAudio": "Transição sem sustos: teste a rotina, alinhe o time e deixe o kit pronto. Planejar dá paz.",
+            "audioIllustration": "📦",
+            "badge": { "id": "planejamento-afinadissimo", "nome": "Planejamento Afinadíssimo", "icone": "🧭" },
+            "extraContent": [
+              { "titulo": "Guia de retorno com amamentação", "url": "https://example.org/retorno_amamentando" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

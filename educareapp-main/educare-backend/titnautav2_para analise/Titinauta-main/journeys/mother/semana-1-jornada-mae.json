@@ -1,0 +1,57 @@
+
+{
+  "deprecated": "This JSON file is a legacy asset and is not used by the application. The authoritative data is in /data/journey.js and the corresponding theme files in /data/themes.",
+  "week": 1,
+  "trail": "mother",
+  "title": "Semana 1 - Recuperação Física",
+  "description": "Foco total na sua recuperação física imediata.",
+  "topics": [
+    {
+      "title": "Sinais de Alerta (Mãe)",
+      "content": {
+        "trail": "mother",
+        "microcard": {
+          "titulo": "⚠️ Sinais de Alerta Urgentes na Mãe",
+          "itens": [
+            "**Sangramento intenso:** enche >1 absorvente/hora",
+            "**Dor de cabeça forte** que não melhora, com visão turva",
+            "**Febre** >38°C com calafrios",
+            "**Dor no peito** ou falta de ar súbita",
+            "**Dor e inchaço** em apenas uma das pernas",
+            "**Convulsões**",
+            "Pensamentos de se machucar ou machucar o bebê"
+          ]
+        },
+        "acaoTexto": "O pós-parto é um período de alto risco para complicações graves. Conhecer os sinais de alerta pode salvar sua vida. **Procure um serviço de emergência imediatamente** se apresentar qualquer um destes sintomas: **Hemorragia:** sangramento vaginal que encharca mais de um absorvente noturno por hora ou eliminação de coágulos grandes. **Pré-eclâmpsia pós-parto:** dor de cabeça forte e persistente que não alivia com remédios, alterações na visão (pontos brilhantes, visão turva) ou dor intensa na parte superior do abdômen. **Infecção:** febre acima de 38°C, calafrios ou secreção com mau cheiro. **Tromboembolismo:** dor, inchaço e vermelhidão em apenas uma das pernas (pode ser Trombose) ou dor súbita no peito e falta de ar intensa (pode ser Embolia Pulmonar). **Não minimize seus sintomas**. Na dúvida, sempre procure ajuda.",
+        "acaoAudio": "Alerta máximo do TitiNauta para a sua saúde, mãe! Estes são sinais de emergência, procure um hospital IMEDIATAMENTE se tiver: sangramento muito intenso. Dor de cabeça fortíssima com visão embaçada. Febre alta com calafrios. Dor forte no peito ou falta de ar que veio do nada. Dor e inchaço em uma perna só. Qualquer um desses sinais não é normal. Não espere para ver se melhora. Sua vida é a prioridade. Vá para a emergência.",
+        "audioIllustration": "🚑",
+        "badge": { "id": "vigilante-mae", "nome": "Vigilante da Mãe", "icone": "⚠️" },
+        "extraContent": [{ "titulo": "Checklist de Sinais de Alerta Pós-Parto (CDC)", "url": "https://www.cdc.gov/hearher/resources/download-share/docs/pdf/Warning-Signs-Poster_LTR_whitebkg_Portuguese-BR.pdf" }, { "titulo": "Entendendo a Pré-eclâmpsia Pós-Parto", "url": "https://www.preeclampsia.org/postpartum-preeclampsia" }]
+      }
+    },
+    {
+      "title": "Cuidados com a Ferida Operatória",
+      "content": {
+        "trail": "mother",
+        "microcard": { "titulo": "🩹 Cuidado com a Cicatrização", "itens": ["Lavar com água e sabão neutro", "Secar bem, sem esfregar", "Manter a área limpa e seca", "Usar roupas folgadas e de algodão", "Observar sinais de infecção", "Vermelhidão, pus ou dor piorando = médico", "Evitar esforço físico pesado", "Para dor perineal: banho de assento"] },
+        "acaoTexto": "Sua recuperação física é uma prioridade. **Se você fez cesariana:** lave a incisão delicadamente com água e sabão no banho, seque com uma toalha limpa dando batidinhas, sem esfregar. Mantenha a área seca e arejada. **Se teve parto vaginal com laceração:** a higiene é a mesma. Lave a região com água após urinar e evacuar. Banhos de assento com água morna podem aliviar o desconforto. Para ambos os casos, fique atenta a **sinais de infecção:** vermelhidão que se espalha, calor excessivo no local, inchaço, secreção amarelada (pus) ou dor que piora com o tempo. Se notar algo, **fale com seu médico**. **Evite carregar peso** (qualquer coisa mais pesada que o bebê) e fazer esforço abdominal. Respeite os limites do seu corpo.",
+        "acaoAudio": "TitiNauta cuidando de você agora. Vamos falar da sua cicatrização. Seja cesárea ou parto normal, a regra é: limpeza e secura. Lave o local dos pontos com água e sabão neutro, todo dia no banho. Depois, seque muito bem, com batidinhas leves. Deixe a área respirar, use roupas folgadas. Fique de olho: se ficar vermelho, inchado, quente ou sair secreção, ligue para o seu médico. Nada de pegar peso, hein? Só o bebê! Respeite seu tempo. Cuidar de você é cuidar {preposicao} {nome} também.",
+        "audioIllustration": "🩹",
+        "badge": { "id": "recuperacao-ativa", "nome": "Recuperação Ativa", "icone": "🩹" },
+        "extraContent": [{ "titulo": "Recuperação Pós-Cesárea", "url": "https://www.msdmanuals.com/pt/casa/problemas-de-sa%C3%BAde-feminina/o-per%C3%ADodo-p%C3%B3s-parto/cesariana" }, { "titulo": "Cuidados com Laceração Perineal", "url": "https://www.msdmanuals.com/pt/profissional/ginecologia-e-obstetr%C3%ADcia/anormalidades-e-complica%C3%A7%C3%B5es-do-trabalho-de-parto-e-parto/lacera%C3%A7%C3%A3o-perineal" }]
+      }
+    },
+    {
+      "title": "Cuidados com as Mamas",
+      "content": {
+        "trail": "mother",
+        "microcard": { "titulo": "🤱 Saúde das Mamas: Protocolo 2022", "itens": ["Fissuras: a causa é a pega incorreta", "Tratamento da fissura: leite materno", "Ingurgitamento: amamentar e compressa FRIA", "NÃO usar compressas quentes ou massagear", "Sutiã de boa sustentação", "Mastite: febre e área vermelha na mama", "Suspeita de mastite = avaliação médica URGENTE"] },
+        "acaoTexto": "Cuidar das suas mamas é fundamental para o sucesso da amamentação. **Fissuras nos mamilos** são quase sempre causadas pela pega incorreta de {nome}: foque em corrigi-la. Para tratar, passe o **próprio leite materno** e deixe secar ao ar. Se a mama estiver muito cheia e dolorida (**ingurgitamento**), a nova recomendação (Protocolo ABM 2022) é aplicar **compressas FRIAS ou gelo** para reduzir a inflamação e a dor. **NÃO FAÇA** massagens vigorosas ou compressas quentes, pois pioram o inchaço. A amamentação em demanda normal ajuda a regular a produção. Fique atenta aos **sinais de mastite:** uma área da mama fica vermelha, quente e dolorida, acompanhada de febre e mal-estar (como uma gripe forte). Se suspeitar de mastite, **procure avaliação médica imediatamente**, pois pode ser necessário o uso de antibióticos.",
+        "acaoAudio": "TitiNauta com informações atualizadas para a saúde das suas mamas! Mamilo machucado? O problema é a pega do bebê. Corrija a pega e passe seu próprio leite para cicatrizar. Seio empedrado, doendo muito? A nova orientação é compressa FRIA ou gelo! Isso mesmo, FRIA. Ela desinflama. Esqueça as compressas quentes e as massagens fortes, elas podem piorar. Atenção máxima agora: se uma parte do seio ficar vermelha, quente, dolorida e você tiver febre, pode ser mastite. Isso é sério. Fale com seu médico na hora!",
+        "audioIllustration": "🧊",
+        "badge": { "id": "amiga-peito", "nome": "Amiga do Peito", "icone": "🤱" },
+        "extraContent": [{ "titulo": "Protocolo de Mastite ABM 2022 (Resumo)", "url": "https://abm.memberclicks.net/assets/DOCUMENTS/PROTOCOLS/36-mitchell-et-al-2022-academy-of-breastfeeding-medicine-clinical-protocol-36-the-mastitis-spectrum-revised-2022.pdf" }, { "titulo": "Como fazer ordenha de alívio", "url": "https://www.pennmedicine.org/updates/blogs/health-and-wellness/2020/march/how-to-hand-express-breast-milk" }]
+      }
+    }
+  ]
+}

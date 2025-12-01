@@ -1,0 +1,73 @@
+
+{
+  "deprecated": "This JSON file is a legacy asset and is not used by the application. The authoritative data is in /data/journey.js and the corresponding theme files in /data/themes.",
+  "week": 3,
+  "trail": "mother",
+  "title": "Semana 3 - Energia e Bem-Estar",
+  "description": "Restaurando suas energias e cuidando do seu corpo.",
+  "interactive_flow": {
+    "quiz": {
+      "questions": [
+        {
+          "id": "urgency",
+          "question": "Como você está se sentindo agora?",
+          "options": [
+            "Bem, apenas com dúvidas comuns da recuperação",
+            "Cansada, mas seguindo em frente",
+            "Preocupada com algo na minha saúde",
+            "Acho que preciso de orientação urgente"
+          ],
+          "type": "urgency"
+        },
+        {
+          "id": "main_concern_mother",
+          "question": "Qual sua principal preocupação com você hoje?",
+          "options": [
+            "Minha recuperação física (cicatrização, dores)",
+            "Minha saúde emocional (cansaço, tristeza)",
+            "Cuidados com as mamas e amamentação",
+            "Planejamento futuro (contracepção, consultas)"
+          ],
+          "type": "theme"
+        }
+      ]
+    }
+  },
+  "topics": [
+    {
+      "title": "Sono e Descanso da Mãe",
+      "content": {
+        "trail": "mother",
+        "microcard": { "titulo": "😴 Seu Descanso é Prioridade", "itens": ["**Durma quando o bebê dormir**", "A louça e a roupa podem esperar", "Cochilos curtos (20-30 min) revitalizam", "Divida os cuidados noturnos", "Peça ajuda para ter pausas durante o dia", "Desconecte-se do celular antes de dormir", "Um ambiente escuro e quieto ajuda", "Descansar não é luxo, é necessidade"] },
+        "acaoTexto": "A privação de sono é um dos maiores desafios do puerpério e afeta sua saúde física e mental. A estratégia mais eficaz é simples, mas difícil de executar: **durma sempre que {nome} dormir**. A pilha de louça, as roupas para lavar e a casa para arrumar podem esperar. **Sua recuperação é a tarefa mais importante agora**. Peça para sua rede de apoio assumir as tarefas domésticas para que você possa focar em descansar. **Divida os turnos da madrugada** com seu parceiro(a), se possível, para que ambos consigam algumas horas de sono contínuo. Mesmo cochilos de 20 minutos durante o dia podem fazer uma diferença enorme. Lembre-se: estar descansada te deixa mais paciente, alerta e presente para {nome}. **Priorize seu sono sem culpa**.",
+        "acaoAudio": "TitiNauta com uma ordem direta para você, mãe: DESCANSE! A regra de ouro do puerpério é: o bebê dormiu, você dorme junto. Esqueça a casa, a louça, o mundo. Seu corpo precisa se recuperar e sua mente precisa de paz. Peça ajuda! 'Fique com o bebê por uma hora, vou apagar'. Divida a noite com seu parceiro. Cada um tira um turno. Não se sinta culpada por descansar. Uma mãe descansada é uma mãe mais feliz e um bebê mais seguro. O sono não é um luxo, é sua ferramenta de trabalho número um.",
+        "audioIllustration": "😴",
+        "badge": { "id": "rainha-descanso", "nome": "Rainha do Descanso", "icone": "👑" },
+        "extraContent": [{ "titulo": "Técnicas de Relaxamento Rápido", "url": "https://www.verywellmind.com/how-to-relax-in-5-minutes-5214631" }, { "titulo": "A Importância do Sono no Pós-Parto", "url": "https://www.sleepfoundation.org/postpartum-sleep" }]
+      }
+    },
+    {
+      "title": "Nutrição e Atividade Física",
+      "content": {
+        "trail": "mother",
+        "microcard": {
+          "titulo": "💪 Energia e Força no Pós-Parto",
+          "itens": [
+            "Beba muita água, especialmente ao amamentar",
+            "Qualidade sobre quantidade: coma comida de verdade",
+            "Tenha lanches saudáveis sempre à mão",
+            "Evite alimentos ultraprocessados",
+            "Retorno à atividade física deve ser gradual",
+            "Comece com caminhadas leves",
+            "Foco na reabilitação do core e assoalho pélvico"
+          ]
+        },
+        "acaoTexto": "Recuperar sua energia depende de dois pilares: nutrição e movimento. **Nutrição:** Amamentar exige um acréscimo de 300-400 calorias por dia. Foque na **qualidade dos alimentos**: frutas, verduras, grãos integrais e proteínas. Tenha uma **garrafa de água** sempre com você. Deixe lanches saudáveis (castanhas, frutas) à mão para não pular refeições. Evite ultraprocessados. **Atividade Física:** O retorno deve ser **lento e gradual**, respeitando seu corpo. Comece com **caminhadas leves**, que melhoram o humor e o estresse. O foco inicial não é perder peso, mas a **reabilitação**. Exercícios para o **core (músculos abdominais profundos) e assoalho pélvico** são fundamentais para recuperar a estabilidade e prevenir dores nas costas e incontinência urinária. Converse com seu médico antes de retomar atividades mais intensas.",
+        "acaoAudio": "TitiNauta abastecendo sua energia, mãe! Seu corpo é uma máquina poderosa e precisa do combustível certo. Regra 1: Água, muita água! Especialmente quando for amamentar. Regra 2: Coma comida de verdade. Frutas, legumes, proteínas. Isso te dá força e enriquece o leite. E o corpo em movimento? Comece devagar. Caminhadas leves são ótimas. O objetivo agora não é virar atleta, é reabilitar. Foque em fortalecer a barriga e o assoalho pélvico. Isso previne problemas no futuro. Comida boa e movimento gentil: a dupla perfeita para sua recuperação.",
+        "audioIllustration": "🏋️‍♀️",
+        "badge": { "id": "maquina-nutrientes", "nome": "Máquina de Nutrientes", "icone": "💪" },
+        "extraContent": [{ "titulo": "Guia Alimentar para a População Brasileira", "url": "https://bvsms.saude.gov.br/bvs/publicacoes/guia_alimentar_populacao_brasileira_2ed.pdf" }, { "titulo": "Exercícios para o Assoalho Pélvico", "url": "https://www.mayoclinic.org/healthy-lifestyle/womens-health/in-depth/kegel-exercises/art-20045283" }]
+      }
+    }
+  ]
+}

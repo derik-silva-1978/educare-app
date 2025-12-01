@@ -1,0 +1,370 @@
+{
+  "week9": {
+    "trail": "quiz",
+    "month": 3,
+    "week": 9,
+    "title": "Quiz da Semana 9",
+    "icon": "😄",
+    "description": "Terceiro mês começando: gargalhadas, mais força e vínculo afetivo!",
+    "baby_domains": [
+      {
+        "id": "motor_w9",
+        "title": "🤲 Motor",
+        "question": "{nome} já consegue sustentar melhor a cabeça quando está de bruços?",
+        "options": ["Sim, com firmeza", "Sim, mas por pouco tempo", "Ainda não"],
+        "feedback": {
+          "positivo": "Excelente! O controle cervical está avançando muito bem.",
+          "negativo": "Continue estimulando com tummy time frequente e supervisão atenta."
+        },
+        "knowledge": {
+          "title": "Força no Pescoço",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23ede9fe;%7D.b%7Bfill:%23c4b5fd;%7D.c%7Bfill:%23a78bfa;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M25,50 C40,55 60,55 75,50 V40 H25 Z'/%3E%3Ccircle class='c' cx='70' cy='30' r='10'/%3E%3Cpath class='b' d='M68,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M72,32 Q70,34 68,32'/%3E%3C/svg%3E",
+          "text": "Aos 3 meses, muitos bebês conseguem manter a cabeça erguida por mais tempo. Esse é um marco importante para futuros movimentos como rolar e sentar.",
+          "audio": "Aos 3 meses, {nome} já está ficando mais forte e pode manter a cabeça erguida. Isso prepara para rolar e, depois, sentar.",
+          "links": [
+            { "titulo": "Educare+ Academy: Força no Tummy Time", "url": "#" }
+          ]
+        }
+      },
+      {
+        "id": "social_emocional_w9",
+        "title": "❤️ Social-Emocional",
+        "question": "{nome} já soltou as primeiras gargalhadas quando você brinca ou faz caretas?",
+        "options": ["Sim, várias vezes", "Uma ou duas vezes", "Ainda não"],
+        "feedback": {
+          "positivo": "Que alegria! As gargalhadas mostram vínculo afetivo e desenvolvimento social.",
+          "negativo": "Continue interagindo com caretas e sons engraçados, logo ele(a) vai responder com risadinhas."
+        },
+        "knowledge": {
+          "title": "Primeiras Gargalhadas",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f0fdf4;%7D.b%7Bfill:%23bbf7d0;%7D.c%7Bfill:%234ade80;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='35' cy='30' r='15'/%3E%3Ccircle class='c' cx='65' cy='30' r='15'/%3E%3Cpath d='M30,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M40,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M28,35 Q35,42 42,35' stroke='%2314532d' fill='none' stroke-width='2'/%3E%3Cpath d='M60,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M70,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M58,35 Q65,42 72,35' stroke='%2314532d' fill='none' stroke-width='2'/%3E%3C/svg%3E",
+          "text": "Rir é um marco social que mostra que o bebê está se conectando emocionalmente e interagindo de forma mais ativa.",
+          "audio": "As gargalhadas são sinais de vínculo e desenvolvimento social. Brinque muito com {nome} para estimular essa conquista!",
+          "links": [
+            { "titulo": "Educare+ Academy: Brincadeiras para estimular risadas", "url": "#" }
+          ]
+        }
+      }
+    ],
+    "mother_domains": [
+      {
+        "id": "autocuidado_w9",
+        "title": "🧘‍♀️ Autocuidado Materno",
+        "question": "Você tem conseguido se hidratar e se alimentar regularmente durante o dia?",
+        "options": ["Sim, sempre", "Às vezes", "Não consigo"],
+        "feedback": {
+          "positivo": "Muito bem! Alimentação e hidratação sustentam sua energia e produção de leite.",
+          "negativo": "Tente preparar lanches fáceis e peça apoio para garantir esses cuidados mínimos."
+        },
+        "knowledge": {
+          "title": "Energia que Sustenta",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f5f3ff;%7D.b%7Bfill:%23c4b5fd;%7D.c%7Bfill:%238b5cf6;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M30,40 L35,20 L40,40 L45,25 L50,40 L55,30 L60,40 L65,22 L70,40' stroke='%238b5cf6' stroke-width='3' fill='none'/%3E%3Cpath class='c' d='M25,50 Q50,45 75,50' stroke='%23a78bfa' stroke-width='2' fill='none'/%3E%3C/svg%3E",
+          "text": "O autocuidado básico ajuda na recuperação, no bem-estar e até na produção de leite. Pequenas pausas fazem grande diferença.",
+          "audio": "Cuidar de você é cuidar de {nome}. Água, descanso e uma boa alimentação fazem toda a diferença.",
+          "links": [
+            { "titulo": "Educare+ Academy: Nutrição no pós-parto", "url": "#" }
+          ]
+        }
+      }
+    ],
+    "badge_on_complete": {
+      "baby": { "id": "quiz-bebe-semana-9", "nome": "Explorador Alegre (S9)", "icone": "😄", "description": "Concluiu o quiz de desenvolvimento do bebê da Semana 9." },
+      "mother": { "id": "quiz-mae-semana-9", "nome": "Cuidadora Atenta (S9)", "icone": "💧", "description": "Concluiu o quiz de bem-estar da mãe da Semana 9." }
+    }
+  },
+  "week10": {
+    "trail": "quiz",
+    "month": 3,
+    "week": 10,
+    "title": "Quiz da Semana 10",
+    "icon": "👂",
+    "description": "Mais firmeza, atenção e sons no ar!",
+    "baby_domains": [
+      {
+        "id": "motor_w10",
+        "title": "💪 Motor",
+        "question": "{nome} já consegue se apoiar nos antebraços quando está de bruços?",
+        "options": ["Sim, com firmeza", "Sim, mas ainda instável", "Ainda não"],
+        "feedback": {
+          "positivo": "Ótimo! Esse apoio é o início da preparação para rolar.",
+          "negativo": "Continue oferecendo tummy time em superfícies seguras e estimulantes."
+        },
+        "knowledge": {
+          "title": "Apoio nos Antebraços",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23fdf2f8;%7D.b%7Bfill:%23fbcfe8;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M20,50 Q50,20 80,50' stroke='%23db2777' stroke-width='4' fill='none'/%3E%3Cpath d='M25,50 L50,30 L75,50' stroke='%23f9a8d4' stroke-width='3' fill='none'/%3E%3C/svg%3E",
+          "text": "Apoiar-se nos antebraços fortalece o tronco e prepara o bebê para rolar e engatinhar no futuro.",
+          "audio": "Apoiar-se nos braços mostra que {nome} está ganhando força para novas conquistas como rolar e engatinhar.",
+          "links": [
+            { "titulo": "Educare+ Academy: Próximos passos motores", "url": "#" }
+          ]
+        }
+      },
+      {
+        "id": "sensorial_w10",
+        "title": "👂 Sensorial",
+        "question": "{nome} já vira a cabeça para sons familiares, como sua voz?",
+        "options": ["Sim, quase sempre", "Às vezes", "Ainda não"],
+        "feedback": {
+          "positivo": "Maravilha! Ele(a) está reconhecendo sons importantes.",
+          "negativo": "Continue conversando e chamando {nome} pelo nome para estimular a resposta auditiva."
+        },
+        "knowledge": {
+          "title": "Localização Sonora",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23fefce8;%7D.b%7Bfill:%23fde047;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M30,30 C35,15 45,15 50,30 S65,45 70,30' stroke='%23ca8a04' stroke-width='3' fill='none'/%3E%3Cpath d='M20,30 L80,30' stroke='%23eab308' stroke-width='2' stroke-dasharray='5 5'/%3E%3C/svg%3E",
+          "text": "Localizar sons é um marco cognitivo e auditivo importante, que prepara para a comunicação futura.",
+          "audio": "{nome} aprende que a sua voz vem de um lugar específico, desenvolvendo atenção e percepção auditiva.",
+          "links": [
+            { "titulo": "Educare+ Academy: Estimulando a audição", "url": "#" }
+          ]
+        }
+      }
+    ],
+    "mother_domains": [
+      {
+        "id": "saude_mental_w10",
+        "title": "🧠 Saúde Mental",
+        "question": "Você tem sentido melhora no humor e na adaptação à rotina?",
+        "options": ["Sim, estou bem melhor", "Mais ou menos", "Sinto-me sobrecarregada"],
+        "feedback": {
+          "positivo": "Ótimo! Essa adaptação mostra que você está encontrando equilíbrio.",
+          "negativo": "Converse com alguém de confiança e, se necessário, procure apoio profissional."
+        },
+        "knowledge": {
+          "title": "Adaptação Pós-Parto",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23eff6ff;%7D.b%7Bfill:%2393c5fd;%7D.c%7Bfill:%233b82f6;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='c' d='M25 30 A 15 15, 0, 0, 0, 50 30' fill='none' stroke-width='4'/%3E%3Cpath class='b' d='M50 30 A 15 15, 0, 0, 1, 75 30' fill='none' stroke-width='4'/%3E%3Cpath class='b' d='M30,45 Q37.5,50 45,45' fill='none' stroke-width='3' stroke='%2360a5fa'/%3E%3Cpath class='c' d='M55,45 Q62.5,40 70,45' fill='none' stroke-width='3'/%3E%3C/svg%3E",
+          "text": "É comum oscilar no humor, mas sentir melhora progressiva é esperado. Persistência de sintomas pode indicar necessidade de apoio.",
+          "audio": "O pós-parto pode ser desafiador. Se a tristeza ou cansaço não melhorarem, peça ajuda.",
+          "links": [
+            { "titulo": "Educare+ Academy: Cuidando da sua mente", "url": "#" }
+          ]
+        }
+      }
+    ],
+    "badge_on_complete": {
+      "baby": { "id": "quiz-bebe-semana-10", "nome": "Detetive dos Sons (S10)", "icone": "👂", "description": "Concluiu o quiz de desenvolvimento do bebê da Semana 10." },
+      "mother": { "id": "quiz-mae-semana-10", "nome": "Mente Serena (S10)", "icone": "🧠", "description": "Concluiu o quiz de bem-estar da mãe da Semana 10." }
+    }
+  },
+  "week11": {
+    "trail": "quiz",
+    "month": 3,
+    "week": 11,
+    "title": "Quiz da Semana 11",
+    "icon": "🤸",
+    "description": "Tentativas de rolar, sons variados e novas descobertas!",
+    "baby_domains": [
+      {
+        "id": "motor_w11",
+        "title": "🔄 Motor",
+        "question": "{nome} já tenta rolar ou virar de lado quando está deitado?",
+        "options": ["Sim, várias vezes", "Algumas tentativas", "Ainda não"],
+        "feedback": {
+          "positivo": "Que avanço! As tentativas de rolar mostram força e coordenação.",
+          "negativo": "Coloque brinquedos ao lado de {nome} para estimular o movimento."
+        },
+        "knowledge": {
+          "title": "Primeiras Roladas",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f7fee7;%7D.b%7Bfill:%23a3e635;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M25,30 A 25 25 0 0 1 75 30' stroke='%2365a30d' stroke-width='4' fill='none'/%3E%3Cpath d='M75,30 L85,25 M75,30 L85,35' stroke='%2365a30d' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E",
+          "text": "O rolar é um marco motor fundamental que amplia a mobilidade e prepara para engatinhar.",
+          "audio": "Quando {nome} tenta rolar, está mostrando coordenação motora e preparando-se para engatinhar.",
+          "links": [
+            { "titulo": "Educare+ Academy: Incentivando o rolar", "url": "#" }
+          ]
+        }
+      },
+      {
+        "id": "comunicacao_w11",
+        "title": "💬 Comunicação",
+        "question": "{nome} está emitindo sons variados, como vogais e balbucios diferentes do choro?",
+        "options": ["Sim, bastante", "Pouco", "Ainda não"],
+        "feedback": {
+          "positivo": "Ótimo! Esses sons são blocos de construção da fala.",
+          "negativo": "Responda e imite os sons de {nome}, isso incentiva novas vocalizações."
+        },
+        "knowledge": {
+          "title": "Primeiros Balbucios",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f0f9ff;%7D.b%7Bfill:%237dd3fc;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M25,25 Q30,20 40,25 T 55,25' stroke='%230ea5e9' fill='none' stroke-width='3'/%3E%3Cpath class='b' d='M45,40 Q50,35 60,40 T 75,40' stroke='%230ea5e9' fill='none' stroke-width='3'/%3E%3C/svg%3E",
+          "text": "Além do choro, os bebês começam a emitir sons mais variados, explorando as cordas vocais e aprendendo a se comunicar.",
+          "audio": "Esses sons são o treino inicial da fala. Responder incentiva {nome} a continuar.",
+          "links": [
+            { "titulo": "Educare+ Academy: O desenvolvimento da fala", "url": "#" }
+          ]
+        }
+      }
+    ],
+    "mother_domains": [
+      {
+        "id": "rede_apoio_w11",
+        "title": "🤝 Rede de Apoio",
+        "question": "Você tem conseguido dividir as tarefas ou pedir ajuda prática à sua rede de apoio?",
+        "options": ["Sim, sempre", "Às vezes", "Ainda não"],
+        "feedback": {
+          "positivo": "Excelente! Delegar ajuda a preservar sua energia.",
+          "negativo": "Não hesite em pedir ajuda de forma clara e prática, isso é um ato de autocuidado."
+        },
+        "knowledge": {
+          "title": "Força da Rede",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f5f5f5;%7D.b%7Bfill:%23a3a3a3;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='35' cy='30' r='10'/%3E%3Ccircle class='b' cx='65' cy='30' r='10'/%3E%3Cpath fill='none' stroke='%23a3a3a3' stroke-width='3' d='M45,30 h10'/%3E%3Cpath fill='none' stroke='%23737373' stroke-width='2' stroke-linecap='round' d='M35,20 L25,10 M65,20 L75,10'/%3E%3C/svg%3E",
+          "text": "A rede de apoio reduz a sobrecarga da mãe. Pedir ajuda prática é essencial para saúde emocional e física.",
+          "audio": "Compartilhar tarefas com sua rede é cuidar de você e de {nome}.",
+          "links": [
+            { "titulo": "Educare+ Academy: Ativando sua rede", "url": "#" }
+          ]
+        }
+      }
+    ],
+    "badge_on_complete": {
+      "baby": { "id": "quiz-bebe-semana-11", "nome": "Pequeno Acrobata (S11)", "icone": "🤸", "description": "Concluiu o quiz de desenvolvimento do bebê da Semana 11." },
+      "mother": { "id": "quiz-mae-semana-11", "nome": "Líder da Rede (S11)", "icone": "🤝", "description": "Concluiu o quiz de bem-estar da mãe da Semana 11." }
+    }
+  },
+  "week12": {
+    "trail": "quiz",
+    "month": 3,
+    "week": 12,
+    "title": "Quiz da Semana 12",
+    "icon": "🌈",
+    "description": "Três meses completos: conquistas motoras e vínculo cada vez maior!",
+    "baby_domains": [
+      {
+        "id": "motor_w12",
+        "title": "🤸 Motor",
+        "question": "{nome} já consegue rolar completamente (da barriga para as costas ou vice-versa)?",
+        "options": ["Sim, várias vezes", "Algumas vezes", "Ainda não"],
+        "feedback": {
+          "positivo": "Fantástico! Esse é um marco importante para mobilidade.",
+          "negativo": "Continue estimulando o rolar em superfícies seguras."
+        },
+        "knowledge": {
+          "title": "Rolando pelo Mundo",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f7fee7;%7D.b%7Bfill:%23a3e635;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M25,30 A 25 25 0 0 1 75 30' stroke='%2365a30d' stroke-width='4' fill='none'/%3E%3Cpath d='M75,30 L85,25 M75,30 L85,35' stroke='%2365a30d' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E",
+          "text": "Rolar é uma grande conquista motora e abre portas para explorar o ambiente.",
+          "audio": "Quando {nome} rola sozinho, significa que está pronto para explorar mais o mundo.",
+          "links": [
+            { "titulo": "Educare+ Academy: Segurança na fase do rolar", "url": "#" }
+          ]
+        }
+      },
+      {
+        "id": "cognitivo_w12",
+        "title": "🧠 Cognitivo",
+        "question": "{nome} demonstra curiosidade ao observar objetos novos e coloridos?",
+        "options": ["Sim, muito", "Um pouco", "Ainda não"],
+        "feedback": {
+          "positivo": "Ótimo! A curiosidade mostra avanço no desenvolvimento cognitivo.",
+          "negativo": "Mostre objetos de cores vivas e texturas diferentes para estimular a atenção."
+        },
+        "knowledge": {
+          "title": "Curiosidade em Alta",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f3f4f6;%7D.b%7Bfill:%239ca3af;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='50' cy='30' r='15'/%3E%3Ccircle fill='white' cx='50' cy='30' r='10'/%3E%3Ccircle fill='black' cx='50' cy='30' r='5'/%3E%3Cpath fill='none' stroke='%239ca3af' stroke-width='2' d='M20,15 L35,25 M80,15 L65,25 M20,45 L35,35 M80,45 L65,35'/%3E%3C/svg%3E",
+          "text": "A curiosidade é sinal de novas conexões cerebrais e interesse pelo mundo.",
+          "audio": "Ao se interessar por objetos novos, {nome} está mostrando evolução cognitiva.",
+          "links": [
+            { "titulo": "Educare+ Academy: Brincadeiras para o 3º mês", "url": "#" }
+          ]
+        }
+      }
+    ],
+    "mother_domains": [
+      {
+        "id": "intimidade_w12",
+        "title": "💞 Intimidade e Conexão",
+        "question": "Você e seu parceiro(a) têm conseguido reservar um tempo, mesmo pequeno, para conversar ou ter momentos juntos?",
+        "options": ["Sim, sempre", "Às vezes", "Ainda não"],
+        "feedback": {
+          "positivo": "Muito bem! Manter a intimidade fortalece a relação e o bem-estar da família.",
+          "negativo": "Mesmo alguns minutos de conversa diária podem reforçar a conexão entre vocês."
+        },
+        "knowledge": {
+          "title": "Intimidade no Puerpério",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23fff1f2;%7D.b%7Bfill:%23fda4af;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M50,25 C40,10 20,15 25,30 C30,45 50,50 50,50 C50,50 70,45 75,30 C80,15 60,10 50,25 Z'/%3E%3C/svg%3E",
+          "text": "No puerpério, a intimidade se redefine. Pequenos gestos de carinho são tão importantes quanto o contato físico.",
+          "audio": "Reserve alguns minutos do dia para conversar e se reconectar emocionalmente.",
+          "links": [
+            { "titulo": "Educare+ Academy: Cuidando da relação", "url": "#" }
+          ]
+        }
+      }
+    ],
+    "badge_on_complete": {
+      "baby": { "id": "quiz-bebe-semana-12", "nome": "Explorador de 3 Meses", "icone": "🌈", "description": "Concluiu o quiz de desenvolvimento do bebê da Semana 12." },
+      "mother": { "id": "quiz-mae-semana-12", "nome": "Parceira Forte (S12)", "icone": "💞", "description": "Concluiu o quiz de bem-estar da mãe da Semana 12." }
+    }
+  },
+  "month3Summary": {
+    "trail": "quiz",
+    "month": 3,
+    "summary": true,
+    "title": "Fechamento do Mês 3",
+    "icon": "🌟",
+    "description": "Hora de celebrar três meses de conquistas incríveis!",
+    "baby_domains": [
+      {
+        "id": "marco_motor_m3",
+        "title": "💪 Marco Motor",
+        "question": "Você percebeu evolução significativa no controle da cabeça, apoio nos braços e nas tentativas de rolar de {nome}?",
+        "options": ["Sim, muito", "Um pouco", "Ainda não"],
+        "feedback": {
+          "positivo": "Fantástico! Isso mostra que o desenvolvimento motor está no caminho certo.",
+          "negativo": "Continue incentivando com tummy time, brinquedos e brincadeiras supervisionadas."
+        },
+        "knowledge": {
+          "title": "Base para Mobilidade",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23fdf2f8;%7D.b%7Bfill:%23fbcfe8;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Cpath class='b' d='M20,50 Q50,20 80,50' stroke='%23db2777' stroke-width='4' fill='none'/%3E%3Cpath d='M25,50 L50,30 L75,50' stroke='%23f9a8d4' stroke-width='3' fill='none'/%3E%3C/svg%3E",
+          "text": "Esses marcos constroem a base para sentar e engatinhar nos próximos meses.",
+          "audio": "O progresso motor de {nome} mostra que ele está pronto para as próximas conquistas.",
+          "links": [
+            { "titulo": "Educare+ Academy: Resumo Motor do 3º Mês", "url": "#" }
+          ]
+        }
+      },
+      {
+        "id": "marco_social_m3",
+        "title": "😊 Marco Social",
+        "question": "{nome} já sorri e gargalha com frequência quando você interage?",
+        "options": ["Sim, muito", "Às vezes", "Ainda não"],
+        "feedback": {
+          "positivo": "Que maravilha! O vínculo afetivo está cada vez mais forte.",
+          "negativo": "Continue interagindo com carinho e estímulos afetivos."
+        },
+        "knowledge": {
+          "title": "O Poder do Vínculo",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f0fdf4;%7D.b%7Bfill:%23bbf7d0;%7D.c%7Bfill:%234ade80;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='35' cy='30' r='15'/%3E%3Ccircle class='c' cx='65' cy='30' r='15'/%3E%3Cpath d='M30,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M40,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M28,35 Q35,42 42,35' stroke='%2314532d' fill='none' stroke-width='2'/%3E%3Cpath d='M60,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M70,28 a2,2 0 1,1 4,0 a2,2 0 1,1 -4,0 M58,35 Q65,42 72,35' stroke='%2314532d' fill='none' stroke-width='2'/%3E%3C/svg%3E",
+          "text": "O sorriso e a gargalhada são sinais de vínculo, interação social e desenvolvimento emocional.",
+          "audio": "As risadas e sorrisos são conquistas sociais muito importantes para {nome}.",
+          "links": [
+            { "titulo": "Educare+ Academy: O vínculo no 3º Mês", "url": "#" }
+          ]
+        }
+      }
+    ],
+    "mother_domains": [
+      {
+        "id": "bem_estar_mae_m3",
+        "title": "💜 Bem-Estar da Mãe",
+        "question": "Você conseguiu organizar melhor a rotina de autocuidado e rede de apoio neste mês?",
+        "options": ["Sim, bastante", "Um pouco", "Ainda não"],
+        "feedback": {
+          "positivo": "Ótimo! Uma mãe bem apoiada é mais disponível para si e para o bebê.",
+          "negativo": "Continue buscando apoio e reservando tempo para você sempre que possível."
+        },
+        "knowledge": {
+          "title": "Apoio e Autocuidado",
+          "image_url": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:%23f5f5f5;%7D.b%7Bfill:%23a3a3a3;%7D%3C/style%3E%3C/defs%3E%3Crect class='a' width='100' height='60' rx='8'/%3E%3Ccircle class='b' cx='35' cy='30' r='10'/%3E%3Ccircle class='b' cx='65' cy='30' r='10'/%3E%3Cpath fill='none' stroke='%23a3a3a3' stroke-width='3' d='M45,30 h10'/%3E%3Cpath fill='none' stroke='%23737373' stroke-width='2' stroke-linecap='round' d='M35,20 L25,10 M65,20 L75,10'/%3E%3C/svg%3E",
+          "text": "O equilíbrio entre cuidar de si e do bebê é essencial para saúde física e emocional.",
+          "audio": "Quanto mais você cuida de si, mais energia terá para cuidar de {nome}.",
+          "links": [
+            { "titulo": "Educare+ Academy: Resumo de Autocuidado do 3º Mês", "url": "#" }
+          ]
+        }
+      }
+    ],
+    "recomendacao_geral": "Anote os principais avanços e dúvidas para levar à próxima consulta pediátrica.",
+    "badge_on_complete": {
+      "id": "badge-mes-3",
+      "nome": "Explorador do Mês 3",
+      "icone": "🌟",
+      "description": "Concluiu o fechamento e os aprendizados do incrível Mês 3."
+    }
+  }
+}

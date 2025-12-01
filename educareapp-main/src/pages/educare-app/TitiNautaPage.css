@@ -1,0 +1,83 @@
+/* Estilos para a página TitiNauta */
+
+.titinauta-page {
+  padding: 20px;
+  max-width: 100%;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.titinauta-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.titinauta-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.titinauta-header h1 {
+  color: #22c55e;
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.titinauta-header p {
+  color: #4b5563;
+  font-size: 16px;
+}
+
+.titinauta-info {
+  padding: 16px;
+  background-color: #f0fdf4;
+  border-left: 4px solid #22c55e;
+  border-radius: 4px;
+  margin-top: 20px;
+}
+
+.titinauta-info p {
+  color: #166534;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.titinauta-info p:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .titinauta-page {
+    padding: 12px;
+  }
+  
+  .titinauta-header h1 {
+    font-size: 20px;
+  }
+  
+  .titinauta-header p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .titinauta-page {
+    padding: 8px;
+  }
+  
+  .titinauta-header {
+    padding: 12px;
+  }
+  
+  .titinauta-header h1 {
+    font-size: 18px;
+  }
+}

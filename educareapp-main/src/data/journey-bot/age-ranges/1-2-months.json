@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "title": "1-2 meses",
+    "min_months": 1,
+    "max_months": 2,
+    "description": "Despertar de sentidos e primeiras interações"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "category": "motor",
+      "categoryName": "Motor",
+      "categoryIcon": "🤲",
+      "question": "Seu bebê consegue mover a cabeça de um lado para o outro quando está de bruços?",
+      "importance": "Esse movimento indica fortalecimento do pescoço e coordenação inicial.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, consegue mover", "emoji": "🎉" },
+        { "value": 2, "text": "⚠️ Às vezes consegue", "emoji": "💡" },
+        { "value": 3, "text": "❌ Ainda não consegue", "emoji": "💪" }
+      ],
+      "feedbacks": {
+        "1": "🎉 Que maravilha! Seu bebê está ficando cada vez mais forte!",
+        "2": "💡 Estimule colocando brinquedos chamativos de um lado e depois do outro.",
+        "3": "💪 Faça esse exercício diariamente e observe o progresso, com muita paciência."
+      },
+      "activity": "Coloque o bebê de bruços por 3-5 minutos, com brinquedos coloridos próximos, alternando os lados."
+    },
+    {
+      "id": 2,
+      "category": "cognitive",
+      "categoryName": "Cognitivo",
+      "categoryIcon": "🧠",
+      "question": "Ele parece se interessar por novos objetos ou sons no ambiente?",
+      "importance": "Interesse por novidades é sinal de desenvolvimento da atenção e curiosidade.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, demonstra interesse", "emoji": "🎉" },
+        { "value": 2, "text": "⚠️ Às vezes se interessa", "emoji": "💡" },
+        { "value": 3, "text": "❌ Não demonstra interesse", "emoji": "🔍" }
+      ],
+      "feedbacks": {
+        "1": "🎉 Que bebê curioso! Isso mostra que ele já está aprendendo com o ambiente.",
+        "2": "💡 Varie os estímulos: cores, sons suaves e objetos de diferentes texturas.",
+        "3": "💡 Estimule com brinquedos simples e observação compartilhada com o cuidador."
+      },
+      "activity": "Mostre objetos com texturas variadas e sons diferentes, uma vez por dia."
+    },
+    {
+      "id": 3,
+      "category": "language",
+      "categoryName": "Linguagem",
+      "categoryIcon": "🗣️",
+      "question": "Seu bebê vocaliza sons como \"aaa\", \"eeeh\" ou balbucios?",
+      "importance": "Esses sons são os primeiros passos para a fala e mostram interesse por comunicação.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, faz vários sons", "emoji": "🎵" },
+        { "value": 2, "text": "⚠️ Alguns sons às vezes", "emoji": "🎶" },
+        { "value": 3, "text": "❌ Ainda não vocaliza", "emoji": "🗣️" }
+      ],
+      "feedbacks": {
+        "1": "🎉 Que lindo ouvir isso! Ele está descobrindo sua própria voz.",
+        "2": "💡 Repita os sons que ele faz e estimule com cantigas e falas lentas.",
+        "3": "💡 Faça silêncio após falar com ele e observe se tenta responder com sons."
+      },
+      "activity": "Durante a troca de fralda, fale pausadamente e cante músicas curtas, olhando nos olhos dele."
+    },
+    {
+      "id": 4,
+      "category": "social",
+      "categoryName": "Social",
+      "categoryIcon": "😊",
+      "question": "Seu bebê já responde com sorrisos sociais quando você sorri?",
+      "importance": "O sorriso como resposta fortalece o vínculo e indica interação social.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, sorri de volta", "emoji": "😊" },
+        { "value": 2, "text": "⚠️ Às vezes sorri", "emoji": "💡" },
+        { "value": 3, "text": "❌ Não sorri socialmente", "emoji": "🤱" }
+      ],
+      "feedbacks": {
+        "1": "🎉 Que conexão maravilhosa! Ele já responde às suas emoções!",
+        "2": "💡 Continue sorrindo, falando com suavidade e fazendo expressões faciais marcantes.",
+        "3": "💡 Fique frente a frente com ele várias vezes ao dia para estimular esse vínculo."
+      },
+      "activity": "Faça 'caras e bocas' e sorria para ele após o banho. Espere para ver se ele responde!"
+    },
+    {
+      "id": 5,
+      "category": "maternal_health",
+      "categoryName": "Saúde Materna",
+      "categoryIcon": "💆‍♀️",
+      "question": "Você tem alguém com quem conversar sobre como tem se sentido nos últimos dias?",
+      "importance": "O apoio emocional é vital nesse momento de transição e cuidado.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, tenho apoio", "emoji": "🤗" },
+        { "value": 2, "text": "⚠️ Às vezes tenho", "emoji": "💡" },
+        { "value": 3, "text": "❌ Não tenho com quem falar", "emoji": "😓" }
+      ],
+      "feedbacks": {
+        "1": "🎉 Que bom! Ter com quem contar faz toda diferença.",
+        "2": "💡 Fale com alguém de confiança, mesmo que por mensagem ou chamada.",
+        "3": "💡 Procure uma roda de mães ou grupo de apoio. Você não está sozinha!"
+      },
+      "activity": "Escreva como se sente em um diário. Isso ajuda a organizar os pensamentos e emoções."
+    }
+  ]
+}

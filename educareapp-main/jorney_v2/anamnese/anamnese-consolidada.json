@@ -1,0 +1,96 @@
+
+{
+  "timeline": [
+    { "key": "firstVisit", "title": "1º Trimestre" },
+    { "key": "secondTrimester", "title": "2º Trimestre" },
+    { "key": "thirdTrimester", "title": "3º Trimestre" },
+    { "key": "newborn", "title": "Recém-Nascido" }
+  ],
+  "firstVisit": {
+    "title": "Primeira consulta (até 12 semanas)",
+    "blocks": [
+      {
+        "h": "Exames laboratoriais iniciais",
+        "items": [
+          { "id": "prenatal.exams.abo_rh", "title": "Tipagem sanguínea e Fator Rh", "when": "Primeira consulta", "why": "Identifica o risco de incompatibilidade Rh. Se a mãe for Rh negativo e o bebê Rh positivo, pode ser necessário o exame Coombs Indireto e o uso de imunoglobulina anti-Rh para proteger futuras gestações.", "options": null, "audio": "É importante saber o tipo sanguíneo da mãe para prevenir a incompatibilidade Rh, uma condição que pode afetar futuras gestações se não for tratada." },
+          { "id": "prenatal.exams.hemograma", "title": "Hemograma completo", "when": "Primeira consulta", "why": "Avalia a presença de anemia ferropriva, condição comum que, se não tratada, pode comprometer o transporte de oxigênio e aumentar o risco de parto prematuro e baixo peso ao nascer.", "options": null, "audio": "É importante fazer o hemograma para verificar se há anemia, uma condição comum na gravidez que precisa ser tratada para garantir a saúde da mãe e do bebê." },
+          { "id": "prenatal.exams.glicemia", "title": "Glicemia de jejum", "when": "Primeira consulta", "why": "Rastreamento inicial para o diabetes mellitus gestacional (DMG). Valores alterados podem indicar a necessidade de um Teste Oral de Tolerância à Glicose (TOTG) no 2º trimestre.", "options": null, "audio": "É importante medir o açúcar no sangue em jejum para rastrear o risco de diabetes gestacional, que pode trazer complicações se não for controlado." },
+          { "id": "prenatal.exams.vdrl", "title": "Sífilis (VDRL/Teste Rápido)", "when": "Primeira consulta", "why": "Essencial para prevenir a sífilis congênita, uma infecção grave que pode causar malformações, aborto ou morte fetal. O tratamento da gestante e do parceiro deve ser iniciado imediatamente.", "options": null, "audio": "É importante testar para sífilis para prevenir a transmissão ao bebê, que pode causar graves problemas de saúde. O tratamento é simples e eficaz." },
+          { "id": "prenatal.exams.hiv", "title": "HIV (Teste Rápido/Sorologia)", "when": "Primeira consulta", "why": "O diagnóstico precoce e o uso de terapia antirretroviral (TARV) durante a gestação reduzem drasticamente o risco de transmissão vertical para o bebê.", "options": null, "audio": "É importante fazer o teste de HIV, pois o tratamento durante a gravidez reduz drasticamente a chance de passar o vírus para o bebê." },
+          { "id": "prenatal.exams.hbsag", "title": "Hepatite B (AgHBs)", "when": "Primeira consulta", "why": "Identifica a presença do vírus. Se a mãe for portadora, o recém-nascido deve receber a vacina e a imunoglobulina específica nas primeiras 12 horas de vida para evitar a infecção crônica.", "options": null, "audio": "É importante detectar a hepatite B, pois se a mãe for portadora, o bebê pode ser protegido com vacina e medicação logo ao nascer." },
+          { "id": "prenatal.exams.hcv", "title": "Hepatite C (anti-HCV)", "when": "Primeira consulta", "why": "Rastreia o contato prévio com o vírus. Um resultado positivo exige exames complementares para confirmar uma infecção ativa e definir o seguimento.", "options": null, "audio": "É importante verificar se a mãe já teve contato com o vírus da hepatite C, para que o acompanhamento adequado seja feito durante a gestação." },
+          { "id": "prenatal.exams.toxo", "title": "Toxoplasmose (IgG/IgM)", "when": "Primeira consulta", "why": "Determina o estado imunológico. Gestantes suscetíveis (IgG e IgM negativos) devem receber orientação sobre prevenção, como evitar o consumo de carnes cruas ou malcozidas.", "options": null, "audio": "É importante saber se a gestante tem imunidade à toxoplasmose. Se não tiver, ela receberá orientações para evitar a infecção, que é perigosa para o feto." },
+          { "id": "prenatal.exams.urina_urocult", "title": "Urina Tipo I + Urocultura", "when": "Primeira consulta", "why": "Detecta a bacteriúria assintomática (infecção urinária sem sintomas), que, se não tratada, pode evoluir para pielonefrite (infecção renal) e aumentar o risco de parto prematuro.", "options": null, "audio": "É importante fazer o exame de urina para buscar infecções que podem não ter sintomas, mas que, se não tratadas, aumentam o risco de parto prematuro." },
+          { "id": "prenatal.exams.pap", "title": "Exame Papanicolau", "when": "Primeira consulta", "why": "Realizado conforme o histórico da mulher, garante a continuidade do rastreamento de lesões no colo do útero durante a gestação.", "options": null, "audio": "É importante que o Papanicolau esteja em dia para rastrear alterações no colo do útero, o que pode ser verificado com segurança na gestação." }
+        ]
+      },
+      {
+        "h": "Participação do parceiro",
+        "items": [
+          { "id": "prenatal.partner.tests", "title": "Testes do parceiro (Sífilis e HIV)", "when": "Primeira consulta", "why": "A testagem e o tratamento do parceiro são cruciais para quebrar a cadeia de transmissão de ISTs, evitando a reinfecção da gestante e protegendo o feto.", "options": null, "audio": "É importante que o parceiro também seja testado para sífilis e HIV para interromper a transmissão de infecções e proteger a saúde da mãe e do bebê." }
+        ]
+      },
+      {
+        "h": "Exames de Imagem",
+        "items": [
+            { "id": "prenatal.exams.ultrassom_1tri", "title": "Ultrassom 1º Trimestre", "when": "Entre 11 e 13 semanas e 6 dias", "why": "Exame crucial para datação precisa da gestação (via CCN), avaliação da vitalidade, rastreio de anomalias cromossômicas (Translucência Nucal - TN) e do risco de pré-eclâmpsia.", "options": null, "audio": "É importante fazer o ultrassom do primeiro trimestre para datar a gestação, rastrear síndromes como a de Down através da translucência nucal e avaliar o risco de pré-eclâmpsia." }
+        ]
+      }
+    ]
+  },
+  "secondTrimester": {
+    "title": "Segundo trimestre (14–27 semanas)",
+    "blocks": [
+      { "h": "Metabolismo e Acompanhamento", "items": [
+        { "id": "prenatal.exams.totg75", "title": "Teste Oral de Tolerância à Glicose (TOTG 75g)", "when": "24ª a 28ª semana", "why": "Considerado o padrão-ouro para o diagnóstico de Diabetes Mellitus Gestacional (DMG), que se manifesta neste período devido aos hormônios placentários. O controle adequado previne complicações como macrossomia fetal (bebê grande) e hipoglicemia neonatal.", "options": null, "audio": "É importante fazer este exame para diagnosticar o diabetes gestacional, que aparece nesta fase e precisa ser controlado para evitar complicações para a mãe e o bebê." },
+        { "id": "prenatal.exams.sorologias_rep", "title": "Repetição de Sorologias", "when": "Conforme risco", "why": "Para gestantes suscetíveis a infecções como toxoplasmose ou sífilis, a repetição dos exames é indicada para detectar uma possível soroconversão (infecção adquirida durante a gravidez).", "options": null, "audio": "É importante repetir alguns exames se a gestante não tiver imunidade para certas doenças, como a toxoplasmose, para garantir que não houve infecção durante a gravidez." }
+      ] },
+      {
+        "h": "Exames de Imagem",
+        "items": [
+            { "id": "prenatal.exams.ultrassom_morfologico", "title": "Ultrassom Morfológico 2º Trimestre", "when": "Entre 20 e 24 semanas", "why": "Exame detalhado da anatomia fetal para avaliar o desenvolvimento de todos os órgãos e sistemas, como cérebro, coração, coluna, membros e face.", "options": null, "audio": "É importante fazer o ultrassom morfológico para avaliar em detalhes o desenvolvimento de todos os órgãos do bebê, sendo fundamental para detectar possíveis malformações." }
+        ]
+      }
+    ]
+  },
+  "thirdTrimester": {
+    "title": "Terceiro trimestre (28s → parto)",
+    "blocks": [
+      { "h": "Rastreamento Final", "items": [
+        { "id": "prenatal.exams.gbs", "title": "Pesquisa de Streptococcus B (GBS)", "when": "35ª a 37ª semana", "why": "Coleta de amostra vaginal e retal para identificar a bactéria. Se positivo, a gestante recebe antibióticos durante o parto para prevenir infecções graves no recém-nascido, como sepse e meningite.", "options": null, "audio": "É importante fazer este exame no final da gestação para detectar uma bactéria. Se presente, um antibiótico na hora do parto protege o recém-nascido de infecções graves." }
+      ] },
+      {
+        "h": "Exames de Imagem",
+        "items": [
+          { "id": "prenatal.exams.ultrassom_3tri", "title": "Ultrassom 3º Trimestre", "when": "Após 28 semanas", "why": "Monitora o crescimento fetal, o volume de líquido amniótico, o bem-estar fetal (pode incluir Doppler) e a localização da placenta, importante para o planejamento do parto.", "options": null, "audio": "É importante fazer o ultrassom do terceiro trimestre para avaliar o crescimento do bebê, a quantidade de líquido amniótico e a posição da placenta, ajudando a planejar o parto." }
+        ]
+      }
+    ]
+  },
+  "newborn": {
+    "title": "Recém-nascido (0-28 dias) - Triagens e Dados de Nascimento",
+    "blocks": [
+      {
+        "h": "Dados de Nascimento",
+        "items": [
+            { "id": "nascimento.peso", "title": "Peso ao nascer", "when": "Logo após o nascimento", "why": "Indicador fundamental de vitalidade. <2,5 kg sugere baixo peso; >4,0 kg sugere macrossomia, ambos com riscos adicionais.", "options": ["Menos de 2.500 g", "Entre 2.500 g e 4.000 g", "Acima de 4.000 g"], "audio": "É importante saber o peso ao nascer pois ele é um indicador vital da saúde do bebê, ajudando a identificar recém-nascidos que podem precisar de cuidados extras." },
+            { "id": "nascimento.perimetro", "title": "Perímetro cefálico", "when": "Logo após o nascimento", "why": "Mede crescimento craniano. Abaixo da faixa pode indicar microcefalia; acima, macrocefalia; ambos requerem avaliação.", "options": ["Abaixo de 32 cm", "Entre 32 e 36 cm", "Acima de 36 cm"], "audio": "É importante medir a cabeça do bebê ao nascer para avaliar o desenvolvimento cerebral inicial. Valores fora do esperado indicam a necessidade de investigação." },
+            { "id": "nascimento.estatura", "title": "Estatura ao nascer", "when": "Logo após o nascimento", "why": "Complementa avaliação do crescimento ao nascimento e auxilia na classificação do RN.", "options": ["Menos de 47 cm", "Entre 47 cm e 52 cm", "Acima de 52 cm"], "audio": "É importante medir a estatura ao nascer para complementar a avaliação do crescimento do bebê e verificar se ele está dentro do esperado para a idade gestacional." },
+            { "id": "newborn.cried_at_birth", "title": "Chorou ao nascer?", "when": "Sala de parto", "why": "Choro imediato sugere boa adaptação cardiorrespiratória e tônus.", "options": ["Sim", "Não"], "audio": "É importante observar o choro ao nascer porque ele é um bom sinal de que o bebê está respirando bem e se adaptando à vida fora do útero." },
+            { "id": "newborn.first_hour_breastfeeding", "title": "Mamou na primeira hora de vida?", "when": "Primeira hora de vida", "why": "Contato pele a pele e amamentação precoce melhoram vínculo e desfechos do aleitamento.", "options": ["Sim", "Não"], "audio": "É importante que o bebê mame na primeira hora de vida, pois isso fortalece o vínculo, acalma o bebê e estimula a produção de leite da mãe." },
+            { "id": "newborn.nicustay", "title": "Necessitou de UTI neonatal?", "when": "Após o nascimento", "why": "Indica gravidade clínica e direciona o seguimento ambulatorial.", "options": ["Sim", "Não"], "audio": "É importante saber se o bebê precisou de UTI para entender a gravidade do seu estado ao nascer e planejar um acompanhamento mais cuidadoso após a alta." }
+        ]
+      },
+      {
+        "h": "Triagens Neonatais Essenciais",
+        "items": [
+          { "id": "triagens.pezinho", "title": "Teste do Pezinho", "when": "Entre 3º e 5º dia", "why": "Coleta de gotas de sangue do calcanhar para rastrear doenças graves como fenilcetonúria, hipotireoidismo congênito, doença falciforme, fibrose cística, entre outras, permitindo tratamento precoce.", "options": null, "audio": "É importante fazer o teste do pezinho para rastrear doenças graves, como fenilcetonúria e hipotireoidismo congênito, permitindo o tratamento antes que os sintomas apareçam." },
+          { "id": "triagens.coracaozinho", "title": "Teste do Coraçãozinho (Oximetria de Pulso)", "when": "24 a 48h de vida", "why": "Mede a oxigenação no sangue para detectar cardiopatias congênitas críticas que podem necessitar de intervenção cirúrgica urgente.", "options": null, "audio": "É importante fazer o teste do coraçãozinho para detectar problemas cardíacos graves que podem precisar de cirurgia urgente, salvando a vida do bebê." },
+          { "id": "triagens.orelhinha", "title": "Teste da Orelhinha (Triagem Auditiva)", "when": "Antes da alta hospitalar", "why": "Avalia a integridade da via auditiva. A detecção precoce de qualquer grau de surdez é fundamental para o desenvolvimento da fala e da linguagem.", "options": null, "audio": "É importante fazer o teste da orelhinha para detectar precocemente qualquer grau de surdez, o que é fundamental para garantir o desenvolvimento da fala." },
+          { "id": "triagens.olhinho", "title": "Teste do Olhinho (Reflexo Vermelho)", "when": "Antes da alta hospitalar", "why": "Busca identificar alterações que impeçam a luz de chegar à retina, como catarata congênita, glaucoma ou retinoblastoma, que podem levar à cegueira se não tratadas.", "options": null, "audio": "É importante fazer o teste do olhinho para identificar problemas de visão como catarata congênita ou glaucoma, que podem levar à cegueira se não forem tratados a tempo." },
+          { "id": "triagens.linguinha", "title": "Teste da Linguinha (Frênulo Lingual)", "when": "Nas primeiras horas", "why": "Avalia o frênulo lingual para identificar a anquiloglossia ('língua presa'), que pode dificultar a amamentação e o ganho de peso do bebê.", "options": null, "audio": "É importante fazer o teste da linguinha para identificar a 'língua presa', uma condição que pode dificultar a amamentação e o ganho de peso do bebê." }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "meta": {
+    "title": "0-1 mês",
+    "min_months": 0,
+    "max_months": 1,
+    "description": "Adaptação ao mundo exterior e primeiros reflexos"
+  },
+  "questions": [
+    {
+      "id": 1,
+      "category": "motor",
+      "categoryName": "Motor",
+      "categoryIcon": "🤲",
+      "question": "O {childName} consegue manter a cabeça erguida por alguns segundos quando está de bruços?",
+      "importance": "Essa habilidade é uma das primeiras conquistas do controle motor do pescoço.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, já consegue", "emoji": "🎉" },
+        { "value": 2, "text": "⚠️ Às vezes consegue", "emoji": "💡" },
+        { "value": 3, "text": "❌ Ainda não consegue", "emoji": "💪" }
+      ],
+      "feedbacks": {
+        "1": "🎉 Que incrível {motherName}! O {childName} está desenvolvendo o controle da cabeça, um passo essencial para futuros movimentos.",
+        "2": "💡 Perfeito {motherName}! Isso é completamente normal. O controle da cabeça se desenvolve gradualmente.",
+        "3": "💪 Não se preocupe {motherName}! Cada bebê tem seu ritmo. Continue estimulando com carinho."
+      },
+      "activity": "Coloque o {childName} de bruços por 2-3 min por dia em uma superfície segura com brinquedos coloridos à frente."
+    },
+    {
+      "id": 2,
+      "category": "cognitive",
+      "categoryName": "Cognitivo",
+      "categoryIcon": "👁️",
+      "question": "O {childName} observa seu rosto ou objetos em movimento perto do campo visual dele?",
+      "importance": "Observar movimentos ajuda no foco visual e atenção.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, acompanha com os olhos", "emoji": "👀" },
+        { "value": 2, "text": "⚠️ Às vezes observa", "emoji": "🔍" },
+        { "value": 3, "text": "❌ Ainda não observa", "emoji": "👁️" }
+      ],
+      "feedbacks": {
+        "1": "👀 Excelente {motherName}! O {childName} está desenvolvendo bem o foco visual e atenção.",
+        "2": "🔍 Normal {motherName}! Isso mostra que ele está começando a perceber o mundo ao redor.",
+        "3": "👁️ Tranquila {motherName}! A visão do bebê ainda está se desenvolvendo. Use contrastes fortes para ajudar."
+      },
+      "activity": "Use um móbile ou chocalho preto e branco e mova suavemente para que o {childName} acompanhe com os olhos!"
+    },
+    {
+      "id": 3,
+      "category": "language",
+      "categoryName": "Linguagem",
+      "categoryIcon": "🗣️",
+      "question": "O {childName} emite algum som além do choro, como grunhidos ou suspiros?",
+      "importance": "Mesmo sons simples mostram o início da comunicação oral.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, faz vários sons", "emoji": "🎵" },
+        { "value": 2, "text": "⚠️ Alguns sons às vezes", "emoji": "🎶" },
+        { "value": 3, "text": "❌ Só chora mesmo", "emoji": "🗣️" }
+      ],
+      "feedbacks": {
+        "1": "🎵 Que fofura {motherName}! Esses sons são formas iniciais de expressão e vínculo.",
+        "2": "🎶 Ótimo {motherName}! Continue conversando bastante com ele usando voz suave e pausada.",
+        "3": "🗣️ Normal {motherName}! Mantenha momentos de contato olho no olho e vá narrando as ações do dia a dia."
+      },
+      "activity": "Fale e cante para o {childName} várias vezes ao dia. Isso estimula a escuta e a produção vocal."
+    },
+    {
+      "id": 4,
+      "category": "social",
+      "categoryName": "Social",
+      "categoryIcon": "🤱",
+      "question": "O {childName} para de chorar quando ouve sua voz?",
+      "importance": "Reconhecer vozes é um dos primeiros sinais de comunicação receptiva.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, sempre se acalma", "emoji": "🎧" },
+        { "value": 2, "text": "⚠️ Às vezes se acalma", "emoji": "👂" },
+        { "value": 3, "text": "❌ Não para o choro", "emoji": "🔊" }
+      ],
+      "feedbacks": {
+        "1": "🎧 Que maravilhoso {motherName}! O {childName} já reconhece sua voz como algo familiar e tranquilizador.",
+        "2": "👂 Ótimo sinal {motherName}! Continue conversando com ele mesmo fora do campo visual.",
+        "3": "🔊 Tranquila {motherName}! Faça experiências como mudar o tom da voz e observe como ele reage."
+      },
+      "activity": "Converse, cante ou conte histórias curtas enquanto troca a fralda ou dá banho. Ele vai adorar sua voz!"
+    },
+    {
+      "id": 5,
+      "category": "maternal_health",
+      "categoryName": "Saúde Materna",
+      "categoryIcon": "💆‍♀️",
+      "question": "{motherName}, você tem conseguido descansar um pouco e pedir ajuda quando precisa?",
+      "importance": "O bem-estar da mãe/cuidador é essencial para cuidar com afeto e presença.",
+      "options": [
+        { "value": 1, "text": "✅ Sim, estou me cuidando bem", "emoji": "💆‍♀️" },
+        { "value": 2, "text": "⚠️ Às vezes consigo descansar", "emoji": "☕" },
+        { "value": 3, "text": "❌ Muito difícil descansar", "emoji": "😓" }
+      ],
+      "feedbacks": {
+        "1": "💆‍♀️ Que bom saber disso {motherName}! Cuidar de você é cuidar do {childName} também. Continue assim!",
+        "2": "☕ Entendo {motherName}! Peça ajuda a quem confia. Uma pausa para descansar faz toda diferença.",
+        "3": "😓 Compreendo perfeitamente! Fale com alguém de confiança sobre como está se sentindo. Você não está sozinha!"
+      },
+      "activity": "Escolha um momento por dia para cuidar de você: banho tranquilo, respiração profunda ou uma xícara de chá em silêncio."
+    }
+  ]
+}

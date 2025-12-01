@@ -1,0 +1,317 @@
+
+{
+  "deprecated": "This JSON file is a legacy asset that serves as a complete blueprint of the baby journey for Month 3. Authoritative data should live in /data/journey.js and theme files.",
+  "trail": "baby",
+  "title": "Jornada do Bebê — Mês 3",
+  "month": 3,
+  "journey": [
+    {
+      "week": 9,
+      "title": "Semana 9 - Vozes, Olhares e Ritmos",
+      "description": "Mais interação: arrulhos, contato visual e início de pequenas rotinas.",
+      "interactive_flow": { "quiz_ref": "quiz_month3_week9" },
+      "topics": [
+        {
+          "title": "Diálogo de Bebê (Arrulhos)",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "💬 Turnos de Conversa",
+              "itens": [
+                "Olhe nos olhos e fale pausadamente",
+                "Imite os sons de {nome}",
+                "Espere e responda (turnos)",
+                "Sorria e exagere expressões faciais",
+                "Evite telas: você é o melhor estímulo"
+              ]
+            },
+            "acaoTexto": "Aos 3 meses, {nome} emite mais vogais e 'arrulhos'. Sente-se frente a frente (20–30 cm), olhe nos olhos e **espere a vez de {pronome}** para responder. Isso ensina o conceito de turnos de conversa e incentiva a comunicação.",
+            "acaoAudio": "TitiNauta na escuta! Fale devagar, espere o som de {nome} e responda. Assim nasce o diálogo — um de cada vez.",
+            "audioIllustration": "🗣️",
+            "badge": { "id": "dialoguinho", "nome": "Dialoguinho", "icone": "💬" },
+            "extraContent": [
+              { "titulo": "Brincando de Conversar", "url": "#" }
+            ]
+          }
+        },
+        {
+          "title": "Tummy Time 3.0",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "💪 Pescoço & Tronco em Alta",
+              "itens": [
+                "Sessões curtas e frequentes",
+                "Alvo à frente para motivar",
+                "Varie superfícies seguras e firmes",
+                "Eleve levemente o tórax (rolinho sob o peito)",
+                "Supervisão total"
+              ]
+            },
+            "acaoTexto": "Amplie o tummy time com superfícies firmes e brinquedos à frente. Um **rolinho sob o peito** pode facilitar manter a cabeça erguida por mais tempo, fortalecendo pescoço e parte superior do tronco.",
+            "acaoAudio": "Missão pescoço forte! Rolinho de apoio, brinquedo chamando e muitos sorrisos de incentivo para {nome}.",
+            "audioIllustration": "🧸",
+            "badge": { "id": "tummy-pro", "nome": "Tummy Time Pro", "icone": "💪" },
+            "extraContent": [
+              { "titulo": "Ideias de Tummy Time", "url": "#" }
+            ]
+          }
+        },
+        {
+          "title": "Rotina de Sono Gentil",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🌙 Ritual que Acalma",
+              "itens": [
+                "Sequência curta e previsível",
+                "Ambiente escuro e silencioso",
+                "Sonecas distribuídas ao longo do dia",
+                "Berço vazio e posição supina",
+                "Evitar superestimulação à noite"
+              ]
+            },
+            "acaoTexto": "Mantenha um **minirritual** (banho, canção, luz baixa) e preserve o **sono seguro**: {nome} dorme de barriga para cima, em berço vazio. Rotina consistente ajuda o corpo a entender que é hora de desacelerar.",
+            "acaoAudio": "Luzes baixas, canção suave e {nome} no berço. Rotina curtinha, sempre igual, ensina a dormir melhor.",
+            "audioIllustration": "🌙",
+            "badge": { "id": "rotina-zen", "nome": "Rotina Zen", "icone": "🛌" },
+            "extraContent": [
+              { "titulo": "Sono Seguro: Regras de Ouro", "url": "#" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "week": 10,
+      "title": "Semana 10 - Mãos em Ação",
+      "description": "Coordenação olho–mão, foco visual e exploração segura.",
+      "interactive_flow": { "quiz_ref": "quiz_month3_week10" },
+      "topics": [
+        {
+          "title": "Mãos ao Centro & Levar à Boca",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "👐 Explorar com as Mãos",
+              "itens": [
+                "Ajude a unir as mãos no centro",
+                "Ofereça chocalhos leves e grandes",
+                "Objetos seguros para levar à boca",
+                "Sessões curtas e supervisionadas",
+                "Higienizar brinquedos"
+              ]
+            },
+            "acaoTexto": "{nome} começa a levar as mãos à boca e a segurar objetos leves. Ofereça peças grandes, macias e seguras. **Traga as mãos ao centro** para facilitar a preensão e a exploração tátil.",
+            "acaoAudio": "Hora de sentir o mundo! Mãos juntinhas no centro e objetos leves para {nome} explorar com segurança.",
+            "audioIllustration": "🤲",
+            "badge": { "id": "explorador-manos", "nome": "Explorador de Mãos", "icone": "👐" },
+            "extraContent": [
+              { "titulo": "Brinquedos Seguros 0–3m", "url": "#" }
+            ]
+          }
+        },
+        {
+          "title": "Olhar que Acompanha (180°)",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "👀 Seguir com o Olhar",
+              "itens": [
+                "Objetos de alto contraste",
+                "Movimentos lentos em semicírculo",
+                "Alternar distâncias (20–40 cm)",
+                "Nomeie o que mostra",
+                "Sem telas"
+              ]
+            },
+            "acaoTexto": "Movimente um objeto de alto contraste lentamente de um lado ao outro para {nome} **acompanhar 180°**. Narre com voz calma o que estão vendo e faça pausas para {pronome} fixar o olhar.",
+            "acaoAudio": "Mostre devagar, conte a história do objeto e espere {nome} acompanhar com os olhos.",
+            "audioIllustration": "🎈",
+            "badge": { "id": "olhar-alerta", "nome": "Olhar Alerta", "icone": "👁️" },
+            "extraContent": [
+              { "titulo": "Estímulos Visuais na Medida", "url": "#" }
+            ]
+          }
+        },
+        {
+          "title": "Brincadeiras de Som & Voz",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🎵 Sons que Ensinam",
+              "itens": [
+                "Cante melodias simples",
+                "Rimas com gestos",
+                "Nomeie rotinas (banho, troca)",
+                "Espere o 'turno' de {nome}",
+                "Evite ruídos altos"
+              ]
+            },
+            "acaoTexto": "Integre música e fala às rotinas: banho, troca, soneca. Use **rimas com gestos** e aguarde a resposta vocal de {nome}. A repetição cria previsibilidade e reforça linguagem.",
+            "acaoAudio": "Cante, rime e dê espaço para {nome} responder. Música + pausa = conversa divertida!",
+            "audioIllustration": "🎶",
+            "badge": { "id": "maestro-do-afeto", "nome": "Maestro do Afeto", "icone": "🎵" },
+            "extraContent": [
+              { "titulo": "Cantigas que Acalmam", "url": "#" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "week": 11,
+      "title": "Semana 11 - Mundo Lá Fora",
+      "description": "Passeios curtos, sol com proteção e segurança em movimento.",
+      "interactive_flow": { "quiz_ref": "quiz_month3_week11" },
+      "topics": [
+        {
+          "title": "Passeios & Sol com Proteção",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🌤️ Sair com Segurança",
+              "itens": [
+                "Horários amenos (início da manhã/tarde)",
+                "Sombra, chapéu e roupas leves",
+                "Sem protetor em <6 meses (via de regra); priorize sombra",
+                "Hidratação da mãe que amamenta",
+                "Evitar aglomerações"
+              ]
+            },
+            "acaoTexto": "Passeios curtos em **horários amenos** ajudam a regular o relógio biológico e trazem estímulos naturais. Para <6 meses, priorize **sombra e barreiras físicas** (chapéu, roupa leve). Evite aglomerações.",
+            "acaoAudio": "Céu aberto com cuidado: sombra, chapéu e roupas leves. Passeio curto e seguro para {nome}.",
+            "audioIllustration": "🧢",
+            "badge": { "id": "explorador-do-sol", "nome": "Explorador do Sol", "icone": "🌤️" },
+            "extraContent": [
+              { "titulo": "Sol Seguro para Bebês", "url": "#" }
+            ]
+          }
+        },
+        {
+          "title": "Cadeirinha & Transporte",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🚗 Segurança no Trânsito",
+              "itens": [
+                "Bebê-conforto de costas para o movimento",
+                "Instalação correta (manual / ISOFIX)",
+                "Sem casacos grossos entre cinto e corpo",
+                "Travas e ângulos conforme fabricante",
+                "Nunca viajar no colo"
+              ]
+            },
+            "acaoTexto": "Utilize o **bebê-conforto** voltado para trás, conforme o manual. Ajuste o cinto sem folgas (sem casacos volumosos). **Nunca** transporte {nome} no colo. Verifique o ângulo adequado e a fixação.",
+            "acaoAudio": "Partiu passeio seguro: bebê-conforto virado para trás, cinto justo e nada de colo no carro.",
+            "audioIllustration": "🛡️",
+            "badge": { "id": "guardiao-do-trajeto", "nome": "Guardião do Trajeto", "icone": "🚗" },
+            "extraContent": [
+              { "titulo": "Guia de Cadeirinhas (Introdução)", "url": "#" }
+            ]
+          }
+        },
+        {
+          "title": "Resfriados & Sinais de Atenção",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🤧 Nariz & Respiração",
+              "itens": [
+                "Lave mãos antes de tocar no bebê",
+                "Irrigação nasal com soro fisiológico",
+                "Umidificação ambiental moderada",
+                "Atenção a febre e esforço respiratório",
+                "Procure serviço se piorar"
+              ]
+            },
+            "acaoTexto": "Em resfriados leves, **soro fisiológico** e aspiração suave ajudam. Procure atendimento se houver **febre persistente, apneias, gemência, batimento de asa do nariz, retrações** ou se {nome} estiver muito prostrado.",
+            "acaoAudio": "Nariz limpinho com soro, observação atenta e mãos sempre higienizadas. Sinais de esforço? Procure avaliação.",
+            "audioIllustration": "🫁",
+            "badge": { "id": "radar-respiratorio", "nome": "Radar Respiratório", "icone": "🫁" },
+            "extraContent": [
+              { "titulo": "Cuidado com Resfriados no 3º Mês", "url": "#" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "week": 12,
+      "title": "Semana 12 - Fechamento & Marcos",
+      "description": "Acompanhe medidas, marcos e prepare a próxima consulta.",
+      "interactive_flow": { "quiz_ref": "quiz_month3_week12" },
+      "topics": [
+        {
+          "title": "Crescimento: Peso, Estatura, PC",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "📈 Tendências que Importam",
+              "itens": [
+                "Registre em planilha/app",
+                "Meça sempre de forma consistente",
+                "Compare com curvas oficiais",
+                "Olhe a tendência, não o número isolado",
+                "Leve dúvidas ao pediatra"
+              ]
+            },
+            "acaoTexto": "Anote peso, estatura e perímetro cefálico, preferindo medir em condições similares. **Tendência ao longo do tempo** é mais útil do que um valor isolado. Leve o histórico à consulta.",
+            "acaoAudio": "Registre, observe a linha e converse com o pediatra. Tendência conta a história de {nome}.",
+            "audioIllustration": "📊",
+            "badge": { "id": "guardiao-dos-dados", "nome": "Guardião dos Dados", "icone": "📈" },
+            "extraContent": [
+              { "titulo": "Curvas 0–2 anos (referência)", "url": "#" }
+            ]
+          }
+        },
+        {
+          "title": "Marcos do 3º Mês",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🧩 O que Observar",
+              "itens": [
+                "Cabeça mais firme no colo",
+                "Segue objetos em 180°",
+                "Leva mãos à boca com intenção",
+                "Arrulhos e risadinhas",
+                "Interesse por rostos e vozes"
+              ]
+            },
+            "acaoTexto": "Marcos variam entre bebês. Procure **tendências**: cabeça mais firme, olhar que acompanha, mãos explorando, sons voluntários. Se houver preocupações persistentes, leve-as à consulta.",
+            "acaoAudio": "Compare {nome} consigo mesmo(a). Tendência de progresso é a melhor bússola.",
+            "audioIllustration": "🧭",
+            "badge": { "id": "marqueiro", "nome": "Caçador de Marcos", "icone": "🧩" },
+            "extraContent": [
+              { "titulo": "Marcos 2–3 Meses", "url": "#" }
+            ]
+          }
+        },
+        {
+          "title": "Consulta & Vacinas do Trimestre",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🗂️ Pronto para a Consulta",
+              "itens": [
+                "Caderneta da Criança em mãos",
+                "Registros de medidas",
+                "Rotina (sono, mamadas, brincadeiras)",
+                "Reações vacinais anteriores",
+                "Dúvidas anotadas"
+              ]
+            },
+            "acaoTexto": "Organize a **caderneta**, registros e dúvidas. Em muitos calendários, no 3º mês há **segundas doses** de vacinas iniciadas no mês 2 — confirme com o pediatra. Relate rotina de sono, mamadas e brincadeiras.",
+            "acaoAudio": "Caderneta, medidas e perguntas na mochila. Preparação = consulta mais objetiva para {nome}.",
+            "audioIllustration": "🩺",
+            "badge": { "id": "agente-de-saude", "nome": "Agente de Saúde da Família (3º Mês)", "icone": "🗂️" },
+            "extraContent": [
+              { "titulo": "Checklist da Consulta (3º mês)", "url": "#" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,457 @@
+[
+  {
+    "trail": "baby",
+    "title": "Jornada do Bebê - Mês 4",
+    "month": 4,
+    "journey": [
+      {
+        "week": 13,
+        "title": "Semana 13 - Novas Descobertas 🌟",
+        "description": "Interações mais claras: risadas, apoio nos braços, atenção a sons e conversas com vogais.",
+        "topics": [
+          {
+            "title": "Controle do Pescoço e Apoio nos Braços",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "🤲 Força no Tronco e Pescoço",
+                "itens": [
+                  "Sustenta a cabeça com firmeza",
+                  "Menos oscilação no colo",
+                  "Apoia o tronco nos antebraços durante o tummy time"
+                ]
+              },
+              "acaoTexto": "No 4º mês, {nome} geralmente mantém a cabeça firme e começa a sustentar o tronco com apoio nos antebraços. Esse controle é a base para rolar e, futuramente, sentar.",
+              "acaoAudio": "TitiNauta: olha o controle cervical de {nome}! Tummy time curto e frequente é o segredo.",
+              "audioIllustration": "🦾",
+              "badge": {
+                "id": "pescoço-forte",
+                "nome": "Pescoço Forte",
+                "icone": "🦾"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Tummy Time (SBP)",
+                  "url": "https://www.sbp.com.br/"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Risadinhas e Trocas de Afeto",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "❤️ Gargalhadas e Vínculo",
+                "itens": [
+                  "Ri com caretas e vozes engraçadas",
+                  "Prefere rostos conhecidos",
+                  "Procura contato olho-no-olho"
+                ]
+              },
+              "acaoTexto": "As risadinhas indicam resposta social e reforçam o vínculo. Brincadeiras leves e jogos de turn-taking social ajudam nessa fase.",
+              "acaoAudio": "Cada risadinha de {nome} é treino social! Use vozes e expressões divertidas.",
+              "audioIllustration": "😂",
+              "badge": {
+                "id": "risadinhas",
+                "nome": "Primeira Risada",
+                "icone": "😂"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Vínculo e desenvolvimento",
+                  "url": "https://www.unicef.org/brazil"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Atenção Auditiva",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "👂 Ouvinte Ativo",
+                "itens": [
+                  "Vira a cabeça para sons",
+                  "Reconhece a voz da mãe/pai/cuidador",
+                  "Pode assustar-se com barulhos fortes"
+                ]
+              },
+              "acaoTexto": "{nome} acompanha sons e procura sua origem. Isso integra audição, atenção e cognição, preparando o terreno para a linguagem.",
+              "acaoAudio": "Chame {nome} pelo nome com voz suave e aguarde a resposta. É um ótimo treino auditivo!",
+              "audioIllustration": "👂",
+              "badge": {
+                "id": "ouvinte-ativo",
+                "nome": "Ouvinte Ativo",
+                "icone": "👂"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Audição e linguagem",
+                  "url": "https://www.audiology.org"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Conversas com Vogais",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "💬 Balbucio Inicial",
+                "itens": [
+                  "Vogais prolongadas: “aaa”, “ooo”",
+                  "Imita entonações",
+                  "Responde quando você fala"
+                ]
+              },
+              "acaoTexto": "Responda aos sons de {nome} como uma conversa real: pausas, turnos e expressões aumentam o interesse em ‘falar’.",
+              "acaoAudio": "Converse com {nome} pausando para ele responder. É comunicação em dupla!",
+              "audioIllustration": "🎶",
+              "badge": {
+                "id": "pequeno-falante",
+                "nome": "Pequeno Falante",
+                "icone": "🗣️"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Estimulação da fala (SBP)",
+                  "url": "https://www.sbp.com.br"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "week": 14,
+        "title": "Semana 14 - Coordenação Olho-Mão 🎯",
+        "description": "Mais controle para alcançar, segurar e explorar com as mãos e a boca.",
+        "topics": [
+          {
+            "title": "Alcance e Preensão",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "✋ Esticar e Agarrar",
+                "itens": [
+                  "Tenta alcançar objetos",
+                  "Segura brinquedos leves",
+                  "Agita e leva à boca"
+                ]
+              },
+              "acaoTexto": "Pendure brinquedos coloridos ao alcance. Estimule o movimento fluido de alcançar, segurar e explorar.",
+              "acaoAudio": "{nome} já tenta agarrar o mundo! Brinquedos leves e seguros são ideais.",
+              "audioIllustration": "🖐️",
+              "badge": {
+                "id": "alcançador",
+                "nome": "Alcançador",
+                "icone": "🖐️"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Brinquedos seguros",
+                  "url": "https://www.gov.br/saude"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Rastreamento Visual",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "👁️ Olhar que Acompanha",
+                "itens": [
+                  "Segue objetos de um lado ao outro",
+                  "Fixa a atenção por mais tempo",
+                  "Prefere rostos e contrastes"
+                ]
+              },
+              "acaoTexto": "Movimente objetos em trajetórias lentas e previsíveis para que {nome} acompanhe com os olhos.",
+              "acaoAudio": "Faça um ‘passeio’ com um brinquedo diante dos olhos de {nome}.",
+              "audioIllustration": "👁️",
+              "badge": {
+                "id": "olhar-vivo",
+                "nome": "Olhar Vivo",
+                "icone": "👁️"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Visão infantil (AAO)",
+                  "url": "https://www.aao.org"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Texturas e Exploração Tátil",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "🧩 Mãos Curiosas",
+                "itens": [
+                  "Aprecia texturas diferentes",
+                  "Esfrega, aperta e tenta ‘beliscar’",
+                  "Leva as mãos à boca frequentemente"
+                ]
+              },
+              "acaoTexto": "Ofereça panos, livros de pano e brinquedos com texturas variadas para enriquecer o repertório sensorial.",
+              "acaoAudio": "Toque, sinta, explore! Texturas seguras ampliam a percepção de {nome}.",
+              "audioIllustration": "🧩",
+              "badge": {
+                "id": "descobridor-tatil",
+                "nome": "Descobridor Tátil",
+                "icone": "🧩"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Segurança com objetos",
+                  "url": "https://www.cdc.gov"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Imitação de Sons",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "🎵 Copiando Você",
+                "itens": [
+                  "Repete sons simples",
+                  "Varia volume e ritmo",
+                  "Sorri quando você imita"
+                ]
+              },
+              "acaoTexto": "Use jogos de repetição (‘você faz, eu faço’) com vogais e sílabas abertas para treinar turnos de conversa.",
+              "acaoAudio": "Imite {nome} e deixe que ele te imite de volta. É divertido e eficaz!",
+              "audioIllustration": "🎵",
+              "badge": {
+                "id": "eco-sonoro",
+                "nome": "Eco Sonoro",
+                "icone": "🎵"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Linguagem inicial (ASHA)",
+                  "url": "https://www.asha.org"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "week": 15,
+        "title": "Semana 15 - Mundo ao Alcance 🌍",
+        "description": "Brincadeiras sociais, primeiros rolamentos laterais e sinais de fome/saciedade.",
+        "topics": [
+          {
+            "title": "Rolar de Lado (Preparação)",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "🔄 Movimentos de Transição",
+                "itens": [
+                  "Rola parcialmente para o lado",
+                  "Joga o peso do corpo para alcançar",
+                  "Demonstra mais iniciativa motora"
+                ]
+              },
+              "acaoTexto": "Crie um ‘campo seguro’ no chão com tapete firme. Posicione brinquedos ao lado para motivar o giro lateral.",
+              "acaoAudio": "TitiNauta: incentive {nome} a alcançar lateralmente para iniciar o rolamento.",
+              "audioIllustration": "🔄",
+              "badge": {
+                "id": "primeiros-rolos",
+                "nome": "Primeiros Rolos",
+                "icone": "🤸"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Marcos motores (SBP)",
+                  "url": "https://www.sbp.com.br"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Brincadeiras de Espelho",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "🪞 Reflexo e Atenção",
+                "itens": [
+                  "Sorri para o reflexo",
+                  "Observa movimentos no espelho",
+                  "Fixa o olhar em expressões"
+                ]
+              },
+              "acaoTexto": "Use um espelho seguro no nível do bebê. Nomeie expressões e partes do rosto para enriquecer a linguagem e a percepção social.",
+              "acaoAudio": "‘Quem é esse bebê lindo?’ Nomeie e brinque com o reflexo!",
+              "audioIllustration": "🪞",
+              "badge": {
+                "id": "reflexo-feliz",
+                "nome": "Reflexo Feliz",
+                "icone": "🪞"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Estimulação visual",
+                  "url": "https://www.psychologytoday.com"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Diálogo e Turn-Taking",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "💬 Minha Vez, Sua Vez",
+                "itens": [
+                  "Alterna ‘falas’ com você",
+                  "Espera sua resposta",
+                  "Ri quando você responde"
+                ]
+              },
+              "acaoTexto": "Converse pausando para {nome} responder. Isso constrói o ritmo da comunicação e a atenção compartilhada.",
+              "acaoAudio": "Pratique ‘minha vez, sua vez’ em conversas curtas e afetuosas.",
+              "audioIllustration": "💬",
+              "badge": {
+                "id": "dueto-falante",
+                "nome": "Dueto Falante",
+                "icone": "💬"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Turn-taking e linguagem",
+                  "url": "https://www.sbp.com.br"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Sinais de Fome e Saciedade (Aleitamento Exclusivo)",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "🍼 Respeitar o Ritmo",
+                "itens": [
+                  "Fome: procura o peito, chupa as mãos",
+                  "Saciedade: desacelera, solta o peito",
+                  "Aleitamento exclusivo até 6 meses"
+                ]
+              },
+              "acaoTexto": "Observe sinais de fome e saciedade. O aleitamento exclusivo permanece a recomendação até 6 meses, salvo orientação clínica.",
+              "acaoAudio": "Deixe {nome} guiar a mamada: ele mostra quando quer e quando já está satisfeito.",
+              "audioIllustration": "🍼",
+              "badge": {
+                "id": "amigo-do-peito",
+                "nome": "Amigo do Peito",
+                "icone": "🍼"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Guia alimentar (MS)",
+                  "url": "https://bvsms.saude.gov.br"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "week": 16,
+        "title": "Semana 16 - Prontos para Novas Etapas 🚀",
+        "description": "Mais firmeza, curiosidade e preparação para rolar por completo.",
+        "topics": [
+          {
+            "title": "Apoio nos Antebraços e Exploração Visual",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "💪 Tronco Ativo",
+                "itens": [
+                  "Sustenta o tronco nos antebraços",
+                  "Olha ao redor durante o tummy time",
+                  "Movimenta pernas e quadris com vigor"
+                ]
+              },
+              "acaoTexto": "Aumente gradualmente o tempo de barriga para baixo, sempre com supervisão, em ciclos curtos e agradáveis.",
+              "acaoAudio": "{nome} está ficando forte e curioso! Novas aventuras estão chegando.",
+              "audioIllustration": "🚀",
+              "badge": {
+                "id": "forca-ativa",
+                "nome": "Força Ativa",
+                "icone": "💪"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Exercícios divertidos",
+                  "url": "https://www.healthychildren.org"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Coordenação Mão-Boca",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "✋👄 Explorar é Aprender",
+                "itens": [
+                  "Leva mãos e objetos à boca",
+                  "Explora texturas com sucção",
+                  "Atenção à segurança e higiene"
+                ]
+              },
+              "acaoTexto": "Explorar com a boca é normal e esperado. Use objetos grandes, sem peças pequenas e de fácil limpeza.",
+              "acaoAudio": "{nome} aprende com a boca! Garanta objetos seguros e limpos.",
+              "audioIllustration": "✋👄",
+              "badge": {
+                "id": "descobridor-sensorial",
+                "nome": "Descobridor Sensorial",
+                "icone": "🧠"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Segurança com brinquedos",
+                  "url": "https://www.cdc.gov"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Vacinação e Bem-Estar",
+            "content": {
+              "trail": "baby",
+              "microcard": {
+                "titulo": "💉 Proteção em Dia",
+                "itens": [
+                  "Verificar calendário do MS",
+                  "Organizar caderneta de vacinação",
+                  "Observar reações comuns (sonolência, febre baixa)"
+                ]
+              },
+              "acaoTexto": "O 4º mês costuma envolver segundas doses de vacinas do primeiro semestre. Siga o calendário oficial do Ministério da Saúde e converse com o pediatra.",
+              "acaoAudio": "Caderneta na mão! Verifique se há vacinas programadas para este mês.",
+              "audioIllustration": "💉",
+              "badge": {
+                "id": "protecao-em-dia",
+                "nome": "Proteção em Dia",
+                "icone": "🛡️"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Calendário vacinal (MS)",
+                  "url": "https://www.gov.br/saude"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

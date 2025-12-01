@@ -1,0 +1,385 @@
+[
+  {
+    "trail": "mother",
+    "title": "Jornada da Mãe - Mês 4",
+    "month": 4,
+    "journey": [
+      {
+        "week": 13,
+        "title": "Semana 13 - Reforçando o Autocuidado",
+        "description": "Equilibrando cuidados com o bebê e com você mesma.",
+        "topics": [
+          {
+            "title": "Sono e Rotina",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🌙 Organização do Descanso",
+                "itens": [
+                  "Cochilos junto com o bebê",
+                  "Evitar telas 1h antes de dormir",
+                  "Rotina consistente",
+                  "Dividir tarefas quando possível"
+                ]
+              },
+              "acaoTexto": "Otimize o descanso com pequenos cochilos e higiene do sono. Aceitar ajuda é estratégia de cuidado, não de fraqueza.",
+              "acaoAudio": "TitiNauta: descanse quando {nome} descansar. Seu corpo precisa recarregar.",
+              "audioIllustration": "😴",
+              "badge": {
+                "id": "sono-recuperado",
+                "nome": "Sono Recuperado",
+                "icone": "🌙"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Sono materno (OMS/OPAS)",
+                  "url": "https://www.paho.org/pt"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Saúde Emocional",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "💜 Atenção aos Sinais",
+                "itens": [
+                  "Tristeza persistente > 2 semanas",
+                  "Ansiedade e irritabilidade constantes",
+                  "Dificuldade de vínculo",
+                  "Procure apoio profissional"
+                ]
+              },
+              "acaoTexto": "A depressão pós-parto pode surgir até meses após o nascimento. Fale com o(a) médico(a) se sinais persistirem.",
+              "acaoAudio": "Você não está sozinha. Falar sobre o que sente é um passo de coragem.",
+              "audioIllustration": "💜",
+              "badge": {
+                "id": "forca-mental",
+                "nome": "Força Mental",
+                "icone": "🧠"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Saúde mental no puerpério",
+                  "url": "https://www.who.int"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Nutrição e Hidratação",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🥗 Energia que Sustenta",
+                "itens": [
+                  "Água por perto ao amamentar",
+                  "Refeições regulares",
+                  "Priorizar in natura",
+                  "Evitar excesso de cafeína"
+                ]
+              },
+              "acaoTexto": "Alimentação e hidratação adequadas fazem diferença na disposição, humor e, quando aplicável, na amamentação.",
+              "acaoAudio": "Monte lanches rápidos e nutritivos: frutas, iogurte, castanhas.",
+              "audioIllustration": "🥗",
+              "badge": {
+                "id": "energia-mae",
+                "nome": "Energia da Mãe",
+                "icone": "⚡"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Guia alimentar MS",
+                  "url": "https://bvsms.saude.gov.br"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "week": 14,
+        "title": "Semana 14 - Corpo em Movimento",
+        "description": "Retomada gradual de atividade física e cuidado pélvico.",
+        "topics": [
+          {
+            "title": "Exercícios Pós-Parto",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🏃 Recomeçar com Leveza",
+                "itens": [
+                  "Caminhadas curtas",
+                  "Alongamentos suaves",
+                  "Fortalecimento leve",
+                  "Respeitar limites"
+                ]
+              },
+              "acaoTexto": "Após liberação médica, inicie com treinos leves e progressivos. A consistência importa mais que a intensidade.",
+              "acaoAudio": "Movimente-se por 10–15 minutos/dia e aumente conforme tolerância.",
+              "audioIllustration": "🏃",
+              "badge": {
+                "id": "retorno-ativo",
+                "nome": "Retorno Ativo",
+                "icone": "🏃"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Atividade física pós-parto (ACOG)",
+                  "url": "https://www.acog.org"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Saúde Íntima e Assoalho Pélvico",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🌸 Cuidado Pélvico",
+                "itens": [
+                  "Exercícios de Kegel",
+                  "Observar escapes urinários",
+                  "Evitar impacto alto",
+                  "Consultar fisio pélvica"
+                ]
+              },
+              "acaoTexto": "O fortalecimento pélvico previne incontinência e melhora o conforto nas atividades diárias e na vida sexual.",
+              "acaoAudio": "Kegel: contrair, sustentar 5s, relaxar 5s — repetir 10x, 3 séries/dia.",
+              "audioIllustration": "🌸",
+              "badge": {
+                "id": "cuidado-intimo",
+                "nome": "Cuidado Íntimo",
+                "icone": "🌸"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Exercícios de Kegel (MSD)",
+                  "url": "https://www.msdmanuals.com"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Autoestima e Imagem Corporal",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "💃 Confiança Renovada",
+                "itens": [
+                  "Evitar comparações",
+                  "Celebrar pequenas vitórias",
+                  "Roupas confortáveis",
+                  "Autocuidado regular"
+                ]
+              },
+              "acaoTexto": "Apoie-se em metas realistas e gentis. Seu corpo fez algo extraordinário e ainda está se reorganizando.",
+              "acaoAudio": "Você é suficiente. Valorize a jornada, não a pressa.",
+              "audioIllustration": "💃",
+              "badge": {
+                "id": "autoestima",
+                "nome": "Autoestima Renovada",
+                "icone": "💃"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Autoimagem no puerpério",
+                  "url": "https://www.unicef.org"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "week": 15,
+        "title": "Semana 15 - Redes de Apoio",
+        "description": "Cultivar relações que sustentam a rotina materna.",
+        "topics": [
+          {
+            "title": "Rede de Apoio",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🤝 Compartilhar é Cuidar",
+                "itens": [
+                  "Delegar tarefas domésticas",
+                  "Pedir ajuda sem culpa",
+                  "Grupos de mães e família",
+                  "Combinar rotinas com parceiros"
+                ]
+              },
+              "acaoTexto": "Apoio social melhora saúde emocional e reduz sobrecarga. Combine responsabilidades de forma clara.",
+              "acaoAudio": "Faça uma lista de tarefas que podem ser delegadas nesta semana.",
+              "audioIllustration": "🤝",
+              "badge": {
+                "id": "rede-apoio",
+                "nome": "Rede de Apoio",
+                "icone": "🤝"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Puerpério e suporte (OMS)",
+                  "url": "https://www.who.int"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Relacionamento Conjugal",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "❤️ A Dois na Jornada",
+                "itens": [
+                  "Comunicação aberta",
+                  "Tempo de qualidade",
+                  "Dividir responsabilidades",
+                  "Celebrar conquistas juntos"
+                ]
+              },
+              "acaoTexto": "Reconectar-se ajuda o bem-estar do casal e da família. Pequenos momentos valem muito.",
+              "acaoAudio": "Agende 30 minutos nesta semana para um momento a dois, mesmo em casa.",
+              "audioIllustration": "❤️",
+              "badge": {
+                "id": "casal-forte",
+                "nome": "Casal Forte",
+                "icone": "❤️"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Relacionamento e pós-parto",
+                  "url": "https://www.psychologytoday.com"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Autonomia Materna",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🌟 Redescobrir-se",
+                "itens": [
+                  "Retomar hobbies",
+                  "Pequenos prazeres diários",
+                  "Cuidar da identidade pessoal",
+                  "Planejar metas curtas"
+                ]
+              },
+              "acaoTexto": "Sua identidade também importa. Inclua atividades que te façam bem e caibam na rotina atual.",
+              "acaoAudio": "Escreva 2 atividades simples que você pode fazer esta semana por você.",
+              "audioIllustration": "🌟",
+              "badge": {
+                "id": "autonomia",
+                "nome": "Autonomia Materna",
+                "icone": "🌟"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Autocuidado e maternidade",
+                  "url": "https://bvsms.saude.gov.br"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "week": 16,
+        "title": "Semana 16 - Planejando os Próximos Passos",
+        "description": "Reflexões sobre retorno ao trabalho, rotinas e saúde continuada.",
+        "topics": [
+          {
+            "title": "Planejamento do Retorno ao Trabalho",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "📅 Organização Prática",
+                "itens": [
+                  "Mapear horários e apoio",
+                  "Ensaiar rotina do bebê",
+                  "Alinhar expectativas com a família",
+                  "Manter consultas em dia"
+                ]
+              },
+              "acaoTexto": "Planejar reduz ansiedade: teste rotinas, combine apoios e faça ajustes de forma gradual.",
+              "acaoAudio": "Faça um checklist simples do que precisa estar organizado antes do retorno.",
+              "audioIllustration": "📅",
+              "badge": {
+                "id": "planejamento",
+                "nome": "Planejamento",
+                "icone": "📅"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Retorno ao trabalho (OIT/ILO)",
+                  "url": "https://www.ilo.org"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Autocuidado Estratégico",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🧘‍♀️ Rotina que Sustenta",
+                "itens": [
+                  "Agenda de sono e pausas",
+                  "Exercício regular leve",
+                  "Alimentação planejada",
+                  "Tempo de qualidade pessoal"
+                ]
+              },
+              "acaoTexto": "Consolide uma rotina realista que inclua pausas, movimento e alimentação, respeitando a fase atual.",
+              "acaoAudio": "Reserve 10 minutos diários para respirar, alongar e beber água conscientemente.",
+              "audioIllustration": "🧘‍♀️",
+              "badge": {
+                "id": "autocuidado-estrategico",
+                "nome": "Autocuidado Estratégico",
+                "icone": "🧘‍♀️"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Hábitos saudáveis (OPAS)",
+                  "url": "https://www.paho.org/pt"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Sinais de Alerta Tardios",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "⚠️ Fique Atenta",
+                "itens": [
+                  "Dor de cabeça intensa e visão turva",
+                  "Dor/edema em uma perna (risco trombótico)",
+                  "Febre persistente",
+                  "Pensamentos de autoagressão"
+                ]
+              },
+              "acaoTexto": "Na dúvida, procure serviço de saúde. Reconhecer sinais de alerta salva vidas.",
+              "acaoAudio": "Se algo não parece certo, confie no seu instinto e busque ajuda imediatamente.",
+              "audioIllustration": "🚑",
+              "badge": {
+                "id": "vigilante",
+                "nome": "Vigilante Materna",
+                "icone": "⚠️"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Checklist de sinais (CDC/OPAS)",
+                  "url": "https://www.cdc.gov"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

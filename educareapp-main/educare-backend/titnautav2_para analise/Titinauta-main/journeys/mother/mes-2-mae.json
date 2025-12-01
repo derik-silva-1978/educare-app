@@ -1,0 +1,292 @@
+
+{
+  "trail": "mother",
+  "title": "Jornada da Mãe - Mês 2",
+  "journey": [
+    {
+      "week": 5,
+      "title": "Semana 5 - Energia & Ritmo",
+      "description": "Consolidando amamentação, saúde mental e energia.",
+      "interactive_flow": { "quiz_ref": "week5" },
+      "topics": [
+        {
+          "title": "Amamentação no 2º Mês",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🤱 Ritmo & Conforto",
+              "itens": [
+                "Livre demanda observando sinais",
+                "Ajuste de pega se houver dor",
+                "Pausa para arrotar",
+                "Evite bicos/mamadeiras sem orientação",
+                "Rede de apoio ativa"
+              ]
+            },
+            "acaoTexto": "Com picos de crescimento, a demanda pode aumentar. Se houver dor, revise pega/posição. Hidrate-se, descanse quando puder e ative sua rede de apoio.",
+            "acaoAudio": "Sinais de fome, pega confortável e pausas. Se doer, ajuste. Você não está sozinha.",
+            "audioIllustration": "🤱",
+            "badge": { "id": "ritmo-de-ouro", "nome": "Ritmo de Ouro", "icone": "🤱" },
+            "extraContent": [
+              { "titulo": "Guia de Amamentação", "url": "https://example.org/amamentacao2" }
+            ]
+          }
+        },
+        {
+          "title": "Saúde Mental & Rede de Apoio",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🧠 Você Importa",
+              "itens": [
+                "Baby blues x depressão",
+                "Sinais: tristeza persistente, culpa",
+                "Converse com profissionais",
+                "Apoio de familiares/amigos",
+                "Peça ajuda prática"
+              ]
+            },
+            "acaoTexto": "Oscilações são comuns, mas sintomas persistentes exigem avaliação. Fale com a equipe de saúde, compartilhe tarefas e aceite ajuda.",
+            "acaoAudio": "Pedir ajuda é força. Sua saúde emocional é prioridade para você e para {nome}.",
+            "audioIllustration": "💜",
+            "badge": { "id": "equilibrio-mente", "nome": "Equilíbrio da Mente", "icone": "💜" },
+            "extraContent": [
+              { "titulo": "Cuidados em Saúde Mental Pós-parto", "url": "https://example.org/mental2" }
+            ]
+          }
+        },
+        {
+          "title": "Energia Sustentável",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "⚙️ Energia no Dia a Dia",
+              "itens": [
+                "Sonecas curtas quando possível",
+                "Garrafa de água por perto",
+                "Lanches simples e nutritivos",
+                "Caminhada leve (se liberada)",
+                "Delegue sem culpa"
+              ]
+            },
+            "acaoTexto": "Pequenos hábitos repetidos aumentam a energia: hidratação, lanches fáceis e movimento leve com liberação médica. Delegar é saúde.",
+            "acaoAudio": "Hidratar, nutrir, mover. O básico bem feito gera energia real.",
+            "audioIllustration": "⚡",
+            "badge": { "id": "energia-on", "nome": "Energia ON", "icone": "⚡" },
+            "extraContent": [
+              { "titulo": "Autocuidado no Puerpério", "url": "https://example.org/autocuidado2" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "week": 6,
+      "title": "Semana 6 - Mamas & Conforto",
+      "description": "Prevenção de desconfortos e cuidados com o seu bem-estar.",
+      "interactive_flow": { "quiz_ref": "week6" },
+      "topics": [
+        {
+          "title": "Fissura, Ingurgitamento & Mastite",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🧊 Protocolo Atual",
+              "itens": [
+                "Pega correta é base",
+                "Leite materno para fissuras",
+                "Compressa fria para inflamação",
+                "Evite massagens vigorosas e calor",
+                "Sinais de mastite = avaliação"
+              ]
+            },
+            "acaoTexto": "Ajuste de pega resolve a maioria das fissuras. Ingurgitamento melhora com compressas frias e mamadas regulares. Sinais de mastite (dor, vermelhidão, febre) exigem avaliação médica.",
+            "acaoAudio": "Se doer, revise a pega. Para inchaço, frio ajuda. Febre e área vermelha? Procure atendimento.",
+            "audioIllustration": "🧊",
+            "badge": { "id": "amiga-do-peito2", "nome": "Amiga do Peito (Mês 2)", "icone": "🤱" },
+            "extraContent": [
+              { "titulo": "Manejo de Mastite: pontos-chave", "url": "https://example.org/mastite2" }
+            ]
+          }
+        },
+        {
+          "title": "Sono da Mãe",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "😴 Recuperar é Cuidar",
+              "itens": [
+                "Sonecas sincronizadas com o bebê",
+                "Reduza luz à noite",
+                "Tarefas não essenciais podem esperar",
+                "Peça revezamento com a rede de apoio",
+                "Evite estimulantes à noite"
+              ]
+            },
+            "acaoTexto": "Sono em blocos curtos ainda ajuda. Sincronize cochilos com {nome}, reduza estímulos noturnos e aceite ajuda prática.",
+            "acaoAudio": "Descansar é parte do cuidado. Planeje cochilos e proteja suas noites do excesso de estímulos.",
+            "audioIllustration": "🌙",
+            "badge": { "id": "sono-em-dia", "nome": "Sono em Dia", "icone": "😴" },
+            "extraContent": [
+              { "titulo": "Higiene do Sono Pós-parto", "url": "https://example.org/sono_mae2" }
+            ]
+          }
+        },
+        {
+          "title": "Alimentação & Hidratação",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🥗 Energia que Sustenta",
+              "itens": [
+                "Lanches rápidos (frutas, oleaginosas)",
+                "Pratos simples com proteínas",
+                "Garrafa de água por perto",
+                "Evite dietas restritivas",
+                "Planeje compras/quentinhas"
+              ]
+            },
+            "acaoTexto": "Nutrientes sustentam energia e a amamentação. Prefira refeições simples e frequentes. Água à mão e planejamento reduzem estresse.",
+            "acaoAudio": "Nutra-se de forma prática. O simples e constante funciona melhor agora.",
+            "audioIllustration": "🥤",
+            "badge": { "id": "combustivel-bom", "nome": "Combustível Bom", "icone": "🥗" },
+            "extraContent": [
+              { "titulo": "Dieta Prática para o Puerpério", "url": "https://example.org/dieta2" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "week": 7,
+      "title": "Semana 7 - Contracepção & Movimento",
+      "description": "Planejamento, retorno ao movimento e à sexualidade.",
+      "interactive_flow": { "quiz_ref": "week7" },
+      "topics": [
+        {
+          "title": "Contracepção Pós-parto",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🛡️ Planejar com Segurança",
+              "itens": [
+                "Métodos compatíveis com amamentação",
+                "Condom, DIU, progestagênicos",
+                "Evitar estrogênio inicial",
+                "Decida com seu profissional",
+                "Combinar método + rotina"
+              ]
+            },
+            "acaoTexto": "Avalie métodos seguros na amamentação (barreira, DIU, progestagênicos). O melhor método é o que você consegue usar com regularidade e orientação profissional.",
+            "acaoAudio": "Planeje com calma. Escolha um método que caiba na sua rotina e combine com seu profissional.",
+            "audioIllustration": "🛡️",
+            "badge": { "id": "planejamento-ok", "nome": "Planejamento OK", "icone": "🗓️" },
+            "extraContent": [
+              { "titulo": "Opções Seguras na Amamentação", "url": "https://example.org/contracepcao2" }
+            ]
+          }
+        },
+        {
+          "title": "Atividade Física Leve",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🚶‍♀️ Volta com Calma",
+              "itens": [
+                "Liberada pelo profissional? Sim",
+                "Caminhadas curtas e regulares",
+                "Alongamentos leves",
+                "Atenção a dor/excesso de sangramento",
+                "Evolução progressiva"
+              ]
+            },
+            "acaoTexto": "Após liberação, comece com caminhadas curtas e alongamentos. Observe sinais do corpo (dor, sangramento) e evolua devagar.",
+            "acaoAudio": "Devagar é avançar. Comece leve, ouça seu corpo, aumente aos poucos.",
+            "audioIllustration": "👟",
+            "badge": { "id": "movimento-seguro", "nome": "Movimento Seguro", "icone": "👟" },
+            "extraContent": [
+              { "titulo": "Exercícios no Puerpério", "url": "https://example.org/exercicio2" }
+            ]
+          }
+        },
+        {
+          "title": "Sexualidade com Conforto",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "💗 Diálogo & Respeito",
+              "itens": [
+                "Lubrificação pode estar reduzida",
+                "Dor não é normal — ajuste e avalie",
+                "Comunicação com o(a) parceiro(a)",
+                "Contracepção definida = tranquilidade",
+                "Voltar no seu tempo"
+              ]
+            },
+            "acaoTexto": "Mudanças hormonais alteram desejo e lubrificação. Priorize conforto, comunicação e métodos contraceptivos definidos. Se houver dor persistente, procure avaliação.",
+            "acaoAudio": "Respeite seu ritmo. Conforto e diálogo guiam o retorno saudável da sexualidade.",
+            "audioIllustration": "💗",
+            "badge": { "id": "cuidado-intimo", "nome": "Cuidado Íntimo", "icone": "💗" },
+            "extraContent": [
+              { "titulo": "Sexualidade no Pós-parto", "url": "https://example.org/sexualidade2" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "week": 8,
+      "title": "Semana 8 - Preparar a Consulta",
+      "description": "Checklist prático para a consulta de seguimento e sinais de atenção.",
+      "interactive_flow": { "quiz_ref": "week8" },
+      "topics": [
+        {
+          "title": "Checklist para a Consulta",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🗂️ Organização que Ajuda",
+              "itens": [
+                "Descrever rotina (sono, alimentação, humor)",
+                "Relatar dúvidas objetivas",
+                "Anotar reações a vacinas do bebê",
+                "Discutir contracepção e retorno ao exercício",
+                "Sinais de alerta: quando procurar antes"
+              ]
+            },
+            "acaoTexto": "Leve anotações sobre rotina, humor, dúvidas e reações do bebê. Alinhe contracepção e atividade física. Revise sinais de alerta (hemorragia intensa, febre alta, dor no peito/falta de ar, dor e inchaço em uma perna).",
+            "acaoAudio": "Caderneta, anotações e perguntas. Informação organizada torna a consulta mais objetiva e resolutiva.",
+            "audioIllustration": "🩺",
+            "badge": { "id": "gestora-saude", "nome": "Gestora da Saúde", "icone": "🗂️" },
+            "extraContent": [
+              { "titulo": "Como se Preparar para a Consulta", "url": "https://example.org/consulta_mae2" }
+            ]
+          }
+        },
+        {
+          "title": "Rede de Apoio & Alertas",
+          "content": {
+            "trail": "mother",
+            "microcard": {
+              "titulo": "🤝 Quem Te Sustenta",
+              "itens": [
+                "Mapeie quem pode ajudar",
+                "Peça tarefas específicas",
+                "Sinais de alerta: não adie",
+                "Contato do serviço de saúde salvo",
+                "Combine plano de cuidado"
+              ]
+            },
+            "acaoTexto": "Defina papéis práticos na sua rede (compras, comida, ficar com o bebê). Revise alertas e tenha contatos salvos para agir cedo quando necessário.",
+            "acaoAudio": "Ajuda combinada vira rotina leve. E alerta reconhecido vira cuidado rápido.",
+            "audioIllustration": "📞",
+            "badge": { "id": "time-apoio", "nome": "Time de Apoio", "icone": "🤝" },
+            "extraContent": [
+              { "titulo": "Ativando sua Rede de Apoio", "url": "https://example.org/apoio2" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

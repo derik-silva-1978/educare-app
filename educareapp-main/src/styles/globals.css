@@ -1,0 +1,300 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base accessibility classes */
+@layer base {
+  /* Provide proper contrast ratios */
+  .high-contrast {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 98%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+  }
+
+  /* High contrast dark mode */
+  .high-contrast.dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 74.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 60.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 25.9%;
+    --input: 240 3.7% 25.9%;
+    --ring: 240 4.9% 93.9%;
+  }
+
+  /* Font size classes */
+  .text-size--2 {
+    font-size: 0.75rem;
+  }
+  
+  .text-size--1 {
+    font-size: 0.875rem;
+  }
+  
+  .text-size-0 {
+    font-size: 1rem;
+  }
+  
+  .text-size-1 {
+    font-size: 1.125rem;
+  }
+  
+  .text-size-2 {
+    font-size: 1.25rem;
+  }
+  
+  .text-size-3 {
+    font-size: 1.375rem;
+  }
+  
+  /* Focus styles for keyboard navigation */
+  .focus-visible:focus {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+  
+  /* Screen reader optimization */
+  .screen-reader-optimized :is(button, a, input, select, textarea, [role="button"]) {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  /* Visually hidden but accessible to screen readers */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  
+  /* Simplified UI */
+  .simplified-ui {
+    --animation-duration: 0s;
+  }
+  
+  .simplified-ui * {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+  
+  /* Reduced motion */
+  .reduce-motion * {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Titibot specific styles */
+@layer components {
+  .titibot-launcher {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    z-index: 50;
+  }
+  
+  .titibot-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+  
+  .titibot-footer {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid hsl(var(--border));
+    background-color: hsl(var(--background));
+    font-size: 0.75rem;
+    text-align: center;
+    color: hsl(var(--muted-foreground));
+  }
+  
+  .titibot-message {
+    display: flex;
+    margin-bottom: 0.5rem;
+  }
+  
+  .titibot-message-content {
+    max-width: 85%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+  }
+  
+  .titibot-user-message {
+    justify-content: flex-end;
+  }
+  
+  .titibot-bot-message {
+    justify-content: flex-start;
+  }
+  
+  .titibot-user-message .titibot-message-content {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+  
+  .titibot-bot-message .titibot-message-content {
+    background-color: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
+  }
+  
+  .titibot-message-time {
+    font-size: 0.6rem;
+    margin-top: 0.25rem;
+    opacity: 0.7;
+  }
+  
+  .titibot-typing {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  
+  .titibot-typing-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: hsl(var(--primary));
+    animation: typing-animation 1s infinite ease-in-out;
+  }
+  
+  .titibot-typing-dot:nth-child(1) {
+    animation-delay: 0s;
+  }
+  
+  .titibot-typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  
+  .titibot-typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+  
+  @keyframes typing-animation {
+    0%, 60%, 100% {
+      transform: translateY(0);
+    }
+    30% {
+      transform: translateY(-4px);
+    }
+  }
+}
+
+/* Responsive design utilities */
+@layer utilities {
+  .responsive-container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .responsive-container {
+      max-width: 640px;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .responsive-container {
+      max-width: 768px;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .responsive-container {
+      max-width: 1024px;
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .responsive-container {
+      max-width: 1280px;
+    }
+  }
+  
+  /* Print styles for reports */
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    
+    .print-section, .print-section * {
+      visibility: visible;
+    }
+    
+    .print-section {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+    
+    .no-print {
+      display: none !important;
+    }
+  }
+  
+  /* Loading skeletons */
+  .skeleton {
+    animation: skeleton-loading 1s linear infinite alternate;
+  }
+  
+  @keyframes skeleton-loading {
+    0% {
+      background-color: hsl(200, 20%, 95%);
+    }
+    100% {
+      background-color: hsl(200, 20%, 99%);
+    }
+  }
+  
+  .dark .skeleton {
+    animation: skeleton-loading-dark 1s linear infinite alternate;
+  }
+  
+  @keyframes skeleton-loading-dark {
+    0% {
+      background-color: hsl(200, 5%, 15%);
+    }
+    100% {
+      background-color: hsl(200, 5%, 25%);
+    }
+  }
+}

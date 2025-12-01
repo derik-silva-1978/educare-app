@@ -1,0 +1,746 @@
+{
+  "week13": {
+    "trail": "quiz",
+    "month": 4,
+    "week": 13,
+    "title": "Quiz da Semana 13",
+    "icon": "🧠",
+    "description": "Novas interações, risadas e controle cervical.",
+    "baby_domains": [
+      {
+        "id": "motor_w13",
+        "title": "🤲 Motor",
+        "question": "{nome} sustenta a cabeça com firmeza, sem balançar?",
+        "options": [
+          "Sim, firme",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Excelente! Mostra força cervical.",
+          "negativo": "Tudo bem, continue com tummy time curto e frequente."
+        },
+        "knowledge": {
+          "title": "Por que é importante?",
+          "text": "Controle cervical prepara para rolar e sentar.",
+          "links": [
+            {
+              "titulo": "Tummy Time (SBP)",
+              "url": "https://www.sbp.com.br"
+            }
+          ]
+        }
+      },
+      {
+        "id": "cognitive_w13",
+        "title": "🧠 Cognitivo",
+        "question": "{nome} observa atentamente rostos e objetos por alguns segundos?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Não"
+        ],
+        "feedback": {
+          "positivo": "Ótimo! Tempo de atenção está aumentando.",
+          "negativo": "Brinquedos de alto contraste podem ajudar."
+        },
+        "knowledge": {
+          "title": "Atenção em crescimento",
+          "text": "Foco visual é base para aprendizagem futura.",
+          "links": [
+            {
+              "titulo": "Visão e cognição",
+              "url": "https://www.aao.org"
+            }
+          ]
+        }
+      },
+      {
+        "id": "sensory_w13",
+        "title": "👁️ Sensorial",
+        "question": "{nome} vira a cabeça em direção a sons familiares?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Não"
+        ],
+        "feedback": {
+          "positivo": "Mostra atenção auditiva saudável.",
+          "negativo": "Estimule com músicas suaves e sua voz."
+        },
+        "knowledge": {
+          "title": "Audição e linguagem",
+          "text": "Seguir sons contribui para a linguagem.",
+          "links": [
+            {
+              "titulo": "Audição (ASHA)",
+              "url": "https://www.asha.org"
+            }
+          ]
+        }
+      },
+      {
+        "id": "communication_w13",
+        "title": "💬 Comunicação",
+        "question": "{nome} emite vogais prolongadas (ex.: 'aaa', 'ooo')?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Ótimo! Balbucio inicial em progresso.",
+          "negativo": "Responda como conversa de dois turnos."
+        },
+        "knowledge": {
+          "title": "Balbucio inicial",
+          "text": "Responder aos sons reforça o interesse em se comunicar.",
+          "links": [
+            {
+              "titulo": "Estimulação (SBP)",
+              "url": "https://www.sbp.com.br"
+            }
+          ]
+        }
+      },
+      {
+        "id": "social_emocional_w13",
+        "title": "❤️ Social-Emocional",
+        "question": "{nome} ri quando você brinca ou faz caretas?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Cada risada fortalece vínculos.",
+          "negativo": "Brinque com expressões e contato visual."
+        },
+        "knowledge": {
+          "title": "Sorriso e risada",
+          "text": "Marcos sociais reforçam vínculo afetivo.",
+          "links": [
+            {
+              "titulo": "Vínculo (UNICEF)",
+              "url": "https://www.unicef.org/brazil"
+            }
+          ]
+        }
+      },
+      {
+        "id": "baby_health_w13",
+        "title": "👶 Saúde do Bebê",
+        "question": "A rotina de tummy time ocorre diariamente com supervisão?",
+        "options": [
+          "Sim, diário",
+          "Alguns dias",
+          "Raramente"
+        ],
+        "feedback": {
+          "positivo": "Perfeito! A regularidade acelera ganhos motores.",
+          "negativo": "Tente sessões curtas várias vezes ao dia."
+        },
+        "knowledge": {
+          "title": "Rotina segura",
+          "text": "Sessões curtas e frequentes são eficazes e seguras.",
+          "links": [
+            {
+              "titulo": "Orientações (AAP)",
+              "url": "https://www.healthychildren.org"
+            }
+          ]
+        }
+      }
+    ],
+    "mother_domains": [
+      {
+        "id": "maternal_self_care_w13",
+        "title": "🧘‍♀️ Autocuidado Materno",
+        "question": "Você tem tirado pequenos intervalos de descanso ao longo do dia?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Quase nunca"
+        ],
+        "feedback": {
+          "positivo": "Ótimo! Isso melhora energia e humor.",
+          "negativo": "Tente cochilos ou pausas programadas."
+        },
+        "knowledge": {
+          "title": "Por que descansar?",
+          "text": "Descanso reduz estresse e melhora cognição.",
+          "links": [
+            {
+              "titulo": "Sono (OMS)",
+              "url": "https://www.who.int"
+            }
+          ]
+        }
+      },
+      {
+        "id": "maternal_health_w13",
+        "title": "💚 Saúde Materna",
+        "question": "Sinais de tristeza/ansiedade persistem há mais de 2 semanas?",
+        "options": [
+          "Não",
+          "Leve",
+          "Sim"
+        ],
+        "feedback": {
+          "positivo": "Que bom! Siga se observando.",
+          "negativo": "Procure avaliação profissional; você não está sozinha."
+        },
+        "knowledge": {
+          "title": "Alerta emocional",
+          "text": "DPP pode surgir até meses após o parto.",
+          "links": [
+            {
+              "titulo": "Saúde mental (OPAS)",
+              "url": "https://www.paho.org/pt"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "week14": {
+    "trail": "quiz",
+    "month": 4,
+    "week": 14,
+    "title": "Quiz da Semana 14",
+    "icon": "🤲",
+    "description": "Coordenação olho-mão, rastreamento visual e imitação de sons.",
+    "baby_domains": [
+      {
+        "id": "motor_w14",
+        "title": "🤲 Motor",
+        "question": "{nome} tenta alcançar e segurar objetos próximos?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Ótimo! Coordenação em evolução.",
+          "negativo": "Pendure brinquedos leves e coloridos ao alcance."
+        },
+        "knowledge": {
+          "title": "Coordenação olho-mão",
+          "text": "Explorar objetos integra visão e movimento.",
+          "links": [
+            {
+              "titulo": "Brincar com segurança",
+              "url": "https://www.gov.br/saude"
+            }
+          ]
+        }
+      },
+      {
+        "id": "cognitive_w14",
+        "title": "🧠 Cognitivo",
+        "question": "{nome} demonstra curiosidade por objetos novos (olha mais, tenta tocar)?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Excelente! Curiosidade é motor da aprendizagem.",
+          "negativo": "Apresente objetos com texturas variadas."
+        },
+        "knowledge": {
+          "title": "Exploração e atenção",
+          "text": "Novidade aumenta foco e aprendizagem.",
+          "links": [
+            {
+              "titulo": "Desenvolvimento",
+              "url": "https://www.unicef.org/brazil"
+            }
+          ]
+        }
+      },
+      {
+        "id": "sensory_w14",
+        "title": "👁️ Sensorial",
+        "question": "{nome} segue com os olhos objetos em diferentes direções?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Não"
+        ],
+        "feedback": {
+          "positivo": "Visão em boa evolução!",
+          "negativo": "Mova objetos lentamente no campo visual."
+        },
+        "knowledge": {
+          "title": "Rastreamento visual",
+          "text": "Rastrear objetos refina coordenação olho-mão.",
+          "links": [
+            {
+              "titulo": "Visão (AAO)",
+              "url": "https://www.aao.org"
+            }
+          ]
+        }
+      },
+      {
+        "id": "communication_w14",
+        "title": "💬 Comunicação",
+        "question": "{nome} imita sons simples quando você repete para ele?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Ótimo! Já há turn-taking vocal.",
+          "negativo": "Faça jogos de eco com vogais."
+        },
+        "knowledge": {
+          "title": "Turnos de conversa",
+          "text": "Imitação sustenta a futura aquisição da fala.",
+          "links": [
+            {
+              "titulo": "Linguagem (ASHA)",
+              "url": "https://www.asha.org"
+            }
+          ]
+        }
+      },
+      {
+        "id": "social_emocional_w14",
+        "title": "❤️ Social-Emocional",
+        "question": "{nome} busca contato visual e sorri quando você interage?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Perfeito! Vínculo em fortalecimento.",
+          "negativo": "Fale com carinho, sorria e mantenha contato visual."
+        },
+        "knowledge": {
+          "title": "Atenção compartilhada",
+          "text": "Olho-no-olho cria base para comunicação social.",
+          "links": [
+            {
+              "titulo": "Vínculo (UNICEF)",
+              "url": "https://www.unicef.org/brazil"
+            }
+          ]
+        }
+      }
+    ],
+    "mother_domains": [
+      {
+        "id": "maternal_self_care_w14",
+        "title": "🧘‍♀️ Autocuidado Materno",
+        "question": "Você realizou alguma atividade física leve nesta semana?",
+        "options": [
+          "Sim",
+          "Planejo",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Excelente! Movimento regular melhora disposição.",
+          "negativo": "Comece com caminhadas e alongamentos, após liberação médica."
+        },
+        "knowledge": {
+          "title": "Por que mover?",
+          "text": "Atividade leve ajuda sono e humor.",
+          "links": [
+            {
+              "titulo": "Atividade (ACOG)",
+              "url": "https://www.acog.org"
+            }
+          ]
+        }
+      },
+      {
+        "id": "maternal_health_w14",
+        "title": "💚 Saúde Materna",
+        "question": "Você percebeu desconforto pélvico ou escapes urinários?",
+        "options": [
+          "Não",
+          "Leve",
+          "Sim"
+        ],
+        "feedback": {
+          "positivo": "Ótimo! Mantenha atenção e exercícios pélvicos.",
+          "negativo": "Considere avaliação com fisioterapia pélvica."
+        },
+        "knowledge": {
+          "title": "Saúde íntima",
+          "text": "Cuidado pélvico previne incontinência e dor.",
+          "links": [
+            {
+              "titulo": "Kegel (MSD)",
+              "url": "https://www.msdmanuals.com"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "week15": {
+    "trail": "quiz",
+    "month": 4,
+    "week": 15,
+    "title": "Quiz da Semana 15",
+    "icon": "👁️",
+    "description": "Brincadeiras sociais, preparação para rolar e aleitamento exclusivo.",
+    "baby_domains": [
+      {
+        "id": "motor_w15",
+        "title": "🤲 Motor",
+        "question": "{nome} tenta rolar parcialmente ou mudar o peso para o lado?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Ótimo! Mostra transição motora.",
+          "negativo": "Estimule no chão, com brinquedos ao lado."
+        },
+        "knowledge": {
+          "title": "Transições",
+          "text": "Mudança de peso é passo para rolar completo.",
+          "links": [
+            {
+              "titulo": "Marcos (SBP)",
+              "url": "https://www.sbp.com.br"
+            }
+          ]
+        }
+      },
+      {
+        "id": "cognitive_w15",
+        "title": "🧠 Cognitivo",
+        "question": "{nome} explora causa-efeito simples (agitar faz barulho)?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Show! Isso revela curiosidade ativa.",
+          "negativo": "Ofereça chocalhos e objetos seguros."
+        },
+        "knowledge": {
+          "title": "Causa e efeito",
+          "text": "Explorar consequências constrói raciocínio.",
+          "links": [
+            {
+              "titulo": "Brincar e aprender",
+              "url": "https://www.healthychildren.org"
+            }
+          ]
+        }
+      },
+      {
+        "id": "sensory_w15",
+        "title": "👁️ Sensorial",
+        "question": "{nome} demonstra interesse por espelhos (observa, sorri)?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Excelente! Espelhos são ótimos para atenção.",
+          "negativo": "Brinque de ‘quem é?’ com espelho seguro."
+        },
+        "knowledge": {
+          "title": "Percepção visual",
+          "text": "Espelho estimula visão e atenção social.",
+          "links": [
+            {
+              "titulo": "Estimulação visual",
+              "url": "https://www.psychologytoday.com"
+            }
+          ]
+        }
+      },
+      {
+        "id": "communication_w15",
+        "title": "💬 Comunicação",
+        "question": "{nome} alterna ‘falas’ com você (sua vez/minha vez)?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Perfeito! É base do diálogo.",
+          "negativo": "Pausar e responder ajuda muito."
+        },
+        "knowledge": {
+          "title": "Ritmo da conversa",
+          "text": "Turn-taking consolida atenção conjunta.",
+          "links": [
+            {
+              "titulo": "Fala inicial",
+              "url": "https://www.asha.org"
+            }
+          ]
+        }
+      },
+      {
+        "id": "nutrition_w15",
+        "title": "🍼 Nutrição",
+        "question": "Aleitamento materno segue exclusivo (sem água, chás, sucos) até 6 meses?",
+        "options": [
+          "Sim",
+          "Parcialmente",
+          "Não"
+        ],
+        "feedback": {
+          "positivo": "Excelente! Padrão ouro de nutrição.",
+          "negativo": "Converse com pediatra para manter exclusividade."
+        },
+        "knowledge": {
+          "title": "Exclusividade",
+          "text": "AME até 6 meses protege contra infecções.",
+          "links": [
+            {
+              "titulo": "Guia alimentar (MS)",
+              "url": "https://bvsms.saude.gov.br"
+            }
+          ]
+        }
+      }
+    ],
+    "mother_domains": [
+      {
+        "id": "maternal_self_care_w15",
+        "title": "🧘‍♀️ Autocuidado Materno",
+        "question": "Você conseguiu um momento por dia só para você?",
+        "options": [
+          "Sim",
+          "Alguns dias",
+          "Quase nunca"
+        ],
+        "feedback": {
+          "positivo": "Ótimo! Isso mantém sua energia emocional.",
+          "negativo": "Planeje 10–15 min diários de pausa consciente."
+        },
+        "knowledge": {
+          "title": "Pausas que cuidam",
+          "text": "Micro-pausas melhoram humor e paciência.",
+          "links": [
+            {
+              "titulo": "Autocuidado (OPAS)",
+              "url": "https://www.paho.org/pt"
+            }
+          ]
+        }
+      },
+      {
+        "id": "maternal_health_w15",
+        "title": "💚 Saúde Materna",
+        "question": "Você tem suporte prático de rede de apoio nesta semana?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Não"
+        ],
+        "feedback": {
+          "positivo": "Perfeito! Isso reduz sobrecarga.",
+          "negativo": "Mapeie tarefas para delegar sem culpa."
+        },
+        "knowledge": {
+          "title": "Apoio faz diferença",
+          "text": "Rede de apoio protege saúde mental.",
+          "links": [
+            {
+              "titulo": "Puerpério (OMS)",
+              "url": "https://www.who.int"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "week16": {
+    "trail": "quiz",
+    "month": 4,
+    "week": 16,
+    "title": "Quiz da Semana 16",
+    "icon": "🎉",
+    "description": "Encerrando o mês com força, curiosidade e planejamento materno.",
+    "baby_domains": [
+      {
+        "id": "motor_w16",
+        "title": "🤲 Motor",
+        "question": "{nome} sustenta o tronco nos antebraços durante o tummy time?",
+        "options": [
+          "Sim, firme",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Excelente! Força no tronco em evolução.",
+          "negativo": "Continue com sessões curtas e agradáveis."
+        },
+        "knowledge": {
+          "title": "Força e equilíbrio",
+          "text": "Suporte nos antebraços prepara para rolar/engatinhar.",
+          "links": [
+            {
+              "titulo": "Tummy time (AAP)",
+              "url": "https://www.healthychildren.org"
+            }
+          ]
+        }
+      },
+      {
+        "id": "cognitive_w16",
+        "title": "🧠 Cognitivo",
+        "question": "{nome} demonstra curiosidade intensa pelo ambiente (olha, tenta alcançar)?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Ótimo! Curiosidade guia o aprendizado.",
+          "negativo": "Crie oportunidades seguras de exploração."
+        },
+        "knowledge": {
+          "title": "Curiosidade ativa",
+          "text": "Ambientes ricos e seguros favorecem a aprendizagem.",
+          "links": [
+            {
+              "titulo": "Ambiente e estímulos",
+              "url": "https://www.unicef.org/brazil"
+            }
+          ]
+        }
+      },
+      {
+        "id": "sensory_w16",
+        "title": "👁️ Sensorial",
+        "question": "{nome} leva com frequência as mãos/objetos à boca para explorar?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Normal e esperado nesta fase.",
+          "negativo": "Ofereça objetos grandes e fáceis de higienizar."
+        },
+        "knowledge": {
+          "title": "Exploração oral",
+          "text": "Experiência tátil e oral amplia percepção.",
+          "links": [
+            {
+              "titulo": "Segurança (CDC)",
+              "url": "https://www.cdc.gov"
+            }
+          ]
+        }
+      },
+      {
+        "id": "communication_w16",
+        "title": "💬 Comunicação",
+        "question": "{nome} variou mais os sons (ex.: 'ah', 'gu', diferentes entonações)?",
+        "options": [
+          "Sim",
+          "Às vezes",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Perfeito! Repertório de sons crescendo.",
+          "negativo": "Imite sons e espere resposta."
+        },
+        "knowledge": {
+          "title": "Mais balbucio",
+          "text": "Variedade de sons antecipa sílabas.",
+          "links": [
+            {
+              "titulo": "Linguagem (ASHA)",
+              "url": "https://www.asha.org"
+            }
+          ]
+        }
+      },
+      {
+        "id": "baby_health_w16",
+        "title": "👶 Saúde do Bebê",
+        "question": "Caderneta de vacinação verificada para o 4º mês?",
+        "options": [
+          "Sim",
+          "Vou verificar",
+          "Não"
+        ],
+        "feedback": {
+          "positivo": "Ótimo! Proteção em dia.",
+          "negativo": "Agende ou atualize conforme calendário do MS."
+        },
+        "knowledge": {
+          "title": "Proteção vacinal",
+          "text": "Vacinas reduzem riscos graves e sequelas.",
+          "links": [
+            {
+              "titulo": "Calendário (MS)",
+              "url": "https://www.gov.br/saude"
+            }
+          ]
+        }
+      }
+    ],
+    "mother_domains": [
+      {
+        "id": "maternal_self_care_w16",
+        "title": "🧘‍♀️ Autocuidado Materno",
+        "question": "Você organizou pequenas rotinas de bem-estar (sono, água, pausas)?",
+        "options": [
+          "Sim",
+          "Parcialmente",
+          "Ainda não"
+        ],
+        "feedback": {
+          "positivo": "Excelente! Rotinas sustentam a energia.",
+          "negativo": "Comece por um hábito simples por vez."
+        },
+        "knowledge": {
+          "title": "Rotinas que ajudam",
+          "text": "Pequenos hábitos consistentes têm grande impacto.",
+          "links": [
+            {
+              "titulo": "Hábitos saudáveis",
+              "url": "https://www.paho.org/pt"
+            }
+          ]
+        }
+      },
+      {
+        "id": "maternal_health_w16",
+        "title": "💚 Saúde Materna",
+        "question": "Você já iniciou o planejamento para o retorno ao trabalho?",
+        "options": [
+          "Sim",
+          "Ainda não",
+          "Indecisa"
+        ],
+        "feedback": {
+          "positivo": "Ótimo! Planejar reduz ansiedade.",
+          "negativo": "Mapeie apoio, horários e logística do bebê."
+        },
+        "knowledge": {
+          "title": "Planejamento prático",
+          "text": "Organização facilita transições.",
+          "links": [
+            {
+              "titulo": "Retorno (OIT)",
+              "url": "https://www.ilo.org"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,80 @@
+
+{
+  "deprecated": "This JSON file is a legacy asset and is not used by the application. The authoritative data is in /data/journey.js and the corresponding theme files in /data/themes.",
+  "week": 2,
+  "trail": "baby",
+  "title": "Semana 2 - Higiene e Saúde",
+  "description": "Estabelecendo rotinas de cuidado e proteção.",
+  "interactive_flow": {
+    "quiz": {
+      "questions": [
+        {
+          "id": "urgency",
+          "question": "Como você e o bebê estão se sentindo agora?",
+          "options": [
+            "Bem, apenas com dúvidas comuns",
+            "Um pouco preocupada com algo específico",
+            "Observando algo diferente no bebê",
+            "Acho que preciso de orientação urgente"
+          ],
+          "type": "urgency"
+        },
+        {
+          "id": "main_concern_baby",
+          "question": "Qual sua principal preocupação com o bebê hoje?",
+          "options": [
+            "Cuidados básicos (umbigo, banho, sono)",
+            "Amamentação e alimentação",
+            "Sinais de alerta e saúde",
+            "Segurança (engasgos, ambiente)"
+          ],
+          "type": "theme"
+        }
+      ]
+    }
+  },
+  "topics": [
+    {
+      "title": "Coto Umbilical",
+      "content": {
+        "trail": "baby",
+        "microcard": {
+          "titulo": "🛡️ Cuidados com o Coto Umbilical",
+          "itens": ["Limpar com álcool 70% a cada troca", "Levante o coto para limpar a base", "Manter a área seca e arejada", "Dobre a fralda para baixo", "Não usar faixas ou moedas", "Sinais de infecção: vermelhidão, pus", "Cai naturalmente em 7-21 dias", "Não tenha medo de limpar!"]
+        },
+        "acaoTexto": "O coto umbilical é a porta de entrada para o umbigo de {nome} e precisa de cuidados para prevenir infecções até cair. A recomendação é simples e eficaz: **limpe a base do coto com álcool a 70%** a cada troca de fralda. Use uma haste de algodão, levante delicadamente o coto e limpe bem a junção com a pele da barriga. **Não tenha medo de limpar**, o procedimento não dói. O objetivo é remover qualquer secreção e acelerar a secagem. Para manter a área arejada, **dobre a parte da frente da fralda para baixo**, deixando o coto exposto. **Nunca use faixas, moedas ou qualquer curativo fechado**. Fique de olho em sinais de alerta como **vermelhidão na pele ao redor, inchaço, secreção com mau cheiro (pus) ou febre**. Se notar algum desses, procure o pediatra. Com esses cuidados, o coto cairá sozinho e de forma segura.",
+        "acaoAudio": "TitiNauta na missão Coto Seguro! É mais simples do que parece. A cada troca de fralda, pegue uma haste de algodão com álcool 70%. Levante o coto com cuidado e limpe bem lá na base, onde ele gruda na barriguinha. Pode limpar sem medo, não dói! A fralda? Dobre a parte da frente pra baixo, deixando o coto pra fora, respirando. Nada de faixa, moeda ou curativo, ok? Se a pele em volta ficar vermelha, inchada ou sair pus, fale com o pediatra. Seguindo esses passos, o umbigo de {nome} vai cicatrizar direitinho.",
+        "audioIllustration": "👶",
+        "badge": { "id": "defensor-coto", "nome": "Defensor do Coto", "icone": "🛡️" },
+        "extraContent": [{ "titulo": "Cuidados com o Recém-Nascido (MS)", "url": "https://bvsms.saude.gov.br/bvs/publicacoes/atencao_saude_recem_nascido_v1.pdf" }, { "titulo": "Onfalite: Sinais de Infecção Umbilical", "url": "https://www.msdmanuals.com/pt/casa/problemas-de-sa%C3%BAde-infantil/problemas-do-trato-digestivo-em-rec%C3%A9m-nascidos/onfalite" }]
+      }
+    },
+    {
+      "title": "Banho & Higiene",
+      "content": {
+        "trail": "baby",
+        "microcard": {
+          "titulo": "🛁 Banho Seguro e Confortável",
+          "itens": ["Prepare tudo ANTES de começar", "Água morna (36-37°C)", "Ambiente sem corrente de ar", "Segure o bebê com firmeza", "Comece pelo rosto, sem sabão", "Limpe da frente para trás (meninas)", "Banho rápido (5-10min)", "Seque bem todas as dobrinhas"]
+        },
+        "acaoTexto": "O banho de {nome} pode ser um ritual relaxante. A chave é a **preparação**. Separe toalha, fralda, roupa e sabonete neutro **ANTES** de pegar o bebê. A água deve estar **morna (entre 36-37°C)**, teste com o cotovelo ou a parte interna do pulso. O ambiente deve ser aquecido e **sem correntes de ar**. Durante todo o banho, segure {nome} com **firmeza**, apoiando a cabeça e o pescoço com seu antebraço e mão. Comece lavando o rosto apenas com água. Use sabonete líquido neutro 'da cabeça aos pés' no corpo, deixando a área genital por último. Em meninas, limpe sempre **da frente para trás**. O banho deve ser **rápido (5-10 minutos)** para evitar que {nome} perca calor. **NUNCA deixe o bebê sozinho na banheira**, nem por um instante. Ao terminar, enrole-o na toalha e seque cuidadosamente cada dobrinha para prevenir assaduras.",
+        "acaoAudio": "TitiNauta aqui para o banho perfeito {preposicao} {nome}! Segurança em primeiro lugar. A regra de ouro: separe TUDO antes. Toalha, fralda, roupa, sabonete. Depois, a água: morninha, entre 36 e 37 graus. Teste com o cotovelo. Feche portas e janelas. Segure o bebê com firmeza, apoiando bem a cabeça. Lave o rostinho só com água. Depois o corpo, com sabonete neutro. Deixe os genitais por último. E o mais importante: seus olhos não saem {preposicao} {nome} por nenhum segundo. O banho é rápido, 5 minutinhos. Depois, seque bem cada dobrinha. Pronto! Bebê limpo, seguro e relaxado.",
+        "audioIllustration": "🛁",
+        "badge": { "id": "banho-seguro", "nome": "Mestre do Banho", "icone": "🛁" },
+        "extraContent": [{ "titulo": "Passo a Passo do Banho (SBP)", "url": "https://www.sbp.com.br/especiais/pediatria-para-familias/cuidados-com-o-bebe/higiene-oral-e-corporal/" }, { "titulo": "Cuidados com a Pele do Bebê", "url": "https://www.sbp.com.br/especiais/pediatria-para-familias/cuidados-com-o-bebe/cuidados-com-a-pele/" }]
+      }
+    },
+    {
+      "title": "Prevenção de Infecções",
+      "content": {
+        "trail": "baby",
+        "microcard": { "titulo": "🦠 Escudo Contra Germes", "itens": ["Lavar as mãos é a regra nº 1", "Álcool em gel 70% na falta de água", "Visitas: poucas, rápidas e saudáveis", "Sem beijos no rosto ou nas mãos", "Evitar locais fechados e aglomerados", "Manter vacinas em dia (bebê e cuidadores)", "Limpar superfícies e brinquedos", "Animais de estimação supervisionados"] },
+        "acaoTexto": "O sistema imunológico de {nome} é novo e precisa da sua proteção. A medida **mais importante e eficaz** para prevenir infecções é a **higienização das mãos**. Lave com água e sabão antes de pegar o bebê, após trocar fraldas e sempre que chegar da rua. Nas primeiras semanas, **limite o número de visitas**. Peça que os visitantes estejam saudáveis, lavem as mãos ao chegar e **evitem beijar o rosto ou as mãos de {nome}**. Evite levar {pronome} a locais fechados e com muita gente, como shoppings ou supermercados. Manter o **calendário vacinal em dia** é crucial. Além das vacinas de {nome}, os cuidadores próximos devem estar com as suas atualizadas (gripe, coqueluche). Com essas camadas de proteção, você cria um ambiente muito mais seguro para {nome} se desenvolver.",
+        "acaoAudio": "TitiNauta ativando o escudo protetor {preposicao} {nome}! Sua arma mais poderosa? Água e sabão! Lave as mãos o tempo todo. Antes de pegar o bebê, depois de ir ao banheiro, sempre. Visitas? No primeiro mês, quanto menos, melhor. E quem vier, tem que estar 100% saudável e lavar as mãos na hora. Beijos? Só no pezinho! Rosto e mãos são proibidos. Evite lugares com muita gente. O sistema de defesa de {nome} ainda está aprendendo. E a lição de casa mais importante: vacinas em dia! As suas e as {preposicao} {nome}. Pronto! Bebê protegido.",
+        "audioIllustration": "🛡️",
+        "badge": { "id": "escudo-imunologico", "nome": "Escudo Imunológico", "icone": "🦠" },
+        "extraContent": [{ "titulo": "Calendário Vacinal SBP", "url": "https://www.sbp.com.br/especiais/pediatria-para-familias/vacinacao/" }, { "titulo": "Técnica de Lavagem das Mãos (Anvisa)", "url": "https://www.youtube.com/watch?v=k3k-_a-p44I" }]
+      }
+    }
+  ]
+}

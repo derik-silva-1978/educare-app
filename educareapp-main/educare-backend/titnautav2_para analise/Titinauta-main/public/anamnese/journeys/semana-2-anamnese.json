@@ -1,0 +1,25 @@
+
+{
+  "deprecated": "This JSON file is a legacy asset and is not used by the application. The authoritative data is in /data/anamnesis-data.js.",
+  "phase": "secondTrimester",
+  "title": "Segundo trimestre (14–27 semanas)",
+  "content": {
+    "blocks": [
+      {
+        "h": "Metabolismo e Acompanhamento",
+        "items": [
+          { "id": "prenatal.exams.totg75", "title": "Teste Oral de Tolerância à Glicose (TOTG 75g)", "when": "24ª a 28ª semana", "why": "Considerado o padrão-ouro para o diagnóstico de Diabetes Mellitus Gestacional (DMG), que se manifesta neste período devido aos hormônios placentários. O controle adequado previne complicações como macrossomia fetal (bebê grande) e hipoglicemia neonatal.", "audio": "Quando fazer: 24ª a 28ª semana. Por que é importante: Considerado o padrão-ouro para o diagnóstico de Diabetes Mellitus Gestacional (DMG), que se manifesta neste período devido aos hormônios placentários. O controle adequado previne complicações como macrossomia fetal (bebê grande) e hipoglicemia neonatal." },
+          { "id": "prenatal.exams.sorologias_rep", "title": "Repetição de Sorologias", "when": "Conforme risco", "why": "Para gestantes suscetíveis a infecções como toxoplasmose ou sífilis, a repetição dos exames é indicada para detectar uma possível soroconversão (infecção adquirida durante a gravidez).", "audio": "Quando fazer: Conforme risco. Por que é importante: Para gestantes suscetíveis a infecções como toxoplasmose ou sífilis, a repetição dos exames é indicada para detectar uma possível soroconversão (infecção adquirida durante a gravidez)." }
+        ]
+      }
+    ],
+    "additionalBlocks": [
+      { 
+        "h": "Ultrassom Morfológico (20–24s)", 
+        "items": [ 
+          { "k": "Objetivo", "v": "Exame detalhado da anatomia fetal para avaliar o desenvolvimento de todos os órgãos e sistemas, como cérebro, coração, coluna, membros e face." }
+        ]
+      }
+    ]
+  }
+}

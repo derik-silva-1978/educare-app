@@ -1,0 +1,755 @@
+{
+	"info": {
+		"_postman_id": "asaas-api-2025",
+		"name": "Asaas - API de Pagamentos",
+		"description": "Coleção completa para integração com a API do Asaas\n\nDocumentação: https://docs.asaas.com",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Clientes",
+			"item": [
+				{
+					"name": "Criar Cliente",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"João da Silva\",\n  \"email\": \"joao@example.com\",\n  \"phone\": \"11999999999\",\n  \"mobilePhone\": \"11999999999\",\n  \"cpfCnpj\": \"12345678909\",\n  \"postalCode\": \"01310-100\",\n  \"address\": \"Av. Paulista\",\n  \"addressNumber\": \"1000\",\n  \"complement\": \"Apto 101\",\n  \"province\": \"Centro\",\n  \"externalReference\": \"user_123\",\n  \"notificationDisabled\": false\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/customers",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["customers"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Clientes",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/customers?offset=0&limit=10",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["customers"],
+							"query": [
+								{"key": "offset", "value": "0"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Cliente por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/customers/:customerId",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["customers", ":customerId"],
+							"variable": [{"key": "customerId", "value": "cus_000000000000"}]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Cliente",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"João da Silva Atualizado\",\n  \"email\": \"joao.novo@example.com\",\n  \"phone\": \"11988888888\"\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/customers/:customerId",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["customers", ":customerId"],
+							"variable": [{"key": "customerId", "value": "cus_000000000000"}]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Cliente",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/customers/:customerId",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["customers", ":customerId"],
+							"variable": [{"key": "customerId", "value": "cus_000000000000"}]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Cobranças",
+			"item": [
+				{
+					"name": "Criar Cobrança (Boleto)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer\": \"cus_000000000000\",\n  \"billingType\": \"BOLETO\",\n  \"value\": 100.00,\n  \"dueDate\": \"2025-12-31\",\n  \"description\": \"Mensalidade Educare\"\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/payments",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["payments"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Cobrança (PIX)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer\": \"cus_000000000000\",\n  \"billingType\": \"PIX\",\n  \"value\": 50.00,\n  \"dueDate\": \"2025-12-31\"\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/payments",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["payments"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Cobranças",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/payments?offset=0&limit=10",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["payments"],
+							"query": [
+								{"key": "offset", "value": "0"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Cobrança por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/payments/:paymentId",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["payments", ":paymentId"],
+							"variable": [{"key": "paymentId", "value": "pay_000000000000"}]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Cobrança (Cartão de Crédito)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer\": \"cus_000000000000\",\n  \"billingType\": \"CREDIT_CARD\",\n  \"value\": 100.00,\n  \"dueDate\": \"2025-12-31\",\n  \"description\": \"Pagamento com Cartão\",\n  \"creditCard\": {\n    \"holderName\": \"João da Silva\",\n    \"number\": \"5162306219378829\",\n    \"expiryMonth\": \"12\",\n    \"expiryYear\": \"2028\",\n    \"ccv\": \"123\"\n  },\n  \"creditCardHolderInfo\": {\n    \"name\": \"João da Silva\",\n    \"email\": \"joao@example.com\",\n    \"cpfCnpj\": \"12345678909\",\n    \"postalCode\": \"01310-100\",\n    \"addressNumber\": \"1000\",\n    \"phone\": \"11999999999\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/payments",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["payments"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Cobrança",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"value\": 150.00,\n  \"dueDate\": \"2025-12-31\"\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/payments/:paymentId",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["payments", ":paymentId"],
+							"variable": [{"key": "paymentId", "value": "pay_000000000000"}]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Cobrança",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/payments/:paymentId",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["payments", ":paymentId"],
+							"variable": [{"key": "paymentId", "value": "pay_000000000000"}]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirmar Recebimento em Dinheiro",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentDate\": \"2025-11-01\",\n  \"value\": 100.00\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/payments/:paymentId/receiveInCash",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["payments", ":paymentId", "receiveInCash"],
+							"variable": [{"key": "paymentId", "value": "pay_000000000000"}]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Estornar Cobrança",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"value\": 100.00,\n  \"description\": \"Motivo do estorno\"\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/payments/:paymentId/refund",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["payments", ":paymentId", "refund"],
+							"variable": [{"key": "paymentId", "value": "pay_000000000000"}]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Assinaturas",
+			"item": [
+				{
+					"name": "Criar Assinatura",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer\": \"cus_000000000000\",\n  \"billingType\": \"BOLETO\",\n  \"value\": 100.00,\n  \"nextDueDate\": \"2025-12-01\",\n  \"cycle\": \"MONTHLY\",\n  \"description\": \"Assinatura Mensal\"\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/subscriptions",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["subscriptions"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Assinaturas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/subscriptions?offset=0&limit=10",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["subscriptions"],
+							"query": [
+								{"key": "offset", "value": "0"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Assinatura por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/subscriptions/:subscriptionId",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["subscriptions", ":subscriptionId"],
+							"variable": [{"key": "subscriptionId", "value": "sub_000000000000"}]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Assinatura",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"value\": 120.00,\n  \"nextDueDate\": \"2025-12-15\"\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/subscriptions/:subscriptionId",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["subscriptions", ":subscriptionId"],
+							"variable": [{"key": "subscriptionId", "value": "sub_000000000000"}]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Assinatura",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/subscriptions/:subscriptionId",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["subscriptions", ":subscriptionId"],
+							"variable": [{"key": "subscriptionId", "value": "sub_000000000000"}]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Cobranças da Assinatura",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/subscriptions/:subscriptionId/payments",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["subscriptions", ":subscriptionId", "payments"],
+							"variable": [{"key": "subscriptionId", "value": "sub_000000000000"}]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. PIX",
+			"item": [
+				{
+					"name": "Gerar QR Code PIX",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/payments/:paymentId/pixQrCode",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["payments", ":paymentId", "pixQrCode"],
+							"variable": [{"key": "paymentId", "value": "pay_000000000000"}]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Chaves PIX",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/pix/addressKeys",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["pix", "addressKeys"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Webhooks",
+			"item": [
+				{
+					"name": "Criar Webhook",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Webhook Educare\",\n  \"url\": \"https://api.educare.whatscall.com.br/api/webhooks/asaas\",\n  \"email\": \"dev@educare.com.br\",\n  \"enabled\": true,\n  \"interrupted\": false,\n  \"authToken\": \"seu_token_secreto\",\n  \"events\": [\n    \"PAYMENT_CREATED\",\n    \"PAYMENT_UPDATED\",\n    \"PAYMENT_CONFIRMED\",\n    \"PAYMENT_RECEIVED\",\n    \"PAYMENT_OVERDUE\",\n    \"PAYMENT_DELETED\",\n    \"PAYMENT_REFUNDED\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/webhooks",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["webhooks"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Webhooks",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/webhooks",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["webhooks"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Webhook por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/webhooks/:webhookId",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["webhooks", ":webhookId"],
+							"variable": [{"key": "webhookId", "value": "webhook_000000000000"}]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Webhook",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"enabled\": false\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/webhooks/:webhookId",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["webhooks", ":webhookId"],
+							"variable": [{"key": "webhookId", "value": "webhook_000000000000"}]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Webhook",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/webhooks/:webhookId",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["webhooks", ":webhookId"],
+							"variable": [{"key": "webhookId", "value": "webhook_000000000000"}]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Transferências",
+			"item": [
+				{
+					"name": "Criar Transferência",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"value\": 100.00,\n  \"bankAccount\": {\n    \"bank\": {\n      \"code\": \"341\"\n    },\n    \"accountName\": \"João da Silva\",\n    \"ownerName\": \"João da Silva\",\n    \"ownerBirthDate\": \"1990-01-01\",\n    \"cpfCnpj\": \"12345678909\",\n    \"agency\": \"1234\",\n    \"account\": \"12345\",\n    \"accountDigit\": \"6\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{asaas_base_url}}/transfers",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["transfers"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Transferências",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/transfers?offset=0&limit=10",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["transfers"],
+							"query": [
+								{"key": "offset", "value": "0"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. Saldo e Extrato",
+			"item": [
+				{
+					"name": "Consultar Saldo",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/finance/balance",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["finance", "balance"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Extrato Financeiro",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "access_token",
+								"value": "{{asaas_api_key}}"
+							}
+						],
+						"url": {
+							"raw": "{{asaas_base_url}}/financialTransactions?offset=0&limit=10",
+							"host": ["{{asaas_base_url}}"],
+							"path": ["financialTransactions"],
+							"query": [
+								{"key": "offset", "value": "0"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "asaas_base_url",
+			"value": "https://www.asaas.com/api/v3",
+			"type": "string"
+		},
+		{
+			"key": "asaas_api_key",
+			"value": "sua_api_key_aqui",
+			"type": "string"
+		}
+	]
+}

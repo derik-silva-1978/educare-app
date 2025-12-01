@@ -1,0 +1,75 @@
+
+{
+  "deprecated": "This JSON file is a legacy asset and is not used by the application. The authoritative data is in /data/journey.js and the corresponding theme files in /data/themes.",
+  "week": 3,
+  "trail": "baby",
+  "title": "Semana 3 - Segurança e Alertas",
+  "description": "Aprendendo a identificar riscos e a proteger o ambiente.",
+  "interactive_flow": {
+    "quiz": {
+      "questions": [
+        {
+          "id": "urgency",
+          "question": "Como você e o bebê estão se sentindo agora?",
+          "options": [
+            "Bem, apenas com dúvidas comuns",
+            "Um pouco preocupada com algo específico",
+            "Observando algo diferente no bebê",
+            "Acho que preciso de orientação urgente"
+          ],
+          "type": "urgency"
+        },
+        {
+          "id": "main_concern_baby",
+          "question": "Qual sua principal preocupação com o bebê hoje?",
+          "options": [
+            "Cuidados básicos (umbigo, banho, sono)",
+            "Amamentação e alimentação",
+            "Sinais de alerta e saúde",
+            "Segurança (engasgos, ambiente)"
+          ],
+          "type": "theme"
+        }
+      ]
+    }
+  },
+  "topics": [
+    {
+      "title": "Sinais de Alerta (Bebê)",
+      "content": {
+        "trail": "baby",
+        "microcard": {
+          "titulo": "⚠️ Sinais de Alerta no Bebê: Ação Rápida!",
+          "itens": ["Febre (>37.8°C) ou hipotermia (<36°C)", "Respiração rápida ou com esforço", "Pele amarelada que piora", "Recusa persistente para mamar", "Menos de 6 fraldas de xixi em 24h", "Choro inconsolável ou muito fraco", "Moleira funda (afundada) ou estufada (abaulada)", "Vômitos em jato ou convulsões"]
+        },
+        "acaoTexto": "**Confie na sua intuição.** Se algo parece errado com {nome}, é melhor pecar pelo excesso de cuidado. No recém-nascido, quadros podem evoluir rapidamente. **Procure um serviço de emergência imediatamente** se notar: **Temperatura:** febre acima de 37.8°C ou hipotermia abaixo de 36°C. **Respiração:** rápida demais (mais de 60 por minuto), com esforço (afundando a costela) ou pausas longas. **Hidratação:** recusa persistente para mamar, vômitos em jato ou menos de 6 fraldas molhadas em 24 horas. **Estado geral:** muito irritado e inconsolável, ou muito 'molinho' e sonolento, difícil de acordar. **Pele:** cor amarelada que piora e se espalha para a barriga e pernas, ou pele pálida/azulada. **Moleira:** visivelmente funda (sinal de desidratação) ou estufada e tensa. Conhecer esses sinais é uma ferramenta poderosa para proteger {nome}.",
+        "acaoAudio": "TitiNauta em modo de alerta máximo! Sua intuição de mãe é poderosa, confie nela. Se {nome} tiver febre acima de 37.8 ou temperatura abaixo de 36, é emergência. Se a respiração estiver muito rápida ou com esforço, é emergência. Se a pele amarelinha chegar na barriga, ou se {pronome} recusar o peito várias vezes e fizer pouco xixi, procure ajuda. Se {nome} estiver muito, muito irritado ou molinho demais, difícil de acordar, também é um alerta. E a moleira, se estiver funda ou estufada, corra para o hospital. Na dúvida, sempre procure um médico. Não hesite!",
+        "audioIllustration": "🚨",
+        "badge": { "id": "vigilante-bebe", "nome": "Vigilante do Bebê", "icone": "👁️" },
+        "extraContent": [{ "titulo": "Quando Procurar o Pediatra (SBP)", "url": "https://www.sbp.com.br/especiais/pediatria-para-familias/cuidados-com-o-bebe/quando-procurar-o-pediatra/" }, { "titulo": "Entendendo a Icterícia Neonatal", "url": "https://www.msdmanuals.com/pt/casa/problemas-de-sa%C3%BAde-infantil/dist%C3%BArbios-hep%C3%A1ticos-e-da-ves%C3%ADcula-biliar-em-rec%C3%A9m-nascidos/icter%C3%ADcia-no-rec%C3%A9m-nascido" }]
+      }
+    },
+    {
+      "title": "Ambiente Seguro",
+      "content": {
+        "trail": "baby",
+        "microcard": {
+          "titulo": "🏠 Casa Segura: Missão Zero Acidentes",
+          "itens": [
+            "Nunca deixe o bebê sozinho em locais altos",
+            "Use o 'teste do rolo de papel' para objetos pequenos",
+            "Verifique a temperatura da água do banho (36-37°C)",
+            "Nunca segure o bebê enquanto cozinha",
+            "Supervisão constante perto de água",
+            "Medicamentos e produtos de limpeza trancados"
+          ]
+        },
+        "acaoTexto": "Sua casa é o primeiro universo de {nome}, e torná-lo seguro é a maior prova de amor. **Quedas:** A regra de ouro é **nunca, nem por um segundo, deixar {nome} sozinho** em trocadores, camas ou sofás. A capacidade de rolar surge de repente. **Asfixia:** Mantenha objetos pequenos (moedas, botões, tampas) fora do alcance. Use a regra do **'teste do rolo de papel higiênico'**: se um objeto passa por dentro, é perigoso. **Queimaduras:** A pele de {nome} é muito sensível. Verifique sempre a temperatura da água do banho (36-37°C) com o cotovelo ou termômetro. Na cozinha, use as bocas de trás do fogão e **nunca segure o bebê no colo** ao manusear líquidos quentes. **Afogamento:** O afogamento é rápido e silencioso. **Nunca deixe {nome} sozinho na banheira**, nem para pegar uma toalha. Baldes e bacias devem estar sempre vazios. **Intoxicação:** Guarde **todos os medicamentos e produtos de limpeza** em armários altos e trancados. Uma casa segura permite que {nome} explore e se desenvolva livre de perigos.",
+        "acaoAudio": "TitiNauta aqui com a missão Casa Segura para {nome}. Quedas: nunca deixe o bebê sozinho em lugares altos, como a cama ou o trocador. Nem por um segundo! Asfixia: objetos pequenos, longe! Se passar no rolo de papel higiênico, é um risco. Queimaduras: água do banho sempre morna, teste com o cotovelo. E jamais segure o bebê enquanto mexe com coisas quentes na cozinha. Afogamento: na banheira, sua atenção é 100%. Nada de celular ou sair de perto. Intoxicação: remédios e produtos de limpeza bem trancados e no alto. Com essas regras, a casa se torna um porto seguro para a exploração {preposicao} {nome}.",
+        "audioIllustration": "🛡️",
+        "badge": { "id": "ambiente-protetor", "nome": "Ambiente Protetor", "icone": "🏠" },
+        "extraContent": [{ "titulo": "ONG Criança Segura Brasil", "url": "https://criancasegura.org.br/" }, { "titulo": "Guia de Prevenção de Acidentes (SBP)", "url": "https://www.sbp.com.br/especiais/pediatria-para-familias/prevencao-de-acidentes/" }]
+      }
+    }
+  ]
+}

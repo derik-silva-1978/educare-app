@@ -1,0 +1,69 @@
+
+/* Anamnese Form Tab Animations */
+.fade-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.fade-exit {
+  opacity: 1;
+}
+
+.fade-exit-active {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 300ms, transform 300ms;
+}
+
+/* Progress indicator animation with improved visibility */
+@keyframes progress-fill {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.progress-animate {
+  animation: progress-fill 0.8s ease-out forwards;
+  transition: width 0.3s ease-in-out, background-color 0.3s ease;
+  /* Added shadow for better contrast and visibility */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Add a subtle pulsing effect for progress bars below 100% with improved visibility */
+@keyframes progress-pulse {
+  0% { opacity: 0.85; }
+  50% { opacity: 1; }
+  100% { opacity: 0.85; }
+}
+
+.progress-animate:not([style*="width: 100%"]) {
+  animation: progress-fill 0.8s ease-out forwards, progress-pulse 2s infinite;
+}
+
+/* Added focus and hover styles for interactive elements to improve accessibility */
+.anamnese-select:focus-within {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+  border-color: #3b82f6;
+}
+
+.anamnese-radio:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+/* High contrast mode styles */
+@media (forced-colors: active) {
+  .progress-animate {
+    forced-color-adjust: none;
+    background-color: HighlightText !important;
+  }
+  
+  .anamnese-select, .anamnese-radio {
+    forced-color-adjust: none;
+  }
+}

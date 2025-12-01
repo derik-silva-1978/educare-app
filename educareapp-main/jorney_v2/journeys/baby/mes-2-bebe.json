@@ -1,0 +1,315 @@
+
+{
+  "trail": "baby",
+  "title": "Jornada do Bebê - Mês 2",
+  "journey": [
+    {
+      "week": 5,
+      "title": "Semana 5 - Explorando com os Sentidos",
+      "description": "Sorriso social, contato visual e primeiros 'diálogos' com o bebê.",
+      "interactive_flow": { "quiz_ref": "week5" },
+      "topics": [
+        {
+          "title": "Sorriso Social & Vínculo",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "😊 Sorriso que Conecta",
+              "itens": [
+                "Converse olhando nos olhos",
+                "Imite sons simples (agu/oh)",
+                "Sorria e aguarde resposta",
+                "Toque gentil e previsível",
+                "Rotina diária de carinho"
+              ]
+            },
+            "acaoTexto": "{nome} está pronto(a) para sorrir de volta! Use voz suave, aproxime o rosto (20–30 cm) e aguarde a resposta. Imite os sons de {nome} para iniciar 'turnos de conversa'. Esse jogo reforça vínculo, atenção conjunta e linguagem.",
+            "acaoAudio": "TitiNauta na escuta! Sorria, espere e responda. Transforme cada troca de olhares em diálogo com {nome}. Simples, afetuoso e poderoso.",
+            "audioIllustration": "😊",
+            "badge": { "id": "sorriso-social", "nome": "Sorriso Social", "icone": "😊" },
+            "extraContent": [
+              { "titulo": "Vínculo e Comunicação Precoce", "url": "https://example.org/vinculo" }
+            ]
+          }
+        },
+        {
+          "title": "Rotina de Sono do 2º Mês",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🌙 Rotina Sem Pressa",
+              "itens": [
+                "Ritual noturno breve e previsível",
+                "Ambiente escuro e calmo",
+                "Sonecas curtas e frequentes",
+                "Sempre dormir de barriga para cima",
+                "Berço vazio (sem objetos soltos)"
+              ]
+            },
+            "acaoTexto": "O sono ainda é irregular, mas já cabe um ritual noturno: banho morno, canção suave, luz baixa e berço. Mantenha as regras do sono seguro e evite associações difíceis (ninar no colo até dormir, por exemplo). Consistência é o superpoder.",
+            "acaoAudio": "Hora de desacelerar! Repita um pequeno ritual todas as noites. Berço vazio, {nome} de barriga para cima e ambiente calminho. A rotina ensina o corpo a dormir.",
+            "audioIllustration": "🛌",
+            "badge": { "id": "guardiao-sono2", "nome": "Guardião do Sono (Mês 2)", "icone": "🌙" },
+            "extraContent": [
+              { "titulo": "Sono Seguro — lembretes essenciais", "url": "https://example.org/sono2" }
+            ]
+          }
+        },
+        {
+          "title": "Tummy Time 2.0 (Pescoço Forte)",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🧠+💪 Cabeça Firme",
+              "itens": [
+                "Várias sessões curtas por dia",
+                "Comece com 1–2 min e aumente",
+                "Brinquedo/rosto como incentivo",
+                "Supervisão o tempo todo",
+                "Superfície firme e segura"
+              ]
+            },
+            "acaoTexto": "O tummy time fortalece pescoço e tronco. Faça sessões curtas, várias vezes ao dia, com {nome} acordado(a) e supervisionado(a). Use seu rosto ou um brinquedo à frente para motivar levantar a cabeça.",
+            "acaoAudio": "Missão pescoço forte! Chamadas curtas e frequentes. Sorria e chame {nome} para olhar pra você. Força com segurança!",
+            "audioIllustration": "🧸",
+            "badge": { "id": "pescoquinho-forte", "nome": "Pescoquinho Forte", "icone": "🧸" },
+            "extraContent": [
+              { "titulo": "Marcos Motores 0–3 meses", "url": "https://example.org/marcos03" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "week": 6,
+      "title": "Semana 6 - Sensos em Ação",
+      "description": "Visão foca melhor, audição responde a vozes e sons do cotidiano.",
+      "interactive_flow": { "quiz_ref": "week6" },
+      "topics": [
+        {
+          "title": "Estímulos Visuais & Auditivos",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "👁️👂 Ver & Ouvir Melhor",
+              "itens": [
+                "Mostre contrastes (preto/branco)",
+                "Fale pausadamente e cante",
+                "Sons do lar como estímulo",
+                "Brinque de acompanhar com o olhar",
+                "Evite telas"
+              ]
+            },
+            "acaoTexto": "Apresente padrões de alto contraste e mova lentamente para {nome} acompanhar com o olhar. Narre atividades diárias em voz calma e cante. Estímulos naturais do lar já bastam — sem telas.",
+            "acaoAudio": "Mostre, narre, cante. Olhar segue, ouvido descobre. A casa é um grande laboratório para {nome}.",
+            "audioIllustration": "🎵",
+            "badge": { "id": "explorador-sensorial", "nome": "Explorador Sensorial", "icone": "🎵" },
+            "extraContent": [
+              { "titulo": "Estimulação Precoce sem Excesso", "url": "https://example.org/estimulo" }
+            ]
+          }
+        },
+        {
+          "title": "Choro & Consolo",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🤲 Acolher é Cuidar",
+              "itens": [
+                "Observe sinais de fome e sono",
+                "Contato pele a pele",
+                "Embalos suaves e voz calma",
+                "Pausa para arrotar",
+                "Cheque fralda/temperatura"
+              ]
+            },
+            "acaoTexto": "O choro comunica necessidades. Verifique fome, sono, fralda, temperatura e desconfortos. Contato pele a pele e embalos suaves ajudam a regular {nome}.",
+            "acaoAudio": "Respire junto com {nome}. Cheque necessidades básicas e acolha. Consolo é cuidado ativo.",
+            "audioIllustration": "🤗",
+            "badge": { "id": "mestre-consolo", "nome": "Mestre do Consolo", "icone": "🤲" },
+            "extraContent": [
+              { "titulo": "Regulação Emocional do RN", "url": "https://example.org/chororegula" }
+            ]
+          }
+        },
+        {
+          "title": "Banho & Pele no 2º Mês",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🛁 Rotina Gentil",
+              "itens": [
+                "Banho curto (5–10 min)",
+                "Água 36–37°C",
+                "Sabonete neutro 2–3x/semana",
+                "Secar bem dobrinhas",
+                "Hidratar se pele ressecada"
+              ]
+            },
+            "acaoTexto": "No segundo mês, mantenha o banho curto, com água morninha. Sabonete neutro em dias alternados protege a barreira cutânea. Seque dobrinhas e hidrate se houver ressecamento.",
+            "acaoAudio": "Banho simples, pele feliz. Pouco sabão, água morna e carinho nas dobrinhas!",
+            "audioIllustration": "🛁",
+            "badge": { "id": "guardiao-da-pele", "nome": "Guardião da Pele", "icone": "🧴" },
+            "extraContent": [
+              { "titulo": "Cuidados com a Pele do Bebê", "url": "https://example.org/pele" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "week": 7,
+      "title": "Semana 7 - Saúde em Dia",
+      "description": "Agenda de vacinas do 2º mês e rotina segura no dia a dia.",
+      "interactive_flow": { "quiz_ref": "week7" },
+      "topics": [
+        {
+          "title": "Vacinas do 2º Mês",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "💉 Proteção que Cresce",
+              "itens": [
+                "Pentavalente",
+                "VIP (pólio inativada)",
+                "Pneumocócica 10",
+                "Rotavírus",
+                "Leve a Caderneta"
+              ]
+            },
+            "acaoTexto": "Mantenha o calendário em dia: Pentavalente, VIP, Pneumocócica 10 e Rotavírus. Reações leves (dor local, febre baixa) são esperadas. Em dúvida ou febre alta persistente, procure orientação.",
+            "acaoAudio": "É dia de proteção! Caderneta na mão, vacinas em dia. Qualquer reação fora do comum? Fale com o pediatra.",
+            "audioIllustration": "💉",
+            "badge": { "id": "escudo-imunidade", "nome": "Escudo da Imunidade", "icone": "🛡️" },
+            "extraContent": [
+              { "titulo": "Calendário Vacinal do 2º Mês", "url": "https://example.org/calendario2" }
+            ]
+          }
+        },
+        {
+          "title": "Ambiente Seguro — 2º Mês",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🏠 Zero Acidentes",
+              "itens": [
+                "Nunca deixar sozinho em locais altos",
+                "Objetos pequenos fora de alcance",
+                "Água do banho sempre 36–37°C",
+                "Supervisão com água (banheira/balde)",
+                "Produtos de limpeza trancados"
+              ]
+            },
+            "acaoTexto": "Reforce a segurança em casa: quedas, asfixia, queimaduras, afogamento e intoxicação. A supervisão atenta previne a maioria dos acidentes.",
+            "acaoAudio": "Porto seguro começa em casa. Checagem diária de riscos e atenção total perto da água.",
+            "audioIllustration": "🛡️",
+            "badge": { "id": "casa-segura2", "nome": "Casa Segura (Mês 2)", "icone": "🏠" },
+            "extraContent": [
+              { "titulo": "Checklist de Segurança Doméstica", "url": "https://example.org/seguranca2" }
+            ]
+          }
+        },
+        {
+          "title": "Motor: Cabeça & Tronco",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "💪 Controle em Progresso",
+              "itens": [
+                "Levantar a cabeça por mais tempo",
+                "Sustentar mais no colo vertical",
+                "Tummy time com incentivo",
+                "Evitar excesso de tempo no bebê-conforto",
+                "Reparar simetrias de movimento"
+              ]
+            },
+            "acaoTexto": "A sustentação cervical melhora. Dê oportunidades seguras: colo vertical curto, tummy time com brinquedo/voz. Evite longos períodos restritos.",
+            "acaoAudio": "Mais tempo olhando o mundo erguendo a cabeça! Pratique com segurança e pausas.",
+            "audioIllustration": "🧠",
+            "badge": { "id": "tronquinho-forte", "nome": "Tronquinho Forte", "icone": "🧠" },
+            "extraContent": [
+              { "titulo": "Estimulação Motora Segura", "url": "https://example.org/motor2" }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "week": 8,
+      "title": "Semana 8 - Acompanhamento & Marcos",
+      "description": "Registrar crescimento e observar marcos esperados do 2º mês.",
+      "interactive_flow": { "quiz_ref": "week8" },
+      "topics": [
+        {
+          "title": "Crescimento: Peso, Estatura, PC",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "📈 Acompanhamento Básico",
+              "itens": [
+                "Registre peso/estatura/PC",
+                "Use sempre a mesma balança",
+                "Compare com a curva oficial",
+                "Olhe a tendência, não um valor isolado",
+                "Leve dúvidas ao pediatra"
+              ]
+            },
+            "acaoTexto": "Anote medidas e acompanhe tendência nas curvas (peso, estatura, perímetro cefálico). Consistência na medição ajuda na comparação. Discuta dúvidas com o pediatra.",
+            "acaoAudio": "Curvas contam histórias: registre e observe a linha ao longo do tempo. Qualquer desvio, converse na consulta.",
+            "audioIllustration": "📊",
+            "badge": { "id": "guardiao-crescimento", "nome": "Guardião do Crescimento", "icone": "📊" },
+            "extraContent": [
+              { "titulo": "Curvas de Crescimento 0–2 anos", "url": "https://example.org/curvas" }
+            ]
+          }
+        },
+        {
+          "title": "Marcos do 2º Mês",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🧩 O que Esperar",
+              "itens": [
+                "Sorri socialmente",
+                "Segue objetos com os olhos",
+                "Levanta a cabeça durante tummy time",
+                "Vozes chamam atenção",
+                "Choro com variações"
+              ]
+            },
+            "acaoTexto": "Marcos são referências e variam entre bebês. Observe tendências: atenção a rostos/vozes, sorriso social, levantar a cabeça. Se houver preocupação persistente, converse com o pediatra.",
+            "acaoAudio": "Marcos guiam, não prendem. Compare {nome} consigo mesmo(a) e leve dúvidas à equipe de saúde.",
+            "audioIllustration": "🧩",
+            "badge": { "id": "explorador-m2", "nome": "Explorador do 2º Mês", "icone": "🧩" },
+            "extraContent": [
+              { "titulo": "Marcos 0–2 meses", "url": "https://example.org/marcos2" }
+            ]
+          }
+        },
+        {
+          "title": "Checklist para Consulta",
+          "content": {
+            "trail": "baby",
+            "microcard": {
+              "titulo": "🗂️ Pronto para a Consulta",
+              "itens": [
+                "Caderneta da Criança",
+                "Registros de peso/estatura/PC",
+                "Vacinas do mês 2",
+                "Dúvidas anotadas",
+                "Relato de rotina (sono, mamadas)"
+              ]
+            },
+            "acaoTexto": "Leve a caderneta, os registros e as dúvidas anotadas. Relate como estão sono, mamadas e estímulos. Informação organizada melhora a consulta.",
+            "acaoAudio": "Caderneta, medidas, vacinas e perguntas. Tudo pronto para um atendimento mais objetivo!",
+            "audioIllustration": "🩺",
+            "badge": { "id": "agente-de-saude-familia", "nome": "Agente de Saúde da Família", "icone": "🗂️" },
+            "extraContent": [
+              { "titulo": "Como se Preparar para a Consulta", "url": "https://example.org/consulta2" }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

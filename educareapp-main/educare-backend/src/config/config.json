@@ -1,0 +1,44 @@
+{
+  "development": {
+    "username": "dsg",
+    "password": "Senha@1q2w3e",
+    "database": "educare1",
+    "host": "app.voipsimples.com.br",
+    "port": 5432,
+    "dialect": "postgres",
+    "timezone": "America/Sao_Paulo",
+    "define": {
+      "timestamps": true,
+      "underscored": true,
+      "underscoredAll": true
+    }
+  },
+  "test": {
+    "username": "dsg",
+    "password": "Senha@1q2w3e",
+    "database": "educare1_test",
+    "host": "app.voipsimples.com.br",
+    "port": 5432,
+    "dialect": "postgres",
+    "timezone": "America/Sao_Paulo",
+    "define": {
+      "timestamps": true,
+      "underscored": true,
+      "underscoredAll": true
+    }
+  },
+  "production": {
+    "username": "dsg",
+    "password": "Senha@1q2w3e",
+    "database": "educare1",
+    "host": "app.voipsimples.com.br",
+    "port": 5432,
+    "dialect": "postgres",
+    "timezone": "America/Sao_Paulo",
+    "define": {
+      "timestamps": true,
+      "underscored": true,
+      "underscoredAll": true
+    }
+  }
+}

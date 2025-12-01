@@ -1,0 +1,120 @@
+
+{
+  "timeline": [
+    { "badge": "Acompanhamento pré-natal", "title": "Histórico", "description": "Dados iniciais", "key": "gestacao" },
+    { "badge": "1ª consulta", "title": "Até 12s", "description": "Exames iniciais", "key": "firstVisit" },
+    { "badge": "2º tri", "title": "14–27s", "description": "TOTG 75g", "key": "secondTrimester" },
+    { "badge": "3º tri", "title": "28s → parto", "description": "Rastreio GBS", "key": "thirdTrimester" },
+    { "badge": "Recém-Nascido", "title": "0–28 dias", "description": "Triagens", "key": "newborn" }
+  ],
+  "gestacao": {
+      "title": "Acompanhamento pré-natal - Histórico e Exames",
+      "blocks": [
+          {
+              "h": "Histórico da Gestação",
+              "items": [
+                  { "id": "gestacao.pre_natal", "title": "Fez acompanhamento pré-natal?", "when": null, "why": null, "options": ["Sim", "Não"], "audio": "Você fez acompanhamento pré-natal?" },
+                  { "id": "gestacao.consultas", "title": "Quantas consultas de pré-natal foram realizadas?", "when": null, "why": null, "options": ["1-3", "4-6", "7 ou mais"], "audio": "Quantas consultas de pré-natal você realizou?" },
+                  { "id": "gestacao.exames", "title": "Realizou os principais exames durante a gestação? (Ultrassonografia, exames de sangue, urina, sorologias)", "when": null, "why": null, "options": ["Sim, todos", "Sim, parcialmente", "Não"], "audio": "Você realizou os principais exames durante a gestação?" },
+                  { "id": "gestacao.intercorrencias", "title": "Houve intercorrências durante a gestação?", "when": null, "why": null, "options": ["Sim", "Não"], "audio": "Houve alguma intercorrência durante a gestação?" },
+                  { "id": "gestacao.tipo_parto", "title": "Qual foi o tipo de parto?", "when": null, "why": null, "options": ["Normal", "Cesárea", "Parto Humanizado", "Outro"], "audio": "Qual foi o seu tipo de parto?" }
+              ]
+          },
+          {
+            "h": "Imunizações",
+            "items": [
+                { "id": "prenatal.imunizacao.dtpa", "title": "Vacina dTpa (Tríplice Bacteriana)", "when": "Entre 20 e 36 semanas", "why": "Protege o recém-nascido contra coqueluche (tosse comprida), uma doença respiratória grave nos primeiros meses de vida, através dos seus anticorpos passados pela placenta.", "options": null, "audio": "A vacina dTpa, tomada entre 20 e 36 semanas, é crucial para proteger seu bebê da coqueluche, uma tosse perigosa para recém-nascidos." },
+                { "id": "prenatal.imunizacao.hepb", "title": "Vacina Hepatite B", "when": "Durante a gestação", "why": "Se a gestante não for imunizada, completar o esquema de 3 doses é essencial para prevenir a transmissão da doença para o bebê, que pode se tornar crônica.", "options": null, "audio": "Completar o esquema da vacina de Hepatite B durante a gestação é vital para impedir a transmissão da doença para o bebê." },
+                { "id": "prenatal.imunizacao.gripe", "title": "Vacina Influenza (Gripe)", "when": "Qualquer idade gestacional", "why": "A gestação aumenta o risco de complicações graves pela gripe. A vacina protege tanto a mãe quanto o bebê, que continua protegido nos primeiros meses de vida.", "options": null, "audio": "A vacina da gripe é segura e recomendada em qualquer fase da gestação para proteger mãe e bebê de complicações sérias." }
+            ]
+        }
+      ]
+  },
+  "firstVisit": {
+    "title": "Primeira consulta (até 12 semanas)",
+    "blocks": [
+      {
+        "h": "Exames laboratoriais iniciais",
+        "items": [
+          { "id": "prenatal.exams.abo_rh", "title": "Tipagem sanguínea e Fator Rh", "when": "Primeira consulta", "why": "Identifica o risco de incompatibilidade Rh. Se a mãe for Rh negativo e o bebê Rh positivo, pode ser necessário o exame Coombs Indireto e o uso de imunoglobulina anti-Rh para proteger futuras gestações.", "options": null, "audio": "Este exame identifica o tipo sanguíneo da mãe para prevenir a incompatibilidade Rh, que pode afetar futuras gestações." },
+          { "id": "prenatal.exams.hemograma", "title": "Hemograma completo", "when": "Primeira consulta", "why": "Avalia a presença de anemia ferropriva, condição comum que, se não tratada, pode comprometer o transporte de oxigênio e aumentar o risco de parto prematuro e baixo peso ao nascer.", "options": null, "audio": "O hemograma verifica se há anemia, que é comum na gravidez e precisa ser tratada para garantir a saúde da mãe e do bebê." },
+          { "id": "prenatal.exams.glicemia", "title": "Glicemia de jejum", "when": "Primeira consulta", "why": "Rastreamento inicial para o diabetes mellitus gestacional (DMG). Valores alterados podem indicar a necessidade de um Teste Oral de Tolerância à Glicose (TOTG) no 2º trimestre.", "options": null, "audio": "Este exame de sangue mede o açúcar em jejum para rastrear o risco de diabetes gestacional desde o início do pré-natal." },
+          { "id": "prenatal.exams.vdrl", "title": "Sífilis (VDRL/Teste Rápido)", "when": "Primeira consulta", "why": "Essencial para prevenir a sífilis congênita, uma infecção grave que pode causar malformações, aborto ou morte fetal. O tratamento da gestante e do parceiro deve ser iniciado imediatamente.", "options": null, "audio": "O teste de sífilis é vital para detectar e tratar a infecção, prevenindo a transmissão para o bebê, que pode causar graves problemas de saúde." },
+          { "id": "prenatal.exams.hiv", "title": "HIV (Teste Rápido/Sorologia)", "when": "Primeira consulta", "why": "O diagnóstico precoce e o uso de terapia antirretroviral (TARV) durante a gestação reduzem drasticamente o risco de transmissão vertical para o bebê.", "options": null, "audio": "O teste de HIV permite iniciar o tratamento durante a gravidez, o que reduz drasticamente a chance de passar o vírus para o bebê." },
+          { "id": "prenatal.exams.hbsag", "title": "Hepatite B (AgHBs)", "when": "Primeira consulta", "why": "Identifica a presença do vírus. Se a mãe for portadora, o recém-nascido deve receber a vacina e a imunoglobulina específica nas primeiras 12 horas de vida para evitar a infecção crônica.", "options": null, "audio": "Este exame detecta a hepatite B. Se a mãe for portadora, o bebê pode ser protegido com vacina e medicação logo ao nascer." },
+          { "id": "prenatal.exams.hcv", "title": "Hepatite C (anti-HCV)", "when": "Primeira consulta", "why": "Rastreia o contato prévio com o vírus. Um resultado positivo exige exames complementares para confirmar uma infecção ativa e definir o seguimento.", "options": null, "audio": "O teste de hepatite C verifica se a mãe já teve contato com o vírus, para que o acompanhamento adequado seja feito durante a gestação." },
+          { "id": "prenatal.exams.toxo", "title": "Toxoplasmose (IgG/IgM)", "when": "Primeira consulta", "why": "Determina o estado imunológico. Gestantes suscetíveis (IgG e IgM negativos) devem receber orientação sobre prevenção, como evitar o consumo de carnes cruas ou malcozidas.", "options": null, "audio": "O exame de toxoplasmose mostra se a gestante tem imunidade. Se não tiver, ela receberá orientações para evitar a infecção, que é perigosa para o feto." },
+          { "id": "prenatal.exams.urina_urocult", "title": "Urina Tipo I + Urocultura", "when": "Primeira consulta", "why": "Detecta a bacteriúria assintomática (infecção urinária sem sintomas), que, se não tratada, pode evoluir para pielonefrite (infecção renal) e aumentar o risco de parto prematuro.", "options": null, "audio": "Este exame de urina busca por infecções que podem não ter sintomas, mas que, se não tratadas, aumentam o risco de parto prematuro." },
+          { "id": "prenatal.exams.pap", "title": "Exame Papanicolau", "when": "Primeira consulta", "why": "Realizado conforme o histórico da mulher, garante a continuidade do rastreamento de lesões no colo do útero durante a gestação.", "options": null, "audio": "O Papanicolau pode ser feito na gestação, se necessário, para continuar o rastreamento de alterações no colo do útero." }
+        ]
+      },
+      {
+        "h": "Participação do parceiro",
+        "items": [
+          { "id": "prenatal.partner.tests", "title": "Testes do parceiro (Sífilis e HIV)", "when": "Primeira consulta", "why": "A testagem e o tratamento do parceiro são cruciais para quebrar a cadeia de transmissão de ISTs, evitando a reinfecção da gestante e protegendo o feto.", "options": null, "audio": "Testar o parceiro para sífilis e HIV é fundamental para tratar possíveis infecções e evitar que a gestante seja reinfectada." }
+        ]
+      },
+      {
+        "h": "Exames de Imagem",
+        "items": [
+            { "id": "prenatal.exams.ultrassom_1tri", "title": "Ultrassom 1º Trimestre", "when": "Entre 11 e 13 semanas e 6 dias", "why": "Exame crucial para datação precisa da gestação (via CCN), avaliação da vitalidade, rastreio de anomalias cromossômicas (Translucência Nucal - TN) e do risco de pré-eclâmpsia.", "options": null, "audio": "O ultrassom do primeiro trimestre data a gestação, mede a translucência nucal para rastrear síndromes e avalia o risco de pré-eclâmpsia." }
+        ]
+      }
+    ]
+  },
+  "secondTrimester": {
+    "title": "Segundo trimestre (14–27 semanas)",
+    "blocks": [
+      { "h": "Metabolismo e Acompanhamento", "items": [
+        { "id": "prenatal.exams.totg75", "title": "Teste Oral de Tolerância à Glicose (TOTG 75g)", "when": "24ª a 28ª semana", "why": "Considerado o padrão-ouro para o diagnóstico de Diabetes Mellitus Gestacional (DMG), que se manifesta neste período devido aos hormônios placentários. O controle adequado previne complicações como macrossomia fetal (bebê grande) e hipoglicemia neonatal.", "options": null, "audio": "Este é o principal exame para diagnosticar diabetes gestacional. É feito entre 24 e 28 semanas para prevenir complicações para a mãe e o bebê." },
+        { "id": "prenatal.exams.sorologias_rep", "title": "Repetição de Sorologias", "when": "Conforme risco", "why": "Para gestantes suscetíveis a infecções como toxoplasmose ou sífilis, a repetição dos exames é indicada para detectar uma possível soroconversão (infecção adquirida durante a gravidez).", "options": null, "audio": "Se a gestante não tiver imunidade para certas doenças, como toxoplasmose, os exames podem ser repetidos para garantir que não houve infecção durante a gravidez." }
+      ] },
+      {
+        "h": "Exames de Imagem",
+        "items": [
+            { "id": "prenatal.exams.ultrassom_morfologico", "title": "Ultrassom Morfológico 2º Trimestre", "when": "Entre 20 e 24 semanas", "why": "Exame detalhado da anatomia fetal para avaliar o desenvolvimento de todos os órgãos e sistemas, como cérebro, coração, coluna, membros e face.", "options": null, "audio": "O ultrassom morfológico é um exame detalhado que avalia o desenvolvimento de todos os órgãos do bebê, sendo fundamental para detectar malformações." }
+        ]
+      }
+    ]
+  },
+  "thirdTrimester": {
+    "title": "Terceiro trimestre (28s → parto)",
+    "blocks": [
+      { "h": "Rastreamento Final", "items": [
+        { "id": "prenatal.exams.gbs", "title": "Pesquisa de Streptococcus B (GBS)", "when": "35ª a 37ª semana", "why": "Coleta de amostra vaginal e retal para identificar a bactéria. Se positivo, a gestante recebe antibióticos durante o parto para prevenir infecções graves no recém-nascido, como sepse e meningite.", "options": null, "audio": "Este exame, feito no final da gestação, detecta uma bactéria comum que pode ser passada para o bebê no parto. Se presente, um antibiótico na hora do parto protege o recém-nascido." }
+      ] },
+      {
+        "h": "Exames de Imagem",
+        "items": [
+          { "id": "prenatal.exams.ultrassom_3tri", "title": "Ultrassom 3º Trimestre", "when": "Após 28 semanas", "why": "Monitora o crescimento fetal, o volume de líquido amniótico, o bem-estar fetal (pode incluir Doppler) e a localização da placenta, importante para o planejamento do parto.", "options": null, "audio": "O ultrassom do terceiro trimestre avalia o crescimento do bebê, a quantidade de líquido amniótico e a posição da placenta, ajudando a planejar o parto." }
+        ]
+      }
+    ]
+  },
+  "newborn": {
+    "title": "Recém-nascido (0-28 dias) - Triagens e Dados de Nascimento",
+    "blocks": [
+      {
+        "h": "Dados de Nascimento",
+        "items": [
+            { "id": "nascimento.peso", "title": "Peso ao nascer", "when": "Logo após o nascimento", "why": "Indicador fundamental de vitalidade. <2,5 kg sugere baixo peso; >4,0 kg sugere macrossomia, ambos com riscos adicionais.", "options": ["Menos de 2.500 g", "Entre 2.500 g e 4.000 g", "Acima de 4.000 g"], "audio": "Peso ao nascer: <2,5 kg baixo peso; 2,5–4,0 kg adequado; >4,0 kg macrossomia." },
+            { "id": "nascimento.perimetro", "title": "Perímetro cefálico", "when": "Logo após o nascimento", "why": "Mede crescimento craniano. Abaixo da faixa pode indicar microcefalia; acima, macrocefalia; ambos requerem avaliação.", "options": ["Abaixo de 32 cm", "Entre 32 e 36 cm", "Acima de 36 cm"], "audio": "Perímetro cefálico: <32 cm abaixo; 32–36 cm esperado; >36 cm acima do esperado." },
+            { "id": "nascimento.estatura", "title": "Estatura ao nascer", "when": "Logo após o nascimento", "why": "Complementa avaliação do crescimento ao nascimento e auxilia na classificação do RN.", "options": ["Menos de 47 cm", "Entre 47 cm e 52 cm", "Acima de 52 cm"], "audio": "Estatura ao nascer: <47 cm baixo, 47–52 cm esperado, >52 cm acima." },
+            { "id": "newborn.cried_at_birth", "title": "Chorou ao nascer?", "when": "Sala de parto", "why": "Choro imediato sugere boa adaptação cardiorrespiratória e tônus.", "options": ["Sim", "Não"], "audio": "O choro ao nascer é um bom sinal de adaptação do RN." },
+            { "id": "newborn.first_hour_breastfeeding", "title": "Mamou na primeira hora de vida?", "when": "Primeira hora de vida", "why": "Contato pele a pele e amamentação precoce melhoram vínculo e desfechos do aleitamento.", "options": ["Sim", "Não"], "audio": "A amamentação na primeira hora de vida é altamente recomendada." },
+            { "id": "newborn.nicustay", "title": "Necessitou de UTI neonatal?", "when": "Após o nascimento", "why": "Indica gravidade clínica e direciona o seguimento ambulatorial.", "options": ["Sim", "Não"], "audio": "A necessidade de UTI neonatal sinaliza maior vigilância no seguimento." }
+        ]
+      },
+      {
+        "h": "Triagens Neonatais Essenciais",
+        "items": [
+          { "id": "triagens.pezinho", "title": "Teste do Pezinho", "when": "Entre 3º e 5º dia", "why": "Coleta de gotas de sangue do calcanhar para rastrear doenças graves como fenilcetonúria, hipotireoidismo congênito, doença falciforme, fibrose cística, entre outras, permitindo tratamento precoce.", "options": null, "audio": "Quando fazer: Entre 3º e 5º dia. Por que é importante: rastreia doenças graves como fenilcetonúria, hipotireoidismo, doença falciforme e fibrose cística." },
+          { "id": "triagens.coracaozinho", "title": "Teste do Coraçãozinho (Oximetria de Pulso)", "when": "24 a 48h de vida", "why": "Mede a oxigenação no sangue para detectar cardiopatias congênitas críticas que podem necessitar de intervenção cirúrgica urgente.", "options": null, "audio": "Quando fazer: 24 a 48h de vida. Por que é importante: mede oxigenação no sangue e detecta cardiopatias congênitas críticas." },
+          { "id": "triagens.orelhinha", "title": "Teste da Orelhinha (Triagem Auditiva)", "when": "Antes da alta hospitalar", "why": "Avalia a integridade da via auditiva. A detecção precoce de qualquer grau de surdez é fundamental para o desenvolvimento da fala e da linguagem.", "options": null, "audio": "Quando fazer: antes da alta hospitalar. Por que é importante: detecta precocemente alterações auditivas que podem impactar a fala." },
+          { "id": "triagens.olhinho", "title": "Teste do Olhinho (Reflexo Vermelho)", "when": "Antes da alta hospitalar", "why": "Busca identificar alterações que impeçam a luz de chegar à retina, como catarata congênita, glaucoma ou retinoblastoma, que podem levar à cegueira se não tratadas.", "options": null, "audio": "Quando fazer: antes da alta hospitalar. Por que é importante: detecta catarata congênita, glaucoma ou retinoblastoma." },
+          { "id": "triagens.linguinha", "title": "Teste da Linguinha (Frênulo Lingual)", "when": "Nas primeiras horas", "why": "Avalia o frênulo lingual para identificar a anquiloglossia ('língua presa'), que pode dificultar a amamentação e o ganho de peso do bebê.", "options": null, "audio": "Quando fazer: nas primeiras horas. Por que é importante: identifica a 'língua presa', que pode dificultar a amamentação." }
+        ]
+      }
+    ]
+  }
+}

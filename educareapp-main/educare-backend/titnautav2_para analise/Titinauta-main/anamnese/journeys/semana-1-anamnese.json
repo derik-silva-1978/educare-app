@@ -1,0 +1,47 @@
+
+{
+  "deprecated": "This JSON file is a legacy asset and is not used by the application. The authoritative data is in /data/anamnesis-data.js.",
+  "phase": "firstVisit",
+  "title": "Primeira consulta (até 12 semanas)",
+  "content": {
+    "blocks": [
+      {
+        "h": "Exames laboratoriais iniciais",
+        "items": [
+          { "id": "prenatal.exams.abo_rh", "title": "Tipagem sanguínea e Fator Rh", "when": "Primeira consulta", "why": "Identifica o risco de incompatibilidade Rh. Se a mãe for Rh negativo e o bebê Rh positivo, pode ser necessário o exame Coombs Indireto e o uso de imunoglobulina anti-Rh para proteger futuras gestações.", "audio": "Quando fazer: Primeira consulta. Por que é importante: Identifica o risco de incompatibilidade Rh. Se a mãe for Rh negativo e o bebê Rh positivo, pode ser necessário o exame Coombs Indireto e o uso de imunoglobulina anti-Rh para proteger futuras gestações." },
+          { "id": "prenatal.exams.hemograma", "title": "Hemograma completo", "when": "Primeira consulta", "why": "Avalia a presença de anemia ferropriva, condição comum que, se não tratada, pode comprometer o transporte de oxigênio e aumentar o risco de parto prematuro e baixo peso ao nascer.", "audio": "Quando fazer: Primeira consulta. Por que é importante: Avalia a presença de anemia ferropriva, condição comum que, se não tratada, pode comprometer o transporte de oxigênio e aumentar o risco de parto prematuro e baixo peso ao nascer." },
+          { "id": "prenatal.exams.glicemia", "title": "Glicemia de jejum", "when": "Primeira consulta", "why": "Rastreamento inicial para o diabetes mellitus gestacional (DMG). Valores alterados podem indicar a necessidade de um Teste Oral de Tolerância à Glicose (TOTG) no 2º trimestre.", "audio": "Quando fazer: Primeira consulta. Por que é importante: Rastreamento inicial para o diabetes mellitus gestacional (DMG). Valores alterados podem indicar a necessidade de um Teste Oral de Tolerância à Glicose (TOTG) no 2º trimestre." },
+          { "id": "prenatal.exams.vdrl", "title": "Sífilis (VDRL/Teste Rápido)", "when": "Primeira consulta", "why": "Essencial para prevenir a sífilis congênita, uma infecção grave que pode causar malformações, aborto ou morte fetal. O tratamento da gestante e do parceiro deve ser iniciado imediatamente.", "audio": "Quando fazer: Primeira consulta. Por que é importante: Essencial para prevenir a sífilis congênita, uma infecção grave que pode causar malformações, aborto ou morte fetal. O tratamento da gestante e do parceiro deve ser iniciado imediatamente." },
+          { "id": "prenatal.exams.hiv", "title": "HIV (Teste Rápido/Sorologia)", "when": "Primeira consulta", "why": "O diagnóstico precoce e o uso de terapia antirretroviral (TARV) durante a gestação reduzem drasticamente o risco de transmissão vertical para o bebê.", "audio": "Quando fazer: Primeira consulta. Por que é importante: O diagnóstico precoce e o uso de terapia antirretroviral (TARV) durante a gestação reduzem drasticamente o risco de transmissão vertical para o bebê." },
+          { "id": "prenatal.exams.hbsag", "title": "Hepatite B (AgHBs)", "when": "Primeira consulta", "why": "Identifica a presença do vírus. Se a mãe for portadora, o recém-nascido deve receber a vacina e a imunoglobulina específica nas primeiras 12 horas de vida para evitar a infecção crônica.", "audio": "Quando fazer: Primeira consulta. Por que é importante: Identifica a presença do vírus. Se a mãe for portadora, o recém-nascido deve receber a vacina e a imunoglobulina específica nas primeiras 12 horas de vida para evitar a infecção crônica." },
+          { "id": "prenatal.exams.hcv", "title": "Hepatite C (anti-HCV)", "when": "Primeira consulta", "why": "Rastreia o contato prévio com o vírus. Um resultado positivo exige exames complementares para confirmar uma infecção ativa e definir o seguimento.", "audio": "Quando fazer: Primeira consulta. Por que é importante: Rastreia o contato prévio com o vírus. Um resultado positivo exige exames complementares para confirmar uma infecção ativa e definir o seguimento." },
+          { "id": "prenatal.exams.toxo", "title": "Toxoplasmose (IgG/IgM)", "when": "Primeira consulta", "why": "Determina o estado imunológico. Gestantes suscetíveis (IgG e IgM negativos) devem receber orientação sobre prevenção, como evitar o consumo de carnes cruas ou malcozidas.", "audio": "Quando fazer: Primeira consulta. Por que é importante: Determina o estado imunológico. Gestantes suscetíveis (IgG e IgM negativos) devem receber orientação sobre prevenção, como evitar o consumo de carnes cruas ou malcozidas." },
+          { "id": "prenatal.exams.urina_urocult", "title": "Urina Tipo I + Urocultura", "when": "Primeira consulta", "why": "Detecta a bacteriúria assintomática (infecção urinária sem sintomas), que, se não tratada, pode evoluir para pielonefrite (infecção renal) e aumentar o risco de parto prematuro.", "audio": "Quando fazer: Primeira consulta. Por que é importante: Detecta a bacteriúria assintomática (infecção urinária sem sintomas), que, se não tratada, pode evoluir para pielonefrite (infecção renal) e aumentar o risco de parto prematuro." },
+          { "id": "prenatal.exams.pap", "title": "Exame Papanicolau", "when": "Primeira consulta", "why": "Realizado conforme o histórico da mulher, garante a continuidade do rastreamento de lesões no colo do útero durante a gestação.", "audio": "Quando fazer: Primeira consulta. Por que é importante: Realizado conforme o histórico da mulher, garante a continuidade do rastreamento de lesões no colo do útero durante a gestação." }
+        ]
+      },
+      {
+        "h": "Participação do parceiro",
+        "items": [
+          { "id": "prenatal.partner.tests", "title": "Testes do parceiro (Sífilis e HIV)", "when": "Primeira consulta", "why": "A testagem e o tratamento do parceiro são cruciais para quebrar a cadeia de transmissão de ISTs, evitando a reinfecção da gestante e protegendo o feto.", "audio": "Quando fazer: Primeira consulta. Por que é importante: A testagem e o tratamento do parceiro são cruciais para quebrar a cadeia de transmissão de ISTs, evitando a reinfecção da gestante e protegendo o feto." }
+        ]
+      }
+    ],
+    "additionalBlocks": [
+      { 
+        "h": "Ultrassom 1º Trimestre (11–13+6s)", 
+        "items": [ 
+          { "k": "Objetivo", "v": "Exame crucial para datação precisa da gestação (via CCN), avaliação da vitalidade, rastreio de anomalias cromossômicas (Translucência Nucal - TN) e do risco de pré-eclâmpsia." }
+        ] 
+      },
+      { 
+        "h": "Imunizações", 
+        "items": [
+          { "k": "dTpa (Tríplice Bacteriana)", "v": "Uma dose a cada gestação (20–36s) para proteger o recém-nascido contra coqueluche, uma doença respiratória grave em bebês." },
+          { "k": "Hepatite B", "v": "Completar o esquema de 3 doses se a gestante não for imunizada, para sua proteção e a do bebê." },
+          { "k": "Influenza (Gripe)", "v": "Dose anual recomendada em qualquer idade gestacional para proteger mãe e bebê de complicações graves da gripe." }
+        ]
+      }
+    ]
+  }
+}
