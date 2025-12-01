@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ChildInfoTab } from './ChildInfoTab';
 import { ChildReportsTab } from './ChildReportsTab';
 import { Bot, User, FileText, MessageCircle } from 'lucide-react';
-import { TitiNautaAvatar } from '../journey-bot/TitiNautaAvatar';
+import { TitiNautaAvatar } from '../titinauta/TitiNautaAvatar';
 import { EnhancedTeamChat } from '../chat/EnhancedTeamChat';
 import { useNavigate } from 'react-router-dom';
 

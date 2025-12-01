@@ -10,7 +10,7 @@ import { ChevronRight, Lock, Play, ArrowLeft, Calendar, AlertCircle, CheckCircle
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { TitiNautaAvatar } from '@/components/educare-app/journey-bot/TitiNautaAvatar';
+import { TitiNautaAvatar } from '@/components/educare-app/titinauta/TitiNautaAvatar';
 import { calculateAgeInMonths } from '@/utils/dateUtils';
 import { useToast } from '@/hooks/use-toast';
 import { JourneyQuestion } from '@/services/journeyQuestionsService';

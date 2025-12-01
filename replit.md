@@ -11,12 +11,14 @@ Educare+ is a digital platform for early childhood development and maternal heal
 
 ## Recent Changes (December 2025)
 - **Cleanup**: Removed all obsolete TitiNauta components and the src/components/titinauta/ folder
-- **Journey consolidation**: TitiNautaJourney is now the single "Jornada 2.0" interface
+- **Journey consolidation**: TitiNautaJourney (2.0) and WhatsAppJourneyBotPage are the only journey interfaces
+- **Removed old journey files**: Deleted JourneyBotPage, JourneyBot, JourneyBotAdmin, JourneyBotAdminPage and entire journey-bot components folder
 - **Theme toggle**: Simplified to single-button toggle between dark/light modes
 - **DevBadge component**: New component (src/components/ui/dev-badge.tsx) for marking incomplete modules
 - **New pages**: LojaPage, SupportPage with DevPlaceholder; MaterialApoioPage added to routes
 - **Navigation cleanup**: Unified "Jornada TitiNauta" across all user roles
-- **Removed routes**: /titinauta/:childId, /titinauta-media-demo, /titinauta-media/:childId, /journey-v2
+- **Slide duration**: AuthSlideshow increased to 8 seconds per slide with improved mobile responsiveness
+- **Removed routes**: /titinauta/:childId, /titinauta-media-demo, /titinauta-media/:childId, /journey-v2, /journey-bot (old)
 
 ## System Architecture
 

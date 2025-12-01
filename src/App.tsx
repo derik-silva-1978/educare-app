@@ -21,7 +21,6 @@ import EducareAppDashboard from "./pages/educare-app/EducareAppDashboard";
 import ChildrenManagement from "./pages/educare-app/ChildrenManagement";
 import ChildProfile from "./pages/educare-app/ChildProfile";
 import ChildForm from "./pages/educare-app/ChildForm";
-import JourneyBotPage from "./pages/educare-app/JourneyBotPage";
 import EducareActivitiesPage from "./pages/educare-app/ActivitiesPage";
 import EducareSettingsPage from "./pages/educare-app/SettingsPage";
 import SettingsLayout from "./pages/educare-app/settings/SettingsLayout";
@@ -100,7 +99,6 @@ const App = () => (
                 <Route path="child/:id" element={<ChildProfile />} />
                 <Route path="child/new" element={<ChildForm />} />
                 <Route path="child/:id/edit" element={<ChildForm />} />
-                <Route path="journey-bot" element={<JourneyBotPage />} />
                 <Route path="communication" element={<CommunicationPage />} />
                 <Route path="journey-bot-whatsapp/:childId" element={<WhatsAppJourneyBotPage />} />
                 <Route path="titinauta-journey" element={<TitiNautaJourney />} />
