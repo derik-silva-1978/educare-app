@@ -113,37 +113,37 @@ const OwnerDashboard: React.FC = () => {
       </Helmet>
       
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-              <Crown className="h-8 w-8 text-orange-500 mr-3" />
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center">
+              <Crown className="h-6 w-6 md:h-8 md:w-8 text-orange-500 mr-3" />
               Owner Dashboard
             </h1>
-            <p className="text-gray-600 mt-1">Gestão Global da Plataforma EducareApp</p>
+            <p className="text-muted-foreground mt-1">Gestão Global da Plataforma EducareApp</p>
           </div>
-          <div className="flex items-center space-x-3">
-            <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+          <div className="flex flex-wrap items-center gap-2 md:gap-3">
+            <Badge variant="secondary" className="bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300">
               <Crown className="h-3 w-3 mr-1" />
               Proprietário
             </Badge>
-            <div className="flex items-center space-x-1 text-green-600">
+            <div className="flex items-center space-x-1 text-green-600 dark:text-green-400">
               <CheckCircle className="h-4 w-4" />
               <span className="text-sm font-medium">Sistema Saudável</span>
             </div>
             <Link
               to="/educare-app/owner/plans"
-              className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors"
+              className="hidden md:flex items-center space-x-2 p-2 rounded-lg hover:bg-secondary transition-colors text-foreground"
             >
-              <CreditCard className="h-5 w-5 text-blue-600" />
-              <span className="font-medium">Planos de Assinatura</span>
+              <CreditCard className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <span className="font-medium">Planos</span>
             </Link>
             
             <Link
               to="/educare-app/owner/subscriptions"
-              className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors"
+              className="hidden md:flex items-center space-x-2 p-2 rounded-lg hover:bg-secondary transition-colors text-foreground"
             >
-              <Users className="h-5 w-5 text-green-600" />
-              <span className="font-medium">Gestão de Assinaturas</span>
+              <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <span className="font-medium">Assinaturas</span>
             </Link>
           </div>
         </div>
@@ -243,7 +243,7 @@ const OwnerDashboard: React.FC = () => {
                   const conversionRate = (trialCount + activeCount) > 0 ? (activeCount / (trialCount + activeCount)) * 100 : 0;
                   
                   return (
-                    <div key={index} className="p-4 bg-gray-50 rounded-lg">
+                    <div key={index} className="p-4 bg-secondary/50 rounded-lg">
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <h4 className="font-medium text-lg">{plan.planName}</h4>
@@ -260,7 +260,7 @@ const OwnerDashboard: React.FC = () => {
                       </div>
                       
                       {/* Detalhamento Trial vs Efetivos */}
-                      <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-200">
+                      <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border">
                         {/* Coluna Trial */}
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">

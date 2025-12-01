@@ -107,36 +107,7 @@ const SubscriptionPlansManagement: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Aplicar estilo CSS global para overlay branco do modal
-  React.useEffect(() => {
-    const styleId = 'subscription-modal-overlay';
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.innerHTML = `
-        /* Estilo específico para overlay branco do modal */
-        [data-radix-dialog-overlay] {
-          background-color: white !important;
-          opacity: 0.98 !important;
-        }
-        /* Garantir que funcione em todos os estados */
-        .radix-dialog-overlay,
-        [data-state="open"][data-radix-dialog-overlay],
-        [data-radix-dialog-overlay][data-state="open"] {
-          background-color: white !important;
-          opacity: 0.98 !important;
-        }
-      `;
-      document.head.appendChild(style);
-    }
-    return () => {
-      const existingStyle = document.getElementById(styleId);
-      if (existingStyle) {
-        existingStyle.remove();
-      }
-    };
-  }, []);
-
+  
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);

@@ -266,11 +266,11 @@ const UserManagement: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Ativo</Badge>;
+        return <Badge variant="default" className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">Ativo</Badge>;
       case 'inactive':
-        return <Badge variant="secondary" className="bg-red-100 text-red-800">Inativo</Badge>;
+        return <Badge variant="secondary" className="bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">Inativo</Badge>;
       case 'pending':
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800">Pendente</Badge>;
+        return <Badge variant="outline" className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">Pendente</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -302,16 +302,16 @@ const UserManagement: React.FC = () => {
       </Helmet>
       
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-              <Users className="h-8 w-8 text-blue-500 mr-3" />
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center">
+              <Users className="h-6 w-6 md:h-8 md:w-8 text-blue-500 mr-3" />
               Gestão de Usuários
             </h1>
-            <p className="text-gray-600 mt-1">Gerenciar usuários e permissões da plataforma</p>
+            <p className="text-muted-foreground mt-1">Gerenciar usuários e permissões da plataforma</p>
           </div>
           <div className="flex items-center space-x-3">
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+            <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
               {totalUsers} usuários
             </Badge>
           </div>

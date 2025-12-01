@@ -7,6 +7,7 @@ import { devToolsConfig } from "@/config/devtools.config";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from "@/providers/CustomAuthProvider";
+import { ThemeProvider } from "@/providers/ThemeProvider";
 import "@/utils/authStorage"; // Importar utilitários de armazenamento de autenticação
 import ContactPage from "./pages/ContactPage";
 import BlogPage from "./pages/BlogPage";
@@ -65,12 +66,13 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <HelmetProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+    <ThemeProvider defaultTheme="system" storageKey="educare-theme">
+      <HelmetProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
             <Routes>
               {/* Main Route - Redirect to Official Landing Page */}
               <Route path="/" element={<Navigate to="/educare-app" replace />} />
@@ -232,17 +234,18 @@ const App = () => (
               <Route path="*" element={<Navigate to="/educare-app" replace />} />
             </Routes>
           </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
-    </HelmetProvider>
-    {/* Renderizar DevTools apenas em ambiente de desenvolvimento */}
-    {process.env.NODE_ENV === 'development' && devToolsConfig.enabled && (
-      <CustomDevTools 
-        initialIsOpen={devToolsConfig.reactQuery.initialIsOpen} 
-        position={devToolsConfig.reactQuery.position} 
-        buttonPosition={devToolsConfig.reactQuery.buttonPosition} 
-      />
-    )}
+          </TooltipProvider>
+        </AuthProvider>
+      </HelmetProvider>
+      {/* Renderizar DevTools apenas em ambiente de desenvolvimento */}
+      {process.env.NODE_ENV === 'development' && devToolsConfig.enabled && (
+        <CustomDevTools 
+          initialIsOpen={devToolsConfig.reactQuery.initialIsOpen} 
+          position={devToolsConfig.reactQuery.position} 
+          buttonPosition={devToolsConfig.reactQuery.buttonPosition} 
+        />
+      )}
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

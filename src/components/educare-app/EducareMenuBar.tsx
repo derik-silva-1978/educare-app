@@ -18,12 +18,23 @@ import {
   GraduationCap,
   ShoppingBag,
   User,
-  HelpCircle
+  HelpCircle,
+  Menu,
+  X
 } from 'lucide-react';
+import { DarkModeToggle } from '@/components/educare-app/layout/DarkModeToggle';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
 const EducareMenuBar: React.FC = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Handle scroll effect for the menu bar
   React.useEffect(() => {
@@ -50,7 +61,9 @@ const EducareMenuBar: React.FC = () => {
   return (
     <motion.div
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/90 backdrop-blur-lg shadow-sm' : 'bg-transparent'
+        scrolled 
+          ? 'bg-background/95 backdrop-blur-lg shadow-sm border-b border-border' 
+          : 'bg-transparent'
       }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -100,10 +113,12 @@ const EducareMenuBar: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-2">
+            <DarkModeToggle />
+            
             <Button 
               variant="ghost" 
               size="sm" 
-              className="hidden sm:flex items-center text-gray-600 hover:text-blue-500"
+              className="hidden sm:flex items-center text-muted-foreground hover:text-primary"
               onClick={() => navigate('/educare-app/support')}
             >
               <HelpCircle className="h-4 w-4 mr-1" />
@@ -113,7 +128,7 @@ const EducareMenuBar: React.FC = () => {
             <Button 
               variant="ghost" 
               size="sm"
-              className="hidden sm:flex items-center text-gray-600 hover:text-blue-500"
+              className="hidden sm:flex items-center text-muted-foreground hover:text-primary"
               onClick={() => navigate('/educare-app/auth')}
             >
               <User className="h-4 w-4 mr-1" />
@@ -122,11 +137,74 @@ const EducareMenuBar: React.FC = () => {
             
             <Button 
               size="sm"
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
+              className="hidden sm:flex bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
               onClick={() => navigate('/educare-app/auth?action=register')}
             >
               Começar Agora
             </Button>
+            
+            {/* Mobile Menu Button */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] sm:w-[350px]">
+                <SheetHeader>
+                  <SheetTitle className="text-left">Menu</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-4 mt-6">
+                  {menuItems.map((item) => (
+                    <Button 
+                      key={item.name}
+                      variant="ghost" 
+                      className="justify-start"
+                      onClick={() => {
+                        item.onClick();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      {item.icon}
+                      {item.name}
+                    </Button>
+                  ))}
+                  <hr className="my-2" />
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start"
+                    onClick={() => {
+                      navigate('/educare-app/support');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    Suporte
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="justify-start"
+                    onClick={() => {
+                      navigate('/educare-app/auth');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Entrar
+                  </Button>
+                  <Button 
+                    className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white"
+                    onClick={() => {
+                      navigate('/educare-app/auth?action=register');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    Começar Agora
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>

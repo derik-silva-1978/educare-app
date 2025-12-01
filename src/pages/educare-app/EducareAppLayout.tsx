@@ -11,6 +11,7 @@ import { useBreadcrumbs } from '@/hooks/useBreadcrumbs';
 import { Button } from '@/components/ui/button';
 import { LogOut, User, Key } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { DarkModeToggle } from '@/components/educare-app/layout/DarkModeToggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -123,8 +124,9 @@ const EducareAppLayout: React.FC = () => {
               <CustomBreadcrumb breadcrumbs={breadcrumbs} />
             </div>
             
-            {/* Menu de usuário com opção de sair */}
+            {/* Dark Mode Toggle e Menu de usuário */}
             <div className="flex items-center gap-2">
+              <DarkModeToggle />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">

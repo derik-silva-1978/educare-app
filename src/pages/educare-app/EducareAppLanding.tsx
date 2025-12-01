@@ -55,10 +55,10 @@ const EducareAppLanding: React.FC = () => {
       <PlatformAreasSection />
 
       {/* User Types Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-secondary/50 dark:bg-secondary/20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Para Cada Necessidade</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Para Cada Necessidade</h2>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               Soluções personalizadas para diferentes perfis de usuário
             </p>
@@ -68,22 +68,22 @@ const EducareAppLanding: React.FC = () => {
             {userTypes.map((type, index) => (
               <motion.div 
                 key={index}
-                className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100"
+                className="bg-card p-8 rounded-2xl shadow-sm border border-border"
                 whileHover={{ y: -5 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-6">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-6">
                   {type.icon}
                 </div>
-                <h3 className="text-xl font-bold mb-4">{type.title}</h3>
-                <p className="text-gray-600 mb-6">{type.description}</p>
+                <h3 className="text-xl font-bold mb-4 text-foreground">{type.title}</h3>
+                <p className="text-muted-foreground mb-6">{type.description}</p>
                 <ul className="space-y-3">
                   {type.benefits.map((benefit, benefitIndex) => (
                     <li key={benefitIndex} className="flex items-start">
-                      <Check className="h-5 w-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm">{benefit}</span>
+                      <Check className="h-5 w-5 text-green-500 dark:text-green-400 mr-3 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-foreground">{benefit}</span>
                     </li>
                   ))}
                 </ul>
@@ -94,10 +94,10 @@ const EducareAppLanding: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-white">
+      <section id="features" className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Funcionalidades Principais</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Funcionalidades Principais</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Tecnologia avançada para apoiar cada etapa do desenvolvimento infantil
             </p>
@@ -138,16 +138,16 @@ const EducareAppLanding: React.FC = () => {
             ].map((feature, index) => (
               <motion.div 
                 key={index}
-                className="bg-gray-50 p-6 rounded-xl border border-gray-100"
+                className="bg-secondary/50 dark:bg-secondary/20 p-6 rounded-xl border border-border"
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mb-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-4">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">{feature.title}</h3>
                 <p className="text-muted-foreground">{feature.description}</p>
               </motion.div>
             ))}
@@ -156,10 +156,10 @@ const EducareAppLanding: React.FC = () => {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
+      <section id="pricing" className="py-20 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Comece Gratuitamente</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Comece Gratuitamente</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Acesse todas as funcionalidades básicas sem custo. Upgrade quando precisar de mais recursos.
             </p>
@@ -168,33 +168,33 @@ const EducareAppLanding: React.FC = () => {
           <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Free Plan */}
             <motion.div 
-              className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200"
+              className="bg-card p-6 rounded-2xl shadow-sm border border-border"
               whileHover={{ y: -5 }}
             >
               <div className="text-center mb-6">
-                <h3 className="text-xl font-bold mb-2">Plano Gratuito</h3>
-                <p className="text-2xl font-bold text-blue-600">Grátis</p>
-                <p className="text-gray-500 text-sm">30 dias</p>
+                <h3 className="text-xl font-bold mb-2 text-foreground">Plano Gratuito</h3>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">Grátis</p>
+                <p className="text-muted-foreground text-sm">30 dias</p>
               </div>
-              <ul className="space-y-2 mb-6 text-sm">
+              <ul className="space-y-2 mb-6 text-sm text-foreground">
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>1 perfil de criança</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Jornada TitiNauta com Assistente IA (Web e WhatsApp)</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Acesso ao Blog</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Avaliações básicas</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Suporte via chat</span>
                 </li>
               </ul>
@@ -205,38 +205,38 @@ const EducareAppLanding: React.FC = () => {
 
             {/* Basic Plan */}
             <motion.div 
-              className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200"
+              className="bg-card p-6 rounded-2xl shadow-sm border border-border"
               whileHover={{ y: -5 }}
             >
               <div className="text-center mb-6">
-                <h3 className="text-xl font-bold mb-2">Plano Básico</h3>
-                <p className="text-2xl font-bold text-green-600">R$ 19,90</p>
-                <p className="text-gray-500 text-sm">por mês</p>
-                <p className="text-xs text-green-600 font-medium mt-1">R$ 199,90/ano - Economize 17%</p>
+                <h3 className="text-xl font-bold mb-2 text-foreground">Plano Básico</h3>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">R$ 19,90</p>
+                <p className="text-muted-foreground text-sm">por mês</p>
+                <p className="text-xs text-green-600 dark:text-green-400 font-medium mt-1">R$ 199,90/ano - Economize 17%</p>
               </div>
-              <ul className="space-y-2 mb-6 text-sm">
+              <ul className="space-y-2 mb-6 text-sm text-foreground">
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>1 perfil de criança</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Jornada TitiNauta com Assistente IA (somente na web)</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Relatórios Básicos</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Acesso à Educare+ Academy</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Acesso ao Blog</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Notificações de progresso</span>
                 </li>
               </ul>
@@ -292,42 +292,42 @@ const EducareAppLanding: React.FC = () => {
             
             {/* Enterprise Plan */}
             <motion.div 
-              className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200"
+              className="bg-card p-6 rounded-2xl shadow-sm border border-border"
               whileHover={{ y: -5 }}
             >
               <div className="text-center mb-6">
-                <h3 className="text-xl font-bold mb-2">Plano Empresarial</h3>
-                <p className="text-2xl font-bold text-purple-600">R$ 199,00</p>
-                <p className="text-gray-500 text-sm">por mês</p>
-                <p className="text-xs text-purple-600 font-medium mt-1">R$ 1.999,00/ano - Economize 17%</p>
+                <h3 className="text-xl font-bold mb-2 text-foreground">Plano Empresarial</h3>
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">R$ 199,00</p>
+                <p className="text-muted-foreground text-sm">por mês</p>
+                <p className="text-xs text-purple-600 dark:text-purple-400 font-medium mt-1">R$ 1.999,00/ano - Economize 17%</p>
               </div>
-              <ul className="space-y-2 mb-6 text-sm">
+              <ul className="space-y-2 mb-6 text-sm text-foreground">
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Cadastrar até 05 Crianças</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Jornada TitiNauta com Assistente IA (Web e WhatsApp)</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Painel de Acompanhamento da Jornada do Desenvolvimento</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Geração de Relatórios auxiliados pelos assistentes virtuais</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Acesso Completo ao Educare Academy</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Mentorias coletivas Mensais</span>
                 </li>
                 <li className="flex items-start">
-                  <Check className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <Check className="h-4 w-4 text-green-500 dark:text-green-400 mr-2 flex-shrink-0 mt-0.5" />
                   <span>Suporte prioritário</span>
                 </li>
               </ul>
