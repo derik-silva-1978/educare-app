@@ -98,7 +98,7 @@ const EducareMenuBar: React.FC = () => {
                 {menuItems.map((item) => (
                   <MenubarMenu key={item.name}>
                     <MenubarTrigger 
-                      className="cursor-pointer text-sm font-medium hover:text-blue-500 transition-colors"
+                      className="cursor-pointer text-sm font-medium text-foreground hover:text-primary transition-colors"
                       onClick={item.onClick}
                     >
                       <span className="flex items-center">
@@ -118,7 +118,7 @@ const EducareMenuBar: React.FC = () => {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="hidden sm:flex items-center text-muted-foreground hover:text-primary"
+              className="hidden sm:flex items-center text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
               onClick={() => navigate('/educare-app/support')}
             >
               <HelpCircle className="h-4 w-4 mr-1" />

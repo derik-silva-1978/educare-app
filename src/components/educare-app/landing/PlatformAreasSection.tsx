@@ -45,10 +45,10 @@ const PlatformAreasSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Todas as Áreas da Plataforma</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Explore Todas as Áreas da Plataforma</h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Uma plataforma integrada com tudo o que você precisa para apoiar o desenvolvimento infantil
           </p>
@@ -58,7 +58,7 @@ const PlatformAreasSection: React.FC = () => {
           {platformAreas.map((area, index) => (
             <motion.div 
               key={index}
-              className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300"
+              className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden hover:shadow-xl transition-shadow duration-300"
               whileHover={{ y: -5 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -69,8 +69,8 @@ const PlatformAreasSection: React.FC = () => {
                 <div className={`w-16 h-16 bg-gradient-to-r ${area.color} rounded-2xl flex items-center justify-center text-white mb-6`}>
                   {area.icon}
                 </div>
-                <h3 className="text-2xl font-bold mb-4">{area.title}</h3>
-                <p className="text-gray-600 mb-6">{area.description}</p>
+                <h3 className="text-2xl font-bold mb-4 text-foreground">{area.title}</h3>
+                <p className="text-muted-foreground mb-6">{area.description}</p>
                 <ul className="space-y-2 mb-8">
                   {area.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-center text-sm">

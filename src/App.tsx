@@ -168,13 +168,13 @@ const App = () => (
               
               {/* Loja Educare+ - Enhanced placeholder */}
               <Route path="/educare-app/loja" element={
-                <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+                <div className="min-h-screen bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/30 dark:to-teal-950/30 flex items-center justify-center">
                   <div className="text-center max-w-2xl px-4">
                     <div className="w-24 h-24 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <span className="text-white font-bold text-2xl">E+</span>
+                      <span className="text-white font-bold text-2xl">🛍️</span>
                     </div>
-                    <h1 className="text-4xl font-bold text-emerald-600 mb-4">Loja Educare+</h1>
-                    <p className="text-xl text-gray-600 mb-6">
+                    <h1 className="text-4xl font-bold text-foreground mb-4">Loja Educare+</h1>
+                    <p className="text-xl text-muted-foreground mb-6">
                       Em breve! Recursos educacionais, materiais didáticos e ferramentas especializadas 
                       para apoiar o desenvolvimento infantil.
                     </p>
@@ -187,7 +187,7 @@ const App = () => (
                       </button>
                       <button 
                         onClick={() => window.location.href = '/contact'}
-                        className="bg-white text-emerald-600 border-2 border-emerald-600 px-8 py-4 rounded-full hover:bg-emerald-50 transition-colors"
+                        className="bg-background text-emerald-600 border-2 border-emerald-600 px-8 py-4 rounded-full hover:bg-accent transition-colors"
                       >
                         Entre em Contato
                       </button>
@@ -198,13 +198,13 @@ const App = () => (
               
               {/* Support/Help Route */}
               <Route path="/educare-app/support" element={
-                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+                <div className="min-h-screen bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/30 dark:to-indigo-950/30 flex items-center justify-center">
                   <div className="text-center max-w-2xl px-4">
                     <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <span className="text-white font-bold text-2xl">?</span>
+                      <span className="text-white font-bold text-2xl">❓</span>
                     </div>
-                    <h1 className="text-4xl font-bold text-blue-600 mb-4">Suporte Educare+</h1>
-                    <p className="text-xl text-gray-600 mb-6">
+                    <h1 className="text-4xl font-bold text-foreground mb-4">Suporte Educare+</h1>
+                    <p className="text-xl text-muted-foreground mb-6">
                       Precisa de ajuda? Estamos aqui para apoiar sua jornada no desenvolvimento infantil.
                     </p>
                     <div className="flex flex-wrap justify-center gap-4">
@@ -216,7 +216,7 @@ const App = () => (
                       </button>
                       <button 
                         onClick={() => window.location.href = '/contact'}
-                        className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-full hover:bg-blue-50 transition-colors"
+                        className="bg-background text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-full hover:bg-accent transition-colors"
                       >
                         Contato
                       </button>
