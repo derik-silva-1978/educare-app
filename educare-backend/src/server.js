@@ -46,16 +46,6 @@ app.use(express.urlencoded({ extended: true }));
 // Servir arquivos estáticos da pasta uploads
 app.use('/uploads', express.static(process.env.UPLOAD_PATH || './uploads'));
 
-// Middleware de debug para capturar requisições de registro
-app.use('/api/auth/register', (req, res, next) => {
-  console.log('=== DEBUG MIDDLEWARE - Requisição de registro ===');
-  console.log('Method:', req.method);
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
-  console.log('=== FIM DEBUG ===');
-  next();
-});
-
 // Rotas
 // app.use('/api', routes); // TODO: Implementar rota principal que gerencia todas as outras
 
