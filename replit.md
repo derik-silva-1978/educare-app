@@ -115,9 +115,11 @@ Educare+ is a digital platform for early childhood development and maternal heal
   - `GET /children/:id/quiz-responses` - Answer history
 
 ### n8n Workflow (Documented)
-- **Template**: `educare-backend/docs/n8n-workflow-template.json`
-- **Documentation**: `educare-backend/docs/README_N8N_WORKFLOW.md`
-- **Status**: Template ready for import
+- **Template**: `educare-backend/docs/n8n-workflow-template.json` ✅
+- **Documentation**: `educare-backend/docs/README_N8N_WORKFLOW.md` ✅
+- **Setup Guide**: `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ **NEW**
+- **Webhook Test**: https://n8neducare.whatscall.com.br/webhook-test/titnauta
+- **Status**: Blueprint ready for import and deployment
 
 ### WhatsApp (Documented)
 - **Documentation**: `educare-backend/docs/WHATSAPP_INTEGRATION.md`
@@ -175,9 +177,10 @@ Educare+ is a digital platform for early childhood development and maternal heal
 
 ### Integration Documentation
 - `README_DIAGNOSTICO.md` - Complete integration analysis
-- `educare-backend/docs/README_N8N_WORKFLOW.md` - n8n workflow guide
-- `educare-backend/docs/n8n-workflow-template.json` - Importable workflow
-- `educare-backend/docs/WHATSAPP_INTEGRATION.md` - WhatsApp setup guide
+- `educare-backend/docs/README_N8N_WORKFLOW.md` - n8n workflow architecture
+- `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` - **NEW** Complete setup & troubleshooting guide
+- `educare-backend/docs/n8n-workflow-template.json` - Importable blueprint (ready for n8n.cloud)
+- `educare-backend/docs/WHATSAPP_INTEGRATION.md` - WhatsApp provider options
 - `educare-backend/docs/ENV_CONFIG.md` - Environment variables reference
 
 ### External API
