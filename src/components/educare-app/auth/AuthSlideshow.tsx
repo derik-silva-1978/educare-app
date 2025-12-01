@@ -63,7 +63,7 @@ const slides: Slide[] = [
   }
 ];
 
-const SLIDE_DURATION = 5000;
+const SLIDE_DURATION = 8000;
 
 const AuthSlideshow: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -138,14 +138,14 @@ const AuthSlideshow: React.FC = () => {
             </motion.div>
           </div>
 
-          <div className="relative h-full flex flex-col items-center justify-center p-8 lg:p-12 text-white">
+          <div className="relative h-full flex flex-col items-center justify-center p-4 sm:p-8 lg:p-12 text-white">
             <motion.div
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.5 }}
-              className="mb-8"
+              className="mb-6 sm:mb-8"
             >
-              <div className="p-6 bg-white/20 backdrop-blur-sm rounded-3xl">
+              <div className="p-4 sm:p-6 bg-white/20 backdrop-blur-sm rounded-3xl">
                 {slide.icon}
               </div>
             </motion.div>
@@ -154,7 +154,7 @@ const AuthSlideshow: React.FC = () => {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="text-2xl lg:text-4xl font-bold text-center mb-4 max-w-lg"
+              className="text-xl sm:text-2xl lg:text-4xl font-bold text-center mb-4 max-w-lg px-4"
             >
               {slide.title}
             </motion.h2>
@@ -163,7 +163,7 @@ const AuthSlideshow: React.FC = () => {
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.5 }}
-              className={`text-base lg:text-lg text-center max-w-md ${slide.accentColor}`}
+              className={`text-sm sm:text-base lg:text-lg text-center max-w-md px-4 ${slide.accentColor}`}
             >
               {slide.description}
             </motion.p>
