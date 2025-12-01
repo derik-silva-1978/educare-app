@@ -193,15 +193,18 @@ The workflow orchestrates:
 - Redirect URLs fixed with /educare-app prefix
 - Both workflows running successfully (Backend on :3001, Frontend on :5000)
 
+## Stripe Products (Created 2025-12-01)
+
+| Plan Name | Product ID | Price ID | Amount |
+|-----------|------------|----------|--------|
+| Plano Gratuito | prod_TWeBe70JHiDtAJ | N/A | Free |
+| Plano Básico | prod_TWeBzLEeRuuo1n | price_1SZasf2ektcrjgYMzNektZH5 | R$29.90/month |
+| Plano Premium | prod_TWeByYcEC87pue | price_1SZasg2ektcrjgYMZdsPovZv | R$59.90/month |
+| Plano Profissional | prod_TWeB90T8wtxDNW | price_1SZash2ektcrjgYM8gxlStFE | R$149.90/month |
+
 ## Next Steps
 
-### 2. Create Stripe Products and Prices
-- Go to Stripe Dashboard → Products
-- Create subscription plans matching your SubscriptionPlan table
-- Add price IDs to SubscriptionPlan records via metadata (e.g., `stripePriceId: "price_xyz"`)
-- Test checkout flow with test card: 4242 4242 4242 4242
-
-### 3. Configure Webhook in Stripe Dashboard
+### 1. Configure Webhook in Stripe Dashboard
 - Navigate to Developers → Webhooks
 - Add endpoint: `https://your-domain.com/api/stripe/webhook`
 - Subscribe to events: `customer.subscription.*`, `invoice.*`, `checkout.session.completed`

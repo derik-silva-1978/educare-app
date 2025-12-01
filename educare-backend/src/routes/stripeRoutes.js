@@ -242,4 +242,25 @@ router.post('/subscription/:subscriptionId/change-plan', verifyToken, isOwner, a
   }
 });
 
+router.post('/seed-plans', verifyToken, isOwner, async (req, res) => {
+  try {
+    console.log('Starting Stripe plans seed...');
+    const createdPlans = await stripeService.seedSubscriptionPlans();
+    
+    res.json({ 
+      success: true,
+      message: `Created/verified ${createdPlans.length} subscription plans`,
+      plans: createdPlans.map(p => ({
+        productId: p.product.id,
+        productName: p.product.name,
+        priceId: p.price?.id || null,
+        priceAmount: p.price?.unit_amount ? `R$${(p.price.unit_amount / 100).toFixed(2)}` : 'Free'
+      }))
+    });
+  } catch (error) {
+    console.error('Error seeding plans:', error);
+    res.status(500).json({ error: 'Failed to seed subscription plans', details: error.message });
+  }
+});
+
 module.exports = router;

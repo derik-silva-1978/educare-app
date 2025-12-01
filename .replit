@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "python-3.11"]
+modules = ["nodejs-20", "web", "python-3.11", "postgresql-16"]
 [agent]
 expertMode = true
 integrations = ["javascript_openai:1.0.0", "stripe:1.0.0"]
@@ -58,10 +58,6 @@ externalPort = 3001
 [[ports]]
 localPort = 5000
 externalPort = 5000
-
-[[ports]]
-localPort = 39355
-externalPort = 3002
 
 [[ports]]
 localPort = 44903

@@ -265,6 +265,184 @@ class StripeService {
   async isConfigured() {
     return await isStripeConfigured();
   }
+
+  async createProduct(name, description, metadata = {}) {
+    const stripe = await getUncachableStripeClient();
+    return await stripe.products.create({
+      name,
+      description,
+      metadata,
+      active: true
+    });
+  }
+
+  async createPrice(productId, unitAmount, currency = 'brl', interval = 'month', metadata = {}) {
+    const stripe = await getUncachableStripeClient();
+    return await stripe.prices.create({
+      product: productId,
+      unit_amount: unitAmount,
+      currency: currency.toLowerCase(),
+      recurring: {
+        interval: interval
+      },
+      metadata,
+      active: true
+    });
+  }
+
+  async seedSubscriptionPlans() {
+    const stripe = await getUncachableStripeClient();
+    
+    const plans = [
+      {
+        name: 'Plano Gratuito',
+        description: 'Acesso básico ao TitiNauta com recursos limitados',
+        price: 0,
+        interval: 'month',
+        features: {
+          tiriNautaWeb: true,
+          basicReports: true,
+          blogAccess: true,
+          basicAssessments: true,
+          maxChildren: 1
+        }
+      },
+      {
+        name: 'Plano Básico',
+        description: 'Acesso completo ao TitiNauta via WhatsApp e Web',
+        price: 2990,
+        interval: 'month',
+        features: {
+          tiriNautaWhatsapp: true,
+          tiriNautaWeb: true,
+          basicReports: true,
+          detailedReports: true,
+          progressNotifications: true,
+          blogAccess: true,
+          basicAssessments: true,
+          maxChildren: 2
+        }
+      },
+      {
+        name: 'Plano Premium',
+        description: 'Todos os recursos incluindo Academia Educare e suporte prioritário',
+        price: 5990,
+        interval: 'month',
+        features: {
+          tiriNautaWhatsapp: true,
+          tiriNautaWeb: true,
+          tiriNautaComplete: true,
+          basicReports: true,
+          detailedReports: true,
+          advancedReports: true,
+          educareAcademy: true,
+          progressNotifications: true,
+          whatsappGroups: true,
+          journeyDashboard: true,
+          prioritySupport: true,
+          chatSupport: true,
+          blogAccess: true,
+          basicAssessments: true,
+          professionalSharing: true,
+          maxChildren: 5
+        }
+      },
+      {
+        name: 'Plano Profissional',
+        description: 'Para profissionais de saúde e educação com recursos avançados',
+        price: 14990,
+        interval: 'month',
+        features: {
+          tiriNautaWhatsapp: true,
+          tiriNautaWeb: true,
+          tiriNautaComplete: true,
+          tiriNautaBusiness: true,
+          basicReports: true,
+          detailedReports: true,
+          advancedReports: true,
+          educareAcademy: true,
+          educareAcademyComplete: true,
+          progressNotifications: true,
+          whatsappGroups: true,
+          livesAndMentoring: true,
+          monthlyMentoring: true,
+          journeyDashboard: true,
+          prioritySupport: true,
+          chatSupport: true,
+          blogAccess: true,
+          basicAssessments: true,
+          professionalSharing: true,
+          maxChildren: 50,
+          maxProfessionals: 10
+        }
+      }
+    ];
+
+    const createdPlans = [];
+
+    for (const plan of plans) {
+      try {
+        const existingProducts = await stripe.products.list({
+          limit: 100,
+          active: true
+        });
+        
+        let product = existingProducts.data.find(p => p.name === plan.name);
+        
+        if (!product) {
+          product = await this.createProduct(plan.name, plan.description, {
+            planType: plan.name.toLowerCase().replace(/\s+/g, '_'),
+            features: JSON.stringify(plan.features)
+          });
+          console.log(`Created product: ${product.name} (${product.id})`);
+        } else {
+          console.log(`Product already exists: ${product.name} (${product.id})`);
+        }
+
+        if (plan.price > 0) {
+          const existingPrices = await stripe.prices.list({
+            product: product.id,
+            active: true
+          });
+
+          let price = existingPrices.data.find(p => 
+            p.unit_amount === plan.price && 
+            p.recurring?.interval === plan.interval &&
+            p.currency === 'brl'
+          );
+
+          if (!price) {
+            price = await this.createPrice(
+              product.id, 
+              plan.price, 
+              'brl', 
+              plan.interval,
+              { planName: plan.name }
+            );
+            console.log(`Created price: R$${(plan.price / 100).toFixed(2)}/${plan.interval} (${price.id})`);
+          } else {
+            console.log(`Price already exists: R$${(plan.price / 100).toFixed(2)}/${plan.interval} (${price.id})`);
+          }
+
+          createdPlans.push({
+            product,
+            price,
+            planDetails: plan
+          });
+        } else {
+          createdPlans.push({
+            product,
+            price: null,
+            planDetails: plan
+          });
+        }
+      } catch (error) {
+        console.error(`Error creating plan ${plan.name}:`, error.message);
+      }
+    }
+
+    return createdPlans;
+  }
 }
 
 const stripeService = new StripeService();
