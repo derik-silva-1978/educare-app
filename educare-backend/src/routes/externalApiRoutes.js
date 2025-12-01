@@ -31,6 +31,7 @@ router.get('/children/:id', externalApiController.getChildById);
 router.get('/children/:childId/unanswered-questions', externalApiController.getUnansweredQuestions);
 router.post('/children/:childId/save-answer', externalApiController.saveQuestionAnswer);
 router.get('/children/:childId/progress', externalApiController.getChildProgress);
+router.get('/children/:childId/quiz-responses', externalApiController.getQuizResponses);
 
 // Rotas para seleção de criança ativa
 router.get('/users/by-phone/:phone/active-child', externalApiController.getActiveChildByPhone);

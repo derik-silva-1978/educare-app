@@ -163,6 +163,10 @@ JourneyBotResponse.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 Child.hasMany(JourneyBotResponse, { foreignKey: 'child_id', as: 'journeyBotResponses' });
 JourneyBotResponse.belongsTo(Child, { foreignKey: 'child_id', as: 'child' });
 
+// JourneyBotResponse <-> JourneyBotQuestion (N:1) - Logical association only (no FK constraint due to type mismatch)
+JourneyBotQuestion.hasMany(JourneyBotResponse, { foreignKey: 'question_id', as: 'responses', constraints: false });
+JourneyBotResponse.belongsTo(JourneyBotQuestion, { foreignKey: 'question_id', as: 'question', constraints: false });
+
 // ChatInvite associations
 // Team <-> ChatInvite (1:N)
 Team.hasMany(ChatInvite, { foreignKey: 'team_id', as: 'invites' });

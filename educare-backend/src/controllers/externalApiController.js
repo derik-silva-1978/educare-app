@@ -1960,25 +1960,33 @@ exports.getChildProgress = async (req, res) => {
       });
     }
     
-    // Calcular idade em meses
-    const birthDate = new Date(child.birth_date);
-    const today = new Date();
-    const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + 
-                        (today.getMonth() - birthDate.getMonth());
+    // Calcular idade em meses (tratar caso de birth_date null/undefined)
+    let ageInMonths = null;
+    if (child.birth_date) {
+      const birthDate = new Date(child.birth_date);
+      const today = new Date();
+      ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + 
+                    (today.getMonth() - birthDate.getMonth());
+    }
     
     // Buscar total de perguntas para a idade
-    const { JourneyQuestion } = require('../models');
+    const { JourneyBotQuestion } = require('../models');
     const { Op } = require('sequelize');
-    const totalQuestions = await JourneyQuestion.count({
-      where: {
-        meta_min_months: {
-          [Op.lte]: ageInMonths
-        },
-        meta_max_months: {
-          [Op.gte]: ageInMonths
+    
+    // Se não tiver idade definida, buscar todas as perguntas ou retornar 0
+    let totalQuestions = 0;
+    if (ageInMonths !== null) {
+      totalQuestions = await JourneyBotQuestion.count({
+        where: {
+          meta_min_months: {
+            [Op.lte]: ageInMonths
+          },
+          meta_max_months: {
+            [Op.gte]: ageInMonths
+          }
         }
-      }
-    });
+      });
+    }
     
     // Buscar respostas dadas
     const { JourneyBotResponse } = require('../models');
@@ -2032,6 +2040,118 @@ exports.getChildProgress = async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Erro ao buscar progresso',
+      message: error.message
+    });
+  }
+};
+
+exports.getQuizResponses = async (req, res) => {
+  try {
+    logger.info('API Externa - Buscar Respostas do Quiz');
+    const { childId } = req.params;
+    const { limit = 50, offset = 0, domain, from_date, to_date } = req.query;
+    
+    const child = await Child.findByPk(childId);
+    if (!child) {
+      return res.status(404).json({
+        success: false,
+        error: 'Criança não encontrada'
+      });
+    }
+    
+    const { JourneyBotResponse, JourneyBotQuestion } = require('../models');
+    const { Op } = require('sequelize');
+    
+    const whereClause = {
+      child_id: childId
+    };
+    
+    if (from_date) {
+      whereClause.created_at = {
+        ...(whereClause.created_at || {}),
+        [Op.gte]: new Date(from_date)
+      };
+    }
+    
+    if (to_date) {
+      whereClause.created_at = {
+        ...(whereClause.created_at || {}),
+        [Op.lte]: new Date(to_date)
+      };
+    }
+    
+    const responses = await JourneyBotResponse.findAndCountAll({
+      where: whereClause,
+      order: [['created_at', 'DESC']],
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+    
+    // Buscar perguntas separadamente para evitar incompatibilidade de tipos (question_id VARCHAR vs id UUID)
+    const questionIds = [...new Set(responses.rows.map(r => r.question_id).filter(id => id))];
+    const questions = questionIds.length > 0 ? await JourneyBotQuestion.findAll({
+      where: { 
+        id: questionIds,
+        ...(domain ? { domain_name: domain } : {})
+      },
+      attributes: ['id', 'domain_name', 'domain_question', 'meta_min_months', 'meta_max_months', 'week']
+    }) : [];
+    
+    // Criar mapa de perguntas para lookup rápido
+    const questionsMap = new Map(questions.map(q => [q.id, q]));
+    
+    const formattedResponses = responses.rows.map(response => {
+      const question = questionsMap.get(response.question_id);
+      return {
+        id: response.id,
+        question_id: response.question_id,
+        answer: response.answer,
+        answer_text: response.answer_text,
+        source: response.metadata?.source || 'web',
+        created_at: response.created_at,
+        question: question ? {
+          id: question.id,
+          domain: question.domain_name,
+          text: question.domain_question,
+          age_range: `${question.meta_min_months}-${question.meta_max_months} meses`,
+          week: question.week
+        } : null
+      };
+    });
+    
+    const birthDate = new Date(child.birth_date);
+    const today = new Date();
+    const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + 
+                        (today.getMonth() - birthDate.getMonth());
+    
+    return res.status(200).json({
+      success: true,
+      data: {
+        child: {
+          id: child.id,
+          name: `${child.first_name} ${child.last_name}`,
+          age_months: ageInMonths
+        },
+        responses: formattedResponses,
+        pagination: {
+          total: responses.count,
+          limit: parseInt(limit),
+          offset: parseInt(offset),
+          has_more: (parseInt(offset) + formattedResponses.length) < responses.count
+        },
+        filters_applied: {
+          domain: domain || null,
+          from_date: from_date || null,
+          to_date: to_date || null
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error('Erro ao buscar respostas do quiz:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao buscar respostas do quiz',
       message: error.message
     });
   }

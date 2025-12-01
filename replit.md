@@ -10,15 +10,45 @@ Educare+ is a digital platform for early childhood development and maternal heal
 - Incomplete modules marked with visible "Em Desenvolvimento" badges.
 
 ## Recent Changes (December 2025)
+- **External API 100% Complete**: All 13 endpoints validated and functional for n8n/WhatsApp integration
+- **Bug Fix**: Corrected model reference from `JourneyQuestion` to `JourneyBotQuestion` in progress/quiz-responses endpoints
+- **Database Compatibility**: Resolved type incompatibility (VARCHAR vs UUID) using separate queries instead of JOIN
+- **Null Safety**: Added birth_date null handling to prevent NaN errors in age calculations
+- **New Endpoint**: Added `/api/external/children/:childId/quiz-responses` for historical answer queries
+- **Documentation**: Created comprehensive integration docs (n8n workflow, WhatsApp, ENV config)
+- **EXTERNAL_API_KEY**: Configured in environment for API authentication
 - **Cleanup**: Removed all obsolete TitiNauta components and the src/components/titinauta/ folder
 - **Journey consolidation**: TitiNautaJourney (2.0) and WhatsAppJourneyBotPage are the only journey interfaces
-- **Removed old journey files**: Deleted JourneyBotPage, JourneyBot, JourneyBotAdmin, JourneyBotAdminPage and entire journey-bot components folder
 - **Theme toggle**: Simplified to single-button toggle between dark/light modes
 - **DevBadge component**: New component (src/components/ui/dev-badge.tsx) for marking incomplete modules
-- **New pages**: LojaPage, SupportPage with DevPlaceholder; MaterialApoioPage added to routes
-- **Navigation cleanup**: Unified "Jornada TitiNauta" across all user roles
-- **Slide duration**: AuthSlideshow increased to 8 seconds per slide with improved mobile responsiveness
-- **Removed routes**: /titinauta/:childId, /titinauta-media-demo, /titinauta-media/:childId, /journey-v2, /journey-bot (old)
+
+## Integration Status
+
+### External API (100% Complete)
+- **Status**: Fully validated and ready for n8n/WhatsApp integration
+- **Authentication**: API Key via `?api_key=` or `X-API-Key` header
+- **Base URL**: `/api/external/`
+- **Key Endpoints**:
+  - `GET /users/search?phone=` - Find user by phone
+  - `GET /users/by-phone/:phone/active-child` - Get active child
+  - `GET /children/:id/unanswered-questions` - Next question
+  - `POST /children/:id/save-answer` - Save response
+  - `GET /children/:id/progress` - Progress tracking
+  - `GET /children/:id/quiz-responses` - Answer history
+
+### n8n Workflow (Documented)
+- **Template**: `educare-backend/docs/n8n-workflow-template.json`
+- **Documentation**: `educare-backend/docs/README_N8N_WORKFLOW.md`
+- **Status**: Template ready for import
+
+### WhatsApp (Documented)
+- **Documentation**: `educare-backend/docs/WHATSAPP_INTEGRATION.md`
+- **Options**: Twilio (recommended) or Meta Cloud API
+- **Status**: Awaiting provider selection
+
+### Stripe (Implemented)
+- **Status**: Webhook configured
+- **Integration**: Replit Stripe connector active
 
 ## System Architecture
 
@@ -40,12 +70,12 @@ Educare+ is a digital platform for early childhood development and maternal heal
 - **Key Endpoints**: Auth, Children, Journey/Quiz, External Integration, Admin.
 
 ### Data Storage
-- **Primary Database**: PostgreSQL via Sequelize ORM
+- **Primary Database**: PostgreSQL via Sequelize ORM (external instance)
 - **Schema Highlights**: Users & Roles (RBAC), Children, Assessments (quizzes, bot responses), Journey System (content by weeks/topics), Health (maternal, child, diary), Subscriptions.
 - **Security**: Row-Level Security ensures data access based on user roles and ownership.
 
 ### Automation Layer
-- **Tool**: n8n Workflow
+- **Tool**: n8n Workflow (to be configured)
 - **Functionality**: Orchestrates WhatsApp message ingestion, AI processing (OpenAI), conversation context management, conditional routing, response generation, and delivery.
 
 ## External Dependencies
@@ -62,3 +92,17 @@ Educare+ is a digital platform for early childhood development and maternal heal
 ### Infrastructure
 - **Development**: Replit (Frontend on 5000, Backend on 3001), external PostgreSQL.
 - **Production**: VPS with PM2, Nginx reverse proxy, SSL/TLS, PostgreSQL.
+
+## Important Files
+
+### Integration Documentation
+- `README_DIAGNOSTICO.md` - Complete integration analysis
+- `educare-backend/docs/README_N8N_WORKFLOW.md` - n8n workflow guide
+- `educare-backend/docs/n8n-workflow-template.json` - Importable workflow
+- `educare-backend/docs/WHATSAPP_INTEGRATION.md` - WhatsApp setup guide
+- `educare-backend/docs/ENV_CONFIG.md` - Environment variables reference
+
+### External API
+- `educare-backend/src/controllers/externalApiController.js` - Main controller (2100+ lines)
+- `educare-backend/src/routes/externalApiRoutes.js` - Route definitions
+- `educare-backend/src/middlewares/apiKey.js` - API Key validation
