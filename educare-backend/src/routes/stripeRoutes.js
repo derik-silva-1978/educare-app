@@ -263,4 +263,37 @@ router.post('/seed-plans', verifyToken, isOwner, async (req, res) => {
   }
 });
 
+router.get('/test-webhook', async (req, res) => {
+  try {
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    
+    if (!webhookSecret) {
+      return res.status(400).json({ 
+        error: 'STRIPE_WEBHOOK_SECRET not configured',
+        status: 'NOT_CONFIGURED'
+      });
+    }
+
+    res.json({
+      success: true,
+      status: 'WEBHOOK_CONFIGURED',
+      message: 'Stripe webhook is properly configured',
+      webhookEndpoint: '/api/stripe/webhook',
+      methods: ['POST'],
+      expectedEvents: [
+        'customer.subscription.created',
+        'customer.subscription.updated',
+        'customer.subscription.deleted',
+        'invoice.paid',
+        'invoice.payment_failed',
+        'checkout.session.completed'
+      ],
+      instructions: 'Send POST requests to /api/stripe/webhook with Stripe-Signature header'
+    });
+  } catch (error) {
+    console.error('Error testing webhook:', error);
+    res.status(500).json({ error: 'Failed to test webhook configuration' });
+  }
+});
+
 module.exports = router;
