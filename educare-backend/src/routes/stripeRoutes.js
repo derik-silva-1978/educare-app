@@ -296,4 +296,74 @@ router.get('/test-webhook', async (req, res) => {
   }
 });
 
+// Simulate webhook for testing (development only)
+router.post('/simulate-webhook', async (req, res) => {
+  try {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({ 
+        error: 'Webhook simulation not allowed in production'
+      });
+    }
+
+    const { event, customerId, subscriptionId, planId } = req.body;
+
+    if (!event) {
+      return res.status(400).json({ 
+        error: 'Event type is required',
+        validEvents: [
+          'customer.subscription.created',
+          'customer.subscription.updated',
+          'customer.subscription.deleted',
+          'invoice.paid',
+          'invoice.payment_failed',
+          'checkout.session.completed'
+        ]
+      });
+    }
+
+    // Simulate Stripe event structure
+    const simulatedEvent = {
+      type: event,
+      data: {
+        object: {
+          id: subscriptionId || 'sub_simulated_' + Date.now(),
+          customer: customerId || 'cus_simulated_' + Date.now(),
+          items: {
+            data: [
+              {
+                price: {
+                  id: planId || 'price_simulated_' + Date.now()
+                }
+              }
+            ]
+          },
+          status: 'active',
+          current_period_start: Math.floor(Date.now() / 1000),
+          current_period_end: Math.floor(Date.now() / 1000) + 2592000 // 30 days
+        }
+      }
+    };
+
+    console.log('🔄 SIMULATED WEBHOOK EVENT:', event);
+    console.log('Webhook data:', JSON.stringify(simulatedEvent, null, 2));
+
+    // Process the simulated event through the handler
+    const { handleWebhookEvent } = require('../services/webhookHandlers');
+    await handleWebhookEvent(simulatedEvent);
+
+    res.json({
+      success: true,
+      message: `Webhook simulado processado com sucesso`,
+      event,
+      simulatedData: simulatedEvent
+    });
+  } catch (error) {
+    console.error('Error simulating webhook:', error);
+    res.status(500).json({ 
+      error: 'Failed to simulate webhook',
+      details: error.message 
+    });
+  }
+});
+
 module.exports = router;
