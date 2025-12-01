@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { stripeService } = require('../services/stripeService');
-const { verifyToken } = require('../middlewares/auth');
+const { verifyToken, isOwner } = require('../middlewares/auth');
 const { User, Profile, Subscription, SubscriptionPlan } = require('../models');
 
 router.get('/config', async (req, res) => {
@@ -94,8 +94,8 @@ router.post('/checkout', verifyToken, async (req, res) => {
     }
 
     const baseUrl = process.env.FRONTEND_URL || `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
-    const successUrl = `${baseUrl}/subscription/success?session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${baseUrl}/subscription/cancel`;
+    const successUrl = `${baseUrl}/educare-app/subscription/success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${baseUrl}/educare-app/subscription/cancel`;
 
     const session = await stripeService.createCheckoutSession(
       stripeCustomerId,
@@ -112,7 +112,7 @@ router.post('/checkout', verifyToken, async (req, res) => {
   }
 });
 
-router.post('/customer-portal', verifyToken, async (req, res) => {
+router.post('/customer-portal', verifyToken, isOwner, async (req, res) => {
   try {
     const userId = req.user.id;
     const user = await User.findByPk(userId);
@@ -122,7 +122,7 @@ router.post('/customer-portal', verifyToken, async (req, res) => {
     }
 
     const baseUrl = process.env.FRONTEND_URL || `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
-    const returnUrl = `${baseUrl}/subscription`;
+    const returnUrl = `${baseUrl}/educare-app/subscription`;
 
     const session = await stripeService.createCustomerPortalSession(
       user.stripeCustomerId,
@@ -160,7 +160,7 @@ router.get('/subscription', verifyToken, async (req, res) => {
   }
 });
 
-router.post('/subscription/:subscriptionId/cancel', verifyToken, async (req, res) => {
+router.post('/subscription/:subscriptionId/cancel', verifyToken, isOwner, async (req, res) => {
   try {
     const userId = req.user.id;
     const { subscriptionId } = req.params;
@@ -193,7 +193,7 @@ router.post('/subscription/:subscriptionId/cancel', verifyToken, async (req, res
   }
 });
 
-router.post('/subscription/:subscriptionId/resume', verifyToken, async (req, res) => {
+router.post('/subscription/:subscriptionId/resume', verifyToken, isOwner, async (req, res) => {
   try {
     const userId = req.user.id;
     const { subscriptionId } = req.params;
@@ -215,7 +215,7 @@ router.post('/subscription/:subscriptionId/resume', verifyToken, async (req, res
   }
 });
 
-router.post('/subscription/:subscriptionId/change-plan', verifyToken, async (req, res) => {
+router.post('/subscription/:subscriptionId/change-plan', verifyToken, isOwner, async (req, res) => {
   try {
     const userId = req.user.id;
     const { subscriptionId } = req.params;

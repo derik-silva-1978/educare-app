@@ -168,6 +168,15 @@ The workflow orchestrates:
 - Added User model fields: stripeCustomerId, stripeSubscriptionId
 - Health check endpoint shows Stripe integration status
 
+**2025-12-01 (Stripe Frontend Integration)**:
+- Created stripeService.ts with types and API functions for frontend-backend communication
+- Created SubscriptionPage.tsx with role-based access control (owner-only management)
+- Added subscription routes to App.tsx: /educare-app/subscription, /success, /cancel
+- Fixed vite.config.ts with allowedHosts: true for Replit proxy compatibility
+- Fixed redirect URLs in stripeRoutes.js to include /educare-app prefix
+- Added isOwner middleware to subscription management endpoints (portal, cancel, resume, change-plan)
+- Updated index.ts exports with aliases to avoid conflicts with legacy subscriptionService
+
 **2025-12-01 (OpenAI Integration)**: 
 - Fixed OpenAI integration propagation in Replit workflows using $(printenv OPENAI_API_KEY) pattern
 - TitiNauta AI service layer implemented with lazy initialization

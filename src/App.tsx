@@ -46,6 +46,7 @@ import ProfessionalOnlyGuard from "./components/auth/ProfessionalOnlyGuard";
 import JourneyQuestionsManagement from "./pages/admin/JourneyQuestionsManagement";
 import MediaResourcesManagement from "./pages/admin/MediaResourcesManagement";
 import CommunicationPage from "./pages/educare-app/CommunicationPage";
+import SubscriptionPage from "./pages/SubscriptionPage";
 import TitiNautaPage from "./pages/educare-app/TitiNautaPage";
 import TitiNautaMediaDemo from "./pages/educare-app/TitiNautaMediaDemo";
 import TitiNautaMediaPage from "./pages/educare-app/TitiNautaMediaPage";
@@ -112,6 +113,9 @@ const App = () => (
                   <Route index element={<EducareSettingsPage />} />
                   <Route path="change-password" element={<ChangePasswordPage />} />
                 </Route>
+                <Route path="subscription" element={<SubscriptionPage />} />
+                <Route path="subscription/success" element={<SubscriptionPage />} />
+                <Route path="subscription/cancel" element={<SubscriptionPage />} />
                 
                 {/* Professional Routes - Protected */}
                 <Route path="professional/dashboard" element={

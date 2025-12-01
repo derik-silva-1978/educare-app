@@ -21,5 +21,30 @@ export * from './quizService';
 // Serviço de assinaturas
 export * from './subscriptionService';
 
+// Serviço do Stripe (re-export with aliases to avoid conflicts)
+export {
+  getStripeConfig,
+  listProducts,
+  listProductsWithPrices,
+  listPrices,
+  getProductPrices,
+  createCheckoutSession,
+  createCustomerPortalSession,
+  getMySubscription as getMyStripeSubscription,
+  cancelSubscription as cancelStripeSubscription,
+  resumeSubscription as resumeStripeSubscription,
+  changePlan,
+  formatPrice,
+  formatInterval,
+} from './stripeService';
+export type {
+  StripeProduct,
+  StripePrice,
+  StripeProductWithPrices,
+  StripeSubscription,
+  CheckoutResponse,
+  PortalResponse,
+} from './stripeService';
+
 // Serviço de jornadas
 export * from './journeyService';
