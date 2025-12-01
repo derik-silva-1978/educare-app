@@ -4,7 +4,19 @@
 Educare+ is a digital platform for early childhood development and maternal health monitoring. It connects parents, caregivers, educators, and healthcare professionals to support child development through interactive assessments, personalized guidance, and collaborative care. The platform features an AI-powered assistant (TitiNauta), WhatsApp integration for remote communication, and multi-level SaaS subscription management.
 
 ## User Preferences
-Preferred communication style: Simple, everyday language.
+- Preferred communication style: Simple, everyday language.
+- UI/UX: Professional with WCAG-compliant contrast ratios.
+- Theme toggle: Single-button dark/light mode (no system theme option).
+- Incomplete modules marked with visible "Em Desenvolvimento" badges.
+
+## Recent Changes (December 2025)
+- **Cleanup**: Removed all obsolete TitiNauta components and the src/components/titinauta/ folder
+- **Journey consolidation**: TitiNautaJourney is now the single "Jornada 2.0" interface
+- **Theme toggle**: Simplified to single-button toggle between dark/light modes
+- **DevBadge component**: New component (src/components/ui/dev-badge.tsx) for marking incomplete modules
+- **New pages**: LojaPage, SupportPage with DevPlaceholder; MaterialApoioPage added to routes
+- **Navigation cleanup**: Unified "Jornada TitiNauta" across all user roles
+- **Removed routes**: /titinauta/:childId, /titinauta-media-demo, /titinauta-media/:childId, /journey-v2
 
 ## System Architecture
 
