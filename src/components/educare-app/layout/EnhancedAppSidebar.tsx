@@ -18,7 +18,6 @@ import {
   MessageCircle,
   MessageSquare,
   UsersRound,
-  Rocket,
   FileVideo
 } from 'lucide-react';
 import {
@@ -59,20 +58,9 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
       icon: Baby,
     },
     {
-      title: "TitiNauta",
-      url: "/educare-app/journey-bot",
-      icon: Bot,
-    },
-    {
-      title: "TitiNauta 2.0",
+      title: "Jornada TitiNauta",
       url: "/educare-app/titinauta-journey",
       icon: Bot,
-      badge: "Novo"
-    },
-    {
-      title: "Jornada 2.0",
-      url: "/educare-app/journey-v2",
-      icon: Rocket,
     },
     {
       title: "Atividades",
@@ -133,11 +121,6 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         title: "Gestor de Mídias",
         url: "/educare-app/owner/media-resources",
         icon: FileVideo,
-      },
-      {
-        title: "Jornada 2.0",
-        url: "/educare-app/journey-v2",
-        icon: Rocket,
       },
       {
         title: "Gestão de Planos",

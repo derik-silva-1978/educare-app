@@ -22,7 +22,6 @@ import ChildrenManagement from "./pages/educare-app/ChildrenManagement";
 import ChildProfile from "./pages/educare-app/ChildProfile";
 import ChildForm from "./pages/educare-app/ChildForm";
 import JourneyBotPage from "./pages/educare-app/JourneyBotPage";
-import JourneyV2Page from "./pages/educare-app/JourneyV2Page";
 import EducareActivitiesPage from "./pages/educare-app/ActivitiesPage";
 import EducareSettingsPage from "./pages/educare-app/SettingsPage";
 import SettingsLayout from "./pages/educare-app/settings/SettingsLayout";
@@ -49,11 +48,10 @@ import JourneyQuestionsManagement from "./pages/admin/JourneyQuestionsManagement
 import MediaResourcesManagement from "./pages/admin/MediaResourcesManagement";
 import CommunicationPage from "./pages/educare-app/CommunicationPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
-import TitiNautaPage from "./pages/educare-app/TitiNautaPage";
-import TitiNautaMediaDemo from "./pages/educare-app/TitiNautaMediaDemo";
-import TitiNautaMediaPage from "./pages/educare-app/TitiNautaMediaPage";
 import TitiNautaJourney from "./pages/educare-app/TitiNautaJourney";
-import TitiNautaChatTest from "./tests/TitiNautaChatTest";
+import LojaPage from "./pages/educare-app/LojaPage";
+import SupportPage from "./pages/educare-app/SupportPage";
+import MaterialApoioPage from "./pages/educare-app/MaterialApoioPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -103,18 +101,12 @@ const App = () => (
                 <Route path="child/new" element={<ChildForm />} />
                 <Route path="child/:id/edit" element={<ChildForm />} />
                 <Route path="journey-bot" element={<JourneyBotPage />} />
-                <Route path="journey-v2" element={<JourneyV2Page />} />
-                <Route path="journey-v2/:journeyId" element={<JourneyV2Page />} />
-                <Route path="journey-v2/:journeyId/:weekId" element={<JourneyV2Page />} />
                 <Route path="communication" element={<CommunicationPage />} />
                 <Route path="journey-bot-whatsapp/:childId" element={<WhatsAppJourneyBotPage />} />
-                <Route path="titinauta/:childId" element={<TitiNautaPage />} />
-                <Route path="titinauta-media-demo" element={<TitiNautaMediaDemo />} />
-                <Route path="titinauta-media/:childId" element={<TitiNautaMediaPage />} />
                 <Route path="titinauta-journey" element={<TitiNautaJourney />} />
                 <Route path="titinauta-journey/:childId" element={<TitiNautaJourney />} />
-                <Route path="titinauta-test" element={<TitiNautaChatTest />} />
                 <Route path="activities" element={<EducareActivitiesPage />} />
+                <Route path="material-apoio" element={<MaterialApoioPage />} />
                 <Route path="settings" element={<SettingsLayout />}>
                   <Route index element={<EducareSettingsPage />} />
                   <Route path="change-password" element={<ChangePasswordPage />} />
@@ -170,64 +162,11 @@ const App = () => (
               {/* Existing Aprendizado routes (keeping for backward compatibility) */}
               <Route path="/educare-app/aprendizado" element={<AprendizadoLanding />} />
               
-              {/* Loja Educare+ - Enhanced placeholder */}
-              <Route path="/educare-app/loja" element={
-                <div className="min-h-screen bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/30 dark:to-teal-950/30 flex items-center justify-center">
-                  <div className="text-center max-w-2xl px-4">
-                    <div className="w-24 h-24 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <span className="text-white font-bold text-2xl">🛍️</span>
-                    </div>
-                    <h1 className="text-4xl font-bold text-foreground mb-4">Loja Educare+</h1>
-                    <p className="text-xl text-muted-foreground mb-6">
-                      Em breve! Recursos educacionais, materiais didáticos e ferramentas especializadas 
-                      para apoiar o desenvolvimento infantil.
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-4">
-                      <button 
-                        onClick={() => window.history.back()}
-                        className="bg-emerald-600 text-white px-8 py-4 rounded-full hover:bg-emerald-700 transition-colors"
-                      >
-                        Voltar
-                      </button>
-                      <button 
-                        onClick={() => window.location.href = '/contact'}
-                        className="bg-background text-emerald-600 border-2 border-emerald-600 px-8 py-4 rounded-full hover:bg-accent transition-colors"
-                      >
-                        Entre em Contato
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              } />
+              {/* Loja Educare+ */}
+              <Route path="/educare-app/loja" element={<LojaPage />} />
               
-              {/* Support/Help Route */}
-              <Route path="/educare-app/support" element={
-                <div className="min-h-screen bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/30 dark:to-indigo-950/30 flex items-center justify-center">
-                  <div className="text-center max-w-2xl px-4">
-                    <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <span className="text-white font-bold text-2xl">❓</span>
-                    </div>
-                    <h1 className="text-4xl font-bold text-foreground mb-4">Suporte Educare+</h1>
-                    <p className="text-xl text-muted-foreground mb-6">
-                      Precisa de ajuda? Estamos aqui para apoiar sua jornada no desenvolvimento infantil.
-                    </p>
-                    <div className="flex flex-wrap justify-center gap-4">
-                      <button 
-                        onClick={() => window.history.back()}
-                        className="bg-blue-600 text-white px-8 py-4 rounded-full hover:bg-blue-700 transition-colors"
-                      >
-                        Voltar
-                      </button>
-                      <button 
-                        onClick={() => window.location.href = '/contact'}
-                        className="bg-background text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-full hover:bg-accent transition-colors"
-                      >
-                        Contato
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              } />
+              {/* Suporte */}
+              <Route path="/educare-app/support" element={<SupportPage />} />
               
               {/* DevTools Demo - apenas em desenvolvimento */}
               {process.env.NODE_ENV === 'development' && (

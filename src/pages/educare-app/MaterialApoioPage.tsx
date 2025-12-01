@@ -3,6 +3,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, FileText, Video, Download } from 'lucide-react';
+import { DevBadge } from '@/components/ui/dev-badge';
 
 const MaterialApoioPage: React.FC = () => {
   // Placeholder support materials
@@ -40,9 +41,13 @@ const MaterialApoioPage: React.FC = () => {
       </Helmet>
       
       <div className="p-6">
+        <DevBadge variant="banner" className="mb-4 rounded-lg">
+          Módulo em desenvolvimento - conteúdo ilustrativo
+        </DevBadge>
+        
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Material de Apoio</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-foreground">Material de Apoio</h1>
+          <p className="text-muted-foreground mt-2">
             Recursos e materiais para apoiar o desenvolvimento infantil
           </p>
         </div>

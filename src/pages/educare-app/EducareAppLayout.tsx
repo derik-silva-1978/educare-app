@@ -59,8 +59,6 @@ const EducareAppLayout: React.FC = () => {
     console.log('👨‍⚕️ EDUCAREAPPLAYOUT: Usuário é professional');
     const allowedPaths = [
       '/educare-app/professional/dashboard',
-      '/educare-app/titinauta-media-demo',
-      '/educare-app/titinauta-media/',
       '/educare-app/titinauta-journey',
       '/educare-app/settings'
     ];
@@ -86,12 +84,9 @@ const EducareAppLayout: React.FC = () => {
       '/educare-app/children',
       '/educare-app/child/',
       '/educare-app/journey-bot',
-      '/educare-app/journey-v2',
-      '/educare-app/titinauta',
-      '/educare-app/titinauta-media-demo',
-      '/educare-app/titinauta-media/',
       '/educare-app/titinauta-journey',
       '/educare-app/activities',
+      '/educare-app/communication',
       '/educare-app/settings'
     ];
     

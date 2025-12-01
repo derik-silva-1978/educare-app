@@ -3,6 +3,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Clock, Users, Star } from 'lucide-react';
+import { DevBadge } from '@/components/ui/dev-badge';
 
 const ActivitiesPage: React.FC = () => {
   // Placeholder activities data
@@ -40,9 +41,13 @@ const ActivitiesPage: React.FC = () => {
       </Helmet>
       
       <div className="p-6">
+        <DevBadge variant="banner" className="mb-4 rounded-lg">
+          Módulo em desenvolvimento - conteúdo ilustrativo
+        </DevBadge>
+        
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Atividades</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-foreground">Atividades</h1>
+          <p className="text-muted-foreground mt-2">
             Atividades e exercícios para estimular o desenvolvimento infantil
           </p>
         </div>
@@ -57,7 +62,7 @@ const ActivitiesPage: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 mb-4">{activity.description}</p>
+                <p className="text-muted-foreground mb-4">{activity.description}</p>
                 
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
