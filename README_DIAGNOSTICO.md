@@ -1,6 +1,7 @@
 # Educare+ - Diagnóstico Completo de Integrações
 
-**Data do Diagnóstico:** 01 de Dezembro de 2025
+**Data do Diagnóstico:** 01 de Dezembro de 2025  
+**Última Atualização:** 01 de Dezembro de 2025
 
 ---
 
@@ -8,35 +9,184 @@
 
 Este documento apresenta uma análise completa do estado atual das integrações do Educare+ e as ações necessárias para produção.
 
+### 🎉 DESCOBERTA IMPORTANTE
+
+A **API Externa já está 95% implementada** com 2039 linhas de código! Isso acelera significativamente o projeto de integração.
+
 ### Status Geral das Integrações
 
-| Integração | Status | Prioridade |
-|------------|--------|------------|
-| Banco de Dados PostgreSQL | ⚠️ Parcial - Tabelas faltando | P1 - Crítico |
-| Stripe (Pagamentos) | ✅ Implementado | P2 - Verificar |
-| n8n (Automação) | ❌ Não implementado | P3 - Desenvolver |
-| WhatsApp Business API | ❌ Apenas UI stubs | P4 - Desenvolver |
-| RAG (IA Contextual) | ❌ Não implementado | P5 - Futuro |
+| Integração | Status | Prioridade | Ação Necessária |
+|------------|--------|------------|-----------------|
+| **API Externa** | ✅ 95% Pronta | P0 - Crítico | Adicionar endpoint quiz-responses |
+| Banco de Dados PostgreSQL | ⚠️ Parcial | P1 - Crítico | Sync Sequelize + Seed |
+| Stripe (Pagamentos) | ✅ Implementado | P2 - Verificar | Testar webhook |
+| n8n (Automação) | ❌ Não configurado | P3 - Desenvolver | Criar workflow |
+| WhatsApp Business API | ❌ Não configurado | P4 - Desenvolver | Integrar via n8n |
+| RAG (IA Contextual) | ❌ Não implementado | P5 - Futuro | Arquitetura definida |
 
 ---
 
-## 1. BANCO DE DADOS POSTGRESQL
+## 1. API EXTERNA (PRONTA PARA INTEGRAÇÃO!)
 
-### 1.1 Estado Atual
+### 1.1 Estado Atual: ✅ 95% IMPLEMENTADA
+
+**Arquivos Principais:**
+- `educare-backend/src/controllers/externalApiController.js` (2039 linhas)
+- `educare-backend/src/routes/externalApiRoutes.js`
+- `educare-backend/src/middlewares/apiKey.js`
+
+### 1.2 Endpoints Implementados
+
+#### Autenticação
+Todos os endpoints requerem API Key via:
+- Query param: `?api_key=SUA_CHAVE`
+- Header: `X-API-Key: SUA_CHAVE`
+- Variável: `EXTERNAL_API_KEY` no ambiente
+
+#### Endpoints de Usuários
+
+| Endpoint | Método | Descrição |
+|----------|--------|-----------|
+| `/api/external/users` | GET | Listar usuários (filtros: email, phone, role) |
+| `/api/external/users` | POST | Criar usuário com perfil e assinatura |
+| `/api/external/users/search` | GET | Buscar por **telefone**, email ou CPF/CNPJ |
+| `/api/external/users/:id` | GET | Buscar usuário por ID |
+| `/api/external/users/:id/children` | GET | Filhos de um usuário |
+
+#### Endpoints de Crianças
+
+| Endpoint | Método | Descrição |
+|----------|--------|-----------|
+| `/api/external/users/search/children` | GET | Buscar crianças por telefone/email do responsável |
+| `/api/external/children/:id` | GET | Dados de uma criança |
+| `/api/external/children/:childId/unanswered-questions` | GET | **Perguntas não respondidas** |
+| `/api/external/children/:childId/save-answer` | POST | **Salvar resposta da jornada** |
+| `/api/external/children/:childId/progress` | GET | **Progresso da criança** |
+
+#### Endpoints para Fluxo WhatsApp (por Telefone)
+
+| Endpoint | Método | Descrição |
+|----------|--------|-----------|
+| `/api/external/users/by-phone/:phone/active-child` | GET | **Criança ativa por telefone** |
+| `/api/external/users/by-phone/:phone/select-child/:childId` | POST | **Selecionar criança** |
+
+#### Outros Endpoints
+
+| Endpoint | Método | Descrição |
+|----------|--------|-----------|
+| `/api/external/subscription-plans` | GET | Listar planos de assinatura |
+
+### 1.3 Endpoint Faltando
+
+```
+GET /api/external/children/:childId/quiz-responses
+```
+
+Este endpoint existe no Postman de produção mas não no código atual. Necessário para consultar histórico de respostas.
+
+### 1.4 Mapeamento Postman Produção vs Código Atual
+
+| Postman (Produção) | Código Atual | Status |
+|-------------------|--------------|--------|
+| `GET /external/user?phone=...` | `GET /api/external/users/search?phone=...` | ✅ Equivalente |
+| `GET /external/children?phone=...` | `GET /api/external/users/search/children?phone=...` | ✅ Equivalente |
+| `GET /external/child/:id/progress` | `GET /api/external/children/:id/progress` | ✅ Equivalente |
+| `GET /external/child/:id/quiz-responses` | ❌ Não existe | ⚠️ A implementar |
+
+### 1.5 Fluxo Completo via Telefone (Pronto!)
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    FLUXO WHATSAPP → API EXTERNA                     │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  1. WhatsApp → n8n recebe mensagem do telefone +5511999999999       │
+│                          │                                          │
+│                          ▼                                          │
+│  2. GET /api/external/users/search?phone=+5511999999999             │
+│     └─ Retorna: { user: { id, name, email, phone } }                │
+│                          │                                          │
+│                          ▼                                          │
+│  3. GET /api/external/users/by-phone/+5511999999999/active-child    │
+│     └─ Retorna: { active_child: { id, name, age_months, progress } }│
+│                          │                                          │
+│                          ▼                                          │
+│  4. GET /api/external/children/{childId}/unanswered-questions       │
+│     └─ Retorna: { questions: [{ id, question_text, domain, ... }] } │
+│                          │                                          │
+│                          ▼                                          │
+│  5. n8n → OpenAI → Formata pergunta amigável                        │
+│                          │                                          │
+│                          ▼                                          │
+│  6. n8n → WhatsApp → Envia pergunta ao usuário                      │
+│                          │                                          │
+│                          ▼                                          │
+│  7. Usuário responde (1=Não, 2=Às vezes, 3=Sim)                     │
+│                          │                                          │
+│                          ▼                                          │
+│  8. POST /api/external/children/{childId}/save-answer               │
+│     Body: { question_id, answer: 0|1|2, answer_text, metadata }     │
+│                          │                                          │
+│                          ▼                                          │
+│  9. GET /api/external/children/{childId}/progress                   │
+│     └─ Retorna: { progress: { percentage, answered, total } }       │
+│                          │                                          │
+│                          ▼                                          │
+│ 10. n8n → WhatsApp → Feedback + próxima pergunta ou conclusão       │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### 1.6 Exemplo de Uso
+
+```bash
+# 1. Buscar usuário por telefone
+curl -X GET "http://localhost:3001/api/external/users/search?phone=+5511999999999" \
+  -H "X-API-Key: educare_external_api_key_2025"
+
+# 2. Buscar criança ativa
+curl -X GET "http://localhost:3001/api/external/users/by-phone/+5511999999999/active-child" \
+  -H "X-API-Key: educare_external_api_key_2025"
+
+# 3. Buscar perguntas não respondidas
+curl -X GET "http://localhost:3001/api/external/children/CHILD_ID/unanswered-questions" \
+  -H "X-API-Key: educare_external_api_key_2025"
+
+# 4. Salvar resposta
+curl -X POST "http://localhost:3001/api/external/children/CHILD_ID/save-answer" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: educare_external_api_key_2025" \
+  -d '{
+    "question_id": "q1-sono-seguro",
+    "answer": 2,
+    "answer_text": "Sim, sempre",
+    "metadata": { "source": "whatsapp" }
+  }'
+
+# 5. Buscar progresso
+curl -X GET "http://localhost:3001/api/external/children/CHILD_ID/progress" \
+  -H "X-API-Key: educare_external_api_key_2025"
+```
+
+---
+
+## 2. BANCO DE DADOS POSTGRESQL
+
+### 2.1 Estado Atual: ⚠️ PARCIAL
 
 **Conexão:** Configurada via Sequelize ORM  
 **Localização:** `educare-backend/src/config/database.js`
 
-### 1.2 PROBLEMA CRÍTICO
+### 2.2 PROBLEMA CRÍTICO
 
-A tabela `journey_bot_questions` **NÃO EXISTE** no banco de dados, mesmo tendo modelo definido.
+A tabela `journey_questions` **NÃO EXISTE** no banco de dados, mesmo tendo modelo definido.
 
 ```sql
 -- Erro retornado:
 ERROR: relation "journey_questions" does not exist
 ```
 
-### 1.3 Modelos Definidos (Sequelize)
+### 2.3 Modelos Definidos (Sequelize)
 
 Arquivo: `educare-backend/src/models/index.js`
 
@@ -48,7 +198,7 @@ Arquivo: `educare-backend/src/models/index.js`
 - Achievement, UserAchievement
 - Journey, UserJourney
 - ChatGroup, ChatMessage, ChatInvite
-- JourneyBotSession, JourneyBotResponse, **JourneyBotQuestion**
+- JourneyBotSession, JourneyBotResponse, **JourneyQuestion**
 - Activity
 
 **Modelos Jornada 2.0:**
@@ -56,7 +206,7 @@ Arquivo: `educare-backend/src/models/index.js`
 - JourneyV2Quiz, JourneyV2Badge
 - UserJourneyV2Progress, UserJourneyV2Badge
 
-### 1.4 Ação Necessária
+### 2.4 Ação Necessária
 
 ```bash
 # Sincronizar tabelas com o banco (Sequelize)
@@ -66,17 +216,17 @@ node -e "const { sequelize } = require('./src/config/database'); sequelize.sync(
 
 ---
 
-## 2. STRIPE (PAGAMENTOS)
+## 3. STRIPE (PAGAMENTOS)
 
-### 2.1 Estado Atual: ✅ IMPLEMENTADO
+### 3.1 Estado Atual: ✅ IMPLEMENTADO
 
 **Integração Replit:** `connection:conn_stripe_01KBCT0D7PTRK8SFTNAY2ABFK1` (Sandbox)
 
-### 2.2 Secrets Configurados
+### 3.2 Secrets Configurados
 
 - `STRIPE_WEBHOOK_SECRET` ✅ Existe
 
-### 2.3 Arquivos de Implementação
+### 3.3 Arquivos de Implementação
 
 | Arquivo | Descrição |
 |---------|-----------|
@@ -84,7 +234,7 @@ node -e "const { sequelize } = require('./src/config/database'); sequelize.sync(
 | `educare-backend/src/services/stripeClient.js` | Cliente Stripe |
 | `educare-backend/src/services/webhookHandlers.js` | Handlers de Webhook |
 
-### 2.4 Endpoints Stripe Disponíveis
+### 3.4 Endpoints Stripe Disponíveis
 
 ```
 GET  /api/stripe/config              - Configuração pública
@@ -103,7 +253,7 @@ GET  /api/stripe/test-webhook        - Testar webhook
 POST /api/stripe/simulate-webhook    - Simular webhook
 ```
 
-### 2.5 Eventos de Webhook Suportados
+### 3.5 Eventos de Webhook Suportados
 
 ```javascript
 // webhookHandlers.js - Eventos tratados:
@@ -115,62 +265,46 @@ POST /api/stripe/simulate-webhook    - Simular webhook
 - checkout.session.completed
 ```
 
-### 2.6 Verificações Pendentes
+### 3.6 Verificações Pendentes
 
-1. [ ] Registrar webhook URL no Stripe Dashboard
-2. [ ] Verificar se planos estão sincronizados
-3. [ ] Testar fluxo completo de checkout
-4. [ ] Validar portal do cliente
+- [ ] Registrar webhook URL no Stripe Dashboard
+- [ ] Verificar se planos estão sincronizados
+- [ ] Testar fluxo completo de checkout
+- [ ] Validar portal do cliente
 
 ---
 
-## 3. N8N (AUTOMAÇÃO DE WORKFLOWS)
+## 4. N8N (AUTOMAÇÃO DE WORKFLOWS)
 
-### 3.1 Estado Atual: ❌ NÃO IMPLEMENTADO
+### 4.1 Estado Atual: ❌ NÃO CONFIGURADO (mas API está pronta!)
 
-**Referências no código:** 0 (zero)  
-**Variáveis de ambiente:** Nenhuma configurada
+**Importante:** A API Externa já possui TODOS os endpoints necessários para o n8n funcionar. Só falta criar o workflow.
 
-### 3.2 Propósito Documentado (replit.md)
-
-> "Orchestrates WhatsApp message ingestion, AI processing (OpenAI), conversation context management, conditional routing, response generation, and delivery."
-
-### 3.3 Arquitetura Esperada
+### 4.2 Arquitetura de Integração
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   WhatsApp API  │───▶│   n8n Workflow  │───▶│  Educare API    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │
-                              ▼
-                       ┌─────────────────┐
-                       │    OpenAI API   │
-                       └─────────────────┘
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│    WhatsApp     │────▶│       n8n       │────▶│  API Externa    │
+│  (Meta/Twilio)  │◀────│   (Workflow)    │◀────│   Educare+      │
+└─────────────────┘     └────────┬────────┘     └─────────────────┘
+                                 │
+                        ┌────────▼────────┐
+                        │     OpenAI      │
+                        │  (Processamento)│
+                        └─────────────────┘
 ```
 
-### 3.4 Implementação Necessária
+### 4.3 Endpoints Prontos para n8n
 
-#### 3.4.1 No Backend Educare
+| Endpoint | Uso no Workflow |
+|----------|-----------------|
+| `GET /users/search?phone=...` | Identificar usuário pela mensagem |
+| `GET /users/by-phone/:phone/active-child` | Obter criança para jornada |
+| `GET /children/:id/unanswered-questions` | Próxima pergunta |
+| `POST /children/:id/save-answer` | Salvar resposta |
+| `GET /children/:id/progress` | Mostrar progresso |
 
-```javascript
-// Novo arquivo: educare-backend/src/routes/n8nWebhookRoutes.js
-// Endpoints para receber callbacks do n8n:
-
-POST /api/webhooks/n8n/message-received    - Mensagem recebida do WhatsApp
-POST /api/webhooks/n8n/ai-response         - Resposta gerada pela IA
-POST /api/webhooks/n8n/context-update      - Atualização de contexto
-GET  /api/webhooks/n8n/user-context/:phone - Buscar contexto do usuário
-```
-
-#### 3.4.2 Variáveis de Ambiente Necessárias
-
-```env
-N8N_WEBHOOK_URL=https://your-n8n-instance.com
-N8N_API_KEY=your_n8n_api_key
-N8N_WEBHOOK_SECRET=your_webhook_secret
-```
-
-#### 3.4.3 Hosting do n8n
+### 4.4 Hosting do n8n
 
 | Opção | Descrição | Custo Estimado |
 |-------|-----------|----------------|
@@ -178,77 +312,31 @@ N8N_WEBHOOK_SECRET=your_webhook_secret
 | Self-hosted VPS | Controle total | $5-20/mês + setup |
 | Docker (Replit) | Não recomendado | N/A |
 
+### 4.5 Variáveis de Ambiente Necessárias
+
+```env
+N8N_WEBHOOK_URL=https://your-n8n-instance.com
+N8N_API_KEY=your_n8n_api_key
+```
+
 ---
 
-## 4. WHATSAPP BUSINESS API
+## 5. WHATSAPP BUSINESS API
 
-### 4.1 Estado Atual: ❌ APENAS UI STUBS
+### 5.1 Estado Atual: ❌ NÃO CONFIGURADO
 
-### 4.2 Código Existente
+### 5.2 Opções de Integração
 
-**Frontend (apenas UI):**
-- `src/components/whatsapp/WhatsAppChatContainer.tsx`
-- Componentes de interface sem integração real
+#### Opção A: Twilio (Recomendado - Integração Replit Disponível)
 
-**Backend:**
-- Nenhuma implementação de API WhatsApp
-
-### 4.3 Integrações Replit Disponíveis
-
-| Integração | Status | Descrição |
-|------------|--------|-----------|
-| Twilio | Disponível | SMS, voz, WhatsApp via Twilio |
-| Meta Cloud API | Não disponível | Requer setup manual |
-
-### 4.4 Implementação Necessária
-
-#### Opção A: Twilio (Recomendado - Integração Replit)
-
-```javascript
-// Novo arquivo: educare-backend/src/services/twilioWhatsApp.js
-
-const twilio = require('twilio');
-const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-
-async function sendWhatsAppMessage(to, message) {
-  return client.messages.create({
-    from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER}`,
-    to: `whatsapp:${to}`,
-    body: message
-  });
-}
-```
-
-#### Opção B: Meta Cloud API (Setup Manual)
-
-```javascript
-// Novo arquivo: educare-backend/src/services/metaWhatsApp.js
-
-const WHATSAPP_API_URL = 'https://graph.facebook.com/v18.0';
-const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
-const ACCESS_TOKEN = process.env.WHATSAPP_ACCESS_TOKEN;
-```
-
-### 4.5 Endpoints Necessários
-
-```
-POST /api/whatsapp/webhook         - Receber mensagens (webhook Meta/Twilio)
-GET  /api/whatsapp/webhook         - Verificação do webhook
-POST /api/whatsapp/send            - Enviar mensagem
-POST /api/whatsapp/send-template   - Enviar template
-GET  /api/whatsapp/conversations   - Listar conversas
-```
-
-### 4.6 Variáveis de Ambiente
-
-**Para Twilio:**
 ```env
 TWILIO_ACCOUNT_SID=your_account_sid
 TWILIO_AUTH_TOKEN=your_auth_token
 TWILIO_WHATSAPP_NUMBER=+14155238886
 ```
 
-**Para Meta Cloud API:**
+#### Opção B: Meta Cloud API (Setup Manual)
+
 ```env
 WHATSAPP_PHONE_NUMBER_ID=your_phone_id
 WHATSAPP_ACCESS_TOKEN=your_access_token
@@ -256,228 +344,77 @@ WHATSAPP_VERIFY_TOKEN=your_verify_token
 WHATSAPP_BUSINESS_ACCOUNT_ID=your_business_id
 ```
 
----
+### 5.3 Arquitetura com n8n
 
-## 5. RAG (RETRIEVAL-AUGMENTED GENERATION)
-
-### 5.1 Estado Atual: ❌ NÃO IMPLEMENTADO
-
-**Referências no código:** 0 (zero)
-
-### 5.2 OpenAI Status
-
-**Secret:** `OPENAI_API_KEY` ✅ Disponível  
-**Uso atual:** Apenas em `openaiService.js` (limitado)
-
-### 5.3 Arquitetura RAG Proposta
+O WhatsApp será integrado através do n8n, não diretamente no backend Educare:
 
 ```
-┌─────────────────┐
-│   Documentos    │
-│  (Conteúdo Ed.) │
-└────────┬────────┘
-         │ Ingestão
-         ▼
-┌─────────────────┐    ┌─────────────────┐
-│   Embeddings    │───▶│   Vector Store  │
-│   (OpenAI)      │    │   (Postgres)    │
-└─────────────────┘    └────────┬────────┘
-                                │ Busca
-         ┌──────────────────────┤
-         │                      ▼
-┌────────┴────────┐    ┌─────────────────┐
-│   User Query    │───▶│    Retrieval    │
-└─────────────────┘    └────────┬────────┘
-                                │ Contexto
-                                ▼
-                       ┌─────────────────┐
-                       │   OpenAI Chat   │
-                       │  + Contexto RAG │
-                       └─────────────────┘
-```
-
-### 5.4 Implementação Necessária (Futuro)
-
-1. Extensão pgvector no PostgreSQL
-2. Tabela de embeddings
-3. Pipeline de ingestão de conteúdo
-4. Serviço de retrieval
-5. Integração com OpenAI Chat
-
----
-
-## 6. ENDPOINTS DE API EXISTENTES
-
-### 6.1 Autenticação (`/api/auth`)
-
-```
-POST /api/auth/register              - Registro
-POST /api/auth/login                 - Login
-GET  /api/auth/verify                - Verificar token [AUTH]
-POST /api/auth/refresh-token         - Renovar token
-POST /api/auth/forgot-password       - Esqueci senha
-POST /api/auth/reset-password        - Resetar senha
-POST /api/auth/logout                - Logout [AUTH]
-POST /api/auth/change-password       - Trocar senha
-POST /api/auth/verify-email          - Verificar email
-POST /api/auth/resend-verification   - Reenviar verificação
-POST /api/auth/google                - Login Google
-POST /api/auth/google-one-tap        - Google One Tap
-```
-
-### 6.2 Perfis (`/api/profiles`)
-
-```
-GET  /api/profiles/                  - Listar perfis [ADMIN/OWNER]
-GET  /api/profiles/me                - Meu perfil [AUTH]
-GET  /api/profiles/:id               - Perfil por ID [AUTH]
-PUT  /api/profiles/:id               - Atualizar perfil
-PUT  /api/profiles/:id/upload-avatar - Upload avatar
-```
-
-### 6.3 Crianças (`/api/children`)
-
-```
-GET    /api/children/                - Minhas crianças [AUTH]
-GET    /api/children/:id             - Criança por ID [AUTH]
-POST   /api/children/                - Cadastrar criança
-PUT    /api/children/:id             - Atualizar criança
-DELETE /api/children/:id             - Remover criança [AUTH]
-POST   /api/children/:id/professionals - Adicionar profissional
-DELETE /api/children/:id/professionals/:profId - Remover profissional
-POST   /api/children/:id/milestones  - Registrar marco
-GET    /api/children/:id/development-notes - Notas de desenvolvimento [AUTH]
-PUT    /api/children/:id/development-notes/:noteId - Atualizar nota
-DELETE /api/children/:id/development-notes/:noteId - Remover nota
-```
-
-### 6.4 Jornada V2 (`/api/journey-v2`)
-
-```
-GET  /api/journey-v2/journeys                     - Listar jornadas
-GET  /api/journey-v2/journeys/:id                 - Jornada por ID
-GET  /api/journey-v2/journeys/:id/weeks           - Semanas da jornada
-GET  /api/journey-v2/weeks/:id                    - Semana por ID
-GET  /api/journey-v2/weeks/:weekId/topics         - Tópicos da semana
-GET  /api/journey-v2/weeks/:weekId/quizzes        - Quizzes da semana
-GET  /api/journey-v2/users/:userId/progress/:journeyId - Progresso [AUTH]
-POST /api/journey-v2/users/:userId/weeks/:weekId/progress - Atualizar progresso [AUTH]
-POST /api/journey-v2/users/:userId/badges         - Conceder badge [AUTH]
-GET  /api/journey-v2/users/:userId/badges         - Badges do usuário [AUTH]
-```
-
-### 6.5 Journey Questions (`/api/journey-questions`)
-
-```
-GET  /api/journey-questions/                      - Listar perguntas [AUTH]
-GET  /api/journey-questions/week/:weekNumber/quizzes - Quizzes da semana [AUTH]
-GET  /api/journey-questions/:id                   - Pergunta por ID [AUTH]
-```
-
-### 6.6 Journey Bot (`/api/journey-bot`)
-
-```
-# Verificar implementação específica em journeyBotRoutes.js
-```
-
-### 6.7 Chat (`/api/chat`)
-
-```
-POST /api/chat/groups                    - Criar grupo [AUTH]
-GET  /api/chat/groups                    - Listar grupos [AUTH]
-GET  /api/chat/groups/:id                - Grupo por ID [AUTH]
-GET  /api/chat/groups/:groupId/messages  - Mensagens do grupo [AUTH]
-POST /api/chat/groups/:groupId/messages  - Enviar mensagem [AUTH]
-GET  /api/chat/groups/:groupId/participants - Participantes [AUTH]
-GET  /api/chat/admin/all-chats           - Todos os chats [OWNER]
-```
-
-### 6.8 Dashboard (`/api/dashboard`)
-
-```
-GET  /api/dashboard/users-by-role           - Usuários por papel [AUTH]
-GET  /api/dashboard/subscriptions-by-status - Assinaturas por status [AUTH]
-```
-
-### 6.9 Admin (`/api/admin/*`)
-
-```
-# /api/admin/children
-GET  /api/admin/children/           - Todas crianças [AUTH]
-GET  /api/admin/children/stats      - Estatísticas globais [AUTH]
-GET  /api/admin/children/:childId   - Detalhes criança [AUTH]
-
-# /api/admin/journey-questions
-# Rotas administrativas para gerenciar perguntas
-
-# /api/admin/user-activities
-GET  /api/admin/user-activities/                - Todos usuários com atividades [AUTH]
-GET  /api/admin/user-activities/stats           - Estatísticas de atividades [AUTH]
-GET  /api/admin/user-activities/:userId         - Atividades de usuário [AUTH]
-GET  /api/admin/user-activities/child/:childId  - Atividades de criança [AUTH]
-```
-
-### 6.10 External API (`/api/external`)
-
-```
-# Verificar implementação específica em externalApiRoutes.js
-```
-
-### 6.11 Outros
-
-```
-# /api/quizzes - Gestão de quizzes
-# /api/journeys - Jornadas v1
-# /api/achievements - Conquistas
-# /api/subscriptions - Assinaturas
-# /api/subscription-plans - Planos
-# /api/teams - Equipes
-# /api/activities - Atividades
-# /api/chat-invites - Convites de chat
-# /api/team-invites - Convites de equipe
-# /api/media-resources - Recursos de mídia
-# /api/journey - TitiNauta moderno
+WhatsApp → n8n (recebe webhook) → Processa → API Externa Educare → n8n → WhatsApp
 ```
 
 ---
 
-## 7. PRÓXIMOS PASSOS
+## 6. RAG (RETRIEVAL-AUGMENTED GENERATION)
 
-### Fase 1: Banco de Dados (Crítico)
-1. [ ] Executar sync do Sequelize para criar tabelas faltantes
-2. [ ] Verificar todas as migrations estão aplicadas
-3. [ ] Popular dados iniciais (seed) para journey_bot_questions
+### 6.1 Estado Atual: ❌ NÃO IMPLEMENTADO (Futuro)
 
-### Fase 2: Stripe (Verificação)
-1. [ ] Registrar webhook URL no Stripe Dashboard
-2. [ ] Testar fluxo de checkout completo
-3. [ ] Verificar sincronização de planos
+### 6.2 OpenAI Status
 
-### Fase 3: n8n (Desenvolvimento)
-1. [ ] Escolher hosting (n8n.cloud recomendado)
-2. [ ] Criar workflows de automação
-3. [ ] Implementar endpoints de webhook no backend
+**Secret:** `OPENAI_API_KEY` ✅ Disponível
 
-### Fase 4: WhatsApp (Desenvolvimento)
-1. [ ] Escolher provider (Twilio ou Meta Cloud API)
-2. [ ] Configurar credenciais
-3. [ ] Implementar serviço de mensagens
-4. [ ] Integrar com n8n
+### 6.3 Arquitetura Proposta (Futuro)
 
-### Fase 5: RAG (Futuro)
-1. [ ] Ativar extensão pgvector
-2. [ ] Implementar pipeline de embeddings
-3. [ ] Criar serviço de retrieval
-4. [ ] Integrar com assistente TitiNauta
+```
+Documentos → Embeddings → Vector Store → Retrieval → OpenAI + Contexto
+```
+
+---
+
+## 7. PLANO DE IMPLEMENTAÇÃO
+
+### Fase 1: Infraestrutura (Crítico)
+
+| # | Tarefa | Prioridade |
+|---|--------|------------|
+| 1 | Sincronizar banco de dados (Sequelize sync) | P0 |
+| 2 | Criar seed de dados para journey_questions | P0 |
+| 3 | Gerar e configurar EXTERNAL_API_KEY | P0 |
+
+### Fase 2: API Externa (Completar)
+
+| # | Tarefa | Prioridade |
+|---|--------|------------|
+| 4 | Adicionar endpoint /quiz-responses | P1 |
+| 5 | Criar testes de integração | P1 |
+
+### Fase 3: Stripe (Verificar)
+
+| # | Tarefa | Prioridade |
+|---|--------|------------|
+| 6 | Registrar webhook URL no Stripe Dashboard | P2 |
+| 7 | Testar fluxo completo de checkout | P2 |
+
+### Fase 4: n8n (Desenvolver)
+
+| # | Tarefa | Prioridade |
+|---|--------|------------|
+| 8 | Criar documentação do workflow | P3 |
+| 9 | Exportar template JSON do workflow | P3 |
+
+### Fase 5: WhatsApp (Integrar)
+
+| # | Tarefa | Prioridade |
+|---|--------|------------|
+| 10 | Documentar opções (Twilio vs Meta) | P4 |
+| 11 | Configurar variáveis de ambiente | P4 |
 
 ---
 
 ## 8. VARIÁVEIS DE AMBIENTE
 
-### Atuais
+### Atuais (Configuradas)
 
 ```env
-# Configuradas
 VITE_API_URL=https://...replit.dev:3001
 OPENAI_API_KEY=***
 STRIPE_WEBHOOK_SECRET=***
@@ -487,10 +424,12 @@ SESSION_SECRET=***
 ### Necessárias (Adicionar)
 
 ```env
+# API Externa
+EXTERNAL_API_KEY=educare_external_api_key_2025
+
 # n8n
-N8N_WEBHOOK_URL=
-N8N_API_KEY=
-N8N_WEBHOOK_SECRET=
+N8N_WEBHOOK_URL=https://your-n8n-instance.com
+N8N_API_KEY=your_n8n_api_key
 
 # WhatsApp (escolher um)
 # Twilio
@@ -513,29 +452,34 @@ educare-backend/
 ├── src/
 │   ├── config/
 │   │   └── database.js              # Conexão PostgreSQL
+│   ├── controllers/
+│   │   └── externalApiController.js # Controller API Externa (2039 linhas!)
+│   ├── middlewares/
+│   │   └── apiKey.js                # Middleware autenticação API Key
 │   ├── models/
 │   │   ├── index.js                 # Associações Sequelize
-│   │   ├── JourneyBotQuestion.js    # Modelo perguntas
+│   │   ├── JourneyQuestion.js       # Modelo perguntas
 │   │   └── *.js                     # Outros modelos
 │   ├── routes/
+│   │   ├── externalApiRoutes.js     # Rotas API Externa
 │   │   ├── stripeRoutes.js          # API Stripe
 │   │   ├── journeyQuestionsRoutes.js # API perguntas
-│   │   ├── journeyV2Routes.js       # API Jornada 2.0
 │   │   └── *.js                     # Outras rotas
 │   ├── services/
 │   │   ├── stripeClient.js          # Cliente Stripe
 │   │   ├── webhookHandlers.js       # Handlers webhook
 │   │   └── openaiService.js         # Serviço OpenAI
 │   └── server.js                    # Entry point
+├── docs/
+│   └── external-api.md              # Documentação API Externa
+├── RESUMO_ENDPOINTS_JORNADA_QUIZ.md # Resumo endpoints jornada
+├── API_EXTERNA_JORNADA_QUIZ.md      # Documentação completa
 └── package.json
 
 src/
 ├── hooks/
 │   ├── useTitiNautaProgress.ts      # Hook progresso
-│   ├── useTitiNautaJourneyQuestions.ts # Hook perguntas
-│   └── useTitiNautaWeekQuizzes.ts   # Hook quizzes
-├── services/
-│   └── journeyQuestionsService.ts   # Serviço frontend
+│   └── useTitiNautaJourneyQuestions.ts # Hook perguntas
 └── pages/
     └── educare-app/
         └── TitiNautaJourney.tsx     # Página principal
@@ -543,4 +487,27 @@ src/
 
 ---
 
-*Documento gerado automaticamente - Educare+ Platform*
+## 10. CONCLUSÃO
+
+### O que já está pronto:
+- ✅ API Externa com 12+ endpoints
+- ✅ Fluxo completo por telefone
+- ✅ Autenticação por API Key
+- ✅ Stripe integrado
+- ✅ OpenAI configurado
+
+### O que falta:
+- ⚠️ Sincronizar banco de dados
+- ⚠️ Adicionar endpoint quiz-responses
+- ❌ Configurar n8n workflow
+- ❌ Configurar WhatsApp webhook
+
+### Próximo passo recomendado:
+1. Executar sync do Sequelize
+2. Gerar EXTERNAL_API_KEY
+3. Testar endpoints manualmente
+4. Configurar n8n
+
+---
+
+*Documento atualizado - Educare+ Platform - Dezembro 2025*

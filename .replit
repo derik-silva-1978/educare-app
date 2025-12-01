@@ -10,6 +10,7 @@ channel = "stable-25_05"
 
 [userenv.shared]
 VITE_API_URL = "https://1d35ed6a-d635-41d2-8d11-7db8db84ce29-00-28ylqytrll200.picard.replit.dev:3001"
+EXTERNAL_API_KEY = "educare_external_api_key_2025"
 
 [workflows]
 runButton = "Project"
