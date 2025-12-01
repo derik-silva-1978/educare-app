@@ -133,7 +133,18 @@ The workflow orchestrates:
 
 ### Infrastructure
 
-**Development**: Vite dev server (port 5173), Node.js backend (port 3001)
+**Development (Replit)**:
+- Frontend: Vite dev server on port 5000 (proxied via Replit)
+- Backend: Node.js/Express on port 3001
+- External PostgreSQL database at `app.voipsimples.com.br`
+
+**Replit Workflow Configuration**:
+- Backend workflow uses `OPENAI_API_KEY=$(printenv OPENAI_API_KEY)` pattern to propagate Replit integration secrets to child processes
+- When editing workflow commands, preserve environment variable propagation to avoid breaking integrations
+
+**Health Check Endpoints**:
+- `/health` - Basic health status
+- `/health/detailed` - Full status including database, integrations (OpenAI, WhatsApp, Stripe)
 
 **Production Deployment**: 
 - VPS hosting recommended with PM2 process manager
@@ -144,3 +155,12 @@ The workflow orchestrates:
 **Domains**: 
 - Frontend: `educare.whatscall.com.br`
 - API: `api.educare.whatscall.com.br`
+
+## Recent Changes
+
+**2025-12-01**: 
+- Fixed OpenAI integration propagation in Replit workflows
+- TitiNauta AI service layer implemented with lazy initialization
+- Health check endpoints added for monitoring integrations status
+- Removed hardcoded localhost URLs in favor of environment variables
+- Security fix: Removed debug middleware that logged credentials
