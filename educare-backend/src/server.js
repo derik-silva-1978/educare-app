@@ -32,6 +32,7 @@ const userActivitiesRoutes = require('./routes/userActivitiesRoutes');
 const journeyV2Routes = require('./routes/journeyV2Routes');
 const externalApiRoutes = require('./routes/externalApiRoutes');
 const mediaResourceRoutes = require('./routes/mediaResourceRoutes');
+const healthRoutes = require('./routes/healthRoutes');
 
 // Inicialização do app Express
 const app = express();
@@ -76,6 +77,9 @@ app.use('/api/external', externalApiRoutes);
 // Novas rotas do TitiNauta
 app.use('/api/journey', titiNautaRoutes); // Interface moderna do TitiNauta
 app.use('/api/media-resources', mediaResourceRoutes); // Gestão de recursos audiovisuais
+
+// Rotas de health check (sem prefixo /api para acesso direto)
+app.use('/health', healthRoutes);
 
 // Rota padrão
 app.get('/', (req, res) => {

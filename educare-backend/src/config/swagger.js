@@ -1,5 +1,9 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+require('dotenv').config();
+
+// URL base do servidor - usa variável de ambiente ou fallback
+const serverUrl = process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 3001}`;
 
 // Configuração básica do Swagger
 const options = {
@@ -16,12 +20,8 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3001',
-        description: 'Servidor de Desenvolvimento',
-      },
-      {
-        url: 'https://api.educareapp.com',
-        description: 'Servidor de Produção',
+        url: serverUrl,
+        description: process.env.NODE_ENV === 'production' ? 'Servidor de Produção' : 'Servidor de Desenvolvimento',
       },
     ],
     components: {
