@@ -1,0 +1,541 @@
+{
+  "name": "Educare+ API Integration Nodes",
+  "description": "Nós HTTP Request para integrar com a API Externa do Educare+. Adicione estes nós ao workflow principal.",
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-01",
+  "environment": {
+    "required": [
+      {
+        "name": "EDUCARE_API_URL",
+        "description": "URL base da API Externa Educare+",
+        "example": "https://your-educare-backend.com/api/external"
+      },
+      {
+        "name": "EXTERNAL_API_KEY",
+        "description": "Chave de autenticação da API Externa",
+        "example": "educare_external_api_key_2025"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "educare-search-user",
+      "name": "Educare: Search User by Phone",
+      "description": "Busca usuário pelo número de telefone WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 1328],
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.EDUCARE_API_URL}}/users/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{$node['Dados'].json.user}}"
+            },
+            {
+              "name": "api_key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "notes": "Conectar após o nó 'Dados'. Saída: { success: true, data: { user: {...} } }"
+    },
+    {
+      "id": "educare-check-user-found",
+      "name": "Educare: Check User Found",
+      "description": "Verifica se o usuário foi encontrado na base",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1000, 1328],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-user-success",
+              "leftValue": "={{$json.success}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "check-user-exists",
+              "leftValue": "={{$json.data?.user}}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "notes": "TRUE: usuário encontrado → continua fluxo. FALSE: usuário não encontrado → mensagem de cadastro"
+    },
+    {
+      "id": "educare-get-active-child",
+      "name": "Educare: Get Active Child",
+      "description": "Obtém a criança ativa do usuário",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 1200],
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.EDUCARE_API_URL}}/users/by-phone/{{$node['Dados'].json.user}}/active-child",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "notes": "Conectar após 'Check User Found' (TRUE). Saída: { success: true, data: { active_child: {...} } }"
+    },
+    {
+      "id": "educare-check-child-found",
+      "name": "Educare: Check Child Found",
+      "description": "Verifica se existe criança ativa",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1400, 1200],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-child-success",
+              "leftValue": "={{$json.success}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "check-child-exists",
+              "leftValue": "={{$json.data?.active_child}}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "notes": "TRUE: criança encontrada → busca perguntas. FALSE: sem criança → mensagem de cadastro"
+    },
+    {
+      "id": "educare-get-unanswered-questions",
+      "name": "Educare: Get Unanswered Questions",
+      "description": "Obtém perguntas não respondidas da jornada",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1600, 1100],
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.EDUCARE_API_URL}}/children/{{$node['Educare: Get Active Child'].json.data.active_child.id}}/unanswered-questions",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "notes": "Busca próxima pergunta não respondida. Saída: { success: true, data: { questions: [...] } }"
+    },
+    {
+      "id": "educare-parse-user-answer",
+      "name": "Educare: Parse User Answer",
+      "description": "Analisa a resposta do usuário e extrai o valor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1800, 1100],
+      "parameters": {
+        "jsCode": "const message = $('Dados').item.json['body.mensagem.body']?.toLowerCase().trim() || '';\n\n// Mapeamento de respostas\nconst answerMap = {\n  '1': 0, 'um': 0, 'nao': 0, 'não': 0, 'nunca': 0, 'raramente': 0,\n  '2': 1, 'dois': 1, 'as vezes': 1, 'às vezes': 1, 'parcialmente': 1,\n  '3': 2, 'tres': 2, 'três': 2, 'sim': 2, 'sempre': 2, 'frequentemente': 2\n};\n\nconst greetings = ['oi', 'ola', 'olá', 'bom dia', 'boa tarde', 'boa noite', 'começar', 'iniciar', 'start', 'oi titi', 'ola titi'];\nconst helpKeywords = ['ajuda', 'help', 'como', 'duvida', 'dúvida', '?'];\nconst progressKeywords = ['progresso', 'quanto falta', 'status', 'avanço'];\n\nlet type = 'unknown';\nlet answerValue = null;\n\nif (answerMap.hasOwnProperty(message)) {\n  type = 'answer';\n  answerValue = answerMap[message];\n} else if (greetings.some(g => message.includes(g))) {\n  type = 'greeting';\n} else if (helpKeywords.some(h => message.includes(h))) {\n  type = 'help';\n} else if (progressKeywords.some(p => message.includes(p))) {\n  type = 'progress';\n} else {\n  type = 'chat'; // Mensagem livre para o AI Agent\n}\n\nreturn {\n  type: type,\n  answerValue: answerValue,\n  originalMessage: message,\n  hasQuestions: $('Educare: Get Unanswered Questions').item.json.data?.questions?.length > 0,\n  currentQuestion: $('Educare: Get Unanswered Questions').item.json.data?.questions?.[0] || null,\n  childId: $('Educare: Get Active Child').item.json.data?.active_child?.id,\n  childName: $('Educare: Get Active Child').item.json.data?.active_child?.name,\n  childAgeMonths: $('Educare: Get Active Child').item.json.data?.active_child?.age_months\n};"
+      },
+      "notes": "Classifica a mensagem: answer, greeting, help, progress, chat"
+    },
+    {
+      "id": "educare-route-message",
+      "name": "Educare: Route Message",
+      "description": "Roteia a mensagem baseado no tipo identificado",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [2000, 1100],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.type}}",
+                    "rightValue": "answer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "answer"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.type}}",
+                    "rightValue": "greeting",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "greeting"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.type}}",
+                    "rightValue": "progress",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "progress"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.type}}",
+                    "rightValue": "help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "help"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "notes": "Saídas: answer, greeting, progress, help, extra (chat livre)"
+    },
+    {
+      "id": "educare-save-answer",
+      "name": "Educare: Save Answer",
+      "description": "Salva a resposta do usuário no banco de dados",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2200, 900],
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.EDUCARE_API_URL}}/children/{{$node['Educare: Parse User Answer'].json.childId}}/save-answer",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-API-Key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"question_id\": \"{{$node['Educare: Parse User Answer'].json.currentQuestion.id}}\",\n  \"answer\": {{$node['Educare: Parse User Answer'].json.answerValue}},\n  \"answer_text\": \"{{$node['Educare: Parse User Answer'].json.originalMessage}}\",\n  \"metadata\": {\n    \"source\": \"whatsapp\",\n    \"timestamp\": \"{{$now.toISO()}}\",\n    \"session_id\": \"{{$node['Dados'].json.user}}\"\n  }\n}",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "notes": "Conectar após Route Message (answer). Salva resposta e retorna feedback."
+    },
+    {
+      "id": "educare-get-progress",
+      "name": "Educare: Get Progress",
+      "description": "Obtém o progresso atual da jornada",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2400, 900],
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.EDUCARE_API_URL}}/children/{{$node['Educare: Parse User Answer'].json.childId}}/progress",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "notes": "Busca progresso após salvar resposta. Saída: { success: true, data: { progress: {...} } }"
+    },
+    {
+      "id": "educare-format-answer-response",
+      "name": "Educare: Format Answer Response",
+      "description": "Formata resposta após salvar resposta do quiz",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2600, 900],
+      "parameters": {
+        "jsCode": "const childName = $node['Educare: Parse User Answer'].json.childName;\nconst currentQuestion = $node['Educare: Parse User Answer'].json.currentQuestion;\nconst answerValue = $node['Educare: Parse User Answer'].json.answerValue;\nconst progress = $node['Educare: Get Progress'].json.data?.progress || {};\nconst saveResult = $node['Educare: Save Answer'].json;\n\n// Determinar feedback baseado na resposta\nconst feedbackMap = {\n  0: currentQuestion?.domain_feedback_1 || 'Obrigada pela sua resposta.',\n  1: currentQuestion?.domain_feedback_2 || 'Obrigada pela sua resposta.',\n  2: currentQuestion?.domain_feedback_3 || 'Que ótimo! Obrigada pela sua resposta.'\n};\n\nconst feedback = feedbackMap[answerValue] || 'Obrigada pela resposta!';\n\nlet message = `✨ ${feedback}\\n\\n`;\nmessage += `📊 Progresso de ${childName}: ${progress.progress_percentage || 0}%\\n`;\n\nif (progress.unanswered_questions > 0) {\n  message += `📝 Perguntas restantes: ${progress.unanswered_questions}\\n\\n`;\n  message += `Deseja continuar? Envie *oi* para a próxima pergunta! 💜`;\n} else {\n  message += `\\n🎉 Parabéns! Você completou todas as perguntas desta fase!\\n`;\n  message += `Continue acompanhando o desenvolvimento de ${childName} no app Educare+!`;\n}\n\nreturn {\n  message: message,\n  sessionId: $node['Dados'].json.user\n};"
+      },
+      "notes": "Formata mensagem de resposta com feedback personalizado e progresso"
+    },
+    {
+      "id": "educare-format-greeting",
+      "name": "Educare: Format Greeting",
+      "description": "Formata saudação inicial com próxima pergunta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2200, 1100],
+      "parameters": {
+        "jsCode": "const childName = $node['Educare: Parse User Answer'].json.childName;\nconst childAge = $node['Educare: Parse User Answer'].json.childAgeMonths;\nconst hasQuestions = $node['Educare: Parse User Answer'].json.hasQuestions;\nconst currentQuestion = $node['Educare: Parse User Answer'].json.currentQuestion;\n\nlet message = `Olá! 👋 Eu sou a TitiNauta, sua assistente para acompanhar o desenvolvimento de ${childName}!\\n\\n`;\n\nif (hasQuestions && currentQuestion) {\n  message += `Vamos continuar nossa jornada? 🚀\\n\\n`;\n  message += `Responda com:\\n`;\n  message += `1️⃣ - Não/Raramente\\n`;\n  message += `2️⃣ - Às vezes\\n`;\n  message += `3️⃣ - Sim/Frequentemente\\n\\n`;\n  message += `📝 *Pergunta:*\\n${currentQuestion.domain_question}`;\n} else {\n  message += `🎉 Parabéns! Você já respondeu todas as perguntas disponíveis!\\n\\n`;\n  message += `Continue acompanhando o desenvolvimento de ${childName} no app Educare+.\\n`;\n  message += `Novas perguntas serão liberadas conforme a idade.`;\n}\n\nreturn {\n  message: message,\n  sessionId: $node['Dados'].json.user\n};"
+      },
+      "notes": "Formata saudação com próxima pergunta do quiz"
+    },
+    {
+      "id": "educare-format-progress",
+      "name": "Educare: Format Progress",
+      "description": "Formata mensagem de progresso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2200, 1300],
+      "parameters": {
+        "jsCode": "const childName = $node['Educare: Parse User Answer'].json.childName;\nconst childId = $node['Educare: Parse User Answer'].json.childId;\n\n// Fazer chamada para buscar progresso\nconst progress = $input.item.json.data?.progress || {};\n\nlet message = `📊 *Progresso de ${childName}*\\n\\n`;\nmessage += `✅ Perguntas respondidas: ${progress.answered_questions || 0}\\n`;\nmessage += `📝 Perguntas pendentes: ${progress.unanswered_questions || 0}\\n`;\nmessage += `📈 Progresso geral: ${progress.progress_percentage || 0}%\\n\\n`;\n\nif (progress.unanswered_questions > 0) {\n  message += `Envie *oi* para continuar respondendo! 💜`;\n} else {\n  message += `🎉 Você completou todas as perguntas desta fase!`;\n}\n\nreturn {\n  message: message,\n  sessionId: $node['Dados'].json.user\n};"
+      },
+      "notes": "Conectar após uma chamada GET /children/:id/progress"
+    },
+    {
+      "id": "educare-format-help",
+      "name": "Educare: Format Help",
+      "description": "Formata mensagem de ajuda",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2200, 1500],
+      "parameters": {
+        "jsCode": "const childName = $node['Educare: Parse User Answer'].json.childName || 'seu filho';\n\nlet message = `👋 Olá! Precisa de ajuda?\\n\\n`;\nmessage += `Aqui estão suas opções:\\n\\n`;\nmessage += `📝 *Responder perguntas:* Envie 1, 2 ou 3\\n`;\nmessage += `  • 1 = Não/Raramente\\n`;\nmessage += `  • 2 = Às vezes\\n`;\nmessage += `  • 3 = Sim/Frequentemente\\n\\n`;\nmessage += `🏠 *Ver próxima pergunta:* Envie \"oi\"\\n`;\nmessage += `📊 *Ver progresso:* Envie \"progresso\"\\n\\n`;\nmessage += `Estou aqui para ajudar você a acompanhar o desenvolvimento de ${childName}! 💜`;\n\nreturn {\n  message: message,\n  sessionId: $node['Dados'].json.user\n};"
+      },
+      "notes": "Formata mensagem de ajuda com instruções"
+    },
+    {
+      "id": "educare-format-not-found",
+      "name": "Educare: Format Not Found",
+      "description": "Formata mensagem quando usuário não está cadastrado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 1500],
+      "parameters": {
+        "jsCode": "let message = `Olá! 👋\\n\\n`;\nmessage += `Não encontrei seu cadastro no Educare+.\\n\\n`;\nmessage += `Para começar sua jornada de acompanhamento do desenvolvimento infantil, acesse:\\n`;\nmessage += `🔗 https://educareapp.com/register\\n\\n`;\nmessage += `Use este mesmo número de telefone para se cadastrar! 📱\\n\\n`;\nmessage += `Após o cadastro, envie \"oi\" para começarmos! 💜`;\n\nreturn {\n  message: message,\n  sessionId: $node['Dados'].json.user\n};"
+      },
+      "notes": "Conectar após 'Check User Found' (FALSE) ou 'Check Child Found' (FALSE)"
+    }
+  ],
+  "connections": {
+    "suggested": [
+      {
+        "from": "Dados",
+        "to": "Educare: Search User by Phone",
+        "description": "Após extrair dados, buscar usuário"
+      },
+      {
+        "from": "Educare: Search User by Phone",
+        "to": "Educare: Check User Found",
+        "description": "Verificar se encontrou usuário"
+      },
+      {
+        "from": "Educare: Check User Found (TRUE)",
+        "to": "Educare: Get Active Child",
+        "description": "Se encontrou, buscar criança ativa"
+      },
+      {
+        "from": "Educare: Check User Found (FALSE)",
+        "to": "Educare: Format Not Found",
+        "description": "Se não encontrou, enviar mensagem de cadastro"
+      },
+      {
+        "from": "Educare: Get Active Child",
+        "to": "Educare: Check Child Found",
+        "description": "Verificar se tem criança ativa"
+      },
+      {
+        "from": "Educare: Check Child Found (TRUE)",
+        "to": "Educare: Get Unanswered Questions",
+        "description": "Se tem criança, buscar perguntas"
+      },
+      {
+        "from": "Educare: Get Unanswered Questions",
+        "to": "Educare: Parse User Answer",
+        "description": "Analisar mensagem do usuário"
+      },
+      {
+        "from": "Educare: Parse User Answer",
+        "to": "Educare: Route Message",
+        "description": "Rotear baseado no tipo"
+      },
+      {
+        "from": "Educare: Route Message (answer)",
+        "to": "Educare: Save Answer",
+        "description": "Se for resposta, salvar"
+      },
+      {
+        "from": "Educare: Save Answer",
+        "to": "Educare: Get Progress",
+        "description": "Após salvar, buscar progresso"
+      },
+      {
+        "from": "Educare: Get Progress",
+        "to": "Educare: Format Answer Response",
+        "description": "Formatar resposta com feedback"
+      },
+      {
+        "from": "Educare: Route Message (greeting)",
+        "to": "Educare: Format Greeting",
+        "description": "Se saudação, mostrar pergunta"
+      },
+      {
+        "from": "Educare: Route Message (progress)",
+        "to": "Educare: Get Progress",
+        "description": "Se progresso, buscar e exibir"
+      },
+      {
+        "from": "Educare: Route Message (help)",
+        "to": "Educare: Format Help",
+        "description": "Se ajuda, exibir instruções"
+      },
+      {
+        "from": "Educare: Route Message (extra)",
+        "to": "AI Agent1",
+        "description": "Se chat livre, enviar para IA"
+      }
+    ]
+  },
+  "usage": {
+    "instructions": [
+      "1. Importe este arquivo no n8n como referência",
+      "2. Adicione os nós ao workflow principal (Educare+ Ch@t)",
+      "3. Configure as variáveis de ambiente EDUCARE_API_URL e EXTERNAL_API_KEY",
+      "4. Conecte os nós conforme o mapeamento em 'connections.suggested'",
+      "5. Teste o fluxo completo com mensagens de WhatsApp"
+    ],
+    "testCommands": [
+      "curl -X GET \"$EDUCARE_API_URL/users/search?phone=+5511988888888&api_key=$EXTERNAL_API_KEY\"",
+      "curl -X GET \"$EDUCARE_API_URL/users/by-phone/+5511988888888/active-child\" -H \"X-API-Key: $EXTERNAL_API_KEY\"",
+      "curl -X GET \"$EDUCARE_API_URL/children/{childId}/unanswered-questions?api_key=$EXTERNAL_API_KEY\"",
+      "curl -X POST \"$EDUCARE_API_URL/children/{childId}/save-answer\" -H \"X-API-Key: $EXTERNAL_API_KEY\" -H \"Content-Type: application/json\" -d '{\"question_id\": \"uuid\", \"answer\": 2}'",
+      "curl -X GET \"$EDUCARE_API_URL/children/{childId}/progress?api_key=$EXTERNAL_API_KEY\""
+    ]
+  }
+}
