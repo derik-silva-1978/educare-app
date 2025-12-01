@@ -326,7 +326,7 @@ const UserManagement: React.FC = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="Buscar por nome ou email..."
                   value={searchTerm}
@@ -423,7 +423,7 @@ const UserManagement: React.FC = () => {
                           </div>
                           <div>
                             <div className="font-medium">{userData.name}</div>
-                            <div className="text-sm text-gray-500">ID: {userData.id}</div>
+                            <div className="text-sm text-muted-foreground">ID: {userData.id}</div>
                           </div>
                         </div>
                       </TableCell>
@@ -437,7 +437,7 @@ const UserManagement: React.FC = () => {
                             )}
                           </div>
                           {userData.phone && (
-                            <div className="flex items-center text-sm text-gray-500">
+                            <div className="flex items-center text-sm text-muted-foreground">
                               <Phone className="h-3 w-3 mr-1" />
                               {userData.phone}
                             </div>
@@ -462,7 +462,7 @@ const UserManagement: React.FC = () => {
                             {userData.subscriptionPlan.name}
                           </Badge>
                         ) : (
-                          <span className="text-gray-500 text-sm">Sem plano</span>
+                          <span className="text-muted-foreground text-sm">Sem plano</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -472,7 +472,7 @@ const UserManagement: React.FC = () => {
                             {formatDate(userData.last_login)}
                           </div>
                         ) : (
-                          <span className="text-gray-400">Nunca</span>
+                          <span className="text-muted-foreground">Nunca</span>
                         )}
                       </TableCell>
                       <TableCell>

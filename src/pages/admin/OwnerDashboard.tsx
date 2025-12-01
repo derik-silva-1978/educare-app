@@ -295,11 +295,11 @@ const OwnerDashboard: React.FC = () => {
                       </div>
                       
                       {/* Taxa de Conversão */}
-                      <div className="mt-3 pt-2 border-t border-gray-200">
+                      <div className="mt-3 pt-2 border-t border-border">
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground">Taxa de Conversão</span>
                           <div className="flex items-center space-x-2">
-                            <div className="w-20 bg-gray-200 rounded-full h-2">
+                            <div className="w-20 bg-secondary rounded-full h-2">
                               <div 
                                 className="bg-blue-500 h-2 rounded-full transition-all duration-300" 
                                 style={{ width: `${Math.min(conversionRate, 100)}%` }}

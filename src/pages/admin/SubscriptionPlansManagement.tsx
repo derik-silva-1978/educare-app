@@ -327,7 +327,7 @@ const SubscriptionPlansManagement: React.FC = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">Gestão de Planos de Assinatura</h1>
-            <p className="text-gray-600">Gerencie os planos e preços da plataforma</p>
+            <p className="text-muted-foreground">Gerencie os planos e preços da plataforma</p>
           </div>
           <Button onClick={handleCreatePlan} className="flex items-center space-x-2">
             <Plus className="h-4 w-4" />
@@ -339,7 +339,7 @@ const SubscriptionPlansManagement: React.FC = () => {
         <div className="grid gap-4 grid-cols-1 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Total de Planos</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total de Planos</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
@@ -351,7 +351,7 @@ const SubscriptionPlansManagement: React.FC = () => {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Planos Ativos</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Planos Ativos</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
@@ -363,7 +363,7 @@ const SubscriptionPlansManagement: React.FC = () => {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Planos Públicos</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Planos Públicos</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
@@ -375,7 +375,7 @@ const SubscriptionPlansManagement: React.FC = () => {
 
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">Receita Potencial</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Receita Potencial</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
@@ -452,12 +452,12 @@ const SubscriptionPlansManagement: React.FC = () => {
                   </div>
 
                   {plan.trial_days > 0 && (
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       {plan.trial_days} dias de teste grátis
                     </div>
                   )}
 
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-muted-foreground">
                     Ordem: {plan.sort_order}
                   </div>
                 </div>
