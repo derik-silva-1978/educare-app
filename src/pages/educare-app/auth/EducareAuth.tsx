@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -8,23 +7,26 @@ import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import EducareLoginForm from '@/components/educare-app/auth/EducareLoginForm';
 import EducareRegisterForm from '@/components/educare-app/auth/EducareRegisterForm';
+import AuthSlideshow from '@/components/educare-app/auth/AuthSlideshow';
+import { Separator } from '@/components/ui/separator';
+import GoogleLoginButton from '@/components/educare-app/auth/GoogleLoginButton';
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+const isGoogleConfigured = Boolean(GOOGLE_CLIENT_ID);
 
 const EducareAuth: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isLoading, isInitialized } = useAuth();
   
-  // Parse action from URL query parameter
   const queryParams = new URLSearchParams(location.search);
   const actionParam = queryParams.get('action');
   let redirectParam = queryParams.get('redirect');
   
-  // Clean redirect parameter with strict validation
   if (redirectParam) {
     try {
       const decoded = decodeURIComponent(redirectParam);
       
-      // Validate redirect URL
       if (decoded.includes('educare-app/auth') || 
           decoded.length > 100 || 
           !decoded.startsWith('/educare-app/') ||
@@ -32,7 +34,6 @@ const EducareAuth: React.FC = () => {
         console.warn('Invalid redirect parameter detected, clearing:', decoded);
         redirectParam = null;
         
-        // Clean the URL immediately
         const cleanUrl = `/educare-app/auth${actionParam ? `?action=${actionParam}` : ''}`;
         window.history.replaceState({}, '', cleanUrl);
       } else {
@@ -44,12 +45,10 @@ const EducareAuth: React.FC = () => {
     }
   }
   
-  // Set the active tab based on URL parameter
   const [activeTab, setActiveTab] = useState<'login' | 'register'>(
     actionParam === 'register' ? 'register' : 'login'
   );
 
-  // Redirect if already logged in
   useEffect(() => {
     if (isInitialized && !isLoading && user) {
       const finalRedirect = redirectParam && redirectParam !== '/educare-app/auth' 
@@ -61,7 +60,6 @@ const EducareAuth: React.FC = () => {
     }
   }, [user, isLoading, isInitialized, navigate, redirectParam]);
 
-  // Handle tab change
   const handleTabChange = (tab: string) => {
     setActiveTab(tab as 'login' | 'register');
     
@@ -69,19 +67,17 @@ const EducareAuth: React.FC = () => {
     navigate(newUrl, { replace: true });
   };
 
-  // Show loading while checking auth state
   if (!isInitialized || isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando...</p>
+          <p className="text-muted-foreground">Carregando...</p>
         </div>
       </div>
     );
   }
 
-  // Don't render if user is authenticated (redirect is in progress)
   if (user) {
     return null;
   }
@@ -96,50 +92,86 @@ const EducareAuth: React.FC = () => {
         />
       </Helmet>
       
-      <main className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <motion.div 
-          className="w-full max-w-md space-y-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Educare</h1>
-            <p className="text-gray-600">Acompanhamento inteligente do desenvolvimento infantil</p>
-          </div>
-          
-          <Card className="overflow-hidden shadow-lg">
-            <Tabs value={activeTab} onValueChange={handleTabChange}>
-              <TabsList className="w-full rounded-none grid grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Cadastro</TabsTrigger>
-              </TabsList>
-              
-              <CardContent className="p-6">
-                <TabsContent value="login">
-                  <EducareLoginForm redirectPath={redirectParam} />
-                </TabsContent>
+      <main className="min-h-screen bg-background flex flex-col lg:flex-row">
+        <div className="w-full lg:w-1/2 h-[40vh] lg:h-screen relative order-first lg:order-first">
+          <AuthSlideshow />
+        </div>
+
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-background min-h-[60vh] lg:min-h-screen">
+          <motion.div 
+            className="w-full max-w-md space-y-6"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div className="text-center lg:text-left">
+              <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-lg">E+</span>
+                </div>
+                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Educare</h1>
+              </div>
+              <p className="text-muted-foreground">
+                {activeTab === 'login' 
+                  ? 'Bem-vindo de volta! Entre para continuar.' 
+                  : 'Crie sua conta e comece a jornada.'}
+              </p>
+            </div>
+
+            {isGoogleConfigured && (
+              <div className="space-y-4">
+                <GoogleLoginButton redirectPath={redirectParam} />
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <Separator className="w-full" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      ou continue com email
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <Card className="border-0 shadow-lg">
+              <Tabs value={activeTab} onValueChange={handleTabChange}>
+                <TabsList className="w-full rounded-t-lg rounded-b-none grid grid-cols-2 h-12">
+                  <TabsTrigger value="login" className="text-sm font-medium">
+                    Entrar
+                  </TabsTrigger>
+                  <TabsTrigger value="register" className="text-sm font-medium">
+                    Criar Conta
+                  </TabsTrigger>
+                </TabsList>
                 
-                <TabsContent value="register">
-                  <EducareRegisterForm redirectPath={redirectParam} />
-                </TabsContent>
-              </CardContent>
-            </Tabs>
-          </Card>
-          
-          <div className="text-center text-sm text-gray-500">
-            <p>
-              Ao utilizar o Educare, você concorda com nossos{' '}
-              <a href="#" className="font-medium text-primary hover:text-primary/80">
-                Termos de Serviço
-              </a>{' '}
-              e{' '}
-              <a href="#" className="font-medium text-primary hover:text-primary/80">
-                Política de Privacidade
-              </a>
-            </p>
-          </div>
-        </motion.div>
+                <CardContent className="p-6">
+                  <TabsContent value="login" className="mt-0">
+                    <EducareLoginForm redirectPath={redirectParam} />
+                  </TabsContent>
+                  
+                  <TabsContent value="register" className="mt-0">
+                    <EducareRegisterForm redirectPath={redirectParam} />
+                  </TabsContent>
+                </CardContent>
+              </Tabs>
+            </Card>
+            
+            <div className="text-center text-xs text-muted-foreground">
+              <p>
+                Ao utilizar o Educare, você concorda com nossos{' '}
+                <a href="#" className="font-medium text-primary hover:underline">
+                  Termos de Serviço
+                </a>{' '}
+                e{' '}
+                <a href="#" className="font-medium text-primary hover:underline">
+                  Política de Privacidade
+                </a>
+              </p>
+            </div>
+          </motion.div>
+        </div>
       </main>
     </>
   );

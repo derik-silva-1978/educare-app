@@ -4,6 +4,7 @@ const { User, Profile } = require('../models');
 const authConfig = require('../config/auth');
 const { validationResult } = require('express-validator');
 const https = require('https'); // Módulo nativo do Node.js para requisições HTTPS
+const { OAuth2Client } = require('google-auth-library');
 
 /**
  * Função auxiliar para enviar dados para um webhook via HTTPS
@@ -1107,5 +1108,70 @@ exports.refreshToken = async (req, res) => {
   } catch (error) {
     console.error('Erro ao renovar token:', error);
     return res.status(500).json({ error: 'Erro ao processar solicitação' });
+  }
+};
+
+// Login com Google OAuth
+exports.googleLogin = async (req, res) => {
+  try {
+    const { email, name, picture, googleId, credential } = req.body;
+    
+    console.log('Google login attempt:', { email, name, googleId });
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email é obrigatório para login com Google' });
+    }
+
+    // Verificar se o usuário já existe
+    let user = await User.findOne({ where: { email } });
+
+    if (user) {
+      // Usuário existe - fazer login
+      // Atualizar último login
+      await user.update({ last_login: new Date() });
+      console.log(`Usuário existente logado via Google: ${email}`);
+    } else {
+      // Criar novo usuário
+      const randomPassword = Math.random().toString(36).slice(-16);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      user = await User.create({
+        email,
+        name: name || email.split('@')[0],
+        password: hashedPassword,
+        role: 'user',
+        status: 'active',
+        email_verified: true, // Email do Google já é verificado
+        last_login: new Date()
+      });
+
+      // Criar perfil para o usuário
+      await Profile.create({
+        user_id: user.id,
+        name: name || email.split('@')[0],
+        type: 'parent',
+        is_primary: true
+      });
+
+      console.log(`Novo usuário criado via Google: ${email}`);
+    }
+
+    // Gerar tokens
+    const token = generateToken(user.id);
+    const refreshToken = generateToken(user.id);
+
+    return res.status(200).json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role
+      },
+      token,
+      refreshToken
+    });
+  } catch (error) {
+    console.error('Erro no login com Google:', error);
+    return res.status(500).json({ error: 'Erro ao processar login com Google' });
   }
 };

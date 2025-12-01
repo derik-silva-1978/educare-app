@@ -447,4 +447,36 @@ router.post(
   authController.refreshToken
 );
 
+/**
+ * @swagger
+ * /api/auth/google:
+ *   post:
+ *     summary: Autentica usuário via Google OAuth
+ *     tags: [Autenticação]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - credential
+ *             properties:
+ *               credential:
+ *                 type: string
+ *                 description: ID Token do Google
+ *     responses:
+ *       200:
+ *         description: Autenticação bem-sucedida
+ *       401:
+ *         description: Token inválido
+ */
+router.post(
+  '/google',
+  [
+    body('credential').notEmpty().withMessage('Token do Google é obrigatório')
+  ],
+  authController.googleLogin
+);
+
 module.exports = router;
