@@ -6,13 +6,10 @@ const swaggerConfig = require('./config/swagger');
 require('dotenv').config();
 
 // Importação das rotas
-// const routes = require('./routes'); // TODO: Implementar rotas principais
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const childRoutes = require('./routes/childRoutes');
-// const teamRoutes = require('./routes/teamRoutes'); // TODO: Implementar rotas de equipes
-// const licenseRoutes = require('./routes/licenseRoutes'); // TODO: Implementar rotas de licenças
 const quizRoutes = require('./routes/quizRoutes');
 const journeyRoutes = require('./routes/journeyRoutes');
 const achievementRoutes = require('./routes/achievementRoutes');
@@ -23,7 +20,6 @@ const teamRoutes = require('./routes/teamRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const adminChildrenRoutes = require('./routes/adminChildrenRoutes');
 const journeyBotRoutes = require('./routes/journeyBotRoutes');
-// Novas rotas do TitiNauta
 const titiNautaRoutes = require('./routes/titiNautaRoutes');
 const adminJourneyQuestionsRoutes = require('./routes/adminJourneyQuestionsRoutes');
 const journeyQuestionsRoutes = require('./routes/journeyQuestionsRoutes');
@@ -33,14 +29,83 @@ const journeyV2Routes = require('./routes/journeyV2Routes');
 const externalApiRoutes = require('./routes/externalApiRoutes');
 const mediaResourceRoutes = require('./routes/mediaResourceRoutes');
 const healthRoutes = require('./routes/healthRoutes');
+const stripeRoutes = require('./routes/stripeRoutes');
+
+// Stripe services
+const { initStripe } = require('./services/stripeInit');
+const { WebhookHandlers } = require('./services/webhookHandlers');
 
 // Inicialização do app Express
 const app = express();
 
-// Middlewares
+// Basic middlewares (before Stripe webhook)
 app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
+
+// CRITICAL: Register Stripe webhook routes BEFORE express.json()
+// These routes need raw Buffer body for signature verification
+
+// Handle webhook with UUID (managed webhook)
+app.post(
+  '/api/stripe/webhook/:uuid',
+  express.raw({ type: 'application/json' }),
+  async (req, res) => {
+    const signature = req.headers['stripe-signature'];
+
+    if (!signature) {
+      return res.status(400).json({ error: 'Missing stripe-signature' });
+    }
+
+    try {
+      const sig = Array.isArray(signature) ? signature[0] : signature;
+
+      if (!Buffer.isBuffer(req.body)) {
+        console.error('STRIPE WEBHOOK ERROR: req.body is not a Buffer');
+        return res.status(500).json({ error: 'Webhook processing error' });
+      }
+
+      const { uuid } = req.params;
+      await WebhookHandlers.processWebhook(req.body, sig, uuid);
+
+      res.status(200).json({ received: true });
+    } catch (error) {
+      console.error('Webhook error:', error.message);
+      res.status(400).json({ error: 'Webhook processing error' });
+    }
+  }
+);
+
+// Handle webhook without UUID (fallback)
+app.post(
+  '/api/stripe/webhook',
+  express.raw({ type: 'application/json' }),
+  async (req, res) => {
+    const signature = req.headers['stripe-signature'];
+
+    if (!signature) {
+      return res.status(400).json({ error: 'Missing stripe-signature' });
+    }
+
+    try {
+      const sig = Array.isArray(signature) ? signature[0] : signature;
+
+      if (!Buffer.isBuffer(req.body)) {
+        console.error('STRIPE WEBHOOK ERROR: req.body is not a Buffer');
+        return res.status(500).json({ error: 'Webhook processing error' });
+      }
+
+      await WebhookHandlers.processWebhook(req.body, sig, null);
+
+      res.status(200).json({ received: true });
+    } catch (error) {
+      console.error('Webhook error:', error.message);
+      res.status(400).json({ error: 'Webhook processing error' });
+    }
+  }
+);
+
+// Now apply JSON middleware for all other routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -78,6 +143,9 @@ app.use('/api/external', externalApiRoutes);
 app.use('/api/journey', titiNautaRoutes); // Interface moderna do TitiNauta
 app.use('/api/media-resources', mediaResourceRoutes); // Gestão de recursos audiovisuais
 
+// Stripe payment routes
+app.use('/api/stripe', stripeRoutes);
+
 // Rotas de health check (sem prefixo /api para acesso direto)
 app.use('/health', healthRoutes);
 
@@ -114,9 +182,21 @@ if (process.env.NODE_ENV === 'development') {
 
 // Inicialização do servidor
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Servidor rodando na porta ${PORT}`);
   console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Initialize Stripe in background (non-blocking)
+  try {
+    const result = await initStripe();
+    if (result.initialized) {
+      console.log('Stripe initialized successfully');
+    } else {
+      console.log('Stripe not initialized (may not be configured)');
+    }
+  } catch (error) {
+    console.error('Error initializing Stripe:', error.message);
+  }
 });
 
 module.exports = app;

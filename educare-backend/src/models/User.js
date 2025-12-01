@@ -141,6 +141,16 @@ const User = sequelize.define('User', {
   },
   phone_verification_expires: {
     type: DataTypes.DATE
+  },
+  stripeCustomerId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'stripe_customer_id'
+  },
+  stripeSubscriptionId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'stripe_subscription_id'
   }
 }, {
   tableName: 'users',

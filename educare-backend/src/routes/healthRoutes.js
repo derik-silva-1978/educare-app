@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { sequelize, testConnection } = require('../config/database');
+const { isStripeConfigured } = require('../services/stripeClient');
 
 /**
  * @swagger
@@ -58,6 +59,13 @@ router.get('/detailed', async (req, res) => {
   }
 
   // Verificar configurações de integração
+  let stripeConfigured = false;
+  try {
+    stripeConfigured = await isStripeConfigured();
+  } catch (e) {
+    stripeConfigured = false;
+  }
+
   healthStatus.services.integrations = {
     whatsapp: {
       configured: !!process.env.PHONE_VERIFICATION_WEBHOOK,
@@ -68,8 +76,8 @@ router.get('/detailed', async (req, res) => {
       webhookUrl: process.env.EMAIL_WEBHOOK ? 'configured' : 'not_configured'
     },
     stripe: {
-      configured: !!process.env.STRIPE_SECRET_KEY,
-      status: process.env.STRIPE_SECRET_KEY ? 'configured' : 'not_configured'
+      configured: stripeConfigured,
+      status: stripeConfigured ? 'configured' : 'not_configured'
     },
     openai: {
       configured: !!process.env.OPENAI_API_KEY,
