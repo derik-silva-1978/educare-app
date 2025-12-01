@@ -21,6 +21,83 @@ Educare+ is a digital platform for early childhood development and maternal heal
 - **Journey consolidation**: TitiNautaJourney (2.0) and WhatsAppJourneyBotPage are the only journey interfaces
 - **Theme toggle**: Simplified to single-button toggle between dark/light modes
 - **DevBadge component**: New component (src/components/ui/dev-badge.tsx) for marking incomplete modules
+- **Sidebar Fix**: Updated role description display to show Proprietário/Administrador/Responsável/Profissional correctly
+
+## Development Status (December 2025)
+
+### Completed (100%)
+✅ **API Externa** - All 13 endpoints implemented and tested
+✅ **Frontend UI** - React components with Radix UI + Tailwind
+✅ **Authentication** - JWT-based with role-based access control
+✅ **Stripe Integration** - Webhook configured and operational
+✅ **OpenAI Integration** - API key configured
+✅ **Database Models** - Sequelize ORM with 20+ models defined
+✅ **Role-based Sidebar** - Proper access levels for Owner/Admin/Professional/Parent
+
+## Pending Development Tasks
+
+### Priority 1 - Critical (Blocking n8n/WhatsApp Integration)
+1. **Database Sync** ⚠️
+   - Task: Run Sequelize sync to ensure all models are synchronized
+   - Files: `educare-backend/src/models/*.js`
+   - Command: `node -e "const { sequelize } = require('./src/config/database'); sequelize.sync({ alter: true }).then(() => console.log('Sync complete'));"`
+   - Status: Pending
+   - Impact: Required for n8n to query journey questions reliably
+
+2. **n8n Workflow Implementation** ❌
+   - Task: Create and test n8n workflow for WhatsApp integration
+   - Files: `educare-backend/docs/n8n-workflow-template.json`, `educare-backend/docs/README_N8N_WORKFLOW.md`
+   - Scope: Message ingestion → API calls → Response generation
+   - Status: Documentation ready, implementation pending
+   - Impact: Enables WhatsApp bot automation
+
+3. **WhatsApp Provider Selection & Setup** ❌
+   - Task: Choose and configure WhatsApp provider (Twilio recommended)
+   - Options: 
+     - **Twilio** (Recommended): Has Replit integration, simpler setup
+     - **Meta Cloud API**: More features, complex setup
+   - Env vars needed:
+     - Twilio: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_NUMBER`
+     - Meta: `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_VERIFY_TOKEN`
+   - Status: Decision pending
+   - Impact: Enables WhatsApp communication channel
+
+### Priority 2 - Important (Verification & Testing)
+4. **Stripe Webhook Verification** ⚠️
+   - Task: Verify webhook URL registration in Stripe Dashboard
+   - Files: `educare-backend/src/services/webhookHandlers.js`
+   - Scope: Test payment events flow (checkout, subscription, invoice)
+   - Status: Implementation done, testing pending
+   - Impact: Ensures subscription billing works correctly
+
+5. **Frontend-to-Backend API Integration Testing** ⚠️
+   - Task: Create comprehensive test suite for external API
+   - Scope: Test all 13 endpoints with real data
+   - Tools: Jest/Vitest + Postman collection
+   - Status: Pending
+   - Impact: Ensures production reliability
+
+6. **Production Deployment Checklist** ⚠️
+   - Task: Prepare deployment configuration
+   - Scope: Environment variables, database migration, SSL setup
+   - Files: `deploy_config_tool` configuration needed
+   - Status: Pending
+   - Impact: Required for going live
+
+### Priority 3 - Enhancement (Post-MVP)
+7. **RAG Implementation (Retrieval-Augmented Generation)** 🔮
+   - Task: Implement vector embeddings for contextual AI
+   - Scope: Document storage, embeddings generation, retrieval
+   - Status: Architecture defined, implementation pending
+   - Impact: Improves AI response quality
+   - Timeline: Post-MVP
+
+8. **Advanced Analytics Dashboard** 🔮
+   - Task: Create usage analytics and performance monitoring
+   - Scope: n8n executions, API response times, user engagement
+   - Status: Pending
+   - Impact: Operations visibility
+   - Timeline: Post-MVP
 
 ## Integration Status
 
