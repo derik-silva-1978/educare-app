@@ -10,21 +10,17 @@ Educare+ is a digital platform for early childhood development and maternal heal
 - Incomplete modules marked with visible "Em Desenvolvimento" badges.
 
 ## Recent Changes (December 2025)
-- **n8n Blueprint Analysis**: Analyzed uploaded `Educare+ Ch@t` blueprint - uses Evolution API for WhatsApp
-- **API Integration Nodes**: Created `n8n-educare-api-integration.json` with HTTP Request nodes for External API
-- **Blueprint Documentation**: Updated `N8N_BLUEPRINT_SETUP.md` with Evolution API format and integration guide
+- **n8n Blueprint Integrado**: Criado `n8n-educare-integrated.json` com 89 nós (77 originais + 12 de API)
+- **Blueprint Pronto**: Arquivo único para importar diretamente no n8n - sem necessidade de adicionar nós manualmente
+- **Documentação Simplificada**: `N8N_BLUEPRINT_SETUP.md` com guia de ativação rápida (5 minutos)
+- **Pasta docs Organizada**: Removidos arquivos redundantes, mantidos apenas os essenciais
 - **External API 100% Complete**: All 13 endpoints validated and functional for n8n/WhatsApp integration
-- **Bug Fix**: Corrected model reference from `JourneyQuestion` to `JourneyBotQuestion` in progress/quiz-responses endpoints
+- **Evolution API Format**: Suporte completo para mensagens de texto, áudio, imagem e localização
 - **Database Compatibility**: Resolved type incompatibility (VARCHAR vs UUID) using separate queries instead of JOIN
 - **Null Safety**: Added birth_date null handling to prevent NaN errors in age calculations
-- **New Endpoint**: Added `/api/external/children/:childId/quiz-responses` for historical answer queries
-- **Documentation**: Created comprehensive integration docs (n8n workflow, WhatsApp, ENV config)
 - **EXTERNAL_API_KEY**: Configured in environment for API authentication
 - **Cleanup**: Removed all obsolete TitiNauta components and the src/components/titinauta/ folder
 - **Journey consolidation**: TitiNautaJourney (2.0) and WhatsAppJourneyBotPage are the only journey interfaces
-- **Theme toggle**: Simplified to single-button toggle between dark/light modes
-- **DevBadge component**: New component (src/components/ui/dev-badge.tsx) for marking incomplete modules
-- **Sidebar Fix**: Updated role description display to show Proprietário/Administrador/Responsável/Profissional correctly
 
 ## Development Status (December 2025)
 
@@ -48,15 +44,14 @@ Educare+ is a digital platform for early childhood development and maternal heal
    - Result: All tables created/updated, backend queries executing normally
    - Impact: ✅ Ready for n8n to query journey questions reliably
 
-2. **n8n Workflow Implementation** 🔄 **IN PROGRESS**
-   - Task: Import blueprint and add API integration nodes
+2. **n8n Workflow Implementation** ✅ **READY**
+   - Task: Import integrated blueprint in n8n
    - Files: 
-     - `educare-backend/docs/n8n-educare-chat-original.json` ✅ (Original blueprint copied)
-     - `educare-backend/docs/n8n-educare-api-integration.json` ✅ (API nodes created)
-     - `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (Setup guide updated)
-   - Scope: Import → Configure credentials → Add API nodes → Activate
-   - Status: Blueprint analyzed, API integration nodes ready, awaiting n8n activation
-   - Next Step: Import blueprint in n8n.cloud and connect API nodes
+     - `educare-backend/docs/n8n-educare-integrated.json` ✅ (Blueprint completo - 89 nós)
+     - `educare-backend/docs/n8n-educare-chat-original.json` ✅ (Backup do original)
+     - `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (Guia de ativação rápida)
+   - Status: Blueprint integrado pronto, apenas importar no n8n e configurar variáveis
+   - Next Step: Importar `n8n-educare-integrated.json` no n8n → Configurar credentials → Ativar
    - Impact: Enables WhatsApp bot automation
 
 3. **WhatsApp Provider: Evolution API** ✅ **SELECTED**
