@@ -114,18 +114,25 @@ Educare+ is a digital platform for early childhood development and maternal heal
   - `GET /children/:id/quiz-responses` - Answer history
 
 ### n8n Workflow (Ready for Activation)
-- **Original Blueprint**: `educare-backend/docs/n8n-educare-chat-original.json` ✅ (Uploaded)
-- **API Integration**: `educare-backend/docs/n8n-educare-api-integration.json` ✅ (New nodes for External API)
-- **Setup Guide**: `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (Complete guide)
+- **Blueprint**: `educare-backend/docs/n8n-educare-integrated.json` ✅ (89 nodes, ready to import)
+- **Setup Guide**: `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (5-minute activation)
 - **Documentation**: `educare-backend/docs/README_N8N_WORKFLOW.md` ✅
 - **Webhook URL**: https://n8neducare.whatscall.com.br/webhook-test/titnauta
-- **Status**: Blueprint ready for import, API nodes ready to connect
-- **Next Action**: Import in n8n → Add API nodes → Activate
+- **Status**: Blueprint integrated and ready for import
+- **Next Action**: Import in n8n → Configure credentials → Activate
 
 ### WhatsApp (Evolution API)
 - **Provider**: Evolution API (identified from blueprint)
 - **Documentation**: `educare-backend/docs/WHATSAPP_INTEGRATION.md`
 - **Status**: Already integrated in blueprint, requires activation
+
+### Cloud Deployment (Digital Ocean)
+- **Documentation**: `educare-backend/docs/DIGITAL_OCEAN_DEPLOYMENT.md` ✅ **NEW**
+- **Architecture**: 2 droplets ($12 each/month) + PostgreSQL + Redis
+- **n8n Droplet**: 2GB RAM, auto-SSL via Caddy/Nginx
+- **Evolution API Droplet**: 2GB RAM, PostgreSQL + Redis backend
+- **Status**: Complete deployment guide with scripts ready
+- **Estimated Cost**: ~$26/month all-in
 
 ### Stripe (Implemented)
 - **Status**: Webhook configured
