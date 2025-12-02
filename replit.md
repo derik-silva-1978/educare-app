@@ -10,6 +10,9 @@ Educare+ is a digital platform for early childhood development and maternal heal
 - Incomplete modules marked with visible "Em Desenvolvimento" badges.
 
 ## Recent Changes (December 2025)
+- **n8n Blueprint Analysis**: Analyzed uploaded `Educare+ Ch@t` blueprint - uses Evolution API for WhatsApp
+- **API Integration Nodes**: Created `n8n-educare-api-integration.json` with HTTP Request nodes for External API
+- **Blueprint Documentation**: Updated `N8N_BLUEPRINT_SETUP.md` with Evolution API format and integration guide
 - **External API 100% Complete**: All 13 endpoints validated and functional for n8n/WhatsApp integration
 - **Bug Fix**: Corrected model reference from `JourneyQuestion` to `JourneyBotQuestion` in progress/quiz-responses endpoints
 - **Database Compatibility**: Resolved type incompatibility (VARCHAR vs UUID) using separate queries instead of JOIN
@@ -45,23 +48,24 @@ Educare+ is a digital platform for early childhood development and maternal heal
    - Result: All tables created/updated, backend queries executing normally
    - Impact: ✅ Ready for n8n to query journey questions reliably
 
-2. **n8n Workflow Implementation** ❌
-   - Task: Create and test n8n workflow for WhatsApp integration
-   - Files: `educare-backend/docs/n8n-workflow-template.json`, `educare-backend/docs/README_N8N_WORKFLOW.md`
-   - Scope: Message ingestion → API calls → Response generation
-   - Status: Documentation ready, implementation pending
+2. **n8n Workflow Implementation** 🔄 **IN PROGRESS**
+   - Task: Import blueprint and add API integration nodes
+   - Files: 
+     - `educare-backend/docs/n8n-educare-chat-original.json` ✅ (Original blueprint copied)
+     - `educare-backend/docs/n8n-educare-api-integration.json` ✅ (API nodes created)
+     - `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (Setup guide updated)
+   - Scope: Import → Configure credentials → Add API nodes → Activate
+   - Status: Blueprint analyzed, API integration nodes ready, awaiting n8n activation
+   - Next Step: Import blueprint in n8n.cloud and connect API nodes
    - Impact: Enables WhatsApp bot automation
 
-3. **WhatsApp Provider Selection & Setup** ❌
-   - Task: Choose and configure WhatsApp provider (Twilio recommended)
-   - Options: 
-     - **Twilio** (Recommended): Has Replit integration, simpler setup
-     - **Meta Cloud API**: More features, complex setup
-   - Env vars needed:
-     - Twilio: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_NUMBER`
-     - Meta: `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_VERIFY_TOKEN`
-   - Status: Decision pending
-   - Impact: Enables WhatsApp communication channel
+3. **WhatsApp Provider: Evolution API** ✅ **SELECTED**
+   - Provider: Evolution API (identified from uploaded blueprint)
+   - Integration: Already configured in n8n workflow
+   - Webhook URL: https://n8neducare.whatscall.com.br/webhook-test/titnauta
+   - Message Format: Evolution API JSON structure (see N8N_BLUEPRINT_SETUP.md)
+   - Status: Ready for activation in n8n
+   - Impact: WhatsApp communication channel ready
 
 ### Priority 2 - Important (Verification & Testing)
 4. **Stripe Webhook Verification** ⚠️
@@ -114,17 +118,19 @@ Educare+ is a digital platform for early childhood development and maternal heal
   - `GET /children/:id/progress` - Progress tracking
   - `GET /children/:id/quiz-responses` - Answer history
 
-### n8n Workflow (Documented)
-- **Template**: `educare-backend/docs/n8n-workflow-template.json` ✅
+### n8n Workflow (Ready for Activation)
+- **Original Blueprint**: `educare-backend/docs/n8n-educare-chat-original.json` ✅ (Uploaded)
+- **API Integration**: `educare-backend/docs/n8n-educare-api-integration.json` ✅ (New nodes for External API)
+- **Setup Guide**: `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (Complete guide)
 - **Documentation**: `educare-backend/docs/README_N8N_WORKFLOW.md` ✅
-- **Setup Guide**: `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ **NEW**
-- **Webhook Test**: https://n8neducare.whatscall.com.br/webhook-test/titnauta
-- **Status**: Blueprint ready for import and deployment
+- **Webhook URL**: https://n8neducare.whatscall.com.br/webhook-test/titnauta
+- **Status**: Blueprint ready for import, API nodes ready to connect
+- **Next Action**: Import in n8n → Add API nodes → Activate
 
-### WhatsApp (Documented)
+### WhatsApp (Evolution API)
+- **Provider**: Evolution API (identified from blueprint)
 - **Documentation**: `educare-backend/docs/WHATSAPP_INTEGRATION.md`
-- **Options**: Twilio (recommended) or Meta Cloud API
-- **Status**: Awaiting provider selection
+- **Status**: Already integrated in blueprint, requires activation
 
 ### Stripe (Implemented)
 - **Status**: Webhook configured
