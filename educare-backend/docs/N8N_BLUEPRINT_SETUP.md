@@ -1,81 +1,195 @@
 # 🤖 N8N Blueprint Setup Guide - Educare+ TitiNauta
 
 **Status:** ✅ Ready for Production  
-**Last Updated:** December 1, 2025  
-**Webhook Test URL:** https://n8neducare.whatscall.com.br/webhook-test/titnauta
+**Last Updated:** December 2, 2025  
+**Webhook URL:** https://n8neducare.whatscall.com.br/webhook-test/titnauta
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (5 minutos)
 
-### 1. Import the Blueprint
+### Passo 1: Importar Blueprint Integrado
 
-1. Go to your n8n instance (https://n8neducare.whatscall.com.br)
-2. Click **"New Workflow"** → **"Import"**
-3. Select the file: `n8n-educare-chat-original.json` (uploaded blueprint)
-4. Click **Import**
-5. Import also: `n8n-educare-api-integration.json` (API integration nodes)
+1. Acesse seu n8n: https://n8neducare.whatscall.com.br
+2. Clique em **"New Workflow"** → **"Import from File"**
+3. Selecione: **`n8n-educare-integrated.json`** ⭐
+4. Clique **Import**
 
-### 2. Configure Environment Variables
+> 💡 Este arquivo já contém **todos os 89 nós** (77 originais + 12 de integração com API).
 
-Before activating the workflow, set these credentials:
+### Passo 2: Configurar Variáveis de Ambiente
 
-#### Required - Educare+ External API
-```
-EDUCARE_API_URL=https://your-educare-backend-domain.com/api/external
-EXTERNAL_API_KEY=educare_external_api_key_2025
-```
+No n8n, vá em **Settings → Variables** e adicione:
 
-#### Required - Evolution API (WhatsApp Provider)
-```
-EVOLUTION_API_URL=https://your-evolution-instance.com
-EVOLUTION_API_KEY=your_evolution_api_key
-EVOLUTION_INSTANCE=your_instance_name
-```
+| Variável | Valor | Descrição |
+|----------|-------|-----------|
+| `EDUCARE_API_URL` | `https://seu-backend/api/external` | URL da API Externa |
+| `EXTERNAL_API_KEY` | `sua_chave_api` | Chave de autenticação |
 
-#### Optional - AI Enhancement
-```
-OPENAI_API_KEY=sk-xxx...  (already configured in Educare+)
-GROQ_API_KEY=gsk_xxx...   (for audio transcription & image analysis)
-GEMINI_API_KEY=AIzaSy...  (alternative for audio/image)
-```
+### Passo 3: Configurar Credenciais
 
-### 3. Set Credentials in n8n
-
-In n8n UI, go to **Credentials** and add:
+Vá em **Credentials** e configure:
 
 1. **OpenAI API**
-   - API Key: `${OPENAI_API_KEY}`
+   - Type: OpenAI
+   - API Key: sua chave OpenAI
 
 2. **Postgres (Chat Memory)**
-   - Host: your-postgres-host
+   - Host: host-do-postgres
    - Database: n8n_chat_memory
    - User: postgres
-   - Password: your-password
+   - Password: sua_senha
 
-### 4. Add API Integration Nodes
+### Passo 4: Ativar e Testar
 
-The original blueprint doesn't include Educare+ API calls. Add the nodes from:
-`n8n-educare-api-integration.json`
+1. Clique **"Save"** para salvar o workflow
+2. Clique **"Active"** (toggle no canto superior direito)
+3. Envie uma mensagem de teste no WhatsApp: **"Oi"**
 
-**Key nodes to add:**
-| Node Name | Purpose | Connect After |
-|-----------|---------|---------------|
-| `Educare: Search User by Phone` | Find user in Educare+ | `Dados` node |
-| `Educare: Check User Found` | Route found/not found | Search User |
-| `Educare: Get Active Child` | Fetch active child | Check User (TRUE) |
-| `Educare: Get Unanswered Questions` | Get quiz questions | Get Active Child |
-| `Educare: Parse User Answer` | Classify message | Get Unanswered Questions |
-| `Educare: Route Message` | Route by type | Parse User Answer |
-| `Educare: Save Answer` | Save quiz response | Route (answer) |
-| `Educare: Get Progress` | Fetch progress | Save Answer |
+---
 
-### 5. Test the Webhook
+## 📂 Arquivos Disponíveis
 
-**Test URL:** https://n8neducare.whatscall.com.br/webhook-test/titnauta
+| Arquivo | Descrição | Usar Para |
+|---------|-----------|-----------|
+| **`n8n-educare-integrated.json`** ⭐ | Blueprint completo e pronto | Importação direta |
+| `n8n-educare-chat-original.json` | Blueprint original (backup) | Referência |
+
+---
+
+## 📊 Arquitetura do Blueprint
+
+### Total: 89 Nós
+
+```
+FLUXO PRINCIPAL:
+
+WhatsApp (Evolution API)
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│  Webhook: "titnauta"                    │
+│  Recebe mensagens do WhatsApp           │
+└───────────────────┬─────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────┐
+│  Filtros & Validação                    │
+│  - Ignora grupos                        │
+│  - Ignora mensagens próprias            │
+│  - Classifica tipo de mídia             │
+└───────────────────┬─────────────────────┘
+                    │
+         ┌──────────┼──────────┐
+         │          │          │
+     Texto       Áudio      Imagem
+         │          │          │
+         ▼          ▼          ▼
+       Dados    Transcrição  Análise
+         │      (Groq/Gemini) (Groq)
+         │          │          │
+         └──────────┼──────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────┐
+│  INTEGRAÇÃO EDUCARE+ (NOVOS NÓS)        │
+├─────────────────────────────────────────┤
+│  1. Buscar Usuário por Telefone         │
+│  2. Verificar se Encontrou              │
+│  3. Obter Criança Ativa                 │
+│  4. Buscar Perguntas Pendentes          │
+│  5. Analisar Mensagem                   │
+│  6. Rotear por Tipo                     │
+│  7. Salvar Resposta (se for quiz)       │
+│  8. Obter Progresso                     │
+│  9. Formatar Resposta                   │
+└───────────────────┬─────────────────────┘
+                    │
+         ┌──────────┼──────────┬──────────┐
+         │          │          │          │
+     Resposta   Saudação    Ajuda     Chat IA
+         │          │          │          │
+         └──────────┼──────────┴──────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────┐
+│  AI Agent: TitiNauta                    │
+│  - Personalidade amigável               │
+│  - Memória de conversa (Postgres)       │
+│  - Ferramentas: calculadora             │
+└───────────────────┬─────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────┐
+│  Enviar WhatsApp (Evolution API)        │
+│  POST /api/messages/sendTextPRO         │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## 🔄 Fluxos de Conversação
+
+### Fluxo 1: Saudação
+```
+👤 Usuário: "Oi"
+
+🤖 TitiNauta: "Olá! 👋 Eu sou a TitiNauta, sua assistente 
+para acompanhar o desenvolvimento de Maria!
+
+📝 *Pergunta:*
+Seu filho faz contato visual quando você fala com ele?
+
+1️⃣ - Não/Raramente
+2️⃣ - Às vezes
+3️⃣ - Sim/Frequentemente"
+```
+
+### Fluxo 2: Resposta ao Quiz
+```
+👤 Usuário: "3"
+
+🤖 TitiNauta: "✨ Que ótimo! Obrigada pela sua resposta.
+
+📊 Progresso de Maria: 45%
+📝 Perguntas restantes: 11
+
+Envie *oi* para a próxima pergunta! 💜"
+```
+
+### Fluxo 3: Ver Progresso
+```
+👤 Usuário: "progresso"
+
+🤖 TitiNauta: "📊 Progresso de Maria:
+
+✅ Respondidas: 9 de 20
+📈 Progresso: 45%
+🎯 Meta semanal: 5 perguntas
+
+Continue assim! 💜"
+```
+
+### Fluxo 4: Usuário Não Cadastrado
+```
+👤 Usuário: "Oi" (telefone não cadastrado)
+
+🤖 TitiNauta: "Olá! 👋
+
+Não encontrei seu cadastro no Educare+.
+
+Para começar sua jornada:
+🔗 https://educareapp.com/register
+
+Use este mesmo número de telefone para se cadastrar! 📱"
+```
+
+---
+
+## 🧪 Testar o Webhook
 
 ```bash
-# Send a test message (Evolution API format)
+# Teste básico - simular mensagem "Oi"
 curl -X POST "https://n8neducare.whatscall.com.br/webhook-test/titnauta" \
   -H "Content-Type: application/json" \
   -d '{
@@ -84,7 +198,7 @@ curl -X POST "https://n8neducare.whatscall.com.br/webhook-test/titnauta" \
         "body": "Oi",
         "mediaType": "textMessage",
         "contact": {
-          "name": "João Silva",
+          "name": "Teste User",
           "number": "5511988888888"
         },
         "fromMe": false
@@ -92,242 +206,42 @@ curl -X POST "https://n8neducare.whatscall.com.br/webhook-test/titnauta" \
       "data": {
         "key": {
           "remoteJid": "5511988888888@s.whatsapp.net",
-          "id": "test-message-123"
+          "id": "test-123"
         },
-        "pushName": "João Silva",
-        "message": {
-          "conversation": "Oi"
-        },
+        "pushName": "Teste User",
+        "message": { "conversation": "Oi" },
         "messageType": "textMessage"
       },
-      "server_url": "https://evolution-api.example.com",
-      "apikey": "test-api-key",
-      "instance": "educare"
+      "server_url": "https://evolution-api.com",
+      "apikey": "test-key",
+      "instance": "educare",
+      "backendURL": "https://evolution-api.com"
     }
   }'
 ```
 
-### 6. Activate the Workflow
-
-1. Click **Execute** on the canvas
-2. Workflow starts running in production
-3. WhatsApp messages will now trigger the bot
-
 ---
 
-## 📊 Blueprint Architecture (Original)
-
-The uploaded blueprint `Educare+ Ch@t` includes:
-
-```
-ORIGINAL BLUEPRINT COMPONENTS:
-
-┌─────────────────────────────────────────────────────────────┐
-│ Webhook Entry - Path: "titnauta"                            │
-│ Receives Evolution API messages                             │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Code1: Get Current Date/Time (Spanish locale)              │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│ If3: Filter (ignore groups, own messages)                  │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│ se_enviador_por_mim: Check if message from bot             │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Tipo de mensaje? (Switch): Route by message type           │
-│ - textMessage → mensagem                                   │
-│ - conversation → mensagem                                  │
-│ - extendedTextMessage → mensagem                           │
-│ - audioMessage → audio transcription (Groq/Gemini)         │
-│ - imageMessage → image analysis (Groq Vision)              │
-│ - locationMessage → address resolution (Google Maps)       │
-│ - documentMessage → process document                       │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│ AI Agent1: TitiNauta Persona (OpenAI)                      │
-│ - Postgres Chat Memory                                     │
-│ - Calculator tool                                          │
-│ - Custom system prompt                                     │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│ HTTP Request6: Send WhatsApp via Evolution API             │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🔗 API Integration Flow (NEW)
-
-Add these nodes to integrate with Educare+ External API:
-
-```
-ENHANCED FLOW WITH API INTEGRATION:
-
-┌─────────────────────────────────────────────────────────────┐
-│                  WhatsApp Message (Evolution API)           │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Webhook Entry → Code1 → If3 → Dados                        │
-│ (Original nodes - keep as is)                              │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Educare: Search User by Phone                              │
-│ GET /api/external/users/search?phone={phone}               │
-└────────────────────┬────────────────────────────────────────┘
-                     │
-          ┌──────────┴──────────┐
-          │                     │
-    ✅ Found          ❌ Not Found
-          │                     │
-          ▼                     ▼
-┌──────────────────┐   ┌────────────────────┐
-│ Get Active Child │   │ Format Not Found   │
-│ GET /by-phone/.../│   │ "Cadastre-se em..."│
-│ active-child     │   └─────────┬──────────┘
-└────────┬─────────┘             │
-         │                       │
-         ▼                       │
-┌──────────────────┐             │
-│ Get Questions    │             │
-│ GET /children/   │             │
-│ .../unanswered   │             │
-└────────┬─────────┘             │
-         │                       │
-         ▼                       │
-┌──────────────────┐             │
-│ Parse User Answer│             │
-│ (Code node)      │             │
-└────────┬─────────┘             │
-         │                       │
-    ┌────┼────┬─────┬────┐       │
-    │    │    │     │    │       │
- Answer Greet Help Prog Chat     │
-    │    │    │     │    │       │
-    ▼    ▼    ▼     ▼    ▼       │
-┌──────┐ ┌──────┐ ┌──────┐ ┌────┐│
-│ Save │ │Format│ │Format│ │ AI ││
-│Answer│ │Greet │ │ Help │ │Agnt││
-└──┬───┘ └──┬───┘ └──┬───┘ └─┬──┘│
-   │        │        │       │   │
-   ▼        │        │       │   │
-┌──────┐    │        │       │   │
-│ Get  │    │        │       │   │
-│Progrs│    │        │       │   │
-└──┬───┘    │        │       │   │
-   │        │        │       │   │
-   └────────┴────────┴───────┴───┤
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Format Response → Send WhatsApp (HTTP Request6)            │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 🔄 Message Flow Examples
-
-### Example 1: User Greeting
-```
-User: "Oi"
-  → Webhook receives Evolution API message
-  → Extract phone from remoteJid
-  → Educare API: Search user by phone
-  → Educare API: Get active child
-  → Educare API: Get unanswered questions
-  → Parse message type: greeting
-  → Format greeting with next question
-  → Send WhatsApp response via Evolution API
-  
-Response: "Olá João! 👋 Eu sou TitiNauta... 
-📝 Pergunta: Seu filho dorme bem? 
-1️⃣ Não/Raramente  2️⃣ Às vezes  3️⃣ Sim/Frequentemente"
-```
-
-### Example 2: User Answer
-```
-User: "3"
-  → Parse answer: 3 = Sim/Frequentemente (value: 2)
-  → Educare API: Save answer (POST /save-answer)
-  → Educare API: Get progress
-  → Format feedback with progress
-  → Send WhatsApp response
-  
-Response: "✨ Que ótimo saber que seu filho dorme bem! 
-📊 Progresso de Maria: 45%
-📝 Perguntas restantes: 11
-Envie *oi* para a próxima pergunta! 💜"
-```
-
-### Example 3: Audio Message
-```
-User: [voice message]
-  → Download audio from Evolution API URL
-  → Convert to base64
-  → Transcribe with Groq Whisper
-  → Parse transcription as text message
-  → Continue normal flow
-```
-
-### Example 4: User Not Registered
-```
-User: "+5521999999999" (not in system)
-  → Educare API: Search user returns empty
-  → Format not found message
-  
-Response: "Olá! 👋 Não encontrei seu cadastro no Educare+...
-🔗 Cadastre-se em: https://educareapp.com/register
-Use este mesmo número de telefone! 📱"
-```
-
----
-
-## 📝 Evolution API Message Format
-
-The blueprint expects messages in this format:
+## 📝 Formato de Mensagem Evolution API
 
 ```json
 {
   "body": {
     "mensagem": {
-      "body": "Message text",
+      "body": "Texto da mensagem",
       "mediaType": "textMessage",
-      "mediaUrl": "https://...", // for audio/image
       "contact": {
-        "name": "User Name",
+        "name": "Nome do Usuário",
         "number": "5511988888888"
       },
-      "fromMe": false,
-      "participant": "",
-      "dataJson": "{...}"
+      "fromMe": false
     },
     "data": {
       "key": {
         "remoteJid": "5511988888888@s.whatsapp.net",
         "id": "message-uuid"
       },
-      "pushName": "User Name",
-      "message": {
-        "conversation": "Message text"
-      },
+      "pushName": "Nome do Usuário",
       "messageType": "textMessage"
     },
     "server_url": "https://evolution-api.example.com",
@@ -338,131 +252,78 @@ The blueprint expects messages in this format:
 }
 ```
 
-### Supported Message Types:
-- `textMessage` - Regular text
-- `extendedTextMessage` - Text with links/mentions
-- `conversation` - Simple conversation
-- `audioMessage` - Voice notes
-- `imageMessage` - Photos
-- `documentMessage` - Documents/PDFs
-- `locationMessage` - Location sharing
+### Tipos de Mensagem Suportados:
+| Tipo | Descrição | Processamento |
+|------|-----------|---------------|
+| `textMessage` | Texto simples | Direto para análise |
+| `audioMessage` | Áudio/voz | Transcrição Groq/Gemini |
+| `imageMessage` | Imagem | Análise Groq Vision |
+| `locationMessage` | Localização | Resolução Google Maps |
+| `documentMessage` | Documento | Extração de texto |
 
 ---
 
 ## 🛠️ Troubleshooting
 
-### Webhook not triggering
-**Solution:**
-1. Verify webhook URL is registered in Evolution API settings
-2. Check n8n workflow is **activated** (not paused)
-3. Verify Evolution API is sending to correct URL
-4. Test with: `curl -X POST "https://n8neducare.whatscall.com.br/webhook-test/titnauta"`
+### ❌ Webhook não dispara
+1. Verifique se workflow está **Ativo** (toggle verde)
+2. Confirme URL no Evolution API: `https://n8neducare.whatscall.com.br/webhook-test/titnauta`
+3. Teste com curl (acima)
 
-### Educare+ API returns 401 Unauthorized
-**Solution:**
-1. Verify `EXTERNAL_API_KEY` environment variable is set
-2. Check API key matches value in Educare+ backend
-3. Ensure X-API-Key header or api_key query param is in request
+### ❌ API retorna 401 Unauthorized
+1. Verifique `EXTERNAL_API_KEY` nas variáveis
+2. Confirme que a chave está correta no backend Educare+
 
-### User not found but exists in database
-**Solution:**
-1. Check phone format matches (with/without +55)
-2. Verify phone is stored correctly in Educare+ database
-3. Test API directly:
-```bash
-curl "https://your-backend/api/external/users/search?phone=5511988888888&api_key=$API_KEY"
-```
+### ❌ Usuário não encontrado (mas existe)
+1. Formato do telefone (com/sem +55)
+2. Teste direto: `GET /api/external/users/search?phone=5511988888888&api_key=CHAVE`
 
-### Audio transcription failing
-**Solution:**
-1. Verify Groq or Gemini API key is valid
-2. Check audio URL is accessible
-3. Verify audio format (supports ogg, mp3, m4a)
-4. Check Groq account has available credits
+### ❌ Áudio não transcreve
+1. Verifique Groq API Key
+2. Confirme URL do áudio acessível
+3. Formatos: ogg, mp3, m4a
 
-### AI responses incomplete
-**Solution:**
-1. Check OpenAI API key is valid
-2. Verify Postgres Chat Memory connection
-3. Review system prompt configuration
-4. Check token limits in AI Agent settings
+### ❌ AI Agent não responde
+1. Verifique OpenAI API Key
+2. Teste conexão Postgres (Chat Memory)
+3. Verifique limite de tokens
 
 ---
 
-## 📈 Monitoring
+## 📈 Monitoramento
 
-### View Workflow Executions
-1. Go to n8n Dashboard
-2. Click **Executions** tab
-3. Filter by date/status
-4. Click any execution to see node-by-node details
+### Ver Execuções
+1. n8n Dashboard → **Executions**
+2. Filtrar por data/status
+3. Clique em qualquer execução para detalhes
 
-### Check Error Logs
+### Logs de Erro
+- n8n UI: **Settings → Execution History**
+- Filtrar por status "Error"
+
+### Health Check API
 ```bash
-# In n8n logs (if self-hosted)
-docker logs n8n-container | tail -50
+# Backend Educare+
+curl https://seu-backend/api/health
 
-# Or in n8n UI: Settings → Execution History
-```
-
-### Monitor Educare+ API Health
-```bash
-# Check backend health
-curl -X GET "https://your-api.com/api/health"
-
-# Check external API
-curl -X GET "https://your-api.com/api/external/users/search?phone=test&api_key=$EXTERNAL_API_KEY"
+# API Externa
+curl "https://seu-backend/api/external/users/search?phone=test&api_key=SUA_CHAVE"
 ```
 
 ---
 
-## 🔐 Security Best Practices
+## ✅ Checklist de Ativação
 
-1. **Keep API Keys Secret**
-   - Never commit `EXTERNAL_API_KEY` or `OPENAI_API_KEY` to version control
-   - Use n8n environment variables
-   - Rotate keys periodically
-
-2. **Use HTTPS Only**
-   - All webhook URLs should be HTTPS
-   - Verify SSL certificates
-
-3. **Rate Limiting**
-   - n8n workflow has built-in timeout (10s per request)
-   - Educare+ API enforces rate limits
-
-4. **Message Filtering**
-   - Blueprint filters out group messages (`@g.us`)
-   - Ignores messages sent by bot (`fromMe: true`)
-   - Validates message structure before processing
+- [ ] Importar `n8n-educare-integrated.json`
+- [ ] Configurar `EDUCARE_API_URL` 
+- [ ] Configurar `EXTERNAL_API_KEY`
+- [ ] Adicionar credencial OpenAI
+- [ ] Configurar Postgres Chat Memory
+- [ ] Salvar workflow
+- [ ] Ativar workflow (toggle)
+- [ ] Enviar "Oi" no WhatsApp para testar
+- [ ] Verificar resposta da TitiNauta
 
 ---
 
-## 📂 Files Reference
-
-| File | Purpose |
-|------|---------|
-| `n8n-educare-chat-original.json` | Original uploaded blueprint |
-| `n8n-educare-api-integration.json` | API integration nodes to add |
-| `README_N8N_WORKFLOW.md` | Detailed workflow documentation |
-| `WHATSAPP_INTEGRATION.md` | WhatsApp provider options |
-| `ENV_CONFIG.md` | Environment variables reference |
-
----
-
-## 🎯 Checklist
-
-- [ ] Import `n8n-educare-chat-original.json` blueprint
-- [ ] Configure `EDUCARE_API_URL` environment variable
-- [ ] Configure `EXTERNAL_API_KEY` environment variable
-- [ ] Add API integration nodes from `n8n-educare-api-integration.json`
-- [ ] Connect nodes following the suggested connections
-- [ ] Configure OpenAI credentials
-- [ ] Configure Postgres Chat Memory
-- [ ] Test webhook with sample message
-- [ ] Activate workflow
-- [ ] Monitor first executions
-
----
-
-*Last Updated: December 1, 2025 by Educare+ Platform Team*
+*Atualizado em: 2 de Dezembro de 2025*
