@@ -1,21 +1,21 @@
-# 🤖 N8N Blueprint Setup Guide - Educare+ TitiNauta
+# 🤖 N8N Blueprint Setup Guide - Educare+ TitiNauta v2.0
 
 **Status:** ✅ Ready for Production  
-**Last Updated:** December 2, 2025  
+**Last Updated:** December 3, 2025  
 **Webhook URL:** https://n8neducare.whatscall.com.br/webhook-test/titnauta
 
 ---
 
 ## 🚀 Quick Start (5 minutos)
 
-### Passo 1: Importar Blueprint Integrado
+### Passo 1: Importar Blueprint v2
 
 1. Acesse seu n8n: https://n8neducare.whatscall.com.br
 2. Clique em **"New Workflow"** → **"Import from File"**
-3. Selecione: **`n8n-educare-integrated.json`** ⭐
+3. Selecione: **`n8n-educare-v2.json`** ⭐
 4. Clique **Import**
 
-> 💡 Este arquivo já contém **todos os 89 nós** (77 originais + 12 de integração com API).
+> 💡 O arquivo v2 é uma versão **otimizada e limpa** com apenas os nós necessários para o Educare+.
 
 ### Passo 2: Configurar Variáveis de Ambiente
 
@@ -23,22 +23,23 @@ No n8n, vá em **Settings → Variables** e adicione:
 
 | Variável | Valor | Descrição |
 |----------|-------|-----------|
-| `EDUCARE_API_URL` | `https://seu-backend/api/external` | URL da API Externa |
-| `EXTERNAL_API_KEY` | `sua_chave_api` | Chave de autenticação |
+| `EDUCARE_API_URL` | `https://seu-backend/api/external` | URL da API Externa Educare+ |
+| `EXTERNAL_API_KEY` | `sua_chave_api` | Chave de autenticação da API |
+| `OPENAI_API_KEY` | `sk-...` | Chave da OpenAI (opcional, se não usar credencial) |
 
 ### Passo 3: Configurar Credenciais
 
 Vá em **Credentials** e configure:
 
-1. **OpenAI API**
+1. **OpenAI API** (obrigatório)
    - Type: OpenAI
    - API Key: sua chave OpenAI
 
-2. **Postgres (Chat Memory)**
+2. **Postgres** (opcional - para memória do chat)
    - Host: host-do-postgres
-   - Database: n8n_chat_memory
-   - User: postgres
-   - Password: sua_senha
+   - Database: nome_do_banco
+   - User: usuario
+   - Password: senha
 
 ### Passo 4: Ativar e Testar
 
@@ -52,14 +53,24 @@ Vá em **Credentials** e configure:
 
 | Arquivo | Descrição | Usar Para |
 |---------|-----------|-----------|
-| **`n8n-educare-integrated.json`** ⭐ | Blueprint completo e pronto | Importação direta |
-| `n8n-educare-chat-original.json` | Blueprint original (backup) | Referência |
+| **`n8n-educare-v2.json`** ⭐ | Blueprint otimizado e limpo | **Produção** |
+| `n8n-educare-integrated.json` | Blueprint original com nós extras | Referência |
+
+### Diferenças entre v1 e v2
+
+| Aspecto | v1 (Integrated) | v2 (Novo) |
+|---------|-----------------|-----------|
+| Total de nós | 89 | 28 |
+| APIs Keys | Hardcoded | Variáveis de ambiente |
+| Nós irrelevantes | Sim (taxi, etc) | Removidos |
+| Conexões WhatsApp | Parciais | Todas conectadas |
+| Documentação inline | Mínima | Completa |
 
 ---
 
-## 📊 Arquitetura do Blueprint
+## 📊 Arquitetura do Blueprint v2
 
-### Total: 89 Nós
+### Total: 28 Nós
 
 ```
 FLUXO PRINCIPAL:
@@ -74,55 +85,61 @@ WhatsApp (Evolution API)
                     │
                     ▼
 ┌─────────────────────────────────────────┐
-│  Filtros & Validação                    │
-│  - Ignora grupos                        │
-│  - Ignora mensagens próprias            │
-│  - Classifica tipo de mídia             │
+│  Filter: Valid Messages                 │
+│  - Ignora grupos (@g.us)                │
+│  - Ignora mensagens próprias (fromMe)   │
+└───────────────────┬─────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────┐
+│  Extract Data                           │
+│  - userPhone, userName                  │
+│  - messageBody, messageType             │
+│  - backendURL, instanceApiKey           │
 └───────────────────┬─────────────────────┘
                     │
          ┌──────────┼──────────┐
          │          │          │
-     Texto       Áudio      Imagem
+       Audio     Imagem      Texto
          │          │          │
-         ▼          ▼          ▼
-       Dados    Transcrição  Análise
-         │      (Groq/Gemini) (Groq)
+         ▼          ▼          │
+     OpenAI      OpenAI       │
+     Whisper   GPT-4 Vision   │
          │          │          │
          └──────────┼──────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────┐
-│  INTEGRAÇÃO EDUCARE+ (NOVOS NÓS)        │
+│  INTEGRAÇÃO EDUCARE+                    │
 ├─────────────────────────────────────────┤
 │  1. Buscar Usuário por Telefone         │
 │  2. Verificar se Encontrou              │
 │  3. Obter Criança Ativa                 │
 │  4. Buscar Perguntas Pendentes          │
-│  5. Analisar Mensagem                   │
+│  5. Analisar e Classificar Mensagem     │
 │  6. Rotear por Tipo                     │
-│  7. Salvar Resposta (se for quiz)       │
-│  8. Obter Progresso                     │
-│  9. Formatar Resposta                   │
 └───────────────────┬─────────────────────┘
                     │
-         ┌──────────┼──────────┬──────────┐
-         │          │          │          │
-     Resposta   Saudação    Ajuda     Chat IA
-         │          │          │          │
-         └──────────┼──────────┴──────────┘
+    ┌───────────────┼───────────────┬───────────────┐
+    │               │               │               │
+ Answer         Greeting       Progress/Help     Chat IA
+    │               │               │               │
+    ▼               ▼               ▼               ▼
+ Save Answer    Format MSG     Format MSG     AI Agent
+    │               │               │               │
+    ▼               │               │               ▼
+ Get Progress       │               │         Format Response
+    │               │               │               │
+    ▼               │               │               │
+ Format Answer      │               │               │
+    │               │               │               │
+    └───────────────┴───────────────┴───────────────┘
                     │
                     ▼
 ┌─────────────────────────────────────────┐
-│  AI Agent: TitiNauta                    │
-│  - Personalidade amigável               │
-│  - Memória de conversa (Postgres)       │
-│  - Ferramentas: calculadora             │
-└───────────────────┬─────────────────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────────┐
-│  Enviar WhatsApp (Evolution API)        │
-│  POST /api/messages/sendTextPRO         │
+│  WhatsApp: Send Message                 │
+│  POST /api/messages/whatsmeow/sendTextPRO│
+│  Todas as branches convergem aqui       │
 └─────────────────────────────────────────┘
 ```
 
@@ -130,12 +147,16 @@ WhatsApp (Evolution API)
 
 ## 🔄 Fluxos de Conversação
 
-### Fluxo 1: Saudação
+### Fluxo 1: Saudação (greeting)
 ```
 👤 Usuário: "Oi"
 
-🤖 TitiNauta: "Olá! 👋 Eu sou a TitiNauta, sua assistente 
-para acompanhar o desenvolvimento de Maria!
+🤖 TitiNauta: "Olá, Maria! 👋
+
+Eu sou a *TitiNauta*, sua assistente para acompanhar 
+o desenvolvimento de João! 🚀
+
+Vamos continuar nossa jornada?
 
 📝 *Pergunta:*
 Seu filho faz contato visual quando você fala com ele?
@@ -145,32 +166,52 @@ Seu filho faz contato visual quando você fala com ele?
 3️⃣ - Sim/Frequentemente"
 ```
 
-### Fluxo 2: Resposta ao Quiz
+### Fluxo 2: Resposta ao Quiz (answer)
 ```
 👤 Usuário: "3"
 
-🤖 TitiNauta: "✨ Que ótimo! Obrigada pela sua resposta.
+🤖 TitiNauta: "✨ Que ótimo! Este é um sinal muito 
+positivo do desenvolvimento!
 
-📊 Progresso de Maria: 45%
+📊 *Progresso de João:* 45%
 📝 Perguntas restantes: 11
 
 Envie *oi* para a próxima pergunta! 💜"
 ```
 
-### Fluxo 3: Ver Progresso
+### Fluxo 3: Ver Progresso (progress)
 ```
 👤 Usuário: "progresso"
 
-🤖 TitiNauta: "📊 Progresso de Maria:
+🤖 TitiNauta: "📊 *Progresso de João*
 
-✅ Respondidas: 9 de 20
+✅ Perguntas respondidas: 9
+📝 Perguntas restantes: 11
 📈 Progresso: 45%
-🎯 Meta semanal: 5 perguntas
 
-Continue assim! 💜"
+Envie *oi* para responder a próxima pergunta! 💜"
 ```
 
-### Fluxo 4: Usuário Não Cadastrado
+### Fluxo 4: Ajuda (help)
+```
+👤 Usuário: "ajuda"
+
+🤖 TitiNauta: "👋 *Precisa de ajuda?*
+
+Aqui estão suas opções:
+
+📝 *Responder perguntas:*
+  • Envie *1* = Não/Raramente
+  • Envie *2* = Às vezes
+  • Envie *3* = Sim/Frequentemente
+
+🏠 *Ver próxima pergunta:* Envie "oi"
+📊 *Ver progresso:* Envie "progresso"
+
+Estou aqui para ajudar você! 💜"
+```
+
+### Fluxo 5: Usuário Não Cadastrado
 ```
 👤 Usuário: "Oi" (telefone não cadastrado)
 
@@ -178,10 +219,33 @@ Continue assim! 💜"
 
 Não encontrei seu cadastro no Educare+.
 
-Para começar sua jornada:
+Para começar sua jornada de acompanhamento 
+do desenvolvimento infantil, acesse:
 🔗 https://educareapp.com/register
 
-Use este mesmo número de telefone para se cadastrar! 📱"
+Use este mesmo número de telefone para 
+se cadastrar! 📱
+
+Após o cadastro, envie "oi" para começarmos! 💜"
+```
+
+### Fluxo 6: Chat Livre (AI Agent)
+```
+👤 Usuário: "Como estimular a fala do meu bebê?"
+
+🤖 TitiNauta: "Ótima pergunta! 💬
+
+Aqui vão algumas dicas para estimular a fala:
+
+• Converse sempre com seu bebê, mesmo que 
+  ele ainda não responda
+• Narre suas atividades do dia a dia
+• Leia livrinhos ilustrados em voz alta
+• Cante músicas infantis
+• Repita os sons que ele faz
+
+Continue acompanhando o desenvolvimento 
+do seu bebê no app Educare+! 💜"
 ```
 
 ---
@@ -252,14 +316,13 @@ curl -X POST "https://n8neducare.whatscall.com.br/webhook-test/titnauta" \
 }
 ```
 
-### Tipos de Mensagem Suportados:
+### Tipos de Mensagem Suportados
+
 | Tipo | Descrição | Processamento |
 |------|-----------|---------------|
 | `textMessage` | Texto simples | Direto para análise |
-| `audioMessage` | Áudio/voz | Transcrição Groq/Gemini |
-| `imageMessage` | Imagem | Análise Groq Vision |
-| `locationMessage` | Localização | Resolução Google Maps |
-| `documentMessage` | Documento | Extração de texto |
+| `audioMessage` | Áudio/voz | Transcrição OpenAI Whisper |
+| `imageMessage` | Imagem | Análise GPT-4 Vision |
 
 ---
 
@@ -279,7 +342,7 @@ curl -X POST "https://n8neducare.whatscall.com.br/webhook-test/titnauta" \
 2. Teste direto: `GET /api/external/users/search?phone=5511988888888&api_key=CHAVE`
 
 ### ❌ Áudio não transcreve
-1. Verifique Groq API Key
+1. Verifique credencial OpenAI
 2. Confirme URL do áudio acessível
 3. Formatos: ogg, mp3, m4a
 
@@ -287,6 +350,17 @@ curl -X POST "https://n8neducare.whatscall.com.br/webhook-test/titnauta" \
 1. Verifique OpenAI API Key
 2. Teste conexão Postgres (Chat Memory)
 3. Verifique limite de tokens
+
+### ❌ Mensagem não enviada ao WhatsApp
+1. Verifique `backendURL` e `instanceApiKey` no payload
+2. Confirme Evolution API funcionando
+3. Teste endpoint manualmente:
+```bash
+curl -X POST "https://evolution-api/api/messages/whatsmeow/sendTextPRO" \
+  -H "Authorization: Bearer API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"number": "5511988888888", "body": "Teste", "openTicket": 0}'
+```
 
 ---
 
@@ -314,11 +388,11 @@ curl "https://seu-backend/api/external/users/search?phone=test&api_key=SUA_CHAVE
 
 ## ✅ Checklist de Ativação
 
-- [ ] Importar `n8n-educare-integrated.json`
+- [ ] Importar `n8n-educare-v2.json`
 - [ ] Configurar `EDUCARE_API_URL` 
 - [ ] Configurar `EXTERNAL_API_KEY`
 - [ ] Adicionar credencial OpenAI
-- [ ] Configurar Postgres Chat Memory
+- [ ] (Opcional) Configurar Postgres Chat Memory
 - [ ] Salvar workflow
 - [ ] Ativar workflow (toggle)
 - [ ] Enviar "Oi" no WhatsApp para testar
@@ -326,4 +400,15 @@ curl "https://seu-backend/api/external/users/search?phone=test&api_key=SUA_CHAVE
 
 ---
 
-*Atualizado em: 2 de Dezembro de 2025*
+## 🔐 Segurança
+
+O workflow v2 segue as melhores práticas de segurança:
+
+1. **Sem API Keys hardcoded** - Todas usam variáveis de ambiente
+2. **Timeout configurado** - 15s para evitar execuções travadas
+3. **NeverError** - Falhas de API não quebram o fluxo
+4. **Filtragem** - Ignora grupos e mensagens próprias
+
+---
+
+*Atualizado em: 3 de Dezembro de 2025*
