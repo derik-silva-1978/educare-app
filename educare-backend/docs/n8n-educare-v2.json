@@ -1,0 +1,1186 @@
+{
+  "name": "Educare+ TitiNauta v2.0",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "titnauta",
+        "options": {}
+      },
+      "id": "webhook-001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-800, 400],
+      "webhookId": "titnauta"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "filter-group",
+              "leftValue": "={{$json.body?.mensagem?.contact?.number}}",
+              "rightValue": "@g.us",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            },
+            {
+              "id": "filter-fromme",
+              "leftValue": "={{$json.body?.mensagem?.fromMe}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-001",
+      "name": "Filter: Valid Messages",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-600, 400]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "user-phone",
+              "name": "userPhone",
+              "value": "={{(() => { const num = $json.body?.mensagem?.contact?.number || $json.body?.data?.key?.remoteJid?.split('@')[0] || ''; return num.replace(/\\D/g, ''); })()}}",
+              "type": "string"
+            },
+            {
+              "id": "user-name",
+              "name": "userName",
+              "value": "={{$json.body?.mensagem?.contact?.name || $json.body?.data?.pushName || 'Usuário'}}",
+              "type": "string"
+            },
+            {
+              "id": "message-body",
+              "name": "messageBody",
+              "value": "={{$json.body?.mensagem?.body || $json.body?.data?.message?.conversation || ''}}",
+              "type": "string"
+            },
+            {
+              "id": "message-type",
+              "name": "messageType",
+              "value": "={{$json.body?.mensagem?.mediaType || $json.body?.data?.messageType || 'textMessage'}}",
+              "type": "string"
+            },
+            {
+              "id": "backend-url",
+              "name": "backendURL",
+              "value": "={{$json.body?.backendURL || $json.body?.server_url || ''}}",
+              "type": "string"
+            },
+            {
+              "id": "api-key",
+              "name": "instanceApiKey",
+              "value": "={{$json.body?.apikey || $json.body?.ticketData?.whatsapp?.token || ''}}",
+              "type": "string"
+            },
+            {
+              "id": "instance-name",
+              "name": "instanceName",
+              "value": "={{$json.body?.instance || $json.body?.ticketData?.whatsapp?.name || ''}}",
+              "type": "string"
+            },
+            {
+              "id": "remote-jid",
+              "name": "remoteJid",
+              "value": "={{$json.body?.data?.key?.remoteJid || $json.body?.mensagem?.contact?.number + '@s.whatsapp.net'}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "extract-001",
+      "name": "Extract Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-400, 400],
+      "notesInFlow": true,
+      "notes": "Extrai dados da mensagem em formato normalizado"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.messageType}}",
+                    "rightValue": "audioMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.messageType}}",
+                    "rightValue": "imageMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "image"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "switch-media-001",
+      "name": "Switch: Media Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [-200, 400],
+      "notesInFlow": true,
+      "notes": "Roteia por tipo de mídia: áudio, imagem ou texto"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {
+          "language": "pt"
+        }
+      },
+      "id": "openai-transcribe-001",
+      "name": "OpenAI: Transcribe Audio",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.5,
+      "position": [0, 200],
+      "credentials": {
+        "openAiApi": {
+          "id": "CONFIGURE_OPENAI_CREDENTIALS",
+          "name": "OpenAI API"
+        }
+      },
+      "notesInFlow": true,
+      "notes": "Transcreve áudio usando Whisper da OpenAI"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "transcribed-text",
+              "name": "messageBody",
+              "value": "={{$json.text || $('Extract Data').item.json.messageBody}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "options": {}
+      },
+      "id": "merge-audio-001",
+      "name": "Merge: Audio Text",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [200, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.OPENAI_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o-mini\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": [\n        {\n          \"type\": \"text\",\n          \"text\": \"Descreva brevemente o que há nesta imagem em português. Se for um documento, extraia o texto principal.\"\n        },\n        {\n          \"type\": \"image_url\",\n          \"image_url\": {\n            \"url\": \"data:image/jpeg;base64,{{$('Webhook').item.json.body?.data?.message?.base64 || ''}}\"\n          }\n        }\n      ]\n    }\n  ],\n  \"max_tokens\": 500\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "openai-vision-001",
+      "name": "OpenAI: Analyze Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [0, 400],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "notesInFlow": true,
+      "notes": "Analisa imagem usando GPT-4 Vision"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "image-description",
+              "name": "messageBody",
+              "value": "={{$json.choices?.[0]?.message?.content || '[Imagem recebida]'}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "include": "selected",
+        "options": {}
+      },
+      "id": "merge-image-001",
+      "name": "Merge: Image Text",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [200, 400]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.EDUCARE_API_URL}}/users/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{$json.userPhone}}"
+            },
+            {
+              "name": "api_key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "educare-search-user-001",
+      "name": "Educare: Search User",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [600, 400],
+      "notesInFlow": true,
+      "notes": "Busca usuário pelo telefone na API Educare+"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-user-found",
+              "leftValue": "={{$json.success}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "educare-check-user-002",
+      "name": "Educare: User Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [800, 400]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.EDUCARE_API_URL}}/users/by-phone/{{$('Extract Data').item.json.userPhone}}/active-child",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "educare-get-child-003",
+      "name": "Educare: Get Active Child",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1000, 300],
+      "notesInFlow": true,
+      "notes": "Obtém a criança ativa do usuário"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.EDUCARE_API_URL}}/children/{{$json.data?.active_child?.id}}/unanswered-questions",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "educare-get-questions-004",
+      "name": "Educare: Get Questions",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 300],
+      "notesInFlow": true,
+      "notes": "Busca próxima pergunta não respondida"
+    },
+    {
+      "parameters": {
+        "jsCode": "const message = $('Extract Data').item.json.messageBody?.toLowerCase().trim() || '';\nconst userData = $('Educare: Search User')?.item?.json?.data?.user || null;\nconst childData = $('Educare: Get Active Child')?.item?.json?.data?.active_child || null;\nconst questionsData = $('Educare: Get Questions')?.item?.json?.data?.questions || [];\n\n// Mapeamento de respostas\nconst answerMap = {\n  '1': 0, 'um': 0, 'nao': 0, 'não': 0, 'nunca': 0, 'raramente': 0,\n  '2': 1, 'dois': 1, 'as vezes': 1, 'às vezes': 1, 'parcialmente': 1,\n  '3': 2, 'tres': 2, 'três': 2, 'sim': 2, 'sempre': 2, 'frequentemente': 2\n};\n\n// Palavras-chave para classificação\nconst greetings = ['oi', 'ola', 'olá', 'bom dia', 'boa tarde', 'boa noite', 'começar', 'iniciar', 'oi titi', 'oi titia', 'hey', 'eai', 'e ai'];\nconst helpWords = ['ajuda', 'help', 'como', 'duvida', 'dúvida', 'o que', 'opcoes', 'opções'];\nconst progressWords = ['progresso', 'quanto falta', 'status', 'avanço', 'avanco', 'quantas'];\n\n// Determina o tipo de mensagem\nlet messageType = 'chat';\nlet answerValue = null;\n\nif (answerMap.hasOwnProperty(message)) {\n  messageType = 'answer';\n  answerValue = answerMap[message];\n} else if (greetings.some(g => message.includes(g))) {\n  messageType = 'greeting';\n} else if (helpWords.some(h => message.includes(h))) {\n  messageType = 'help';\n} else if (progressWords.some(p => message.includes(p))) {\n  messageType = 'progress';\n}\n\nreturn [{\n  json: {\n    messageType: messageType,\n    answerValue: answerValue,\n    originalMessage: message,\n    hasUser: !!userData,\n    hasChild: !!childData,\n    hasQuestions: questionsData.length > 0,\n    currentQuestion: questionsData[0] || null,\n    childId: childData?.id || null,\n    childName: childData?.name || 'seu filho',\n    childAgeMonths: childData?.age_months || null,\n    userPhone: $('Extract Data').item.json.userPhone,\n    userName: $('Extract Data').item.json.userName,\n    backendURL: $('Extract Data').item.json.backendURL,\n    instanceApiKey: $('Extract Data').item.json.instanceApiKey,\n    instanceName: $('Extract Data').item.json.instanceName,\n    remoteJid: $('Extract Data').item.json.remoteJid\n  }\n}];"
+      },
+      "id": "educare-parse-message-005",
+      "name": "Educare: Parse Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1400, 300],
+      "notesInFlow": true,
+      "notes": "Analisa e classifica a mensagem do usuário"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.messageType}}",
+                    "rightValue": "answer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "answer"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.messageType}}",
+                    "rightValue": "greeting",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "greeting"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.messageType}}",
+                    "rightValue": "progress",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "progress"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.messageType}}",
+                    "rightValue": "help",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "help"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "educare-route-006",
+      "name": "Educare: Route Message",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [1600, 300],
+      "notesInFlow": true,
+      "notes": "Roteia por tipo: answer, greeting, progress, help, chat"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.EDUCARE_API_URL}}/children/{{$('Educare: Parse Message').item.json.childId}}/save-answer",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-API-Key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"question_id\": \"{{$('Educare: Parse Message').item.json.currentQuestion?.id || ''}}\",\n  \"answer\": {{$('Educare: Parse Message').item.json.answerValue ?? 0}},\n  \"answer_text\": \"{{$('Educare: Parse Message').item.json.originalMessage}}\",\n  \"metadata\": {\n    \"source\": \"whatsapp\",\n    \"timestamp\": \"{{$now.toISO()}}\",\n    \"session_id\": \"{{$('Educare: Parse Message').item.json.userPhone}}\"\n  }\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "educare-save-answer-007",
+      "name": "Educare: Save Answer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 100],
+      "notesInFlow": true,
+      "notes": "Salva a resposta do quiz na API Educare+"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.EDUCARE_API_URL}}/children/{{$('Educare: Parse Message').item.json.childId}}/progress",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "educare-get-progress-008",
+      "name": "Educare: Get Progress",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 100],
+      "notesInFlow": true,
+      "notes": "Obtém progresso após salvar resposta"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseMsg = $('Educare: Parse Message').item.json;\nconst childName = parseMsg.childName || 'seu filho';\nconst progress = $json.data?.progress || {};\nconst question = parseMsg.currentQuestion;\nconst answerValue = parseMsg.answerValue;\n\n// Feedback baseado na resposta\nconst feedbackMap = {\n  0: question?.domain_feedback_1 || 'Obrigada pela sua resposta. Vamos acompanhar este aspecto do desenvolvimento.',\n  1: question?.domain_feedback_2 || 'Obrigada pela sua resposta. É normal que algumas habilidades ainda estejam em desenvolvimento.',\n  2: question?.domain_feedback_3 || 'Que ótimo! Este é um sinal muito positivo do desenvolvimento!'\n};\n\nconst feedback = feedbackMap[answerValue] || 'Obrigada pela resposta!';\n\nlet msg = '✨ ' + feedback + '\\n\\n';\nmsg += '📊 *Progresso de ' + childName + ':* ' + (progress.progress_percentage || 0) + '%\\n';\n\nif (progress.unanswered_questions > 0) {\n  msg += '📝 Perguntas restantes: ' + progress.unanswered_questions + '\\n\\n';\n  msg += 'Envie *oi* para a próxima pergunta! 💜';\n} else {\n  msg += '\\n🎉 *Parabéns!* Você completou todas as perguntas desta fase!\\n';\n  msg += 'Continue acompanhando o desenvolvimento de ' + childName + ' no app Educare+.';\n}\n\nreturn [{\n  json: {\n    responseMessage: msg,\n    userPhone: parseMsg.userPhone,\n    backendURL: parseMsg.backendURL,\n    instanceApiKey: parseMsg.instanceApiKey,\n    remoteJid: parseMsg.remoteJid\n  }\n}];"
+      },
+      "id": "educare-format-answer-009",
+      "name": "Educare: Format Answer Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2200, 100],
+      "notesInFlow": true,
+      "notes": "Formata resposta após salvar answer"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseMsg = $('Educare: Parse Message').item.json;\nconst childName = parseMsg.childName || 'seu bebê';\nconst userName = parseMsg.userName || 'mamãe';\nconst hasQuestions = parseMsg.hasQuestions;\nconst question = parseMsg.currentQuestion;\n\nlet msg = 'Olá, ' + userName + '! 👋\\n\\n';\nmsg += 'Eu sou a *TitiNauta*, sua assistente para acompanhar o desenvolvimento de ' + childName + '! 🚀\\n\\n';\n\nif (hasQuestions && question) {\n  msg += 'Vamos continuar nossa jornada?\\n\\n';\n  msg += '📝 *Pergunta:*\\n' + question.domain_question + '\\n\\n';\n  msg += 'Responda com:\\n';\n  msg += '1️⃣ - Não/Raramente\\n';\n  msg += '2️⃣ - Às vezes\\n';\n  msg += '3️⃣ - Sim/Frequentemente';\n} else {\n  msg += '🎉 *Parabéns!* Você já respondeu todas as perguntas disponíveis para esta fase!\\n\\n';\n  msg += 'Continue acompanhando o desenvolvimento de ' + childName + ' no app Educare+.\\n';\n  msg += 'Novas perguntas serão liberadas conforme ' + childName + ' cresce! 💜';\n}\n\nreturn [{\n  json: {\n    responseMessage: msg,\n    userPhone: parseMsg.userPhone,\n    backendURL: parseMsg.backendURL,\n    instanceApiKey: parseMsg.instanceApiKey,\n    remoteJid: parseMsg.remoteJid\n  }\n}];"
+      },
+      "id": "educare-format-greeting-010",
+      "name": "Educare: Format Greeting",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1800, 250],
+      "notesInFlow": true,
+      "notes": "Formata mensagem de saudação"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.EDUCARE_API_URL}}/children/{{$('Educare: Parse Message').item.json.childId}}/progress",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "educare-get-progress-direct-011",
+      "name": "Educare: Get Progress Direct",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseMsg = $('Educare: Parse Message').item.json;\nconst childName = parseMsg.childName || 'seu filho';\nconst progress = $json.data?.progress || {};\n\nlet msg = '📊 *Progresso de ' + childName + '*\\n\\n';\nmsg += '✅ Perguntas respondidas: ' + (progress.answered_questions || 0) + '\\n';\nmsg += '📝 Perguntas restantes: ' + (progress.unanswered_questions || 0) + '\\n';\nmsg += '📈 Progresso: ' + (progress.progress_percentage || 0) + '%\\n\\n';\n\nif (progress.unanswered_questions > 0) {\n  msg += 'Envie *oi* para responder a próxima pergunta! 💜';\n} else {\n  msg += '🎉 Você completou todas as perguntas desta fase!\\n';\n  msg += 'Continue acompanhando ' + childName + ' no app Educare+.';\n}\n\nreturn [{\n  json: {\n    responseMessage: msg,\n    userPhone: parseMsg.userPhone,\n    backendURL: parseMsg.backendURL,\n    instanceApiKey: parseMsg.instanceApiKey,\n    remoteJid: parseMsg.remoteJid\n  }\n}];"
+      },
+      "id": "educare-format-progress-012",
+      "name": "Educare: Format Progress",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseMsg = $('Educare: Parse Message').item.json;\nconst childName = parseMsg.childName || 'seu filho';\n\nlet msg = '👋 *Precisa de ajuda?*\\n\\n';\nmsg += 'Aqui estão suas opções:\\n\\n';\nmsg += '📝 *Responder perguntas:*\\n';\nmsg += '  • Envie *1* = Não/Raramente\\n';\nmsg += '  • Envie *2* = Às vezes\\n';\nmsg += '  • Envie *3* = Sim/Frequentemente\\n\\n';\nmsg += '🏠 *Ver próxima pergunta:* Envie \"oi\"\\n';\nmsg += '📊 *Ver progresso:* Envie \"progresso\"\\n\\n';\nmsg += 'Estou aqui para ajudar você a acompanhar o desenvolvimento de ' + childName + '! 💜';\n\nreturn [{\n  json: {\n    responseMessage: msg,\n    userPhone: parseMsg.userPhone,\n    backendURL: parseMsg.backendURL,\n    instanceApiKey: parseMsg.instanceApiKey,\n    remoteJid: parseMsg.remoteJid\n  }\n}];"
+      },
+      "id": "educare-format-help-013",
+      "name": "Educare: Format Help",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1800, 550]
+    },
+    {
+      "parameters": {
+        "jsCode": "const extractData = $('Extract Data').item.json;\n\nlet msg = 'Olá! 👋\\n\\n';\nmsg += 'Não encontrei seu cadastro no Educare+.\\n\\n';\nmsg += 'Para começar sua jornada de acompanhamento do desenvolvimento infantil, acesse:\\n';\nmsg += '🔗 https://educareapp.com/register\\n\\n';\nmsg += 'Use este mesmo número de telefone para se cadastrar! 📱\\n\\n';\nmsg += 'Após o cadastro, envie \"oi\" para começarmos! 💜';\n\nreturn [{\n  json: {\n    responseMessage: msg,\n    userPhone: extractData.userPhone,\n    backendURL: extractData.backendURL,\n    instanceApiKey: extractData.instanceApiKey,\n    remoteJid: extractData.remoteJid\n  }\n}];"
+      },
+      "id": "educare-not-found-014",
+      "name": "Educare: User Not Found",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1000, 500],
+      "notesInFlow": true,
+      "notes": "Mensagem para usuário não cadastrado"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Você é a TitiNauta, uma assistente virtual amigável e carinhosa do aplicativo Educare+, especializada em desenvolvimento infantil e maternidade.\n\n## Sua Personalidade:\n- Acolhedora e empática com mães e pais\n- Usa linguagem simples e acessível\n- Oferece apoio emocional quando apropriado\n- Sempre encoraja os pais em sua jornada\n\n## Regras:\n1. Responda SEMPRE em português brasileiro\n2. Mantenha respostas curtas (máximo 3 parágrafos)\n3. Use emojis com moderação para tornar a conversa amigável\n4. Se perguntarem sobre saúde específica, recomende consultar um profissional\n5. Não faça diagnósticos médicos\n6. Incentive o uso do app Educare+ para acompanhamento\n\n## Contexto:\nO usuário está conversando via WhatsApp e pode ter dúvidas sobre:\n- Desenvolvimento infantil\n- Marcos do desenvolvimento\n- Alimentação e sono\n- Dicas de cuidados\n- Uso do aplicativo Educare+\n\nResponda de forma natural e útil!"
+        }
+      },
+      "id": "ai-agent-001",
+      "name": "AI Agent: TitiNauta",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [1800, 700],
+      "credentials": {
+        "openAiApi": {
+          "id": "CONFIGURE_OPENAI_CREDENTIALS",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {
+          "maxTokens": 500,
+          "temperature": 0.7
+        }
+      },
+      "id": "openai-chat-model-001",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [1700, 900],
+      "credentials": {
+        "openAiApi": {
+          "id": "CONFIGURE_OPENAI_CREDENTIALS",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableName": "n8n_chat_educare",
+        "contextWindowLength": 20
+      },
+      "id": "postgres-memory-001",
+      "name": "Postgres Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [1900, 900],
+      "credentials": {
+        "postgres": {
+          "id": "CONFIGURE_POSTGRES_CREDENTIALS",
+          "name": "Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseMsg = $('Educare: Parse Message').item.json;\nconst aiOutput = $json.output || '';\n\nreturn [{\n  json: {\n    responseMessage: aiOutput,\n    userPhone: parseMsg.userPhone,\n    backendURL: parseMsg.backendURL,\n    instanceApiKey: parseMsg.instanceApiKey,\n    remoteJid: parseMsg.remoteJid\n  }\n}];"
+      },
+      "id": "ai-format-response-015",
+      "name": "Format AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 700]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$json.backendURL}}/api/messages/whatsmeow/sendTextPRO",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$json.instanceApiKey}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{$json.userPhone}}\",\n  \"openTicket\": 0,\n  \"queueId\": \"0\",\n  \"body\": \"{{$json.responseMessage.replace(/[\\r\\n]+/g, '\\\\n').replace(/\"/g, '\\\\\"')}}\"\n}",
+        "options": {
+          "timeout": 15000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "whatsapp-send-001",
+      "name": "WhatsApp: Send Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2400, 400],
+      "notesInFlow": true,
+      "notes": "Envia resposta via Evolution API / WhatsMeow"
+    },
+    {
+      "parameters": {},
+      "id": "noop-end-001",
+      "name": "End: Filtered",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-400, 600]
+    },
+    {
+      "parameters": {
+        "content": "## 🚀 EDUCARE+ TITINAUTA v2.0\n\nWorkflow otimizado para integração WhatsApp via Evolution API.\n\n### Configuração Necessária:\n1. **Variáveis de Ambiente (n8n Settings > Variables):**\n   - `EDUCARE_API_URL`: URL da API externa (ex: https://seu-backend.com/api/external)\n   - `EXTERNAL_API_KEY`: Chave da API externa\n   - `OPENAI_API_KEY`: Chave da OpenAI\n\n2. **Credenciais (Credentials):**\n   - OpenAI API: Configure com sua API Key\n   - Postgres: Configure para memória do chat\n\n### Fluxo:\nWebhook → Filtro → Extração → Tipo Mídia → Busca Usuário → Roteamento → Resposta → WhatsApp",
+        "height": 400,
+        "width": 500
+      },
+      "id": "sticky-info-001",
+      "name": "Info",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-1100, 200]
+    },
+    {
+      "parameters": {
+        "content": "## 📱 PROCESSAMENTO DE MÍDIA\n\n- **Áudio**: Transcrição via OpenAI Whisper\n- **Imagem**: Análise via GPT-4 Vision\n- **Texto**: Processamento direto",
+        "height": 180,
+        "width": 300
+      },
+      "id": "sticky-media-001",
+      "name": "Media Processing",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-100, 0]
+    },
+    {
+      "parameters": {
+        "content": "## 🔄 INTEGRAÇÃO EDUCARE+\n\n1. Busca usuário por telefone\n2. Verifica se existe\n3. Obtém criança ativa\n4. Busca perguntas pendentes\n5. Analisa mensagem\n6. Roteia por tipo\n7. Processa resposta\n8. Envia via WhatsApp",
+        "height": 250,
+        "width": 300
+      },
+      "id": "sticky-educare-001",
+      "name": "Educare Flow",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [600, 0]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Filter: Valid Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Valid Messages": {
+      "main": [
+        [
+          {
+            "node": "Extract Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "End: Filtered",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Data": {
+      "main": [
+        [
+          {
+            "node": "Switch: Media Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch: Media Type": {
+      "main": [
+        [
+          {
+            "node": "OpenAI: Transcribe Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "OpenAI: Analyze Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Educare: Search User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI: Transcribe Audio": {
+      "main": [
+        [
+          {
+            "node": "Merge: Audio Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge: Audio Text": {
+      "main": [
+        [
+          {
+            "node": "Educare: Search User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI: Analyze Image": {
+      "main": [
+        [
+          {
+            "node": "Merge: Image Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge: Image Text": {
+      "main": [
+        [
+          {
+            "node": "Educare: Search User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: Search User": {
+      "main": [
+        [
+          {
+            "node": "Educare: User Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: User Found?": {
+      "main": [
+        [
+          {
+            "node": "Educare: Get Active Child",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Educare: User Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: Get Active Child": {
+      "main": [
+        [
+          {
+            "node": "Educare: Get Questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: Get Questions": {
+      "main": [
+        [
+          {
+            "node": "Educare: Parse Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: Parse Message": {
+      "main": [
+        [
+          {
+            "node": "Educare: Route Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: Route Message": {
+      "main": [
+        [
+          {
+            "node": "Educare: Save Answer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Educare: Format Greeting",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Educare: Get Progress Direct",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Educare: Format Help",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent: TitiNauta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: Save Answer": {
+      "main": [
+        [
+          {
+            "node": "Educare: Get Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: Get Progress": {
+      "main": [
+        [
+          {
+            "node": "Educare: Format Answer Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: Format Answer Response": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp: Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: Format Greeting": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp: Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: Get Progress Direct": {
+      "main": [
+        [
+          {
+            "node": "Educare: Format Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: Format Progress": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp: Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: Format Help": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp: Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Educare: User Not Found": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp: Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: TitiNauta": {
+      "main": [
+        [
+          {
+            "node": "Format AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format AI Response": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp: Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent: TitiNauta",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent: TitiNauta",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "educare-v2-2025-12-03",
+  "meta": {
+    "instanceId": "educare-titinauta-v2",
+    "description": "Workflow otimizado para integração WhatsApp via Evolution API com API Externa Educare+. Versão limpa e corrigida.",
+    "updatedAt": "2025-12-03T00:00:00.000Z"
+  },
+  "id": "educare-titinauta-v2",
+  "tags": [
+    {
+      "id": "tag-educare",
+      "name": "educare"
+    },
+    {
+      "id": "tag-production",
+      "name": "production"
+    }
+  ]
+}
