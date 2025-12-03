@@ -10,9 +10,10 @@ Educare+ is a digital platform for early childhood development and maternal heal
 - Incomplete modules marked with visible "Em Desenvolvimento" badges.
 
 ## Recent Changes (December 2025)
-- **n8n Blueprint Integrado**: Criado `n8n-educare-integrated.json` com 89 nós (77 originais + 12 de API)
-- **Blueprint Pronto**: Arquivo único para importar diretamente no n8n - sem necessidade de adicionar nós manualmente
-- **Documentação Simplificada**: `N8N_BLUEPRINT_SETUP.md` com guia de ativação rápida (5 minutos)
+- **n8n Workflow v2.0**: Criado `n8n-educare-v2.json` - versão otimizada com 28 nós (vs 89 do v1)
+- **Segurança Corrigida**: Removidas API keys hardcoded, todas usam variáveis de ambiente
+- **Todas Branches Conectadas**: Todas as branches (answer, greeting, progress, help, chat, user not found) convergem para WhatsApp Send
+- **Documentação Atualizada**: `N8N_BLUEPRINT_SETUP.md` com guia completo para v2
 - **Pasta docs Organizada**: Removidos arquivos redundantes, mantidos apenas os essenciais
 - **External API 100% Complete**: All 13 endpoints validated and functional for n8n/WhatsApp integration
 - **Evolution API Format**: Suporte completo para mensagens de texto, áudio, imagem e localização
@@ -44,14 +45,14 @@ Educare+ is a digital platform for early childhood development and maternal heal
    - Result: All tables created/updated, backend queries executing normally
    - Impact: ✅ Ready for n8n to query journey questions reliably
 
-2. **n8n Workflow Implementation** ✅ **READY**
-   - Task: Import integrated blueprint in n8n
+2. **n8n Workflow Implementation** ✅ **READY v2.0**
+   - Task: Import optimized v2 blueprint in n8n
    - Files: 
-     - `educare-backend/docs/n8n-educare-integrated.json` ✅ (Blueprint completo - 89 nós)
-     - `educare-backend/docs/n8n-educare-chat-original.json` ✅ (Backup do original)
-     - `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (Guia de ativação rápida)
-   - Status: Blueprint integrado pronto, apenas importar no n8n e configurar variáveis
-   - Next Step: Importar `n8n-educare-integrated.json` no n8n → Configurar credentials → Ativar
+     - `educare-backend/docs/n8n-educare-v2.json` ✅ **RECOMENDADO** (28 nós, otimizado e seguro)
+     - `educare-backend/docs/n8n-educare-integrated.json` ✅ (Backup do v1 - 89 nós)
+     - `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (Guia atualizado para v2)
+   - Status: Blueprint v2 pronto, todas as branches conectadas ao WhatsApp Send
+   - Next Step: Importar `n8n-educare-v2.json` no n8n → Configurar credentials → Ativar
    - Impact: Enables WhatsApp bot automation
 
 3. **WhatsApp Provider: Evolution API** ✅ **SELECTED**
@@ -113,13 +114,14 @@ Educare+ is a digital platform for early childhood development and maternal heal
   - `GET /children/:id/progress` - Progress tracking
   - `GET /children/:id/quiz-responses` - Answer history
 
-### n8n Workflow (Ready for Activation)
-- **Blueprint**: `educare-backend/docs/n8n-educare-integrated.json` ✅ (89 nodes, ready to import)
+### n8n Workflow v2.0 (Ready for Activation)
+- **Blueprint v2**: `educare-backend/docs/n8n-educare-v2.json` ✅ (28 nodes, optimized)
 - **Setup Guide**: `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (5-minute activation)
 - **Documentation**: `educare-backend/docs/README_N8N_WORKFLOW.md` ✅
 - **Webhook URL**: https://n8neducare.whatscall.com.br/webhook-test/titnauta
-- **Status**: Blueprint integrated and ready for import
-- **Next Action**: Import in n8n → Configure credentials → Activate
+- **Status**: v2 blueprint ready - all branches connected to WhatsApp Send
+- **Security**: All API keys use environment variables (no hardcoded values)
+- **Next Action**: Import `n8n-educare-v2.json` → Configure credentials → Activate
 
 ### WhatsApp (Evolution API)
 - **Provider**: Evolution API (identified from blueprint)
