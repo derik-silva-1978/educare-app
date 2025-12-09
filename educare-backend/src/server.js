@@ -169,14 +169,27 @@ app.use((err, req, res, next) => {
 // Inicialização do banco de dados
 const { sequelize } = require('./config/database');
 
-// Sincronizar modelos com o banco de dados (em desenvolvimento)
-if (process.env.NODE_ENV === 'development') {
-  sequelize.sync({ alter: true }) // Em produção, usar { force: false }
+// Sincronizar modelos com o banco de dados
+// NOTA: sync desativado pois o usuário 'educareapp' não é owner das tabelas
+// Para ativar sync, execute como superuser: 
+// ALTER TABLE nome_tabela OWNER TO educareapp; (para todas as tabelas)
+// Ou use: GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO educareapp;
+if (process.env.DB_SYNC_ENABLED === 'true') {
+  sequelize.sync({ alter: true })
     .then(() => {
       console.log('Banco de dados sincronizado');
     })
     .catch(err => {
       console.error('Erro ao sincronizar banco de dados:', err);
+    });
+} else {
+  console.log('Sincronização do banco de dados desativada (DB_SYNC_ENABLED != true)');
+  sequelize.authenticate()
+    .then(() => {
+      console.log('Conexão com o banco de dados estabelecida com sucesso.');
+    })
+    .catch(err => {
+      console.error('Erro ao conectar ao banco de dados:', err);
     });
 }
 
