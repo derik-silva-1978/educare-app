@@ -3,6 +3,7 @@ import {
   IconToolbar, 
   WelcomeHero, 
   NewsCarousel, 
+  TrainingSection,
   AcademyCourses, 
   TitiNautaWidget, 
   FeedbackPanel, 
@@ -32,20 +33,19 @@ const WelcomeHub: React.FC = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-8 max-w-6xl">
+      <main className="container mx-auto px-4 py-8 space-y-8 max-w-6xl">
         <WelcomeHero />
 
         <NewsCarousel />
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <AcademyCourses />
-          </div>
-          <div className="space-y-6">
-            <TitiNautaWidget />
-            {showFeedback && <FeedbackPanel />}
-            <DonationCTA />
-          </div>
+        <TrainingSection />
+
+        <AcademyCourses />
+
+        <div className="space-y-6">
+          <TitiNautaWidget />
+          {showFeedback && <FeedbackPanel />}
+          <DonationCTA />
         </div>
       </main>
     </div>
