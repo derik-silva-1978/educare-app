@@ -45,7 +45,7 @@ const KnowledgeBaseManagement: React.FC = () => {
   const loadDocuments = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/knowledge-base', {
+      const response = await fetch('/api/admin/knowledge', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
@@ -53,7 +53,8 @@ const KnowledgeBaseManagement: React.FC = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setDocuments(Array.isArray(data) ? data : data.documents || []);
+        const docs = data.data || data.documents || [];
+        setDocuments(Array.isArray(docs) ? docs : []);
       }
     } catch (error) {
       console.error('Erro ao carregar documentos:', error);
@@ -113,7 +114,7 @@ const KnowledgeBaseManagement: React.FC = () => {
       formData.append('file', fileInput);
       formData.append('kb_type', selectedKB);
 
-      const response = await fetch('/api/knowledge-base/upload', {
+      const response = await fetch('/api/admin/knowledge/upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
@@ -150,7 +151,7 @@ const KnowledgeBaseManagement: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`/api/knowledge-base/${id}`, {
+      const response = await fetch(`/api/admin/knowledge/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
@@ -178,7 +179,7 @@ const KnowledgeBaseManagement: React.FC = () => {
 
   const handleToggleActive = async (id: string) => {
     try {
-      const response = await fetch(`/api/knowledge-base/${id}/toggle-active`, {
+      const response = await fetch(`/api/admin/knowledge/${id}/toggle-active`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
