@@ -10,18 +10,15 @@ Educare+ is a digital platform for early childhood development and maternal heal
 - Incomplete modules marked with visible "Em Desenvolvimento" badges.
 
 ## Recent Changes (December 2025)
+- **Database Migration (December 9)**: Migrado para novo servidor PostgreSQL (86.48.30.74, user: educareapp, database: educareapp)
+- **DB Sync Disabled**: Sincronização automática desativada via DB_SYNC_ENABLED - usuário educareapp não é owner das tabelas
+- **Security Improved**: Removidas senhas hardcoded de database.js e sequelize-config.js
 - **n8n Workflow v2.0**: Criado `n8n-educare-v2.json` - versão otimizada com 28 nós (vs 89 do v1)
 - **Segurança Corrigida**: Removidas API keys hardcoded, todas usam variáveis de ambiente
 - **Todas Branches Conectadas**: Todas as branches (answer, greeting, progress, help, chat, user not found) convergem para WhatsApp Send
 - **Documentação Atualizada**: `N8N_BLUEPRINT_SETUP.md` com guia completo para v2
-- **Pasta docs Organizada**: Removidos arquivos redundantes, mantidos apenas os essenciais
 - **External API 100% Complete**: All 13 endpoints validated and functional for n8n/WhatsApp integration
 - **Evolution API Format**: Suporte completo para mensagens de texto, áudio, imagem e localização
-- **Database Compatibility**: Resolved type incompatibility (VARCHAR vs UUID) using separate queries instead of JOIN
-- **Null Safety**: Added birth_date null handling to prevent NaN errors in age calculations
-- **EXTERNAL_API_KEY**: Configured in environment for API authentication
-- **Cleanup**: Removed all obsolete TitiNauta components and the src/components/titinauta/ folder
-- **Journey consolidation**: TitiNautaJourney (2.0) and WhatsAppJourneyBotPage are the only journey interfaces
 
 ## Development Status (December 2025)
 
