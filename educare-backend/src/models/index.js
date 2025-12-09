@@ -26,6 +26,9 @@ const JourneyBotResponse = require('./JourneyBotResponse');
 const JourneyBotQuestion = require('./JourneyBotQuestion');
 const Activity = require('./Activity');
 
+// Modelos do RAG
+const KnowledgeDocument = require('./KnowledgeDocument');
+
 // Importação dos modelos da Jornada 2.0
 const JourneyV2 = require('./JourneyV2');
 const JourneyV2Week = require('./JourneyV2Week');
@@ -253,6 +256,8 @@ module.exports = {
   JourneyBotResponse,
   JourneyBotQuestion,
   Activity,
+  // Modelos do RAG
+  KnowledgeDocument,
   // Modelos da Jornada 2.0
   JourneyV2,
   JourneyV2Week,

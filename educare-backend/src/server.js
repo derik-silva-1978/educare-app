@@ -143,6 +143,10 @@ app.use('/api/external', externalApiRoutes);
 app.use('/api/journey', titiNautaRoutes); // Interface moderna do TitiNauta
 app.use('/api/media-resources', mediaResourceRoutes); // Gestão de recursos audiovisuais
 
+// Rotas do RAG (Knowledge Management)
+const adminKnowledgeRoutes = require('./routes/adminKnowledgeRoutes');
+app.use('/api/admin/knowledge', adminKnowledgeRoutes); // Ingestão de documentos (Super Admin)
+
 // Stripe payment routes
 app.use('/api/stripe', stripeRoutes);
 
