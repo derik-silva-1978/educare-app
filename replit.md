@@ -10,15 +10,14 @@ Educare+ is a digital platform for early childhood development and maternal heal
 - Incomplete modules marked with visible "Em Desenvolvimento" badges.
 
 ## Recent Changes (December 2025)
+- **FASE 7-UPGRADE Completa (December 9)**: Testes end-to-end + Migração assistida + 4 endpoints admin
+- **FASE 6-UPGRADE Completa (December 9)**: Métricas RAG automáticas, 6 endpoints REST, health check
+- **FASE 5-UPGRADE Completa (December 8)**: RAG com seleção inteligente de bases segmentadas
+- **FASE 4-UPGRADE Completa (December 8)**: Dual write com inferência automática de categoria
+- **FASE 3-UPGRADE Completa (December 8)**: 3 tabelas segmentadas (kb_baby, kb_mother, kb_professional)
 - **Database Migration (December 9)**: Migrado para novo servidor PostgreSQL (86.48.30.74, user: educareapp, database: educareapp)
-- **DB Sync Disabled**: Sincronização automática desativada via DB_SYNC_ENABLED - usuário educareapp não é owner das tabelas
-- **Security Improved**: Removidas senhas hardcoded de database.js e sequelize-config.js
-- **n8n Workflow v2.0**: Criado `n8n-educare-v2.json` - versão otimizada com 28 nós (vs 89 do v1)
-- **Segurança Corrigida**: Removidas API keys hardcoded, todas usam variáveis de ambiente
-- **Todas Branches Conectadas**: Todas as branches (answer, greeting, progress, help, chat, user not found) convergem para WhatsApp Send
-- **Documentação Atualizada**: `N8N_BLUEPRINT_SETUP.md` com guia completo para v2
+- **n8n Workflow v2.0**: Criado `n8n-educare-v2.json` - versão otimizada com 28 nós
 - **External API 100% Complete**: All 13 endpoints validated and functional for n8n/WhatsApp integration
-- **Evolution API Format**: Suporte completo para mensagens de texto, áudio, imagem e localização
 
 ## Development Status (December 2025)
 
@@ -31,34 +30,48 @@ Educare+ is a digital platform for early childhood development and maternal heal
 ✅ **Database Models** - Sequelize ORM with 20+ models defined
 ✅ **Role-based Sidebar** - Proper access levels for Owner/Admin/Professional/Parent
 
-## Pending Development Tasks
+## RAG Segmented Architecture (PHASES 1-7 ✅ COMPLETE)
 
-### Priority 1 - Critical (Blocking n8n/WhatsApp Integration)
-1. **Database Sync** ✅ **COMPLETED** (December 1, 2025)
-   - Task: Run Sequelize sync to ensure all models are synchronized
-   - Files: `educare-backend/src/models/*.js`
-   - Command: `node -e "const { sequelize } = require('./src/config/database'); sequelize.sync({ alter: true }).then(() => console.log('Sync complete'));"`
-   - Status: ✅ Completed - All 20+ models synchronized with PostgreSQL
-   - Result: All tables created/updated, backend queries executing normally
-   - Impact: ✅ Ready for n8n to query journey questions reliably
+### Fase 1 - Auditoria ✅
+- Análise completa do RAG atual (11 seções)
+- Identificação de gaps: single knowledge base, sem segmentação por user type
+- Recomendação: arquitetura segmentada (kb_baby, kb_mother, kb_professional)
 
-2. **n8n Workflow Implementation** ✅ **READY v2.0**
-   - Task: Import optimized v2 blueprint in n8n
-   - Files: 
-     - `educare-backend/docs/n8n-educare-v2.json` ✅ **RECOMENDADO** (28 nós, otimizado e seguro)
-     - `educare-backend/docs/n8n-educare-integrated.json` ✅ (Backup do v1 - 89 nós)
-     - `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (Guia atualizado para v2)
-   - Status: Blueprint v2 pronto, todas as branches conectadas ao WhatsApp Send
-   - Next Step: Importar `n8n-educare-v2.json` no n8n → Configurar credentials → Ativar
-   - Impact: Enables WhatsApp bot automation
+### Fase 2 - Arquitetura ✅
+- Design de 3 tabelas segmentadas + routing inteligente
+- Estratégia dual write + fallback automático
+- Feature flags para rollback seguro
+- Zero regression com sistema legado
 
-3. **WhatsApp Provider: Evolution API** ✅ **SELECTED**
-   - Provider: Evolution API (identified from uploaded blueprint)
-   - Integration: Already configured in n8n workflow
-   - Webhook URL: https://n8neducare.whatscall.com.br/webhook-test/titnauta
-   - Message Format: Evolution API JSON structure (see N8N_BLUEPRINT_SETUP.md)
-   - Status: Ready for activation in n8n
-   - Impact: WhatsApp communication channel ready
+### Fase 3 - Tabelas & Models ✅
+- 3 tabelas criadas: kb_baby, kb_mother, kb_professional
+- Models Sequelize + repositórios
+- Índices para performance
+- Suporte a OpenAI File Search (file_search_id)
+
+### Fase 4 - Dual Ingestion ✅
+- Método insertDualWithCategory() com inferência automática
+- Classificação por campos: age_range/domain → baby, specialty → mother/professional
+- Rastreamento via migrated_from para auditoria
+- Feature flag ENABLE_SEGMENTED_KB para controle
+
+### Fase 5 - RAG Integration ✅
+- selectKnowledgeDocuments() com seletor inteligente
+- ask() e askWithBabyId() com contexto de módulo
+- Fallback automático quando base primária vazia
+- Compatibilidade reversa 100%
+
+### Fase 6 - Métricas ✅
+- ragMetricsService.js com 6 métodos públicos
+- 6 endpoints REST: /api/metrics/rag/*
+- Health check com status (healthy/degraded/unhealthy)
+- Tracking: success_rate, response_time, fallback_rate, KB usage
+
+### Fase 7 - Testes & Migração ✅
+- Suite de testes end-to-end (19 testes)
+- migrationService.js: analyze, migrate, validate, rollback
+- 4 endpoints admin: /api/admin/migration/*
+- Documentação completa (FASE7_UPGRADE_TESTS_MIGRATION.md)
 
 ### Priority 2 - Important (Verification & Testing)
 4. **Stripe Webhook Verification** ⚠️
@@ -68,12 +81,13 @@ Educare+ is a digital platform for early childhood development and maternal heal
    - Status: Implementation done, testing pending
    - Impact: Ensures subscription billing works correctly
 
-5. **Frontend-to-Backend API Integration Testing** ⚠️
-   - Task: Create comprehensive test suite for external API
-   - Scope: Test all 13 endpoints with real data
-   - Tools: Jest/Vitest + Postman collection
-   - Status: Pending
-   - Impact: Ensures production reliability
+5. **n8n Workflow Implementation** ✅ **READY v2.0**
+   - Task: Import optimized v2 blueprint in n8n
+   - Files: 
+     - `educare-backend/docs/n8n-educare-v2.json` ✅ (28 nós, otimizado e seguro)
+     - `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (Guia atualizado para v2)
+   - Status: Blueprint v2 pronto com todas as branches conectadas
+   - Next Step: Importar no n8n → Configurar credentials → Ativar
 
 6. **Production Deployment Checklist** ⚠️
    - Task: Prepare deployment configuration
@@ -81,29 +95,6 @@ Educare+ is a digital platform for early childhood development and maternal heal
    - Files: `deploy_config_tool` configuration needed
    - Status: Pending
    - Impact: Required for going live
-
-### Priority 3 - RAG Implementation (In Progress)
-7. **RAG Implementation (Retrieval-Augmented Generation)** 🔄 **PHASES 1-5 COMPLETE**
-   - **Phase 1** ✅ - Analysis and technical report
-   - **Phase 2** ✅ - knowledge_documents table + fileSearchService + Super Admin upload
-   - **Phase 3** ✅ - ragService + /rag/ask endpoint (tested, 4.7s response time)
-   - **Phase 4** ✅ - babyContextService for personalized responses
-   - **Phase 5** ✅ - n8n integration (endpoints ready, documentation complete)
-   - **Phase 6** ⏳ - Frontend Super Admin
-   - **Phase 7** ⏳ - Prompt Templates with versioning
-   - **Phase 8** ⏳ - Refinement
-   - **Phase 9** ⏳ - QA and Tests
-   - Files: `educare-backend/src/services/ragService.js`, `babyContextService.js`, `fileSearchService.js`
-   - Documentation: `RAG-EDUCARE.md`, `N8N_RAG_INTEGRATION.md` (NEW)
-   - Impact: AI responses personalized to child's age, milestones, and developmental stage
-
-### Priority 4 - Enhancement (Post-MVP)
-8. **Advanced Analytics Dashboard** 🔮
-   - Task: Create usage analytics and performance monitoring
-   - Scope: n8n executions, API response times, user engagement
-   - Status: Pending
-   - Impact: Operations visibility
-   - Timeline: Post-MVP
 
 ## Integration Status
 

@@ -147,9 +147,11 @@ app.use('/api/media-resources', mediaResourceRoutes); // Gestão de recursos aud
 const adminKnowledgeRoutes = require('./routes/adminKnowledgeRoutes');
 const ragRoutes = require('./routes/ragRoutes');
 const metricsRoutes = require('./routes/metricsRoutes');
+const migrationRoutes = require('./routes/migrationRoutes');
 app.use('/api/admin/knowledge', adminKnowledgeRoutes); // Ingestão de documentos (Super Admin)
 app.use('/api/rag', ragRoutes); // Consulta RAG (autenticado e via API Key)
 app.use('/api/metrics', metricsRoutes); // Métricas do RAG (autenticado)
+app.use('/api/admin/migration', migrationRoutes); // Migração de documentos (Super Admin)
 
 // Stripe payment routes
 app.use('/api/stripe', stripeRoutes);
