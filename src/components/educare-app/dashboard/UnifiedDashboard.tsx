@@ -56,9 +56,10 @@ const UnifiedDashboard: React.FC = () => {
     <SelectedChildProvider>
       <DashboardErrorBoundary>
         <div className="space-y-6">
-          <EnhancedDashboardHeader />
-
-          <SocialMediaAccess />
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <EnhancedDashboardHeader />
+            <SocialMediaAccess />
+          </div>
 
           {isParent && totalChildren > 0 && (
             <ChildSelector children={children as any} />
@@ -70,38 +71,22 @@ const UnifiedDashboard: React.FC = () => {
             individualMode={isParent}
           />
 
-          {isParent && totalChildren > 0 && selectedChild && (
-            <>
-              <div className="grid gap-6 lg:grid-cols-2">
-                <DomainProgressChart 
-                  childName={selectedChild?.firstName || selectedChild?.first_name}
-                />
-                <StrengthsOpportunities />
-              </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <DomainProgressChart 
+              childName={selectedChild?.firstName || selectedChild?.first_name}
+            />
+            <StrengthsOpportunities />
+          </div>
 
-              <div className="grid gap-6 lg:grid-cols-3">
-                <div className="lg:col-span-2">
-                  <MilestonesTimeline childAge={getChildAge()} />
-                </div>
-                <div className="space-y-6">
-                  <AIInsightsCard />
-                  <ParentalResourcesCarousel />
-                </div>
-              </div>
-            </>
-          )}
-
-          {isParent && totalChildren === 0 && (
-            <div className="grid gap-6 lg:grid-cols-3">
-              <div className="lg:col-span-2">
-                <MilestonesTimeline />
-              </div>
-              <div className="space-y-6">
-                <AIInsightsCard />
-                <ParentalResourcesCarousel />
-              </div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <MilestonesTimeline childAge={getChildAge()} />
             </div>
-          )}
+            <div className="space-y-6">
+              <AIInsightsCard />
+              <ParentalResourcesCarousel />
+            </div>
+          </div>
 
           {totalChildren > 0 && (
             <Card>

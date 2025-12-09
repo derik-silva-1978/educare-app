@@ -16,12 +16,12 @@ interface DomainProgressChartProps {
   childName?: string;
 }
 
-const defaultData: DomainData[] = [
-  { domain: 'Motor', shortName: 'Motor', progress: 0, color: '#3B82F6' },
-  { domain: 'Linguagem', shortName: 'Linguagem', progress: 0, color: '#10B981' },
-  { domain: 'Cognitivo', shortName: 'Cognitivo', progress: 0, color: '#F59E0B' },
-  { domain: 'Social', shortName: 'Social', progress: 0, color: '#8B5CF6' },
-  { domain: 'Sensorial', shortName: 'Sensorial', progress: 0, color: '#EC4899' },
+const sampleData: DomainData[] = [
+  { domain: 'Motor', shortName: 'Motor', progress: 75, color: '#3B82F6' },
+  { domain: 'Linguagem', shortName: 'Linguagem', progress: 62, color: '#10B981' },
+  { domain: 'Cognitivo', shortName: 'Cognitivo', progress: 88, color: '#F59E0B' },
+  { domain: 'Social', shortName: 'Social', progress: 54, color: '#8B5CF6' },
+  { domain: 'Sensorial', shortName: 'Sensorial', progress: 70, color: '#EC4899' },
 ];
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -40,13 +40,13 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 const DomainProgressChart: React.FC<DomainProgressChartProps> = ({ 
-  data = defaultData,
+  data,
   childName 
 }) => {
-  const hasData = data.some(d => d.progress > 0);
+  const chartData = data && data.some(d => d.progress > 0) ? data : sampleData;
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -69,50 +69,45 @@ const DomainProgressChart: React.FC<DomainProgressChartProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        {hasData ? (
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={data}
-                layout="vertical"
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              layout="vertical"
+              margin={{ top: 5, right: 40, left: 10, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} opacity={0.3} />
+              <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} fontSize={12} />
+              <YAxis 
+                type="category" 
+                dataKey="shortName" 
+                width={70}
+                tick={{ fontSize: 12 }}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar 
+                dataKey="progress" 
+                radius={[0, 6, 6, 0]}
+                maxBarSize={28}
               >
-                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-                <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
-                <YAxis 
-                  type="category" 
-                  dataKey="shortName" 
-                  width={80}
-                  tick={{ fontSize: 12 }}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar 
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+                <LabelList 
                   dataKey="progress" 
-                  radius={[0, 4, 4, 0]}
-                  maxBarSize={30}
-                >
-                  {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                  <LabelList 
-                    dataKey="progress" 
-                    position="right" 
-                    formatter={(v: number) => `${v}%`}
-                    className="text-xs fill-muted-foreground"
-                  />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        ) : (
-          <div className="h-64 flex items-center justify-center">
-            <div className="text-center space-y-2">
-              <TrendingUp className="h-12 w-12 text-muted-foreground/30 mx-auto" />
-              <p className="text-muted-foreground text-sm">
-                Complete a jornada para ver o progresso por domínio
-              </p>
-            </div>
-          </div>
+                  position="right" 
+                  formatter={(v: number) => `${v}%`}
+                  className="text-xs"
+                  style={{ fill: '#6B7280', fontWeight: 500 }}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        {(!data || !data.some(d => d.progress > 0)) && (
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            * Dados de exemplo. Complete a jornada para ver seu progresso real.
+          </p>
         )}
       </CardContent>
     </Card>
