@@ -254,3 +254,38 @@ RAG_FEEDBACK_ENABLED=true
 RAG_AUTO_ANALYSIS=true
 RAG_IMPROVEMENT_MODEL=gpt-4o-mini
 ```
+
+## Frontend RAG Integration (December 9, 2025 - LIVE)
+
+### New Services Created
+✅ `src/services/api/ragService.ts` (200+ lines)
+  - askQuestion() - Chamada ao /api/rag/ask
+  - submitFeedback() - POST /api/metrics/rag/feedback
+  - getAggregateMetrics() - GET /api/metrics/rag/aggregates
+  - getModuleStats() - GET /api/metrics/rag/by-module
+  - getFeedbackStats() - Estatísticas de feedback
+  - getMaturityDashboard() - Dashboard de maturidade
+  - getQualityAnalysis() - Análise de qualidade
+  - getHealthCheck() - Health check do RAG
+
+### New Components Created
+✅ `src/components/educare-app/RAGFeedbackModal.tsx` (250+ lines)
+  - Modal de feedback 1-5 stars
+  - Tipos de feedback: helpful, not_helpful, incorrect, unclear
+  - Comentários opcionais
+  - Submissão anônima
+  - Integração com ragService
+
+✅ `src/pages/admin/RAGMetricsDashboard.tsx` (350+ lines)
+  - 3 Tabs: Visão Geral, Módulos, Detalhes
+  - Métricas agregadas em cards
+  - Estatísticas por módulo (baby/mother/professional)
+  - Health check visual
+  - Refresh automático
+
+### Status
+- ✅ Backend: 26 endpoints operacionais
+- ✅ Frontend Service: Completo com tipos TypeScript
+- ✅ Components: RAGFeedbackModal + RAGMetricsDashboard
+- ✅ Integration: Pronto para usar em TitiNautaJourney
+- ⏳ Next: Integrar RAGFeedbackModal em componentes que usam RAG
