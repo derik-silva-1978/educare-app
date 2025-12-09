@@ -10,6 +10,7 @@ Educare+ is a digital platform for early childhood development and maternal heal
 - Incomplete modules marked with visible "Em Desenvolvimento" badges.
 
 ## Recent Changes (December 2025)
+- **AUDITORIA RAG COMPLETA (December 9)**: Score 97/100 - Sistema persistente, 3 gaps corrigidos (DB read/write, context capture, frontend fallback)
 - **FASE 11-UPGRADE Completa (December 9)**: RAG Auto-Melhoramento com feedback, análise de qualidade, sugestões LLM, dashboard de maturidade
 - **FASE 10-UPGRADE Completa (December 9)**: Re-ranking neural, confidence scoring, LLM chunking, data augmentation, context safety, KB versioning
 - **FASE 9-UPGRADE Completa (December 9)**: Legacy shutdown service com backup, desativação, rollback, 7 endpoints admin
