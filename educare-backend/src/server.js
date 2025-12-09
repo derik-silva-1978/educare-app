@@ -149,11 +149,13 @@ const ragRoutes = require('./routes/ragRoutes');
 const metricsRoutes = require('./routes/metricsRoutes');
 const migrationRoutes = require('./routes/migrationRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const guardrailsRoutes = require('./routes/guardrailsRoutes');
 app.use('/api/admin/knowledge', adminKnowledgeRoutes); // Ingestão de documentos (Super Admin)
 app.use('/api/rag', ragRoutes); // Consulta RAG (autenticado e via API Key)
 app.use('/api/metrics', metricsRoutes); // Métricas do RAG (autenticado)
 app.use('/api/admin/migration', migrationRoutes); // Migração de documentos (Super Admin)
 app.use('/api/admin', adminRoutes); // FASE 09: Legacy shutdown management (Super Admin)
+app.use('/api/guardrails', guardrailsRoutes); // Guardrails para n8n/WhatsApp
 
 // Stripe payment routes
 app.use('/api/stripe', stripeRoutes);

@@ -1,0 +1,341 @@
+{
+  "description": "Nós de Guardrails para adicionar ao workflow Educare+ TitiNauta v2.0",
+  "version": "1.0.0",
+  "instructions": "Importe estes nós no seu workflow existente e conecte conforme documentação N8N_GUARDRAILS_SETUP.md",
+  
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.EDUCARE_API_URL}}/guardrails/validate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-API-Key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{$('Extract Data').item.json.messageBody}}\",\n  \"context\": {\n    \"sessionId\": \"{{$('Extract Data').item.json.userPhone}}\",\n    \"userId\": \"{{$('Extract Data').item.json.userPhone}}\",\n    \"module\": \"chat\",\n    \"source\": \"whatsapp\"\n  }\n}",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "guardrails-input-001",
+      "name": "Guardrails: Validate Input",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-300, 400],
+      "notesInFlow": true,
+      "notes": "Valida mensagem de entrada: PII, prompt injection, tópicos, emergência"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-blocked",
+              "leftValue": "={{$json.valid}}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "guardrails-router-002",
+      "name": "Guardrails: Check Blocked",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-100, 400],
+      "notesInFlow": true,
+      "notes": "Verifica se mensagem foi bloqueada por guardrails"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-emergency",
+              "leftValue": "={{$json.checks?.emergency?.requiresEscalation}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "guardrails-emergency-003",
+      "name": "Guardrails: Check Emergency",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [100, 300],
+      "notesInFlow": true,
+      "notes": "Verifica se é emergência médica que requer escalação"
+    },
+    {
+      "parameters": {
+        "jsCode": "const guardrails = $('Guardrails: Validate Input').item.json;\nconst extractData = $('Extract Data').item.json;\n\n// Mensagem bloqueada - usar resposta de guardrails\nconst responseMessage = guardrails.blockedResponse || 'Desculpe, não foi possível processar sua mensagem.';\n\nreturn [{\n  json: {\n    responseMessage: responseMessage,\n    userPhone: extractData.userPhone,\n    backendURL: extractData.backendURL,\n    instanceApiKey: extractData.instanceApiKey,\n    remoteJid: extractData.remoteJid,\n    blockedBy: 'guardrails',\n    reason: guardrails.issues?.[0]?.type || 'unknown'\n  }\n}];"
+      },
+      "id": "guardrails-blocked-response-004",
+      "name": "Guardrails: Format Blocked Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-100, 550],
+      "notesInFlow": true,
+      "notes": "Formata resposta para mensagens bloqueadas por guardrails"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.EDUCARE_API_URL}}/guardrails/escalate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-API-Key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"userPhone\": \"{{$('Extract Data').item.json.userPhone}}\",\n  \"userName\": \"{{$('Extract Data').item.json.userName}}\",\n  \"message\": \"{{$('Extract Data').item.json.messageBody}}\",\n  \"emergencyTerms\": {{JSON.stringify($('Guardrails: Validate Input').item.json.checks?.emergency?.terms || [])}},\n  \"urgencyScore\": \"{{$('Guardrails: Validate Input').item.json.checks?.emergency?.urgencyScore || 'high'}}\",\n  \"sessionId\": \"{{$('Extract Data').item.json.userPhone}}\"\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "guardrails-escalate-005",
+      "name": "Guardrails: Escalate Emergency",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [100, 150],
+      "notesInFlow": true,
+      "notes": "Escala emergência médica - registra e notifica"
+    },
+    {
+      "parameters": {
+        "jsCode": "const escalation = $json;\nconst extractData = $('Extract Data').item.json;\n\n// Usar resposta de emergência do guardrails\nconst responseMessage = escalation.userResponse || `🚨 *ATENÇÃO - SITUAÇÃO DE EMERGÊNCIA*\n\nPelos termos que você usou, parece ser uma situação urgente.\n\n*LIGUE AGORA:*\n📞 SAMU: 192\n📞 Bombeiros: 193\n📞 Emergência: 190\n\nNão espere - procure atendimento médico IMEDIATO.\n\nA TitiNauta não substitui atendimento de emergência. 💜`;\n\nreturn [{\n  json: {\n    responseMessage: responseMessage,\n    userPhone: extractData.userPhone,\n    backendURL: extractData.backendURL,\n    instanceApiKey: extractData.instanceApiKey,\n    remoteJid: extractData.remoteJid,\n    escalationId: escalation.escalation?.id,\n    isEmergency: true\n  }\n}];"
+      },
+      "id": "guardrails-emergency-response-006",
+      "name": "Guardrails: Format Emergency Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 150],
+      "notesInFlow": true,
+      "notes": "Formata resposta de emergência com instruções SAMU/Bombeiros"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.EDUCARE_API_URL}}/guardrails/validate-output",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-API-Key",
+              "value": "={{$env.EXTERNAL_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"response\": \"{{$json.output || $json.text || ''}}\",\n  \"context\": {\n    \"module\": \"chat\"\n  }\n}",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "guardrails-output-007",
+      "name": "Guardrails: Validate Output",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2400, 500],
+      "notesInFlow": true,
+      "notes": "Valida resposta do LLM: disclaimers médicos, PII na resposta"
+    },
+    {
+      "parameters": {
+        "jsCode": "const outputCheck = $json;\nconst extractData = $('Extract Data').item.json;\n\n// Usar resposta final (com ou sem disclaimer)\nlet responseMessage = outputCheck.finalResponse || outputCheck.originalResponse || '';\n\n// Se a resposta foi invalidada, usar mensagem genérica\nif (!outputCheck.valid) {\n  responseMessage = 'Desculpe, houve um problema ao processar a resposta. Por favor, consulte um profissional de saúde para orientações específicas.';\n}\n\nreturn [{\n  json: {\n    responseMessage: responseMessage,\n    userPhone: extractData.userPhone,\n    backendURL: extractData.backendURL,\n    instanceApiKey: extractData.instanceApiKey,\n    remoteJid: extractData.remoteJid,\n    disclaimerAdded: outputCheck.disclaimerAdded || false\n  }\n}];"
+      },
+      "id": "guardrails-format-output-008",
+      "name": "Guardrails: Format Safe Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2600, 500],
+      "notesInFlow": true,
+      "notes": "Formata resposta final com disclaimers se necessário"
+    }
+  ],
+  
+  "connections": {
+    "Extract Data": {
+      "main": [
+        [
+          {
+            "node": "Guardrails: Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails: Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Guardrails: Check Blocked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails: Check Blocked": {
+      "main": [
+        [
+          {
+            "node": "Guardrails: Format Blocked Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Guardrails: Check Emergency",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails: Check Emergency": {
+      "main": [
+        [
+          {
+            "node": "Guardrails: Escalate Emergency",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Educare: Search User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails: Format Blocked Response": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp: Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails: Escalate Emergency": {
+      "main": [
+        [
+          {
+            "node": "Guardrails: Format Emergency Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails: Format Emergency Response": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp: Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent: TitiNauta": {
+      "main": [
+        [
+          {
+            "node": "Guardrails: Validate Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails: Validate Output": {
+      "main": [
+        [
+          {
+            "node": "Guardrails: Format Safe Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardrails: Format Safe Output": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp: Send Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

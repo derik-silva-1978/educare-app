@@ -1,0 +1,207 @@
+{
+  "enabled": true,
+  "version": "1.0.0",
+  "description": "Configuração de Guardrails para Educare+ TitiNauta",
+  
+  "strictMode": false,
+  "logEvents": true,
+  "blockOnViolation": true,
+  
+  "pii": {
+    "detectCPF": true,
+    "detectPhone": true,
+    "detectEmail": true,
+    "detectCreditCard": true,
+    "detectChildNames": true,
+    "detectBirthDate": true,
+    "detectRG": true,
+    "maskInLogs": true,
+    "blockOnDetection": false,
+    "warnOnly": true
+  },
+  
+  "promptInjection": {
+    "enabled": true,
+    "sensitivity": "high",
+    "customPatterns": [
+      "ignore.*instruções",
+      "esqueça.*contexto",
+      "você.*agora.*é",
+      "responda.*como.*se.*fosse",
+      "finja.*ser",
+      "aja.*como",
+      "novo.*papel",
+      "mude.*personalidade"
+    ]
+  },
+  
+  "topics": {
+    "allowed": [
+      "desenvolvimento_infantil",
+      "marcos_desenvolvimento",
+      "motricidade_fina",
+      "motricidade_grossa",
+      "linguagem_comunicacao",
+      "cognitivo",
+      "socioemocional",
+      "alimentacao_infantil",
+      "introducao_alimentar",
+      "amamentacao",
+      "sono_bebe",
+      "rotina_sono",
+      "saude_materna",
+      "puerperio",
+      "estimulacao",
+      "brincadeiras",
+      "interacao",
+      "vacinas_informacoes",
+      "consultas_pediatra",
+      "crescimento",
+      "peso_altura"
+    ],
+    "blocked": [
+      "medicamentos",
+      "dosagem",
+      "diagnostico",
+      "tratamento_medico",
+      "receita_medica",
+      "prescricao",
+      "financeiro",
+      "investimento",
+      "emprestimo",
+      "juridico",
+      "legal",
+      "advogado",
+      "politica",
+      "religiao",
+      "aborto",
+      "violencia",
+      "abuso"
+    ],
+    "requiresDisclaimer": [
+      "febre",
+      "dor",
+      "vomito",
+      "diarreia",
+      "alergia",
+      "manchas",
+      "erupcao",
+      "tosse",
+      "gripe",
+      "resfriado"
+    ]
+  },
+  
+  "emergencyTerms": {
+    "critical": [
+      "não respira",
+      "nao respira",
+      "parou de respirar",
+      "inconsciente",
+      "convulsão",
+      "convulsao",
+      "engasgou",
+      "afogamento",
+      "envenenamento",
+      "intoxicação grave"
+    ],
+    "high": [
+      "emergência",
+      "urgente",
+      "hospital agora",
+      "sangramento intenso",
+      "febre muito alta",
+      "desmaio",
+      "caiu da",
+      "acidente"
+    ],
+    "medium": [
+      "febre alta",
+      "não acorda",
+      "roxo",
+      "azul",
+      "grave",
+      "preocupada"
+    ]
+  },
+  
+  "rateLimit": {
+    "enabled": true,
+    "maxRequestsPerMinute": 30,
+    "maxRequestsPerHour": 200,
+    "maxRequestsPerDay": 500,
+    "burstLimit": 10,
+    "burstWindow": 10
+  },
+  
+  "outputValidation": {
+    "enabled": true,
+    "maxResponseLength": 2000,
+    "requireMedicalDisclaimer": true,
+    "disclaimerText": "💡 Lembre-se: Esta informação não substitui a orientação de um profissional de saúde.",
+    "blockDangerousAdvice": true,
+    "dangerousPatterns": [
+      "não precisa de médico",
+      "pode dar \\d+ (mg|ml|gotas)",
+      "automedicação é segura",
+      "ignore o profissional",
+      "não leve ao hospital",
+      "tratamento caseiro resolve"
+    ]
+  },
+  
+  "childDataProtection": {
+    "enabled": true,
+    "maskNamesInLogs": true,
+    "maskHealthDataInLogs": true,
+    "encryptStoredData": true,
+    "retentionDays": 365,
+    "allowedFields": [
+      "age_months",
+      "domain_scores",
+      "progress_percentage"
+    ],
+    "sensitiveFields": [
+      "name",
+      "birth_date",
+      "photo",
+      "medical_history",
+      "parent_phone"
+    ]
+  },
+  
+  "escalation": {
+    "enabled": true,
+    "emergencyContact": {
+      "method": "webhook",
+      "url": "${ESCALATION_WEBHOOK_URL}",
+      "includeContext": true,
+      "notifyParent": true
+    },
+    "humanReview": {
+      "enabled": true,
+      "triggerOn": ["emergency", "blocked_content", "repeated_violations"],
+      "queueName": "educare_human_review"
+    }
+  },
+  
+  "monitoring": {
+    "enabled": true,
+    "metricsEndpoint": "/api/guardrails/metrics",
+    "alertThresholds": {
+      "piiDetectionsPerHour": 50,
+      "promptInjectionBlocksPerHour": 10,
+      "emergencyEscalationsPerDay": 5,
+      "rateLimitViolationsPerHour": 100
+    }
+  },
+  
+  "responses": {
+    "promptInjection": "Desculpe, não consigo processar essa mensagem. Por favor, faça uma pergunta sobre desenvolvimento infantil ou saúde materna.",
+    "blockedTopicMedical": "Para questões sobre medicamentos, dosagens ou tratamentos médicos, é essencial consultar um pediatra ou profissional de saúde. A TitiNauta pode ajudar com dúvidas sobre desenvolvimento infantil, alimentação, sono e estimulação. 💜",
+    "blockedTopicOther": "A TitiNauta é especializada em desenvolvimento infantil e saúde materna. Posso ajudar com dúvidas sobre marcos do desenvolvimento, alimentação, sono, amamentação e estimulação do bebê. Como posso ajudar nessas áreas?",
+    "rateLimit": "Você está enviando muitas mensagens. Por favor, aguarde um momento antes de continuar. 🙏",
+    "emergency": "🚨 *ATENÇÃO - SITUAÇÃO DE EMERGÊNCIA*\n\nPelos termos que você usou, parece ser uma situação urgente.\n\n*LIGUE AGORA:*\n📞 SAMU: 192\n📞 Bombeiros: 193\n📞 Emergência: 190\n\nNão espere - procure atendimento médico IMEDIATO.\n\nA TitiNauta não substitui atendimento de emergência. 💜",
+    "medicalDisclaimer": "💡 Lembre-se: Esta informação é apenas orientativa e não substitui a consulta com um pediatra ou profissional de saúde."
+  }
+}
