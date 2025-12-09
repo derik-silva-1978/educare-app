@@ -14,7 +14,7 @@ Educare+ is a digital platform designed to support early childhood development a
 ### UI/UX Decisions
 The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui` (Radix UI + Tailwind CSS) for a professional and WCAG-compliant interface. 
 
-**WelcomeHub** (`/educare-app/welcome`): Entry screen after login featuring WelcomeHero (gradient banner with CTA), NewsCarousel (image-based news cards), AcademyCourses (course listings), TitiNautaWidget (AI assistant), FeedbackPanel, and DonationCTA. IconToolbar with 6 minimalist icons (theme, notifications, feedback, activities, TitiNauta, profile).
+**WelcomeHub** (`/educare-app/welcome`): Authenticated-only landing page featuring sticky IconToolbar (6 minimalist icons: theme toggle, notifications badge, feedback, activities, TitiNauta, profile menu). Main content: WelcomeHero (gradient banner with greeting & CTAs), NewsCarousel (dynamically loaded news cards from ContentItem), TrainingSection (training content), AcademyCourses (course listings with difficulty levels), TitiNautaWidget (AI assistant card), FeedbackPanel (collapsible), and DonationCTA (support banner). All content fetches real data from `/api/content/public` endpoint via React Query with loading states.
 
 **Dashboard**: Clean, focused layout showing MetricsCards, DomainProgressChart (recharts bar chart with color-coded domains), StrengthsOpportunities, MilestonesTimeline, AIInsightsCard, ParentalResourcesCarousel, and children list. Removed: "Acesso Rápido à Plataforma", empty state messages, and "Primeiros Passos" for minimalist aesthetic. Social media icons (WhatsApp, Instagram, Facebook) in header.
 
@@ -32,6 +32,8 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 - **Authentication**: JWT-based with comprehensive role-based access control (Owner, Admin, Professional, Parent).
 - **Knowledge Base Management**: Owner panel for uploading, listing, deleting, and activating/deactivating documents across the three segmented KBs.
 - **RAG Metrics & Monitoring**: Dedicated RAGMetricsDashboard for owners, displaying success rates, response times, fallback rates, and KB usage. Health checks provide status (healthy/degraded/unhealthy).
+- **Content Management**: Admin/Owner exclusive system for creating, editing, and publishing dynamic content (news, trainings, courses) that populates WelcomeHub. Features draft/published/archived status, image URLs, target audience, and sort ordering. Accessible at `/educare-app/admin/content-management` and `/educare-app/owner/content-management`.
+- **WelcomeHub Dynamic Content**: Public `/api/content/public` endpoint serves published content filtered by type and audience. Components use React Query for real-time data with loading states.
 - **External API**: 13 endpoints for integration with external systems like WhatsApp via n8n.
 - **Subscription Management**: Stripe integration for handling SaaS subscriptions.
 
