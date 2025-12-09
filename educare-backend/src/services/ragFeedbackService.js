@@ -7,17 +7,22 @@
  * - Rastrear eventos do RAG
  * - Analisar qualidade
  * - Gerar sugestões de melhoria
+ * 
+ * ATUALIZADO: Agora usa persistência em banco de dados (rag_events, rag_feedback)
  */
 
 const { v4: uuidv4 } = require('uuid');
 const OpenAI = require('openai');
+const { Sequelize, DataTypes } = require('sequelize');
 
 const openai = new OpenAI();
 
 const FEEDBACK_ENABLED = process.env.RAG_FEEDBACK_ENABLED !== 'false';
 const AUTO_ANALYSIS_ENABLED = process.env.RAG_AUTO_ANALYSIS === 'true';
 const IMPROVEMENT_MODEL = process.env.RAG_IMPROVEMENT_MODEL || 'gpt-4o-mini';
+const USE_DB_PERSISTENCE = process.env.RAG_USE_DB_PERSISTENCE !== 'false';
 
+// In-memory stores como fallback
 const feedbackStore = [];
 const eventStore = [];
 const analysisResults = [];
@@ -25,10 +30,54 @@ const improvementSuggestions = [];
 
 const MAX_STORE_SIZE = parseInt(process.env.RAG_STORE_MAX_SIZE || '10000');
 
+// Database connection (lazy initialization)
+let sequelize = null;
+let RagEvent = null;
+let RagFeedback = null;
+
+async function initDatabase() {
+  if (sequelize) return { RagEvent, RagFeedback };
+  
+  try {
+    sequelize = new Sequelize(process.env.DATABASE_URL, { logging: false });
+    
+    RagEvent = sequelize.define('rag_event', {
+      id: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV4 },
+      type: { type: DataTypes.STRING(100), allowNull: false },
+      timestamp: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+      session_id: { type: DataTypes.STRING(100) },
+      user_id: { type: DataTypes.UUID },
+      query: { type: DataTypes.TEXT },
+      module: { type: DataTypes.STRING(50) },
+      data: { type: DataTypes.JSONB, defaultValue: {} }
+    }, { tableName: 'rag_events', timestamps: true, createdAt: 'created_at', updatedAt: false });
+
+    RagFeedback = sequelize.define('rag_feedback', {
+      id: { type: DataTypes.UUID, primaryKey: true, defaultValue: DataTypes.UUIDV4 },
+      response_id: { type: DataTypes.STRING(255), allowNull: false },
+      query: { type: DataTypes.TEXT },
+      rating: { type: DataTypes.INTEGER },
+      feedback_type: { type: DataTypes.STRING(50), allowNull: false },
+      comment: { type: DataTypes.TEXT },
+      module: { type: DataTypes.STRING(50) },
+      user_id: { type: DataTypes.UUID },
+      session_id: { type: DataTypes.STRING(100) },
+      metadata: { type: DataTypes.JSONB, defaultValue: {} }
+    }, { tableName: 'rag_feedback', timestamps: true, createdAt: 'created_at', updatedAt: false });
+
+    await sequelize.authenticate();
+    console.log('[RAGFeedback] Database persistence initialized');
+    return { RagEvent, RagFeedback };
+  } catch (error) {
+    console.warn('[RAGFeedback] Database init failed, using in-memory store:', error.message);
+    return null;
+  }
+}
+
 /**
- * Registra evento do RAG
+ * Registra evento do RAG (com persistência em banco)
  */
-function logEvent(eventType, data = {}) {
+async function logEvent(eventType, data = {}) {
   if (!FEEDBACK_ENABLED) return null;
 
   const event = {
@@ -42,8 +91,29 @@ function logEvent(eventType, data = {}) {
     module: data.module || null
   };
 
-  eventStore.push(event);
+  // Persist to database if enabled
+  if (USE_DB_PERSISTENCE) {
+    try {
+      const db = await initDatabase();
+      if (db && db.RagEvent) {
+        await db.RagEvent.create({
+          id: event.id,
+          type: event.type,
+          timestamp: event.timestamp,
+          session_id: event.session_id,
+          user_id: event.user_id,
+          query: event.query,
+          module: event.module,
+          data: event.data
+        });
+      }
+    } catch (error) {
+      console.warn('[RAGFeedback] DB persist failed for event:', error.message);
+    }
+  }
 
+  // Also keep in memory for quick access
+  eventStore.push(event);
   if (eventStore.length > MAX_STORE_SIZE) {
     eventStore.shift();
   }
@@ -52,9 +122,9 @@ function logEvent(eventType, data = {}) {
 }
 
 /**
- * Registra feedback do usuário
+ * Registra feedback do usuário (com persistência em banco)
  */
-function submitFeedback(params) {
+async function submitFeedback(params) {
   if (!FEEDBACK_ENABLED) {
     return { success: false, reason: 'disabled' };
   }
@@ -66,7 +136,8 @@ function submitFeedback(params) {
     feedback_type,
     comment,
     user_id,
-    module
+    module,
+    session_id
   } = params;
 
   const feedback = {
@@ -78,17 +149,50 @@ function submitFeedback(params) {
     comment,
     user_id,
     module,
+    session_id,
     created_at: new Date().toISOString(),
     processed: false
   };
 
-  feedbackStore.push(feedback);
+  // Persist to database if enabled
+  if (USE_DB_PERSISTENCE) {
+    try {
+      const db = await initDatabase();
+      if (db && db.RagFeedback) {
+        await db.RagFeedback.create({
+          id: feedback.id,
+          response_id: feedback.response_id,
+          query: feedback.query,
+          rating: feedback.rating,
+          feedback_type: feedback.feedback_type,
+          comment: feedback.comment,
+          module: feedback.module,
+          user_id: feedback.user_id,
+          session_id: feedback.session_id,
+          metadata: { processed: false }
+        });
+        console.log(`[RAGFeedback] Feedback persistido no banco: ${feedback.id}`);
+      }
+    } catch (error) {
+      console.warn('[RAGFeedback] DB persist failed for feedback:', error.message);
+    }
+  }
 
+  // Also keep in memory for quick access
+  feedbackStore.push(feedback);
   if (feedbackStore.length > MAX_STORE_SIZE) {
     feedbackStore.shift();
   }
 
-  logEvent('feedback_submitted', { feedback_id: feedback.id, rating, feedback_type });
+  await logEvent('feedback_submitted', { 
+    feedback_id: feedback.id, 
+    rating, 
+    feedback_type,
+    query: query,
+    module: module,
+    user_id: user_id,
+    session_id: session_id
+  });
 
   console.log(`[RAGFeedback] Feedback registrado: ${feedback_type} (rating: ${rating})`);
 
@@ -96,13 +200,48 @@ function submitFeedback(params) {
 }
 
 /**
- * Obtém estatísticas de feedback
+ * Obtém estatísticas de feedback (busca do banco de dados)
  */
-function getFeedbackStats(options = {}) {
+async function getFeedbackStats(options = {}) {
   const { module, days = 30 } = options;
-  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-  let filtered = feedbackStore.filter(f => f.created_at >= cutoff);
+  // Try database first
+  if (USE_DB_PERSISTENCE) {
+    try {
+      const db = await initDatabase();
+      if (db && db.RagFeedback) {
+        const { Op } = require('sequelize');
+        const where = { created_at: { [Op.gte]: cutoff } };
+        if (module) where.module = module;
+
+        const feedbacks = await db.RagFeedback.findAll({ where, raw: true });
+        
+        const ratings = feedbacks.map(f => f.rating).filter(r => r !== null && r !== undefined);
+        const avgRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
+
+        const byType = {};
+        feedbacks.forEach(f => {
+          byType[f.feedback_type] = (byType[f.feedback_type] || 0) + 1;
+        });
+
+        return {
+          total_feedback: feedbacks.length,
+          avg_rating: avgRating ? parseFloat(avgRating.toFixed(2)) : null,
+          by_type: byType,
+          period_days: days,
+          module_filter: module || 'all',
+          source: 'database'
+        };
+      }
+    } catch (error) {
+      console.warn('[RAGFeedback] DB query failed, using in-memory:', error.message);
+    }
+  }
+
+  // Fallback to in-memory
+  const cutoffStr = cutoff.toISOString();
+  let filtered = feedbackStore.filter(f => f.created_at >= cutoffStr);
   
   if (module) {
     filtered = filtered.filter(f => f.module === module);
@@ -121,18 +260,55 @@ function getFeedbackStats(options = {}) {
     avg_rating: avgRating ? parseFloat(avgRating.toFixed(2)) : null,
     by_type: byType,
     period_days: days,
-    module_filter: module || 'all'
+    module_filter: module || 'all',
+    source: 'memory'
   };
 }
 
 /**
- * Obtém estatísticas de eventos
+ * Obtém estatísticas de eventos (busca do banco de dados)
  */
-function getEventStats(options = {}) {
+async function getEventStats(options = {}) {
   const { days = 7 } = options;
-  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-  const filtered = eventStore.filter(e => e.timestamp >= cutoff);
+  // Try database first
+  if (USE_DB_PERSISTENCE) {
+    try {
+      const db = await initDatabase();
+      if (db && db.RagEvent) {
+        const { Op } = require('sequelize');
+        const events = await db.RagEvent.findAll({
+          where: { timestamp: { [Op.gte]: cutoff } },
+          raw: true
+        });
+
+        const byType = {};
+        events.forEach(e => {
+          byType[e.type] = (byType[e.type] || 0) + 1;
+        });
+
+        const byModule = {};
+        events.filter(e => e.module).forEach(e => {
+          byModule[e.module] = (byModule[e.module] || 0) + 1;
+        });
+
+        return {
+          total_events: events.length,
+          by_type: byType,
+          by_module: byModule,
+          period_days: days,
+          source: 'database'
+        };
+      }
+    } catch (error) {
+      console.warn('[RAGFeedback] DB event query failed, using in-memory:', error.message);
+    }
+  }
+
+  // Fallback to in-memory
+  const cutoffStr = cutoff.toISOString();
+  const filtered = eventStore.filter(e => e.timestamp >= cutoffStr);
 
   const byType = {};
   filtered.forEach(e => {
@@ -148,7 +324,8 @@ function getEventStats(options = {}) {
     total_events: filtered.length,
     by_type: byType,
     by_module: byModule,
-    period_days: days
+    period_days: days,
+    source: 'memory'
   };
 }
 
@@ -156,8 +333,8 @@ function getEventStats(options = {}) {
  * Analisa qualidade do RAG baseado em feedback
  */
 async function analyzeQuality(options = {}) {
-  const feedbackStats = getFeedbackStats(options);
-  const eventStats = getEventStats(options);
+  const feedbackStats = await getFeedbackStats(options);
+  const eventStats = await getEventStats(options);
 
   const analysis = {
     id: uuidv4(),
@@ -306,8 +483,8 @@ function markSuggestionImplemented(suggestionId, implementedBy) {
  * Obtém dashboard de maturidade do RAG
  */
 async function getMaturityDashboard() {
-  const feedbackStats = getFeedbackStats({ days: 30 });
-  const eventStats = getEventStats({ days: 7 });
+  const feedbackStats = await getFeedbackStats({ days: 30 });
+  const eventStats = await getEventStats({ days: 7 });
   const recentAnalysis = analysisResults.slice(-1)[0];
   const pendingSuggestions = getPendingSuggestions(5);
 

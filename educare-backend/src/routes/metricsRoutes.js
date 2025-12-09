@@ -269,9 +269,9 @@ router.post('/rag/reset', verifyToken, isOwner, (req, res) => {
  *       200:
  *         description: Feedback registrado
  */
-router.post('/rag/feedback', (req, res) => {
+router.post('/rag/feedback', async (req, res) => {
   try {
-    const result = ragFeedbackService.submitFeedback(req.body);
+    const result = await ragFeedbackService.submitFeedback(req.body);
     return res.json(result);
   } catch (error) {
     console.error('[Metrics] Erro ao submeter feedback:', error);
@@ -294,11 +294,11 @@ router.post('/rag/feedback', (req, res) => {
  *       200:
  *         description: Estatisticas de feedback
  */
-router.get('/rag/feedback/stats', verifyToken, (req, res) => {
+router.get('/rag/feedback/stats', verifyToken, async (req, res) => {
   try {
     const module = req.query.module;
     const days = parseInt(req.query.days) || 30;
-    const stats = ragFeedbackService.getFeedbackStats({ module, days });
+    const stats = await ragFeedbackService.getFeedbackStats({ module, days });
     return res.json({ success: true, data: stats });
   } catch (error) {
     console.error('[Metrics] Erro ao obter feedback stats:', error);

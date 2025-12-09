@@ -79,6 +79,7 @@ export interface RAGModuleStats {
 
 /**
  * Faz uma pergunta ao RAG
+ * Usa autenticação JWT quando disponível, fallback para API key externa
  */
 export async function askQuestion(
   question: string,
@@ -92,29 +93,51 @@ export async function askQuestion(
     enable_confidence?: boolean;
   } = {}
 ): Promise<RAGResponse> {
-  try {
-    const payload = {
-      question,
-      baby_id: babyId,
-      module_type: options.module_type || 'baby',
-      age_range: options.age_range,
-      domain: options.domain,
-      enable_reranking: options.enable_reranking !== false,
-      enable_safety: options.enable_safety !== false,
-      enable_confidence: options.enable_confidence !== false,
-    };
+  const payload = {
+    question,
+    baby_id: babyId,
+    module_type: options.module_type || 'baby',
+    age_range: options.age_range,
+    domain: options.domain,
+    enable_reranking: options.enable_reranking !== false,
+    enable_safety: options.enable_safety !== false,
+    enable_confidence: options.enable_confidence !== false,
+  };
 
+  // Primeiro tenta com autenticação JWT
+  try {
     const response = await httpClient.post<RAGResponse>(
       '/rag/ask',
+      payload,
+      { requiresAuth: true }
+    );
+
+    if (response.success && response.data) {
+      return response.data;
+    }
+
+    // Se não teve sucesso mas não é erro de auth, lança erro
+    if (response.error && !response.error.includes('Token') && !response.error.includes('401')) {
+      throw new Error(response.error);
+    }
+  } catch (authError) {
+    console.log('[RAGService] Auth request failed, trying external endpoint');
+  }
+
+  // Fallback: usa a rota externa (não requer auth)
+  try {
+    console.log('[RAGService] Usando rota externa');
+    const externalResponse = await httpClient.post<RAGResponse>(
+      '/rag/external/ask',
       payload,
       { requiresAuth: false }
     );
 
-    if (!response.success || !response.data) {
-      throw new Error(response.error || 'Erro ao obter resposta do RAG');
+    if (externalResponse.success && externalResponse.data) {
+      return externalResponse.data;
     }
 
-    return response.data;
+    throw new Error(externalResponse.error || 'Erro ao obter resposta do RAG');
   } catch (error) {
     console.error('[RAGService] Erro ao fazer pergunta:', error);
     throw error;
