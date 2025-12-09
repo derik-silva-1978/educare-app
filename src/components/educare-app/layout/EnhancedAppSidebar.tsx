@@ -20,7 +20,9 @@ import {
   UsersRound,
   FileVideo,
   BarChart3,
-  Database
+  Database,
+  FileText,
+  Sparkles
 } from 'lucide-react';
 import {
   Sidebar,
@@ -85,9 +87,19 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
   if (userRole === 'owner') {
     return [
       {
+        title: "WelcomeHub",
+        url: "/educare-app/welcome",
+        icon: Sparkles,
+      },
+      {
         title: "Dashboard Owner",
         url: "/educare-app/owner/dashboard",
         icon: Crown,
+      },
+      {
+        title: "Gestão de Conteúdo",
+        url: "/educare-app/owner/content-management",
+        icon: FileText,
       },
       {
         title: "Gestão de Usuários",
@@ -147,9 +159,19 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
   if (userRole === 'admin') {
     return [
       {
+        title: "WelcomeHub",
+        url: "/educare-app/welcome",
+        icon: Sparkles,
+      },
+      {
         title: "Dashboard Admin",
         url: "/educare-app/admin/dashboard",
         icon: Shield,
+      },
+      {
+        title: "Gestão de Conteúdo",
+        url: "/educare-app/admin/content-management",
+        icon: FileText,
       },
       {
         title: "Gestão de Usuários",

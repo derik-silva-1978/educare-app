@@ -30,6 +30,7 @@ const externalApiRoutes = require('./routes/externalApiRoutes');
 const mediaResourceRoutes = require('./routes/mediaResourceRoutes');
 const healthRoutes = require('./routes/healthRoutes');
 const stripeRoutes = require('./routes/stripeRoutes');
+const contentRoutes = require('./routes/contentRoutes');
 
 // Stripe services
 const { initStripe } = require('./services/stripeInit');
@@ -159,6 +160,9 @@ app.use('/api/guardrails', guardrailsRoutes); // Guardrails para n8n/WhatsApp
 
 // Stripe payment routes
 app.use('/api/stripe', stripeRoutes);
+
+// Content management routes (WelcomeHub)
+app.use('/api/content', contentRoutes);
 
 // Rotas de health check (sem prefixo /api para acesso direto)
 app.use('/health', healthRoutes);

@@ -25,6 +25,7 @@ const JourneyBotSession = require('./JourneyBotSession');
 const JourneyBotResponse = require('./JourneyBotResponse');
 const JourneyBotQuestion = require('./JourneyBotQuestion');
 const Activity = require('./Activity');
+const ContentItem = require('./ContentItem');
 
 // Modelos do RAG
 const KnowledgeDocument = require('./KnowledgeDocument');
@@ -232,6 +233,13 @@ UserJourneyV2Badge.belongsTo(Child, { foreignKey: 'child_id', as: 'child' });
 JourneyV2Badge.hasMany(UserJourneyV2Badge, { foreignKey: 'badge_id', as: 'userBadges' });
 UserJourneyV2Badge.belongsTo(JourneyV2Badge, { foreignKey: 'badge_id', as: 'badge' });
 
+// Associações ContentItem
+User.hasMany(ContentItem, { foreignKey: 'created_by', as: 'createdContent' });
+ContentItem.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
+
+User.hasMany(ContentItem, { foreignKey: 'updated_by', as: 'updatedContent' });
+ContentItem.belongsTo(User, { foreignKey: 'updated_by', as: 'updater' });
+
 // Exportação dos modelos
 module.exports = {
   sequelize,
@@ -259,6 +267,7 @@ module.exports = {
   JourneyBotResponse,
   JourneyBotQuestion,
   Activity,
+  ContentItem,
   // Modelos do RAG
   KnowledgeDocument,
   KbBaby,

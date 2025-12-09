@@ -80,11 +80,13 @@ const EducareAppLayout: React.FC = () => {
     const allowedPaths = [
       '/educare-app/owner/',
       '/educare-app/admin/',
+      '/educare-app/welcome',
       '/educare-app/dashboard',
       '/educare-app/children',
       '/educare-app/child/',
       '/educare-app/journey-bot',
       '/educare-app/titinauta-journey',
+      '/educare-app/titinauta',
       '/educare-app/activities',
       '/educare-app/communication',
       '/educare-app/settings'

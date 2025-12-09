@@ -11,8 +11,7 @@ const subscriptionPlanRoutes = require('./subscriptionPlanRoutes');
 const quizRoutes = require('./quizRoutes');
 const journeyRoutes = require('./journeyRoutes');
 const achievementRoutes = require('./achievementRoutes');
-
-
+const contentRoutes = require('./contentRoutes');
 
 // Configurar rotas
 router.use('/auth', authRoutes);
@@ -24,6 +23,7 @@ router.use('/subscription-plans', subscriptionPlanRoutes);
 router.use('/quizzes', quizRoutes);
 router.use('/journeys', journeyRoutes);
 router.use('/achievements', achievementRoutes);
+router.use('/content', contentRoutes);
 
 // Rota de status da API
 router.get('/status', (req, res) => {

@@ -47,6 +47,7 @@ import JourneyQuestionsManagement from "./pages/admin/JourneyQuestionsManagement
 import MediaResourcesManagement from "./pages/admin/MediaResourcesManagement";
 import RAGMetricsDashboard from "./pages/admin/RAGMetricsDashboard";
 import KnowledgeBaseManagement from "./pages/admin/KnowledgeBaseManagement";
+import ContentManagement from "./pages/admin/ContentManagement";
 import CommunicationPage from "./pages/educare-app/CommunicationPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import TitiNautaJourney from "./pages/educare-app/TitiNautaJourney";
@@ -95,11 +96,10 @@ const App = () => (
               <Route path="/educare-app/auth/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/educare-app/auth/reset-password" element={<ResetPasswordPage />} />
               
-              {/* Welcome Hub - First screen after login */}
-              <Route path="/educare-app/welcome" element={<WelcomeHub />} />
-              
               {/* Protected Educare App Routes */}
               <Route path="/educare-app" element={<EducareAppLayout />}>
+                {/* Welcome Hub - First screen after login (authenticated) */}
+                <Route path="welcome" element={<WelcomeHub />} />
                 <Route path="dashboard" element={<EducareAppDashboard />} />
                 <Route path="titinauta" element={<TitiNautaJourney />} />
                 <Route path="children" element={<ChildrenManagement />} />
@@ -152,6 +152,8 @@ const App = () => (
                 <Route path="owner/media-resources" element={<MediaResourcesManagement />} />
                 <Route path="owner/rag-metrics" element={<RAGMetricsDashboard />} />
                 <Route path="owner/kb-management" element={<KnowledgeBaseManagement />} />
+                <Route path="owner/content-management" element={<ContentManagement />} />
+                <Route path="admin/content-management" element={<ContentManagement />} />
                 
                 {/* Professional Routes - Gestão de Crianças */}
                 <Route path="professional/children" element={
