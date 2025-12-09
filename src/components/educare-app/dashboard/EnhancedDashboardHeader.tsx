@@ -1,14 +1,16 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, Home, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Home, Sparkles } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
+import { IconToolbar } from '@/components/educare-app/welcome';
 
 const EnhancedDashboardHeader: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [showFeedback, setShowFeedback] = useState(false);
   
-  // Get current time-based greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Bom dia';
@@ -16,38 +18,40 @@ const EnhancedDashboardHeader: React.FC = () => {
     return 'Boa noite';
   };
 
-  const isParent = user?.role === 'parent';
+  const isParent = user?.role === 'parent' || (user?.role as string) === 'user';
 
   return (
-    <Card className="bg-gradient-to-r from-blue-50 via-purple-50/60 to-green-50/40 border-0 shadow-sm">
+    <Card className="bg-gradient-to-r from-blue-50 via-purple-50/60 to-green-50/40 dark:from-blue-950/50 dark:via-purple-950/30 dark:to-green-950/20 border-0 shadow-sm">
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-1">
-                {getGreeting()}, {user?.name?.split(' ')[0] || 'Usuário'}! 👋
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                {getGreeting()}, {user?.name?.split(' ')[0] || 'Usuário'}!
               </h1>
-              <p className="text-gray-600 text-lg">
+              <p className="text-gray-600 dark:text-gray-400 text-base md:text-lg">
                 {isParent 
-                  ? 'Acompanhe o desenvolvimento das suas crianças de forma inteligente'
-                  : 'Gerencie seus pacientes e avaliações profissionais'
+                  ? 'Acompanhe o desenvolvimento das suas crianças'
+                  : 'Gerencie seus pacientes e avaliações'
                 }
               </p>
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" className="hidden md:flex" asChild>
-              <Link to="/educare-app">
-                <Home className="h-4 w-4 mr-2" />
-                Página Inicial
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" className="md:hidden" asChild>
-              <Link to="/educare-app">
-                <ArrowLeft className="h-4 w-4" />
-              </Link>
-            </Button>
+          <div className="flex items-center gap-2">
+            <div className="hidden md:block">
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/educare-app/welcome">
+                  <Home className="h-4 w-4 mr-2" />
+                  Início
+                </Link>
+              </Button>
+            </div>
+            <IconToolbar 
+              notificationCount={2}
+              onFeedbackClick={() => setShowFeedback(!showFeedback)}
+              onTitiNautaClick={() => navigate('/educare-app/titinauta')}
+            />
           </div>
         </div>
       </CardContent>

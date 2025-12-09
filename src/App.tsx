@@ -53,6 +53,7 @@ import TitiNautaJourney from "./pages/educare-app/TitiNautaJourney";
 import LojaPage from "./pages/educare-app/LojaPage";
 import SupportPage from "./pages/educare-app/SupportPage";
 import MaterialApoioPage from "./pages/educare-app/MaterialApoioPage";
+import WelcomeHub from "./pages/educare-app/WelcomeHub";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -94,9 +95,13 @@ const App = () => (
               <Route path="/educare-app/auth/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/educare-app/auth/reset-password" element={<ResetPasswordPage />} />
               
+              {/* Welcome Hub - First screen after login */}
+              <Route path="/educare-app/welcome" element={<WelcomeHub />} />
+              
               {/* Protected Educare App Routes */}
               <Route path="/educare-app" element={<EducareAppLayout />}>
                 <Route path="dashboard" element={<EducareAppDashboard />} />
+                <Route path="titinauta" element={<TitiNautaJourney />} />
                 <Route path="children" element={<ChildrenManagement />} />
                 <Route path="child/:id" element={<ChildProfile />} />
                 <Route path="child/new" element={<ChildForm />} />
