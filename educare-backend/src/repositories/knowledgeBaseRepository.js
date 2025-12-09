@@ -114,6 +114,62 @@ class KnowledgeBaseRepository {
     }
   }
 
+  async insertDualWithCategory(category, legacyData, segmentedData = null) {
+    const transaction = null;
+    try {
+      // Always insert into legacy table for backward compatibility
+      const legacyResult = await KnowledgeDocument.create(legacyData);
+      
+      if (!segmentedData) {
+        return { 
+          success: true, 
+          data: { 
+            legacy: legacyResult, 
+            segmented: null 
+          } 
+        };
+      }
+
+      // Add reference to legacy document
+      segmentedData.migrated_from = legacyResult.id;
+
+      // Insert into appropriate segmented table
+      let segmentedResult = null;
+      switch (category) {
+        case 'baby':
+          segmentedResult = await KbBaby.create(segmentedData);
+          break;
+        case 'mother':
+          segmentedResult = await KbMother.create(segmentedData);
+          break;
+        case 'professional':
+          segmentedResult = await KbProfessional.create(segmentedData);
+          break;
+        default:
+          // If category is unknown, just use legacy
+          return { 
+            success: true, 
+            data: { 
+              legacy: legacyResult, 
+              segmented: null 
+            },
+            warning: `Unknown category: ${category}. Document saved to legacy table only.`
+          };
+      }
+
+      return { 
+        success: true, 
+        data: { 
+          legacy: legacyResult, 
+          segmented: segmentedResult 
+        } 
+      };
+    } catch (error) {
+      console.error('[KnowledgeBaseRepository] insertDualWithCategory error:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
   async countByTable(tableName) {
     try {
       let count = 0;

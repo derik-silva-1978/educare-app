@@ -1,5 +1,6 @@
 const KnowledgeDocument = require('../models/KnowledgeDocument');
 const fileSearchService = require('../services/fileSearchService');
+const knowledgeBaseRepository = require('../repositories/knowledgeBaseRepository');
 const path = require('path');
 const fs = require('fs');
 
@@ -31,7 +32,7 @@ exports.uploadDocument = async (req, res) => {
       });
     }
 
-    const { title, description, source_type, age_range, domain, tags } = req.body;
+    const { title, description, source_type, age_range, domain, tags, knowledge_category, trimester, specialty, subdomain } = req.body;
 
     if (!title || !source_type) {
       if (req.file && req.file.path) {
@@ -89,7 +90,8 @@ exports.uploadDocument = async (req, res) => {
 
     const parsedTags = typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : (tags || []);
 
-    const document = await KnowledgeDocument.create({
+    // Legacy data (always written for backward compatibility)
+    const legacyData = {
       title,
       description: description || null,
       source_type,
@@ -107,19 +109,71 @@ exports.uploadDocument = async (req, res) => {
         upload_timestamp: timestamp,
         file_search_error: fileSearchError
       }
-    });
+    };
 
-    console.log(`[Knowledge] Documento criado por ${req.user.email}: ${document.id} - ${title}`);
+    // Segmented data (optional, based on knowledge_category)
+    let segmentedData = null;
+    const category = knowledge_category || inferCategory(req.body);
+
+    if (process.env.ENABLE_SEGMENTED_KB === 'true' && category && ['baby', 'mother', 'professional'].includes(category)) {
+      segmentedData = {
+        title,
+        content: '',  // Content will be indexed by File Search
+        description: description || null,
+        source_type,
+        file_search_id: fileSearchId,
+        file_path: finalPath,
+        original_filename: req.file.originalname,
+        file_size: req.file.size,
+        mime_type: req.file.mimetype,
+        tags: parsedTags,
+        is_active: true,
+        created_by: req.user.id,
+        metadata: {
+          upload_timestamp: timestamp,
+          file_search_error: fileSearchError
+        }
+      };
+
+      // Add category-specific fields
+      if (category === 'baby') {
+        segmentedData.age_range = age_range || null;
+        segmentedData.domain = domain || null;
+        segmentedData.subcategory = subdomain || null;
+      } else if (category === 'mother') {
+        segmentedData.trimester = trimester || null;
+        segmentedData.domain = domain || null;
+        segmentedData.subcategory = subdomain || null;
+      } else if (category === 'professional') {
+        segmentedData.specialty = specialty || null;
+        segmentedData.domain = domain || null;
+        segmentedData.subcategory = subdomain || null;
+      }
+    }
+
+    // Dual write: legacy + segmented
+    const result = await knowledgeBaseRepository.insertDualWithCategory(category, legacyData, segmentedData);
+
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        error: result.error
+      });
+    }
+
+    console.log(`[Knowledge] Documento criado por ${req.user.email}: ${result.data.legacy.id} - ${title} (categoria: ${category || 'legado'})`);
 
     return res.status(201).json({
       success: true,
       message: 'Documento de conhecimento cadastrado com sucesso',
       data: {
-        id: document.id,
-        title: document.title,
-        file_search_id: document.file_search_id,
-        file_path: document.file_path,
+        id: result.data.legacy.id,
+        title: result.data.legacy.title,
+        file_search_id: result.data.legacy.file_search_id,
+        file_path: result.data.legacy.file_path,
         indexed: !!fileSearchId,
+        category: category || 'legado',
+        segmented_id: result.data.segmented ? result.data.segmented.id : null,
         warning: fileSearchError ? `Arquivo salvo mas não indexado: ${fileSearchError}` : null
       }
     });
@@ -135,6 +189,18 @@ exports.uploadDocument = async (req, res) => {
       error: 'Erro interno ao processar upload'
     });
   }
+};
+
+/**
+ * Infere categoria baseado nos campos presentes no request
+ */
+const inferCategory = (body) => {
+  if (body.trimester) return 'mother';
+  if (body.specialty) return 'professional';
+  if (body.age_range || body.domain === 'motor' || body.domain === 'cognitivo' || body.domain === 'social' || body.domain === 'linguagem') {
+    return 'baby';
+  }
+  return null;
 };
 
 exports.listDocuments = async (req, res) => {
