@@ -45,6 +45,7 @@ import { AllChatsView } from "./components/educare-app/admin/AllChatsView";
 import ProfessionalOnlyGuard from "./components/auth/ProfessionalOnlyGuard";
 import JourneyQuestionsManagement from "./pages/admin/JourneyQuestionsManagement";
 import MediaResourcesManagement from "./pages/admin/MediaResourcesManagement";
+import RAGMetricsDashboard from "./pages/admin/RAGMetricsDashboard";
 import CommunicationPage from "./pages/educare-app/CommunicationPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import TitiNautaJourney from "./pages/educare-app/TitiNautaJourney";
@@ -143,6 +144,7 @@ const App = () => (
                 <Route path="owner/plans" element={<SubscriptionPlansManagement />} />
                 <Route path="owner/subscriptions" element={<AdminSubscriptions />} />
                 <Route path="owner/media-resources" element={<MediaResourcesManagement />} />
+                <Route path="owner/rag-metrics" element={<RAGMetricsDashboard />} />
                 
                 {/* Professional Routes - Gestão de Crianças */}
                 <Route path="professional/children" element={

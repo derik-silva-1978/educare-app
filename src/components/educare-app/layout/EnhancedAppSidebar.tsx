@@ -18,7 +18,8 @@ import {
   MessageCircle,
   MessageSquare,
   UsersRound,
-  FileVideo
+  FileVideo,
+  BarChart3
 } from 'lucide-react';
 import {
   Sidebar,
@@ -126,6 +127,11 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         title: "Gestão de Planos",
         url: "/educare-app/owner/plans",
         icon: CreditCard,
+      },
+      {
+        title: "Métricas RAG",
+        url: "/educare-app/owner/rag-metrics",
+        icon: BarChart3,
       },
       ...baseItems,
     ];
