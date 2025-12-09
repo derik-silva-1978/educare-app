@@ -11,9 +11,7 @@ import DashboardErrorBoundary from './DashboardErrorBoundary';
 import DashboardLoadingState from './DashboardLoadingState';
 import EnhancedDashboardHeader from './EnhancedDashboardHeader';
 import EnhancedMetricsCards from './EnhancedMetricsCards';
-import EnhancedEmptyState from './EnhancedEmptyState';
 import ChildSelector from './ChildSelector';
-import PlatformQuickAccess from './PlatformQuickAccess';
 import SocialMediaAccess from './SocialMediaAccess';
 import DomainProgressChart from './DomainProgressChart';
 import StrengthsOpportunities from './StrengthsOpportunities';
@@ -155,10 +153,6 @@ const UnifiedDashboard: React.FC = () => {
               </CardContent>
             </Card>
           )}
-
-          <PlatformQuickAccess />
-
-          {totalChildren === 0 && <EnhancedEmptyState />}
         </div>
       </DashboardErrorBoundary>
     </SelectedChildProvider>

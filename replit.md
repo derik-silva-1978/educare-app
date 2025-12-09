@@ -12,7 +12,11 @@ Educare+ is a digital platform designed to support early childhood development a
 ## System Architecture
 
 ### UI/UX Decisions
-The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui` (Radix UI + Tailwind CSS) for a professional and WCAG-compliant interface. Key design elements include a WelcomeHub and a redesigned Dashboard featuring a WelcomeHero, NewsCarousel, AcademyCourses, TitiNautaWidget, FeedbackPanel, and DonationCTA. A minimalist IconToolbar provides quick access to theme toggling, notifications, feedback, activities, TitiNauta, and user profiles.
+The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui` (Radix UI + Tailwind CSS) for a professional and WCAG-compliant interface. 
+
+**WelcomeHub** (`/educare-app/welcome`): Entry screen after login featuring WelcomeHero (gradient banner with CTA), NewsCarousel (image-based news cards), AcademyCourses (course listings), TitiNautaWidget (AI assistant), FeedbackPanel, and DonationCTA. IconToolbar with 6 minimalist icons (theme, notifications, feedback, activities, TitiNauta, profile).
+
+**Dashboard**: Clean, focused layout showing MetricsCards, DomainProgressChart (recharts bar chart with color-coded domains), StrengthsOpportunities, MilestonesTimeline, AIInsightsCard, ParentalResourcesCarousel, and children list. Removed: "Acesso Rápido à Plataforma", empty state messages, and "Primeiros Passos" for minimalist aesthetic. Social media icons (WhatsApp, Instagram, Facebook) in header.
 
 ### Technical Implementations
 - **Frontend**: React hooks, `@tanstack/react-query` for state management, React Router for navigation, and `react-hook-form` with Zod for form validation. Custom JWT-based context provider handles authentication.
