@@ -1,3 +1,8 @@
+/**
+ * RAG Service
+ * FASE 08-UPGRADE: Suporte a modo strict (sem fallback legacy)
+ */
+
 const OpenAI = require('openai');
 const { KnowledgeDocument } = require('../models');
 const { Op } = require('sequelize');
@@ -46,6 +51,13 @@ FORMATAÇÃO:
 - Inclua emojis ocasionalmente para tornar a conversa acolhedora 😊
 - Prefira frases curtas, diretas e claras`;
 
+// FASE 08: Mensagem de fallback amigável para modo strict
+const LOW_CONFIDENCE_MESSAGE = `Ainda estou aprendendo sobre este tema específico. 🌱
+
+Posso ajudar com outras perguntas sobre desenvolvimento infantil, saúde materna ou orientações para profissionais. Continue me enviando suas dúvidas!
+
+Se precisar de orientação urgente, recomendo consultar um profissional de saúde.`;
+
 async function selectKnowledgeDocuments(filters = {}) {
   try {
     // Determina qual base de conhecimento usar (legado ou segmentada)
@@ -60,8 +72,9 @@ async function selectKnowledgeDocuments(filters = {}) {
     const primaryTable = selector.primary_table;
     const fallbackTable = selector.fallback_table;
     const useFallback = selector.use_fallback;
+    const strictMode = selector.strict_mode;
 
-    console.log(`[RAG] Selecionando documentos - tabela primária: ${primaryTable}, motivo: ${selector.selection_reason}`);
+    console.log(`[RAG] Selecionando documentos - tabela primária: ${primaryTable}, motivo: ${selector.selection_reason}, strict: ${strictMode}`);
 
     // Prepara os filtros comuns
     const commonFilters = {
@@ -74,6 +87,7 @@ async function selectKnowledgeDocuments(filters = {}) {
 
     let documents = [];
     let usedTable = primaryTable;
+    let fallbackWasUsed = false;
 
     // Consulta tabela primária
     if (primaryTable === 'knowledge_documents') {
@@ -89,14 +103,17 @@ async function selectKnowledgeDocuments(filters = {}) {
         documents = result.data;
       }
 
-      // Se nenhum documento encontrado e fallback habilitado, tenta tabela legada
-      if (documents.length === 0 && useFallback && fallbackTable) {
+      // FASE 08: Só usa fallback se NÃO estiver em modo strict
+      if (documents.length === 0 && useFallback && fallbackTable && !strictMode) {
         console.log(`[RAG] Nenhum documento em ${primaryTable}, tentando fallback para ${fallbackTable}`);
         const fallbackResult = await knowledgeBaseRepository.queryByTable(fallbackTable, commonFilters);
         if (fallbackResult.success) {
           documents = fallbackResult.data;
           usedTable = fallbackTable;
+          fallbackWasUsed = true;
         }
+      } else if (documents.length === 0 && strictMode) {
+        console.log(`[RAG] Nenhum documento em ${primaryTable}, STRICT MODE ativo - sem fallback`);
       }
     }
 
@@ -107,8 +124,10 @@ async function selectKnowledgeDocuments(filters = {}) {
       metadata: {
         primary_table: primaryTable,
         used_table: usedTable,
-        fallback_used: usedTable !== primaryTable,
-        selection_reason: selector.selection_reason
+        fallback_used: fallbackWasUsed,
+        strict_mode: strictMode,
+        selection_reason: selector.selection_reason,
+        inferred_module: selector.inferred_module
       }
     };
   } catch (error) {
@@ -311,10 +330,9 @@ async function ask(question, options = {}) {
   let processingTime = 0;
   let success = false;
   let error = null;
+  const startTime = Date.now();
 
   try {
-    const startTime = Date.now();
-
     const filters = {
       age_range: options.age_range,
       domain: options.domain,
@@ -329,6 +347,47 @@ async function ask(question, options = {}) {
     };
 
     const docsResult = await selectKnowledgeDocuments(filters);
+
+    // FASE 08: Verifica modo strict com resultado vazio
+    const strictMode = docsResult.metadata?.strict_mode || false;
+    const noDocuments = docsResult.data.length === 0;
+
+    if (strictMode && noDocuments) {
+      processingTime = Date.now() - startTime;
+
+      // Registra query com resultado vazio em modo strict
+      ragMetricsService.recordQuery({
+        question,
+        module_type: filters.module_type,
+        success: true,  // É sucesso técnico, mas sem conteúdo
+        response_time_ms: processingTime,
+        primary_table: docsResult.metadata?.primary_table,
+        used_table: docsResult.metadata?.used_table,
+        fallback_used: false,
+        strict_mode: true,
+        documents_found: 0,
+        file_search_used: false,
+        chunks_retrieved: 0
+      });
+
+      console.log(`[RAG] STRICT MODE: Retornando resposta de baixa confiança para módulo ${filters.module_type}`);
+
+      return {
+        success: true,
+        answer: LOW_CONFIDENCE_MESSAGE,
+        metadata: {
+          documents_found: 0,
+          documents_used: [],
+          file_search_used: false,
+          chunks_retrieved: 0,
+          model: 'fallback',
+          processing_time_ms: processingTime,
+          knowledge_base: docsResult.metadata,
+          low_confidence: true,
+          strict_mode: true
+        }
+      };
+    }
 
     let retrievedChunks = [];
     let fileSearchUsed = false;
@@ -376,6 +435,7 @@ async function ask(question, options = {}) {
         primary_table: docsResult.metadata?.primary_table,
         used_table: docsResult.metadata?.used_table,
         fallback_used: docsResult.metadata?.fallback_used,
+        strict_mode: strictMode,
         documents_found: 0,
         file_search_used: false,
         chunks_retrieved: 0,
@@ -400,6 +460,7 @@ async function ask(question, options = {}) {
       primary_table: docsResult.metadata?.primary_table,
       used_table: docsResult.metadata?.used_table,
       fallback_used: docsResult.metadata?.fallback_used,
+      strict_mode: strictMode,
       documents_found: docsResult.data.length,
       file_search_used: fileSearchUsed,
       chunks_retrieved: retrievedChunks.length
@@ -420,11 +481,12 @@ async function ask(question, options = {}) {
         model: llmResult.model,
         usage: llmResult.usage,
         processing_time_ms: processingTime,
-        knowledge_base: docsResult.metadata
+        knowledge_base: docsResult.metadata,
+        strict_mode: strictMode
       }
     };
   } catch (error) {
-    processingTime = Date.now() - (options.startTime || Date.now());
+    processingTime = Date.now() - startTime;
     console.error('[RAG] Erro geral:', error);
 
     ragMetricsService.recordQuery({
@@ -488,6 +550,13 @@ function isConfigured() {
   return !!process.env.OPENAI_API_KEY;
 }
 
+/**
+ * FASE 08: Retorna status das flags de fallback
+ */
+function getFallbackStatus() {
+  return knowledgeBaseSelector.getFallbackStatus();
+}
+
 module.exports = {
   selectKnowledgeDocuments,
   retrieveFromFileSearch,
@@ -497,7 +566,9 @@ module.exports = {
   askSimple,
   askWithBabyId,
   isConfigured,
+  getFallbackStatus,
   DEFAULT_SYSTEM_PROMPT,
+  LOW_CONFIDENCE_MESSAGE,
   babyContextService,
   ragMetricsService
 };

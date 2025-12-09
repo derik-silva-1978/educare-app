@@ -1,10 +1,25 @@
+/**
+ * Knowledge Base Selector
+ * FASE 08-UPGRADE: Suporte a flags granulares de fallback por módulo
+ */
+
 const KbBaby = require('../models/KbBaby');
 const KbMother = require('../models/KbMother');
 const KbProfessional = require('../models/KbProfessional');
 const KnowledgeDocument = require('../models/KnowledgeDocument');
 
+// Master switch for segmented KB
 const ENABLE_SEGMENTED_KB = process.env.ENABLE_SEGMENTED_KB === 'true';
+
+// Global fallback (backward compatibility)
 const KB_FALLBACK_ENABLED = process.env.KB_FALLBACK_ENABLED !== 'false';
+
+// FASE 08: Flags granulares de fallback por módulo
+const USE_LEGACY_FALLBACK_FOR_BABY = process.env.USE_LEGACY_FALLBACK_FOR_BABY !== 'false';
+const USE_LEGACY_FALLBACK_FOR_MOTHER = process.env.USE_LEGACY_FALLBACK_FOR_MOTHER !== 'false';
+const USE_LEGACY_FALLBACK_FOR_PROFESSIONAL = process.env.USE_LEGACY_FALLBACK_FOR_PROFESSIONAL !== 'false';
+
+// Logging
 const KB_LOG_SELECTIONS = process.env.KB_LOG_SELECTIONS !== 'false';
 
 const MODELS = {
@@ -25,6 +40,48 @@ const ROUTE_MAPPINGS = {
   '/professional': 'professional'
 };
 
+/**
+ * Verifica se o fallback para legacy está habilitado para um módulo específico
+ * FASE 08: Desligamento progressivo por módulo
+ */
+function isLegacyFallbackEnabledForModule(moduleType) {
+  // Se o fallback global estiver desabilitado, nenhum módulo usa fallback
+  if (!KB_FALLBACK_ENABLED) {
+    return false;
+  }
+
+  switch (moduleType) {
+    case 'baby':
+      return USE_LEGACY_FALLBACK_FOR_BABY;
+    case 'mother':
+      return USE_LEGACY_FALLBACK_FOR_MOTHER;
+    case 'professional':
+      return USE_LEGACY_FALLBACK_FOR_PROFESSIONAL;
+    default:
+      return KB_FALLBACK_ENABLED;
+  }
+}
+
+/**
+ * Retorna status de todas as flags de fallback
+ */
+function getFallbackStatus() {
+  return {
+    global: KB_FALLBACK_ENABLED,
+    segmented_kb_enabled: ENABLE_SEGMENTED_KB,
+    modules: {
+      baby: USE_LEGACY_FALLBACK_FOR_BABY,
+      mother: USE_LEGACY_FALLBACK_FOR_MOTHER,
+      professional: USE_LEGACY_FALLBACK_FOR_PROFESSIONAL
+    },
+    strict_mode: {
+      baby: !USE_LEGACY_FALLBACK_FOR_BABY,
+      mother: !USE_LEGACY_FALLBACK_FOR_MOTHER,
+      professional: !USE_LEGACY_FALLBACK_FOR_PROFESSIONAL
+    }
+  };
+}
+
 function select(context = {}) {
   const {
     module_type,
@@ -38,34 +95,42 @@ function select(context = {}) {
   let fallback_table = null;
   let use_fallback = false;
   let selection_reason = '';
+  let strict_mode = false;
+  let inferred_module = null;
 
   if (force_legacy) {
     selection_reason = 'force_legacy flag enabled';
-    logSelection(context, { primary_table, fallback_table, use_fallback, selection_reason });
+    logSelection(context, { primary_table, fallback_table, use_fallback, selection_reason, strict_mode });
     return {
       primary_table,
       primary_model: MODELS[primary_table],
       fallback_table,
       fallback_model: null,
       use_fallback,
-      selection_reason
+      selection_reason,
+      strict_mode,
+      inferred_module
     };
   }
 
   if (!ENABLE_SEGMENTED_KB) {
     selection_reason = 'ENABLE_SEGMENTED_KB is false, using legacy table';
-    logSelection(context, { primary_table, fallback_table, use_fallback, selection_reason });
+    logSelection(context, { primary_table, fallback_table, use_fallback, selection_reason, strict_mode });
     return {
       primary_table,
       primary_model: MODELS[primary_table],
       fallback_table,
       fallback_model: null,
       use_fallback,
-      selection_reason
+      selection_reason,
+      strict_mode,
+      inferred_module
     };
   }
 
+  // Determina o módulo
   if (module_type) {
+    inferred_module = module_type;
     switch (module_type) {
       case 'baby':
         primary_table = 'kb_baby';
@@ -84,14 +149,15 @@ function select(context = {}) {
     }
   } else if (baby_id) {
     primary_table = 'kb_baby';
+    inferred_module = 'baby';
     selection_reason = 'baby_id provided, inferring baby module';
   } else if (route_context) {
     const matchedRoute = Object.keys(ROUTE_MAPPINGS).find(route => 
       route_context.startsWith(route)
     );
     if (matchedRoute) {
-      const mappedModule = ROUTE_MAPPINGS[matchedRoute];
-      switch (mappedModule) {
+      inferred_module = ROUTE_MAPPINGS[matchedRoute];
+      switch (inferred_module) {
         case 'baby':
           primary_table = 'kb_baby';
           break;
@@ -102,7 +168,7 @@ function select(context = {}) {
           primary_table = 'kb_professional';
           break;
       }
-      selection_reason = `route_context ${route_context} mapped to ${mappedModule}`;
+      selection_reason = `route_context ${route_context} mapped to ${inferred_module}`;
     } else {
       selection_reason = `route_context ${route_context} not mapped, using legacy`;
     }
@@ -110,9 +176,21 @@ function select(context = {}) {
     selection_reason = 'no context provided, using legacy table';
   }
 
-  if (primary_table !== 'knowledge_documents' && KB_FALLBACK_ENABLED) {
-    fallback_table = 'knowledge_documents';
-    use_fallback = true;
+  // FASE 08: Verifica fallback granular por módulo
+  if (primary_table !== 'knowledge_documents' && inferred_module) {
+    const moduleFallbackEnabled = isLegacyFallbackEnabledForModule(inferred_module);
+    
+    if (moduleFallbackEnabled) {
+      fallback_table = 'knowledge_documents';
+      use_fallback = true;
+      strict_mode = false;
+    } else {
+      // MODO STRICT: Sem fallback para este módulo
+      fallback_table = null;
+      use_fallback = false;
+      strict_mode = true;
+      selection_reason += ` [STRICT MODE - no legacy fallback for ${inferred_module}]`;
+    }
   }
 
   const result = {
@@ -121,7 +199,9 @@ function select(context = {}) {
     fallback_table,
     fallback_model: fallback_table ? MODELS[fallback_table] : null,
     use_fallback,
-    selection_reason
+    selection_reason,
+    strict_mode,
+    inferred_module
   };
 
   logSelection(context, result);
@@ -143,6 +223,7 @@ function logSelection(context, result) {
       primary_table: result.primary_table,
       fallback_table: result.fallback_table,
       use_fallback: result.use_fallback,
+      strict_mode: result.strict_mode,
       reason: result.selection_reason
     }
   });
@@ -165,5 +246,7 @@ module.exports = {
   getModel,
   isSegmentedKbEnabled,
   isFallbackEnabled,
+  isLegacyFallbackEnabledForModule,
+  getFallbackStatus,
   MODELS
 };

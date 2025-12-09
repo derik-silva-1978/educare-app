@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ragMetricsService = require('../services/ragMetricsService');
+const ragService = require('../services/ragService');
 const { verifyToken, isOwner } = require('../middlewares/auth');
 
 /**
@@ -148,6 +149,67 @@ router.get('/rag/health', verifyToken, (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Erro ao obter health'
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/metrics/rag/shutdown-readiness:
+ *   get:
+ *     summary: FASE 08 - Verifica prontidão de módulos para desligar fallback legacy
+ *     tags: [Métricas RAG]
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: module
+ *         schema:
+ *           type: string
+ *           enum: [baby, mother, professional]
+ *         description: Módulo específico (opcional, retorna todos se omitido)
+ *     responses:
+ *       200:
+ *         description: Status de prontidão para desligamento do fallback
+ */
+router.get('/rag/shutdown-readiness', verifyToken, isOwner, (req, res) => {
+  try {
+    const moduleType = req.query.module;
+    const data = ragMetricsService.getShutdownReadiness(moduleType);
+    return res.json(data);
+  } catch (error) {
+    console.error('[Metrics] Erro ao verificar shutdown readiness:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao verificar prontidão'
+    });
+  }
+});
+
+/**
+ * @swagger
+ * /api/metrics/rag/fallback-status:
+ *   get:
+ *     summary: FASE 08 - Retorna status atual das flags de fallback por módulo
+ *     tags: [Métricas RAG]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Status das flags de fallback
+ */
+router.get('/rag/fallback-status', verifyToken, (req, res) => {
+  try {
+    const data = ragService.getFallbackStatus();
+    return res.json({
+      success: true,
+      data
+    });
+  } catch (error) {
+    console.error('[Metrics] Erro ao obter fallback status:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao obter status de fallback'
     });
   }
 });

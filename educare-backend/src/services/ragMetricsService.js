@@ -1,6 +1,7 @@
 /**
  * RAG Metrics Service
- * Coleta e analisa métricas de desempenho do RAG
+ * FASE 06 + FASE 08: Coleta e analisa métricas de desempenho do RAG
+ * Inclui telemetria avançada para critérios de desligamento
  */
 
 const metricsStorage = {
@@ -18,6 +19,12 @@ const metricsStorage = {
     error_count: 0,
     file_search_success_rate: 0,
     last_updated: null
+  },
+  // FASE 08: Telemetria avançada por módulo
+  moduleStats: {
+    baby: { queries: 0, empty_results: 0, avg_score: 0, total_score: 0, strict_mode_queries: 0 },
+    mother: { queries: 0, empty_results: 0, avg_score: 0, total_score: 0, strict_mode_queries: 0 },
+    professional: { queries: 0, empty_results: 0, avg_score: 0, total_score: 0, strict_mode_queries: 0 }
   }
 };
 
@@ -25,6 +32,7 @@ const MAX_STORED_QUERIES = 1000;
 
 /**
  * Registra uma query no RAG
+ * FASE 08: Adiciona suporte a strict_mode e scores
  */
 function recordQuery(data) {
   try {
@@ -38,11 +46,15 @@ function recordQuery(data) {
       knowledge_base: {
         primary_table: data.primary_table || 'unknown',
         used_table: data.used_table || 'unknown',
-        fallback_used: data.fallback_used || false
+        fallback_used: data.fallback_used || false,
+        strict_mode: data.strict_mode || false
       },
       file_search_used: data.file_search_used || false,
       chunks_retrieved: data.chunks_retrieved || 0,
-      error: data.error || null
+      relevance_score: data.relevance_score || null,
+      confidence_level: data.confidence_level || null,
+      error: data.error || null,
+      empty_result: data.documents_found === 0 && data.success
     };
 
     metricsStorage.queries.push(record);
@@ -52,14 +64,48 @@ function recordQuery(data) {
       metricsStorage.queries = metricsStorage.queries.slice(-MAX_STORED_QUERIES);
     }
 
+    // FASE 08: Atualiza stats por módulo
+    updateModuleStats(record);
     updateAggregates();
 
-    console.log(`[RAGMetrics] Query registrada - módulo: ${record.module_type}, tempo: ${record.response_time_ms}ms, sucesso: ${record.success}`);
+    console.log(`[RAGMetrics] Query registrada - módulo: ${record.module_type}, tempo: ${record.response_time_ms}ms, sucesso: ${record.success}, strict: ${record.knowledge_base.strict_mode}`);
 
     return { success: true, record };
   } catch (error) {
     console.error('[RAGMetrics] Erro ao registrar query:', error);
     return { success: false, error: error.message };
+  }
+}
+
+/**
+ * FASE 08: Atualiza estatísticas específicas por módulo
+ */
+function updateModuleStats(record) {
+  const module = record.module_type;
+  if (!metricsStorage.moduleStats[module]) {
+    metricsStorage.moduleStats[module] = {
+      queries: 0,
+      empty_results: 0,
+      avg_score: 0,
+      total_score: 0,
+      strict_mode_queries: 0
+    };
+  }
+
+  const stats = metricsStorage.moduleStats[module];
+  stats.queries++;
+
+  if (record.empty_result) {
+    stats.empty_results++;
+  }
+
+  if (record.knowledge_base.strict_mode) {
+    stats.strict_mode_queries++;
+  }
+
+  if (record.relevance_score !== null) {
+    stats.total_score += record.relevance_score;
+    stats.avg_score = stats.total_score / stats.queries;
   }
 }
 
@@ -147,7 +193,11 @@ function getModuleStats() {
         count: 0,
         avg_response_time_ms: 0,
         success_rate: 0,
-        error_count: 0
+        error_count: 0,
+        empty_result_count: 0,
+        empty_result_rate: 0,
+        strict_mode_count: 0,
+        fallback_count: 0
       };
       return;
     }
@@ -156,12 +206,20 @@ function getModuleStats() {
     const successCount = queries.filter(q => q.success).length;
     const successRate = Math.round((successCount / queries.length) * 100);
     const errorCount = queries.filter(q => !q.success).length;
+    const emptyResultCount = queries.filter(q => q.empty_result).length;
+    const emptyResultRate = Math.round((emptyResultCount / queries.length) * 100);
+    const strictModeCount = queries.filter(q => q.knowledge_base.strict_mode).length;
+    const fallbackCount = queries.filter(q => q.knowledge_base.fallback_used).length;
 
     stats[module] = {
       count: queries.length,
       avg_response_time_ms: avgTime,
       success_rate: successRate,
-      error_count: errorCount
+      error_count: errorCount,
+      empty_result_count: emptyResultCount,
+      empty_result_rate: emptyResultRate,
+      strict_mode_count: strictModeCount,
+      fallback_count: fallbackCount
     };
   });
 
@@ -182,25 +240,29 @@ function getKnowledgeBaseStats() {
       primary_count: queries.filter(q => q.knowledge_base.primary_table === 'kb_baby').length,
       used_count: queries.filter(q => q.knowledge_base.used_table === 'kb_baby').length,
       avg_documents_found: 0,
-      avg_chunks_retrieved: 0
+      avg_chunks_retrieved: 0,
+      strict_mode_count: queries.filter(q => q.knowledge_base.primary_table === 'kb_baby' && q.knowledge_base.strict_mode).length
     },
     kb_mother: {
       primary_count: queries.filter(q => q.knowledge_base.primary_table === 'kb_mother').length,
       used_count: queries.filter(q => q.knowledge_base.used_table === 'kb_mother').length,
       avg_documents_found: 0,
-      avg_chunks_retrieved: 0
+      avg_chunks_retrieved: 0,
+      strict_mode_count: queries.filter(q => q.knowledge_base.primary_table === 'kb_mother' && q.knowledge_base.strict_mode).length
     },
     kb_professional: {
       primary_count: queries.filter(q => q.knowledge_base.primary_table === 'kb_professional').length,
       used_count: queries.filter(q => q.knowledge_base.used_table === 'kb_professional').length,
       avg_documents_found: 0,
-      avg_chunks_retrieved: 0
+      avg_chunks_retrieved: 0,
+      strict_mode_count: queries.filter(q => q.knowledge_base.primary_table === 'kb_professional' && q.knowledge_base.strict_mode).length
     },
     knowledge_documents: {
       primary_count: queries.filter(q => q.knowledge_base.primary_table === 'knowledge_documents').length,
       used_count: queries.filter(q => q.knowledge_base.used_table === 'knowledge_documents').length,
       avg_documents_found: 0,
-      avg_chunks_retrieved: 0
+      avg_chunks_retrieved: 0,
+      strict_mode_count: 0
     }
   };
 
@@ -241,6 +303,10 @@ function getHealthCheck() {
     ? Math.round((recentQueries.filter(q => q.knowledge_base.fallback_used).length / recentQueries.length) * 100)
     : 0;
 
+  const emptyResultRate = recentQueries.length > 0
+    ? Math.round((recentQueries.filter(q => q.empty_result).length / recentQueries.length) * 100)
+    : 0;
+
   // Determina status geral
   let status = 'healthy';
   if (successRate < 80) status = 'degraded';
@@ -254,8 +320,102 @@ function getHealthCheck() {
       success_rate_percent: successRate,
       avg_response_time_ms: avgTime,
       fallback_rate_percent: fallbackRate,
+      empty_result_rate_percent: emptyResultRate,
       recent_queries_analyzed: recentQueries.length,
       total_queries_recorded: metricsStorage.queries.length
+    }
+  };
+}
+
+/**
+ * FASE 08: Diagnóstico de prontidão para desligamento do legacy
+ * Verifica se um módulo está pronto para operar sem fallback
+ */
+function getShutdownReadiness(moduleType = null) {
+  const queries = metricsStorage.queries;
+  const modules = moduleType ? [moduleType] : ['baby', 'mother', 'professional'];
+  const results = {};
+
+  const THRESHOLDS = {
+    min_queries: 50,           // Mínimo de queries para avaliar
+    min_success_rate: 80,      // Taxa de sucesso mínima (%)
+    max_empty_rate: 5,         // Taxa máxima de resultados vazios (%)
+    min_avg_score: 0.75,       // Score médio mínimo de relevância
+    max_fallback_rate: 10      // Taxa máxima de uso de fallback (%)
+  };
+
+  modules.forEach(module => {
+    const moduleQueries = queries.filter(q => q.module_type === module);
+    const count = moduleQueries.length;
+
+    if (count < THRESHOLDS.min_queries) {
+      results[module] = {
+        ready: false,
+        reason: `Dados insuficientes (${count}/${THRESHOLDS.min_queries} queries)`,
+        metrics: { query_count: count },
+        recommendation: 'Aguarde mais uso antes de desligar fallback'
+      };
+      return;
+    }
+
+    const successCount = moduleQueries.filter(q => q.success).length;
+    const successRate = Math.round((successCount / count) * 100);
+
+    const emptyCount = moduleQueries.filter(q => q.empty_result).length;
+    const emptyRate = Math.round((emptyCount / count) * 100);
+
+    const fallbackCount = moduleQueries.filter(q => q.knowledge_base.fallback_used).length;
+    const fallbackRate = Math.round((fallbackCount / count) * 100);
+
+    const scoresAvailable = moduleQueries.filter(q => q.relevance_score !== null);
+    const avgScore = scoresAvailable.length > 0
+      ? scoresAvailable.reduce((sum, q) => sum + q.relevance_score, 0) / scoresAvailable.length
+      : null;
+
+    const issues = [];
+
+    if (successRate < THRESHOLDS.min_success_rate) {
+      issues.push(`Taxa de sucesso baixa: ${successRate}% (mín: ${THRESHOLDS.min_success_rate}%)`);
+    }
+
+    if (emptyRate > THRESHOLDS.max_empty_rate) {
+      issues.push(`Taxa de resultados vazios alta: ${emptyRate}% (máx: ${THRESHOLDS.max_empty_rate}%)`);
+    }
+
+    if (fallbackRate > THRESHOLDS.max_fallback_rate) {
+      issues.push(`Taxa de fallback alta: ${fallbackRate}% (máx: ${THRESHOLDS.max_fallback_rate}%)`);
+    }
+
+    if (avgScore !== null && avgScore < THRESHOLDS.min_avg_score) {
+      issues.push(`Score médio baixo: ${avgScore.toFixed(2)} (mín: ${THRESHOLDS.min_avg_score})`);
+    }
+
+    const ready = issues.length === 0;
+
+    results[module] = {
+      ready,
+      reason: ready ? 'Módulo pronto para operar sem fallback' : issues.join('; '),
+      metrics: {
+        query_count: count,
+        success_rate: successRate,
+        empty_rate: emptyRate,
+        fallback_rate: fallbackRate,
+        avg_relevance_score: avgScore ? avgScore.toFixed(2) : 'N/A'
+      },
+      thresholds: THRESHOLDS,
+      recommendation: ready
+        ? `Pode definir USE_LEGACY_FALLBACK_FOR_${module.toUpperCase()}=false`
+        : 'Aguarde melhoria nas métricas ou adicione mais conteúdo à KB'
+    };
+  });
+
+  return {
+    success: true,
+    data: results,
+    summary: {
+      modules_ready: Object.values(results).filter(r => r.ready).length,
+      modules_total: modules.length,
+      all_ready: Object.values(results).every(r => r.ready)
     }
   };
 }
@@ -279,6 +439,11 @@ function reset() {
     file_search_success_rate: 0,
     last_updated: null
   };
+  metricsStorage.moduleStats = {
+    baby: { queries: 0, empty_results: 0, avg_score: 0, total_score: 0, strict_mode_queries: 0 },
+    mother: { queries: 0, empty_results: 0, avg_score: 0, total_score: 0, strict_mode_queries: 0 },
+    professional: { queries: 0, empty_results: 0, avg_score: 0, total_score: 0, strict_mode_queries: 0 }
+  };
   console.log('[RAGMetrics] Métricas resetadas');
   return { success: true };
 }
@@ -290,5 +455,6 @@ module.exports = {
   getModuleStats,
   getKnowledgeBaseStats,
   getHealthCheck,
+  getShutdownReadiness,
   reset
 };
