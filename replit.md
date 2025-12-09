@@ -10,6 +10,10 @@ Educare+ is a digital platform for early childhood development and maternal heal
 - Incomplete modules marked with visible "Em Desenvolvimento" badges.
 
 ## Recent Changes (December 2025)
+- **FASE 11-UPGRADE Completa (December 9)**: RAG Auto-Melhoramento com feedback, análise de qualidade, sugestões LLM, dashboard de maturidade
+- **FASE 10-UPGRADE Completa (December 9)**: Re-ranking neural, confidence scoring, LLM chunking, data augmentation, context safety, KB versioning
+- **FASE 9-UPGRADE Completa (December 9)**: Legacy shutdown service com backup, desativação, rollback, 7 endpoints admin
+- **FASE 8-UPGRADE Completa (December 9)**: Flags granulares USE_LEGACY_FALLBACK_FOR_*, modo strict, telemetria avançada
 - **FASE 7-UPGRADE Completa (December 9)**: Testes end-to-end + Migração assistida + 4 endpoints admin
 - **FASE 6-UPGRADE Completa (December 9)**: Métricas RAG automáticas, 6 endpoints REST, health check
 - **FASE 5-UPGRADE Completa (December 8)**: RAG com seleção inteligente de bases segmentadas
@@ -29,8 +33,9 @@ Educare+ is a digital platform for early childhood development and maternal heal
 ✅ **OpenAI Integration** - API key configured
 ✅ **Database Models** - Sequelize ORM with 20+ models defined
 ✅ **Role-based Sidebar** - Proper access levels for Owner/Admin/Professional/Parent
+✅ **RAG Upgrade 11 Fases** - Arquitetura segmentada completa com auto-melhoramento
 
-## RAG Segmented Architecture (PHASES 1-7 ✅ COMPLETE)
+## RAG Segmented Architecture (PHASES 1-11 ✅ COMPLETE)
 
 ### Fase 1 - Auditoria ✅
 - Análise completa do RAG atual (11 seções)
@@ -73,28 +78,53 @@ Educare+ is a digital platform for early childhood development and maternal heal
 - 4 endpoints admin: /api/admin/migration/*
 - Documentação completa (FASE7_UPGRADE_TESTS_MIGRATION.md)
 
-### Priority 2 - Important (Verification & Testing)
-4. **Stripe Webhook Verification** ⚠️
-   - Task: Verify webhook URL registration in Stripe Dashboard
-   - Files: `educare-backend/src/services/webhookHandlers.js`
-   - Scope: Test payment events flow (checkout, subscription, invoice)
-   - Status: Implementation done, testing pending
-   - Impact: Ensures subscription billing works correctly
+### Fase 8 - Transição Controlada ✅
+- Flags granulares: USE_LEGACY_FALLBACK_FOR_BABY/MOTHER/PROFESSIONAL
+- Modo strict: opera sem legacy quando flag=false
+- Telemetria avançada por módulo
+- Endpoints: /api/metrics/rag/shutdown-readiness, /api/metrics/rag/fallback-status
+- Documentação: FASE8_UPGRADE_TRANSITION.md
 
-5. **n8n Workflow Implementation** ✅ **READY v2.0**
-   - Task: Import optimized v2 blueprint in n8n
-   - Files: 
-     - `educare-backend/docs/n8n-educare-v2.json` ✅ (28 nós, otimizado e seguro)
-     - `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (Guia atualizado para v2)
-   - Status: Blueprint v2 pronto com todas as branches conectadas
-   - Next Step: Importar no n8n → Configurar credentials → Ativar
+### Fase 9 - Legacy Shutdown ✅
+- legacyShutdownService.js com backup, desativação, rollback
+- Verificação de pré-condições automática
+- Backup imutável (JSONL + CSV + metadata)
+- 5 testes de consistência
+- 7 endpoints: /api/admin/legacy/*
+- Documentação: FASE9_UPGRADE_LEGACY_SHUTDOWN.md
 
-6. **Production Deployment Checklist** ⚠️
-   - Task: Prepare deployment configuration
-   - Scope: Environment variables, database migration, SSL setup
-   - Files: `deploy_config_tool` configuration needed
-   - Status: Pending
-   - Impact: Required for going live
+### Fase 10 - Enterprise Optimizations ✅
+- **rerankingService.js**: Re-ranking neural pós-busca com diversificação
+- **confidenceService.js**: Score de confiança (high/medium/low) + escalação humana
+- **chunkingService.js**: Divisão inteligente (simple/hierarchical/semantic)
+- **dataAugmentationService.js**: Geração de perguntas, entidades, resumos, tags
+- **contextSafetyService.js**: Detecção de dados sensíveis, emergências, conteúdo prejudicial
+- **kbVersioningService.js**: Versionamento de KBs com snapshots e rollback
+- Documentação: FASE10_UPGRADE_ENTERPRISE.md
+
+### Fase 11 - Auto-Melhoramento ✅
+- **ragFeedbackService.js**: Sistema completo de feedback e eventos
+- Análise de qualidade automatizada
+- Geração de sugestões de melhoria via LLM
+- Dashboard de maturidade (score 0-100, levels: initial/basic/developing/mature)
+- 7 endpoints: /api/metrics/rag/feedback, /maturity, /quality-analysis, etc.
+- Documentação: FASE11_UPGRADE_SELFIMPROVING.md
+
+## Pending Items
+
+### Priority 1 - Testing
+- **Stripe Webhook Verification** ⚠️
+  - Task: Verify webhook URL registration in Stripe Dashboard
+  - Status: Implementation done, testing pending
+
+### Priority 2 - Deployment
+- **n8n Workflow Implementation** ✅ READY v2.0
+  - Blueprint v2: `educare-backend/docs/n8n-educare-v2.json`
+  - Next Step: Import → Configure credentials → Activate
+
+- **Production Deployment Checklist** ⚠️
+  - Task: Prepare deployment configuration
+  - Status: Pending
 
 ## Integration Status
 
@@ -108,29 +138,27 @@ Educare+ is a digital platform for early childhood development and maternal heal
   - `GET /children/:id/unanswered-questions` - Next question
   - `POST /children/:id/save-answer` - Save response
   - `GET /children/:id/progress` - Progress tracking
-  - `GET /children/:id/quiz-responses` - Answer history
+
+### RAG API Endpoints (Complete)
+- **Metrics**: `/api/metrics/rag/*` (10+ endpoints)
+- **Admin Migration**: `/api/admin/migration/*` (4 endpoints)
+- **Admin Legacy Shutdown**: `/api/admin/legacy/*` (7 endpoints)
+- **Feedback**: `/api/metrics/rag/feedback`, `/maturity`, `/suggestions`
 
 ### n8n Workflow v2.0 (Ready for Activation)
-- **Blueprint v2**: `educare-backend/docs/n8n-educare-v2.json` ✅ (28 nodes, optimized)
-- **Setup Guide**: `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` ✅ (5-minute activation)
-- **Documentation**: `educare-backend/docs/README_N8N_WORKFLOW.md` ✅
-- **Webhook URL**: https://n8neducare.whatscall.com.br/webhook-test/titnauta
-- **Status**: v2 blueprint ready - all branches connected to WhatsApp Send
-- **Security**: All API keys use environment variables (no hardcoded values)
-- **Next Action**: Import `n8n-educare-v2.json` → Configure credentials → Activate
+- **Blueprint v2**: `educare-backend/docs/n8n-educare-v2.json` ✅ (28 nodes)
+- **Setup Guide**: `educare-backend/docs/N8N_BLUEPRINT_SETUP.md`
+- **Status**: Ready - all branches connected
 
 ### WhatsApp (Evolution API)
-- **Provider**: Evolution API (identified from blueprint)
+- **Provider**: Evolution API
 - **Documentation**: `educare-backend/docs/WHATSAPP_INTEGRATION.md`
-- **Status**: Already integrated in blueprint, requires activation
+- **Status**: Integrated in blueprint, requires activation
 
 ### Cloud Deployment (Digital Ocean)
-- **Documentation**: `educare-backend/docs/DIGITAL_OCEAN_DEPLOYMENT.md` ✅ **NEW**
+- **Documentation**: `educare-backend/docs/DIGITAL_OCEAN_DEPLOYMENT.md`
 - **Architecture**: 2 droplets ($12 each/month) + PostgreSQL + Redis
-- **n8n Droplet**: 2GB RAM, auto-SSL via Caddy/Nginx
-- **Evolution API Droplet**: 2GB RAM, PostgreSQL + Redis backend
-- **Status**: Complete deployment guide with scripts ready
-- **Estimated Cost**: ~$26/month all-in
+- **Estimated Cost**: ~$26/month
 
 ### Stripe (Implemented)
 - **Status**: Webhook configured
@@ -145,51 +173,84 @@ Educare+ is a digital platform for early childhood development and maternal heal
 - **Routing**: React Router
 - **Forms**: react-hook-form with Zod validation
 - **Authentication**: Custom JWT-based context provider
-- **Key Features**: TitiNauta interactive journey, multi-domain quiz system, child management, maternal health tracking, professional collaboration.
-- **Design Patterns**: Component-based, custom hooks, TypeScript for type safety, responsive-first design.
 
 ### Backend
 - **Framework**: Node.js with Express.js and Sequelize ORM
 - **Architecture**: Layered MVC (Controllers, Models, Routes, Middleware)
 - **Authentication**: JWT-based (access and refresh tokens) with Row-Level Security (RLS)
-- **API Design**: RESTful, internal/external routes, OpenAPI/Swagger for external APIs, structured error handling.
-- **Key Endpoints**: Auth, Children, Journey/Quiz, External Integration, Admin.
+- **API Design**: RESTful, internal/external routes, OpenAPI/Swagger
 
 ### Data Storage
-- **Primary Database**: PostgreSQL via Sequelize ORM (external instance)
-- **Schema Highlights**: Users & Roles (RBAC), Children, Assessments (quizzes, bot responses), Journey System (content by weeks/topics), Health (maternal, child, diary), Subscriptions.
-- **Security**: Row-Level Security ensures data access based on user roles and ownership.
+- **Primary Database**: PostgreSQL via Sequelize ORM (external: 86.48.30.74)
+- **Schema Highlights**: Users & Roles (RBAC), Children, Assessments, Journey System, Health, Subscriptions
+- **Knowledge Bases**: kb_baby, kb_mother, kb_professional (segmented), knowledge_documents (legacy)
 
 ### Automation Layer
-- **Tool**: n8n Workflow (to be configured)
-- **Functionality**: Orchestrates WhatsApp message ingestion, AI processing (OpenAI), conversation context management, conditional routing, response generation, and delivery.
-
-## External Dependencies
-
-### Third-Party Services
-- **WhatsApp Business API**: Conversational interface for TitiNauta, group messaging, media sharing, notifications.
-- **OpenAI API**: Powers AI features (NLP for chat, audio transcription, image analysis, recommendations) within the n8n workflow.
-- **Stripe**: Payment gateway for subscription billing.
-
-### Key NPM Dependencies
-- **Frontend**: `react`, `@tanstack/react-query`, `react-hook-form`, `zod`, `date-fns`, `recharts`, `html2canvas`, Radix UI.
-- **Backend**: `express`, `sequelize`, `pg`, `jsonwebtoken`, `bcryptjs`, `express-validator`, `swagger-jsdoc`, `swagger-ui-express`, `cors`.
-
-### Infrastructure
-- **Development**: Replit (Frontend on 5000, Backend on 3001), external PostgreSQL.
-- **Production**: VPS with PM2, Nginx reverse proxy, SSL/TLS, PostgreSQL.
+- **Tool**: n8n Workflow
+- **Functionality**: WhatsApp ingestion, AI processing, context management, response delivery
 
 ## Important Files
+
+### RAG Services (FASE 8-11)
+- `educare-backend/src/services/knowledgeBaseSelector.js` - Seletor inteligente de KB
+- `educare-backend/src/services/ragService.js` - Serviço principal de RAG
+- `educare-backend/src/services/ragMetricsService.js` - Métricas e health check
+- `educare-backend/src/services/legacyShutdownService.js` - Gerenciamento de shutdown
+- `educare-backend/src/services/rerankingService.js` - Re-ranking neural
+- `educare-backend/src/services/confidenceService.js` - Scoring de confiança
+- `educare-backend/src/services/chunkingService.js` - Chunking inteligente
+- `educare-backend/src/services/dataAugmentationService.js` - Data augmentation
+- `educare-backend/src/services/contextSafetyService.js` - Auditor de segurança
+- `educare-backend/src/services/kbVersioningService.js` - Versionamento de KB
+- `educare-backend/src/services/ragFeedbackService.js` - Feedback e auto-melhoramento
+
+### RAG Routes
+- `educare-backend/src/routes/metricsRoutes.js` - Endpoints de métricas e feedback
+- `educare-backend/src/routes/adminRoutes.js` - Endpoints de legacy shutdown
+- `educare-backend/src/routes/migrationRoutes.js` - Endpoints de migração
+
+### Documentation (FASE 8-11)
+- `educare-backend/docs/FASE8_UPGRADE_TRANSITION.md`
+- `educare-backend/docs/FASE9_UPGRADE_LEGACY_SHUTDOWN.md`
+- `educare-backend/docs/FASE10_UPGRADE_ENTERPRISE.md`
+- `educare-backend/docs/FASE11_UPGRADE_SELFIMPROVING.md`
 
 ### Integration Documentation
 - `README_DIAGNOSTICO.md` - Complete integration analysis
 - `educare-backend/docs/README_N8N_WORKFLOW.md` - n8n workflow architecture
-- `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` - **NEW** Complete setup & troubleshooting guide
-- `educare-backend/docs/n8n-workflow-template.json` - Importable blueprint (ready for n8n.cloud)
+- `educare-backend/docs/N8N_BLUEPRINT_SETUP.md` - Setup & troubleshooting guide
+- `educare-backend/docs/n8n-educare-v2.json` - Importable blueprint
 - `educare-backend/docs/WHATSAPP_INTEGRATION.md` - WhatsApp provider options
 - `educare-backend/docs/ENV_CONFIG.md` - Environment variables reference
 
 ### External API
-- `educare-backend/src/controllers/externalApiController.js` - Main controller (2100+ lines)
+- `educare-backend/src/controllers/externalApiController.js` - Main controller
 - `educare-backend/src/routes/externalApiRoutes.js` - Route definitions
 - `educare-backend/src/middlewares/apiKey.js` - API Key validation
+
+## Environment Variables (RAG FASE 8-11)
+
+```bash
+# FASE 8 - Transition Control
+USE_LEGACY_FALLBACK_FOR_BABY=false
+USE_LEGACY_FALLBACK_FOR_MOTHER=false
+USE_LEGACY_FALLBACK_FOR_PROFESSIONAL=false
+
+# FASE 9 - Legacy Shutdown
+LEGACY_INGESTION_DISABLED=false
+BACKUP_PATH=./backups/rag_legacy
+
+# FASE 10 - Enterprise
+RERANKING_ENABLED=true
+RERANKING_MODEL=gpt-4o-mini
+CONFIDENCE_HIGH_THRESHOLD=0.80
+CHUNKING_ENABLED=true
+AUGMENTATION_ENABLED=true
+CONTEXT_SAFETY_ENABLED=true
+KB_VERSIONING_ENABLED=true
+
+# FASE 11 - Auto-Improvement
+RAG_FEEDBACK_ENABLED=true
+RAG_AUTO_ANALYSIS=true
+RAG_IMPROVEMENT_MODEL=gpt-4o-mini
+```

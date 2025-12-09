@@ -1,6 +1,6 @@
 /**
  * RAG Service
- * FASE 08-UPGRADE: Suporte a modo strict (sem fallback legacy)
+ * FASE 08-11-UPGRADE: Integração completa com Enterprise Features
  */
 
 const OpenAI = require('openai');
@@ -10,6 +10,14 @@ const babyContextService = require('./babyContextService');
 const knowledgeBaseSelector = require('./knowledgeBaseSelector');
 const knowledgeBaseRepository = require('../repositories/knowledgeBaseRepository');
 const ragMetricsService = require('./ragMetricsService');
+
+// FASE 10: Enterprise Services
+const rerankingService = require('./rerankingService');
+const confidenceService = require('./confidenceService');
+const contextSafetyService = require('./contextSafetyService');
+
+// FASE 11: Feedback Service
+const ragFeedbackService = require('./ragFeedbackService');
 
 let openaiInstance = null;
 
@@ -406,6 +414,38 @@ async function ask(question, options = {}) {
       }
     }
 
+    // FASE 10: Re-ranking dos documentos encontrados
+    let rankedDocs = docsResult.data;
+    let rerankingStats = null;
+    
+    if (docsResult.data.length > 1 && options.enable_reranking !== false) {
+      try {
+        const rerankResult = await rerankingService.rerank(question, docsResult.data, {
+          module: filters.module_type,
+          topK: filters.limit
+        });
+        if (rerankResult.reranked) {
+          rankedDocs = rerankResult.documents;
+          rerankingStats = rerankResult.stats;
+        }
+      } catch (rerankError) {
+        console.warn('[RAG] Erro no reranking (continuando sem):', rerankError.message);
+      }
+    }
+
+    // FASE 10: Context Safety Audit da query
+    let safetyAudit = null;
+    if (options.enable_safety !== false) {
+      try {
+        safetyAudit = contextSafetyService.auditContext({
+          query: question,
+          documents: rankedDocs
+        });
+      } catch (safetyError) {
+        console.warn('[RAG] Erro no safety audit:', safetyError.message);
+      }
+    }
+
     const promptData = buildLLMPrompt(
       question,
       retrievedChunks,
@@ -442,11 +482,54 @@ async function ask(question, options = {}) {
         error
       });
 
+      // FASE 11: Log event de erro
+      ragFeedbackService.logEvent('query_error', {
+        query: question,
+        module: filters.module_type,
+        error: llmResult.error
+      });
+
       return {
         success: false,
         error: llmResult.error,
         processing_time_ms: processingTime
       };
+    }
+
+    // FASE 10: Audit da resposta gerada
+    let responseAudit = null;
+    let disclaimers = [];
+    if (options.enable_safety !== false && safetyAudit) {
+      try {
+        responseAudit = contextSafetyService.auditContext({
+          query: question,
+          documents: rankedDocs,
+          response: llmResult.content
+        });
+        disclaimers = contextSafetyService.generateDisclaimer(responseAudit);
+      } catch (safetyError) {
+        console.warn('[RAG] Erro no response audit:', safetyError.message);
+      }
+    }
+
+    // FASE 10: Calcular confidence score
+    let confidence = null;
+    if (options.enable_confidence !== false) {
+      try {
+        confidence = confidenceService.analyzeRAGResponse({
+          documents: rankedDocs,
+          query: question,
+          responseText: llmResult.content,
+          responseTime: processingTime,
+          usedFallback: docsResult.metadata?.fallback_used || false,
+          moduleMatch: true,
+          context: {
+            healthRelated: safetyAudit?.findings?.some(f => f.type === 'emergency_terms')
+          }
+        });
+      } catch (confError) {
+        console.warn('[RAG] Erro no confidence scoring:', confError.message);
+      }
     }
 
     success = true;
@@ -463,18 +546,38 @@ async function ask(question, options = {}) {
       strict_mode: strictMode,
       documents_found: docsResult.data.length,
       file_search_used: fileSearchUsed,
-      chunks_retrieved: retrievedChunks.length
+      chunks_retrieved: retrievedChunks.length,
+      reranked: !!rerankingStats,
+      confidence_level: confidence?.level
     });
+
+    // FASE 11: Log event de sucesso
+    ragFeedbackService.logEvent('query_success', {
+      query: question,
+      module: filters.module_type,
+      documents_found: rankedDocs.length,
+      confidence_level: confidence?.level,
+      response_time_ms: processingTime,
+      fallback_used: docsResult.metadata?.fallback_used
+    });
+
+    // Prepara resposta final (com disclaimers se necessário)
+    let finalAnswer = llmResult.content;
+    if (disclaimers.length > 0) {
+      finalAnswer = disclaimers.join('\n') + '\n\n' + llmResult.content;
+    }
 
     return {
       success: true,
-      answer: llmResult.content,
+      answer: finalAnswer,
+      response_id: `rag_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       metadata: {
         documents_found: docsResult.data.length,
-        documents_used: docsResult.data.map(d => ({
+        documents_used: rankedDocs.map(d => ({
           id: d.id,
           title: d.title,
-          source_type: d.source_type
+          source_type: d.source_type,
+          relevance_score: d.relevance_score
         })),
         file_search_used: fileSearchUsed,
         chunks_retrieved: retrievedChunks.length,
@@ -482,7 +585,14 @@ async function ask(question, options = {}) {
         usage: llmResult.usage,
         processing_time_ms: processingTime,
         knowledge_base: docsResult.metadata,
-        strict_mode: strictMode
+        strict_mode: strictMode,
+        reranking: rerankingStats,
+        confidence,
+        safety: {
+          query_audit: safetyAudit?.findings?.length > 0 ? safetyAudit.findings : null,
+          response_audit: responseAudit?.findings?.length > 0 ? responseAudit.findings : null,
+          disclaimers_added: disclaimers.length > 0
+        }
       }
     };
   } catch (error) {
