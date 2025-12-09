@@ -11,7 +11,7 @@ function getOpenAI() {
   return openaiInstance;
 }
 
-const TITINAUTA_SYSTEM_PROMPT = `Você é TitiNauta, uma assistente virtual amigável e especializada em desenvolvimento infantil da plataforma Educare+.
+const TITINAUTA_SYSTEM_PROMPT = `Você é TitiNauta, um assistente virtual amigável e especializado em desenvolvimento infantil da plataforma Educare+.
 
 Seu papel é:
 - Orientar pais e cuidadores sobre marcos de desenvolvimento infantil (0-6 anos)
@@ -94,7 +94,7 @@ Forneça um feedback que:
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: 'Você é TitiNauta, uma especialista em desenvolvimento infantil. Seja breve, acolhedora e prática.' },
+        { role: 'system', content: 'Você é TitiNauta, um especialista em desenvolvimento infantil. Seja breve, acolhedor e prático.' },
         { role: 'user', content: prompt }
       ],
       temperature: 0.7,

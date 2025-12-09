@@ -20,7 +20,7 @@ export const pricingPlans: PricingPlan[] = [
     studentLimit: "1 perfil de criança",
     features: [
       "1 perfil de criança",
-      "Jornada TitiNauta com Assistente IA (Web e WhatsApp)",
+      "Jornada TitiNauta - seu assistente inteligente (Web e WhatsApp)",
       "Acesso ao Blog",
       "Avaliações básicas",
       "Suporte via chat"
@@ -41,7 +41,7 @@ export const pricingPlans: PricingPlan[] = [
     studentLimit: "1 perfil de criança",
     features: [
       "1 perfil de criança",
-      "Jornada TitiNauta com Assistente IA (somente na web)",
+      "Jornada TitiNauta - seu assistente inteligente (somente na web)",
       "Relatórios Básicos",
       "Acesso à Educare+ Academy",
       "Acesso ao Blog",
@@ -63,7 +63,7 @@ export const pricingPlans: PricingPlan[] = [
     studentLimit: "1 perfil de criança",
     features: [
       "1 perfil de criança",
-      "Jornada TitiNauta com Assistente IA (Web e WhatsApp)",
+      "Jornada TitiNauta - seu assistente inteligente (Web e WhatsApp)",
       "Relatórios Detalhados e Compartilhamento com Profissionais",
       "Acesso à Educare+ Academy",
       "Acesso ao Blog",

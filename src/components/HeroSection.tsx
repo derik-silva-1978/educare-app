@@ -57,7 +57,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
           >
-            Plataforma completa com TitiNauta (assistente IA), comunicação WhatsApp com especialistas, 
+            Plataforma completa com TitiNauta (assistente inteligente), comunicação WhatsApp com especialistas, 
             relatórios detalhados e Academia Educare+ para famílias e profissionais.
           </motion.p>
           
@@ -106,7 +106,7 @@ const HeroSection = () => {
           <div className="bg-gradient-to-r from-educare-600 to-educare-400 aspect-video rounded-2xl overflow-hidden flex items-center justify-center relative">
             <div className="text-white text-center p-8 z-10">
               <h3 className="text-xl md:text-2xl font-medium mb-2">TitiNauta em Ação</h3>
-              <p className="text-white/80">Veja como nosso assistente IA acompanha o desenvolvimento infantil</p>
+              <p className="text-white/80">Veja como o TitiNauta acompanha o desenvolvimento infantil</p>
               
               <motion.div
                 whileHover={{ scale: 1.05 }}
