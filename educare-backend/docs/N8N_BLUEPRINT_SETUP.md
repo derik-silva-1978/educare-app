@@ -400,6 +400,44 @@ curl "https://seu-backend/api/external/users/search?phone=test&api_key=SUA_CHAVE
 
 ---
 
+## 🧠 RAG Integration (Fase 5)
+
+O workflow pode agora usar o RAG (Retrieval-Augmented Generation) para respostas personalizadas baseadas na base de conhecimento.
+
+### Endpoint RAG
+```
+POST /api/rag/external/ask
+Header: X-API-Key: {EXTERNAL_API_KEY}
+Body: { question, baby_id, use_file_search: true }
+```
+
+### Node de Integração no N8N
+
+Após buscar o `active-child`, adicione um HTTP Request Node:
+
+```json
+{
+  "name": "Call RAG Endpoint",
+  "url": "{{ $env.EDUCARE_API_URL }}/rag/external/ask",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-API-Key": "{{ $env.EXTERNAL_API_KEY }}"
+  },
+  "body": {
+    "question": "{{ $node['Extract Message'].json.messageBody }}",
+    "baby_id": "{{ $node['Get Active Child'].json.id }}",
+    "use_file_search": true
+  }
+}
+```
+
+A resposta será a propriedade `answer` do JSON retornado.
+
+📖 **Documentação Completa:** `N8N_RAG_INTEGRATION.md`
+
+---
+
 ## 🔐 Segurança
 
 O workflow v2 segue as melhores práticas de segurança:
@@ -408,7 +446,8 @@ O workflow v2 segue as melhores práticas de segurança:
 2. **Timeout configurado** - 15s para evitar execuções travadas
 3. **NeverError** - Falhas de API não quebram o fluxo
 4. **Filtragem** - Ignora grupos e mensagens próprias
+5. **RAG seguro** - API Key validada em cada request
 
 ---
 
-*Atualizado em: 3 de Dezembro de 2025*
+*Atualizado em: 9 de Dezembro de 2025 (Fase 5 - RAG Integration)*
