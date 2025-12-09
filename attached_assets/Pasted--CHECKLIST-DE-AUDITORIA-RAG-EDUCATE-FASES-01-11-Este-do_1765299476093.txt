@@ -1,0 +1,185 @@
+# ✅ CHECKLIST DE AUDITORIA – RAG EDUCATE+ (FASES 01–11)
+
+Este documento deve ser usado para validar que o Replit implementou corretamente todas as fases do RAG segmentado, garantindo segurança, estabilidade e compatibilidade com o Educare+ App.
+
+---
+
+# 🔒 1. SEGURANÇA E ESTABILIDADE GERAL
+
+## 1.1 Nenhuma rota existente foi modificada ou removida  
+- [ ] APIs continuam respondendo normalmente  
+- [ ] Fluxos integrados ao n8n continuam funcionando  
+- [ ] Webhooks permanecem inalterados  
+- [ ] Sem alteração no comportamento do app para usuários finais  
+
+## 1.2 Sistema inicia sem erros  
+- [ ] Todos os serviços sobem corretamente  
+- [ ] Não há warnings novos relacionados ao RAG  
+- [ ] Logs estão limpos e consistentes  
+
+## 1.3 Variáveis de ambiente preservadas  
+- [ ] `.env` atualizado com flags do RAG segmentado  
+- [ ] Nenhuma variável crítica foi removida  
+- [ ] Flags de fallback funcionam corretamente  
+
+---
+
+# 🧱 2. ARQUITETURA DO RAG E SEGMENTAÇÃO
+
+## 2.1 As KBs segmentadas existem e estão operacionais  
+- [ ] `kb_baby` está populada e retornando dados  
+- [ ] `kb_mother` está populada e retornando dados  
+- [ ] `kb_professional` está populada e retornando dados  
+- [ ] Estrutura no banco segue o schema definido  
+
+## 2.2 O **KnowledgeBaseSelector** está ativo  
+- [ ] O módulo correto seleciona a KB correta  
+- [ ] Logs indicam seleção coerente por módulo  
+
+## 2.3 Base legado permanece preservada  
+- [ ] A tabela legado existe  
+- [ ] Não recebe ingestões novas  
+- [ ] Está acessível para auditoria  
+- [ ] Operações de fallback funcionam quando habilitadas  
+
+---
+
+# 📥 3. INGESTÃO VIA SUPER ADMIN
+
+## 3.1 Ingestão segmentada está operacional  
+- [ ] Upload → pré-processamento → embeddings → armazenamento  
+- [ ] Ingestão respeita módulo selecionado  
+- [ ] Não há ingestão indevida para legado  
+
+## 3.2 Painel de gestão de prompts funcionando  
+- [ ] Listar prompts  
+- [ ] Editar prompts  
+- [ ] Atualizar prompts sem crash  
+- [ ] Histórico de versões preservado  
+
+---
+
+# 🔍 4. CONSULTA RAG E RESPOSTAS
+
+## 4.1 Pipeline segmentado funcionando  
+- [ ] Busca inicial (vector search) retorna top-k  
+- [ ] Re-ranking neural ativo  
+- [ ] Auditoria de contexto funcionando  
+- [ ] Respostas com `confidenceScore` embutido  
+
+## 4.2 Comportamento com fallback (quando flags = true)  
+- [ ] Se KB segmentada não retornar nada, legado entra  
+- [ ] Sem regressão  
+- [ ] Sem respostas vazias  
+
+## 4.3 Comportamento SEM fallback (quando flags = false)  
+- [ ] Módulo responde apenas com KB segmentada  
+- [ ] Sem crash quando score baixo  
+- [ ] Mensagens seguras para baixa confiança  
+
+---
+
+# 🧪 5. TESTES DE REGRESSÃO E QUALIDADE
+
+## 5.1 Teste de temas reais  
+- [ ] Perguntas sobre bebê (sono, marcos, alimentação)  
+- [ ] Perguntas sobre mãe (saúde emocional, pós-parto)  
+- [ ] Perguntas profissionais (PEI, adaptação, inclusão)  
+- [ ] Respostas estão coerentes e contextualizadas ao módulo  
+
+## 5.2 Teste de alta carga (opcional)  
+- [ ] 50+ consultas sem degradação  
+- [ ] Latência estável  
+
+## 5.3 Teste de precisão  
+- [ ] Respostas não contêm alucinações  
+- [ ] Conteúdo remete claramente aos trechos recuperados  
+
+---
+
+# 📦 6. MIGRAÇÃO E FASE 9 (DESLIGAMENTO DO LEGADO)
+
+## 6.1 Pré-requisitos atendidos  
+- [ ] Todos os módulos têm fallback desligado com sucesso  
+- [ ] Nenhuma consulta acionou fallback nos últimos 7 dias  
+- [ ] Score médio > 0.75  
+
+## 6.2 Backup da base legado criado  
+- [ ] Dump `.sql` presente em `/backups/rag_legacy/`  
+- [ ] Arquivo acessível e íntegro  
+
+## 6.3 Base legado desativada logicamente  
+- [ ] Não aparece mais no pipeline  
+- [ ] Não é usada em consultas  
+- [ ] Ingestão bloqueada com erro claro  
+
+---
+
+# 🧠 7. FASE 10 – OTIMIZAÇÕES AVANÇADAS
+
+## 7.1 Re-ranking Neural  
+- [ ] Implementado  
+- [ ] Logs mostram funcionamento  
+- [ ] Reordenação coerente  
+
+## 7.2 Chunking inteligente (LLM-Assisted Chunking)  
+- [ ] Divisão por sentido, não por tamanho  
+- [ ] PDFs com imagens geram chunks coerentes  
+- [ ] Chunks armazenados corretamente na KB  
+
+## 7.3 Data Augmentation  
+- [ ] Resumo criado automaticamente  
+- [ ] Glossário criado  
+- [ ] FAQ gerada  
+- [ ] Estes itens são usados no RAG  
+
+## 7.4 Auditoria de contexto  
+- [ ] Respostas inseguras são suavizadas  
+- [ ] Auditor identifica extrapolações  
+
+---
+
+# 📊 8. FASE 11 – AUTO-APERFEIÇOAMENTO (SELF-IMPROVEMENT)
+
+## 8.1 Tabela `rag_events` criada e registrando logs  
+- [ ] Eventos aparecendo corretamente  
+- [ ] Confiança registrada  
+- [ ] Módulo registrado  
+
+## 8.2 Sistema de feedback  
+- [ ] Usuário pode avaliar resposta  
+- [ ] Feedback armazenado em `rag_feedback`  
+
+## 8.3 Relatórios automáticos  
+- [ ] `RAG_quality_report_*.md` gerado  
+- [ ] Contém estatísticas por módulo  
+- [ ] Destaca temas com baixa confiança  
+
+## 8.4 Gerador de sugestões  
+- [ ] Arquivo `RAG_improvement_suggestions_*.md` gerado  
+- [ ] Contém recomendações de novos conteúdos  
+- [ ] Sugere ajustes nos prompts  
+- [ ] Sugere temas com lacunas  
+
+---
+
+# 🚦 9. APROVAÇÃO FINAL
+
+O RAG só pode ser considerado **concluído e estável** se:
+
+- [ ] Todas as validações acima foram marcadas como OK  
+- [ ] Nenhuma regressão foi identificada  
+- [ ] Todos os módulos estão operando 100% na KB segmentada  
+- [ ] Auto-aprimoramento funcionando  
+- [ ] Painel Super Admin atualizado  
+- [ ] Backend estável  
+- [ ] Banco consistente  
+- [ ] Nenhum fluxo do n8n foi impactado  
+
+---
+
+# 🏁 STATUS FINAL
+
+- [ ] **RAG Estável**  
+- [ ] **RAG parcialmente estável (ajustes necessários)**  
+- [ ] **RAG não aprovado (regressões identificadas)**  
