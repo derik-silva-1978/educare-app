@@ -2,6 +2,8 @@ const OpenAI = require('openai');
 const { KnowledgeDocument } = require('../models');
 const { Op } = require('sequelize');
 const babyContextService = require('./babyContextService');
+const knowledgeBaseSelector = require('./knowledgeBaseSelector');
+const knowledgeBaseRepository = require('../repositories/knowledgeBaseRepository');
 
 let openaiInstance = null;
 
@@ -45,46 +47,78 @@ FORMATAÇÃO:
 
 async function selectKnowledgeDocuments(filters = {}) {
   try {
-    const where = {
-      is_active: true
+    // Determina qual base de conhecimento usar (legado ou segmentada)
+    const selector = knowledgeBaseSelector.select({
+      module_type: filters.module_type,
+      baby_id: filters.baby_id,
+      user_role: filters.user_role,
+      route_context: filters.route_context,
+      force_legacy: filters.force_legacy
+    });
+
+    const primaryTable = selector.primary_table;
+    const fallbackTable = selector.fallback_table;
+    const useFallback = selector.use_fallback;
+
+    console.log(`[RAG] Selecionando documentos - tabela primária: ${primaryTable}, motivo: ${selector.selection_reason}`);
+
+    // Prepara os filtros comuns
+    const commonFilters = {
+      age_range: filters.age_range,
+      domain: filters.domain,
+      tags: filters.tags,
+      source_type: filters.source_type,
+      limit: filters.limit || 10
     };
 
-    if (filters.age_range) {
-      where.age_range = filters.age_range;
-    }
+    let documents = [];
+    let usedTable = primaryTable;
 
-    if (filters.domain) {
-      where.domain = filters.domain;
-    }
+    // Consulta tabela primária
+    if (primaryTable === 'knowledge_documents') {
+      // Consulta legado
+      const result = await knowledgeBaseRepository.queryByTable('knowledge_documents', commonFilters);
+      if (result.success) {
+        documents = result.data;
+      }
+    } else if (['kb_baby', 'kb_mother', 'kb_professional'].includes(primaryTable)) {
+      // Consulta base segmentada
+      const result = await knowledgeBaseRepository.queryByTable(primaryTable, commonFilters);
+      if (result.success) {
+        documents = result.data;
+      }
 
-    if (filters.tags && filters.tags.length > 0) {
-      where.tags = {
-        [Op.overlap]: filters.tags
-      };
+      // Se nenhum documento encontrado e fallback habilitado, tenta tabela legada
+      if (documents.length === 0 && useFallback && fallbackTable) {
+        console.log(`[RAG] Nenhum documento em ${primaryTable}, tentando fallback para ${fallbackTable}`);
+        const fallbackResult = await knowledgeBaseRepository.queryByTable(fallbackTable, commonFilters);
+        if (fallbackResult.success) {
+          documents = fallbackResult.data;
+          usedTable = fallbackTable;
+        }
+      }
     }
-
-    if (filters.source_type) {
-      where.source_type = filters.source_type;
-    }
-
-    const documents = await KnowledgeDocument.findAll({
-      where,
-      attributes: ['id', 'title', 'file_search_id', 'tags', 'age_range', 'domain', 'source_type'],
-      order: [['created_at', 'DESC']],
-      limit: filters.limit || 10
-    });
 
     return {
       success: true,
       data: documents,
-      count: documents.length
+      count: documents.length,
+      metadata: {
+        primary_table: primaryTable,
+        used_table: usedTable,
+        fallback_used: usedTable !== primaryTable,
+        selection_reason: selector.selection_reason
+      }
     };
   } catch (error) {
     console.error('[RAG] Erro ao selecionar documentos:', error);
     return {
       success: false,
       error: error.message,
-      data: []
+      data: [],
+      metadata: {
+        error_details: error.message
+      }
     };
   }
 }
@@ -281,7 +315,12 @@ async function ask(question, options = {}) {
       domain: options.domain,
       tags: options.tags,
       source_type: options.source_type,
-      limit: options.document_limit || 5
+      limit: options.document_limit || 5,
+      module_type: options.module_type || 'baby',  // Default para baby
+      baby_id: options.baby_id,
+      user_role: options.user_role,
+      route_context: options.route_context,
+      force_legacy: options.force_legacy
     };
 
     const docsResult = await selectKnowledgeDocuments(filters);
@@ -344,7 +383,8 @@ async function ask(question, options = {}) {
         chunks_retrieved: retrievedChunks.length,
         model: llmResult.model,
         usage: llmResult.usage,
-        processing_time_ms: processingTime
+        processing_time_ms: processingTime,
+        knowledge_base: docsResult.metadata
       }
     };
   } catch (error) {
@@ -381,6 +421,8 @@ async function askWithBabyId(question, babyId, options = {}) {
 
     return ask(question, {
       ...options,
+      baby_id: babyId,
+      module_type: options.module_type || 'baby',  // Force baby module for child context
       childContext,
       age_range: inferredAgeRange
     });
