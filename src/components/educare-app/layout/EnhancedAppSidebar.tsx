@@ -19,7 +19,8 @@ import {
   MessageSquare,
   UsersRound,
   FileVideo,
-  BarChart3
+  BarChart3,
+  Database
 } from 'lucide-react';
 import {
   Sidebar,
@@ -132,6 +133,11 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         title: "Métricas RAG",
         url: "/educare-app/owner/rag-metrics",
         icon: BarChart3,
+      },
+      {
+        title: "Knowledge Base",
+        url: "/educare-app/owner/kb-management",
+        icon: Database,
       },
       ...baseItems,
     ];
