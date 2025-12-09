@@ -1,0 +1,305 @@
+⸻
+
+PRD – RAG Híbrido do Educare App
+
+(PostgreSQL externo + Backend já existente + n8n + Gemini/OpenAI)
+
+⸻
+
+1. Visão Geral
+
+O objetivo é implementar um fluxo de RAG híbrido para o Educare App, permitindo que o agente (TitiNauta/Educare Chat) responda:
+  •	com base em dados personalizados do usuário/bebê (PostgreSQL existente)
+  •		•	conteúdos especializados multimodais (PDFs, cartilhas, imagens) via Gemini/File Search ou equivalente
+  •	de forma segura, estável, sem quebrar o código atual e sem comprometer a integridade do banco.
+
+1.1. Objetivos principais
+  1.	Incluir uma camada RAG no backend do Educare App sem causar crash na aplicação existente.
+  2.	Fazer ingestão de documentos exclusivamente via módulo de frontend do Super Admin (owner).
+  3.	Reaproveitar ao máximo:
+  •	backend atual (Replit)
+  •	banco PostgreSQL já existente
+  •	fluxo n8n já orquestrando backend, DB, WhatsApp.
+  4.	Expor novos endpoints de RAG para que:
+  •	o próprio frontend possa consumir;
+  •	o n8n possa consumir, se fizer sentido.
+  5.	Garantir:
+  •	integridade total das tabelas já existentes;
+  •	criação criteriosa de novas tabelas;
+  •	documentação sempre atualizada.
+
+⸻
+
+2. Restrições e Premissas
+  1.	Código existente no Replit não pode ser quebrado
+  •	Qualquer nova funcionalidade deve:
+  •	respeitar a estrutura de pastas atual;
+  •	seguir o estilo do código existente;
+  •	evitar alterações destrutivas em módulos core.
+  2.	PostgreSQL é externo
+  •	Não pode haver perda ou alteração indevida de dados.
+  •	Novas tabelas só podem ser criadas:
+  •	com nomes claros, sem conflitar com existentes;
+  •	usando migrações seguras (IF NOT EXISTS, etc.).
+  3.	Ingestão somente via frontend de Super Admin
+  •	Não devem existir “atalhos” de ingestão via endpoints públicos ou n8n standalone.
+  •	Toda ingestão precisa:
+  •	passar pela autenticação/ autorização do perfil Super Admin;
+  •	registrar no banco log de quem subiu o documento e quando.
+  4.	n8n já orquestra backend, DB, plataforma e WhatsApp
+  •	O fluxo RAG não é obrigado a passar pelo n8n.
+  •	O backend pode manter todo o fluxo de RAG em código, contanto que:
+  •	exponha endpoints REST para o n8n, caso necessário;
+  •	não quebre os webhooks já existentes.
+  5.	LLMs prioritárias
+  •	Gemini (File Search + LLM)
+  •	OpenAI (como alternativa/fallback ou modelo complementares)
+  6.	Documentação
+  •	Qualquer nova feature deve:
+  •	ser descrita em README técnico;
+  •	incluir diagrama simples de fluxo;
+  •	listar endpoints criados/alterados.
+
+⸻
+
+3. Arquitetura Geral
+
+3.1 Componentes já existentes
+  •	Backend Educare App (Replit) – API principal
+  •	Banco PostgreSQL Externo – com múltiplas tabelas já em produção
+  •	Frontend da Plataforma – incluindo módulo Super Admin
+  •	n8n – orquestra fluxos entre:
+  •	backend
+  •	DB
+  •	WhatsApp
+  •	outras integrações
+
+3.2 Novos componentes lógicos
+  •	Módulo RAG Service (no backend):
+  •	encapsula lógica de:
+  •	seleção de documentos;
+  •	consulta a Gemini File Search;
+  •	chamada a LLM (Gemini/OpenAI);
+  •	composição da resposta.
+  •	Módulo de Ingestão de Conhecimento (backend + frontend):
+  •	endpoint protegido para upload de documentos;
+  •	salvamento da referência no PostgreSQL;
+  •	indexação no File Search.
+  •	Tabelas adicionais (mínimas e criteriosas):
+  •	knowledge_documents (ou similar, nome ajustado à convenção atual);
+  •	opcionalmente uma tabela de rag_logs ou rag_requests para auditoria.
+
+⸻
+
+4. Extensão de Banco de Dados (PostgreSQL)
+
+⚠️ Requisito: antes de criar qualquer tabela, o Replit deve:
+  •	listar as tabelas atuais;
+  •	verificar se já existe algo similar;
+  •	evitar conflitos de nomes;
+  •	gerar migrações idempotentes (IF NOT EXISTS).
+
+4.1. Nova tabela sugerida: knowledge_documents
+
+Objetivo: guardar somente metadados de documentos indexados no File Search.
+
+Campos sugeridos (ajustáveis à convenção do seu schema):
+
+create table if not exists knowledge_documents (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text,
+  source_type text,         -- 'educare', 'oms', 'bncc', etc.
+  file_search_id text not null, -- id retornado pela API do Gemini File Search
+  tags text[],              -- ['0-3m', 'sensorial', 'mãe_puerpério']
+  age_range text,           -- '0-3m', '4-6m', 'gestante', etc.
+  domain text,              -- 'motor', 'cognitivo', 'social', etc.
+  is_active boolean default true,
+  created_by uuid,          -- opcional: id do admin que subiu
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+4.2. Opcional: rag_request_logs
+
+Para auditoria/custo/debug, se fizer sentido:
+
+create table if not exists rag_request_logs (
+  id uuid primary key default gen_random_uuid(),
+  baby_id uuid,
+  user_id uuid,
+  question text,
+  answer_summary text,
+  model_used text,              -- 'gemini', 'gpt-4.1'
+  file_search_docs text[],      -- ids dos docs usados
+  created_at timestamptz default now()
+);
+
+O Replit não deve alterar nenhuma tabela deixada por você, a não ser que você peça explicitamente.
+
+⸻
+
+5. Fluxo de Ingestão (Super Admin)
+
+5.1. Requisitos funcionais
+  •	Usuário Super Admin acessa módulo de ingestão na plataforma Educare.
+  •	Faz upload de:
+  •	PDF
+  •	imagem
+  •	outro documento suportado.
+  •	Preenche metadados:
+  •	título
+  •	tipo (OMS/Educare/Outro)
+  •	faixa etária
+  •	domínio
+  •	tags
+  •	idioma
+  •	Ao salvar:
+  •	frontend chama endpoint do backend /admin/knowledge/upload (nome a definir conforme padrão existente).
+  •	backend:
+  •	valida autenticação e permissão (Super Admin);
+  •	armazena o arquivo em storage (Drive ou outro já em uso);
+  •	chama API do Gemini File Search para indexar;
+  •	recebe file_search_id;
+  •	grava registro em knowledge_documents.
+
+5.2. Requisitos não funcionais
+  •	Não pode bloquear o backend em caso de falha do File Search:
+  •	deve registrar erro e retornar mensagem amigável ao admin.
+  •	Deve logar:
+  •	quem subiu;
+  •	quando;
+  •	se foi sucesso ou erro.
+
+⸻
+
+6. Fluxo de Consulta / Resposta (RAG)
+
+Quando o usuário interage com TitiNauta ou Educare Chat (via app, web, WhatsApp etc.):
+
+6.1. Contexto (backend)
+  1.	Recebe a pergunta + identificador do usuário e/ou bebê.
+  2.	Backend consulta PostgreSQL:
+  •	tabela de bebês
+  •	histórico de marcos
+  •	resultados de quizzes
+  •	outras tabelas já existentes que já alimentam suas jornadas.
+  3.	Backend decide, com base em regras Educare:
+  •	faixa etária (ex.: 0–3m, 4–6m etc.);
+  •	domínios mais relevantes (motor, sensorial, etc.);
+  •	tags de documentos a consultar.
+
+6.2. Seleção de documentos
+  1.	Backend consulta knowledge_documents filtrando por:
+  •	age_range
+  •	domain
+  •	tags
+  •	is_active = true.
+  2.	Monta uma lista de file_search_id relevantes para a pergunta.
+
+6.3. Chamada ao RAG (Gemini File Search + LLM)
+  1.	Backend monta um prompt de pesquisa para o File Search, incluindo:
+  •	pergunta do usuário;
+  •	contexto do bebê (resumo, não dados sensíveis brutos);
+  •	filtro de documentos (ids selecionados).
+  2.	Recebe os trechos relevantes do File Search.
+  3.	Monta um prompt para o LLM (Gemini ou GPT-4.1) contendo:
+  •	prompt mestre do TitiNauta (sistema);
+  •	contexto de bebê e família;
+  •	trechos dos documentos;
+  •	pergunta do usuário.
+  4.	LLM devolve resposta:
+  •	personalizada;
+  •	baseada em evidências;
+  •	com estilo Educare.
+  5.	Backend:
+  •	retorna a resposta para o canal de origem (web, app, WhatsApp via n8n, etc.);
+  •	opcionalmente grava log em rag_request_logs.
+
+⸻
+
+7. Integração com n8n
+
+7.1. Requisitos
+  •	O n8n já orquestra:
+  •	entrada de mensagens (WhatsApp, etc.);
+  •	chamada ao backend;
+  •	salvamento no banco.
+
+7.2. Decisão arquitetural
+  •	O fluxo de RAG deve morar principalmente no backend, e não dentro do n8n, por questões de:
+  •	manutenção,
+  •	reuso,
+  •	performance,
+  •	segurança.
+  •	O backend deve:
+  •	expor um endpoint único (ou poucos endpoints) do tipo /rag/ask ou similar;
+  •	receber question + baby_id + outras infos necessárias;
+  •	devolver answer + citations (opcional).
+  •	O n8n:
+  •	chama o endpoint quando precisar;
+  •	não precisa saber de File Search ou LLM por dentro.
+
+⸻
+
+8. Estratégia de Implementação Segura (Replit)
+
+8.1. Como o Replit deve agir
+
+Antes de implementar qualquer parte do plano, o Replit deve:
+  1.	Analisar a estrutura existente:
+  •	pastas
+  •	arquivos
+  •	frameworks / libs
+  •	padrão de rotas
+  •	padrão de erros/log.
+  2.	Comparar com o PRD:
+  •	identificar o ponto mais natural para colocar:
+  •	ragService
+  •	knowledgeController
+  •	novas rotas.
+  3.	Validar compatibilidade com o banco:
+  •	examinar como hoje se faz conexão com Postgres;
+  •	descobrir se já há migrations / scripts SQL;
+  •	decidir se a criação de nova tabela será:
+  •	via script SQL separado
+  •	via ORM (se existir)
+  •	via migration tool (se existir).
+  4.	Escolher a melhor forma de implementação:
+  •	se existe padrão de services/controllers → seguir;
+  •	se existe arquitetura em camadas → respeitar;
+  •	se existe engine de docs → atualizar.
+  5.	Nunca remover código existente sem sua aprovação explícita.
+
+⸻
+
+9. Documentação
+
+Para cada fase implementada, o Replit deve:
+  •	atualizar um arquivo de documentação (por ex. docs/RAG-EDUCARE.md), contendo:
+  •	visão geral
+  •	novos endpoints
+  •	novas tabelas / campos
+  •	dependências externas (Gemini/OpenAI)
+  •	passos básicos de configuração (.env).
+  •	atualizar o README.md principal com:
+  •	seção “RAG Educare App – Overview”
+  •	link para docs detalhadas.
+
+⸻
+
+10. Critérios de Aceite
+  1.	Backend continua funcionando sem crashes para features antigas.
+  2.	Ingestão de documentos funciona apenas com credencial de Super Admin, via frontend.
+  3.	Dados existentes no Postgres permanecem íntegros.
+  4.	Novas tabelas só são criadas:
+  •	se ainda não existirem;
+  •	com migrations seguras.
+  5.	Endpoint de RAG:
+  •	responde em tempo hábil;
+  •	personaliza com dados do bebê;
+  •	usa conteúdos do File Search.
+  6.	n8n:
+  •	continua funcionando para fluxos existentes;
+  •	consegue consumir o RAG via endpoint REST, se configurado.
+  7.	Documentação atualizada ao final de cada fase.
