@@ -28,6 +28,9 @@ const Activity = require('./Activity');
 
 // Modelos do RAG
 const KnowledgeDocument = require('./KnowledgeDocument');
+const KbBaby = require('./KbBaby');
+const KbMother = require('./KbMother');
+const KbProfessional = require('./KbProfessional');
 
 // Importação dos modelos da Jornada 2.0
 const JourneyV2 = require('./JourneyV2');
@@ -258,6 +261,9 @@ module.exports = {
   Activity,
   // Modelos do RAG
   KnowledgeDocument,
+  KbBaby,
+  KbMother,
+  KbProfessional,
   // Modelos da Jornada 2.0
   JourneyV2,
   JourneyV2Week,
