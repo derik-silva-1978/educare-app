@@ -4,6 +4,7 @@ const { Op } = require('sequelize');
 const babyContextService = require('./babyContextService');
 const knowledgeBaseSelector = require('./knowledgeBaseSelector');
 const knowledgeBaseRepository = require('../repositories/knowledgeBaseRepository');
+const ragMetricsService = require('./ragMetricsService');
 
 let openaiInstance = null;
 
@@ -307,6 +308,10 @@ async function callLLM(systemPrompt, userMessage, options = {}) {
 }
 
 async function ask(question, options = {}) {
+  let processingTime = 0;
+  let success = false;
+  let error = null;
+
   try {
     const startTime = Date.now();
 
@@ -359,15 +364,46 @@ async function ask(question, options = {}) {
       }
     );
 
-    const processingTime = Date.now() - startTime;
+    processingTime = Date.now() - startTime;
 
     if (!llmResult.success) {
+      error = llmResult.error;
+      ragMetricsService.recordQuery({
+        question,
+        module_type: filters.module_type,
+        success: false,
+        response_time_ms: processingTime,
+        primary_table: docsResult.metadata?.primary_table,
+        used_table: docsResult.metadata?.used_table,
+        fallback_used: docsResult.metadata?.fallback_used,
+        documents_found: 0,
+        file_search_used: false,
+        chunks_retrieved: 0,
+        error
+      });
+
       return {
         success: false,
         error: llmResult.error,
         processing_time_ms: processingTime
       };
     }
+
+    success = true;
+
+    // Registra query bem-sucedida
+    ragMetricsService.recordQuery({
+      question,
+      module_type: filters.module_type,
+      success: true,
+      response_time_ms: processingTime,
+      primary_table: docsResult.metadata?.primary_table,
+      used_table: docsResult.metadata?.used_table,
+      fallback_used: docsResult.metadata?.fallback_used,
+      documents_found: docsResult.data.length,
+      file_search_used: fileSearchUsed,
+      chunks_retrieved: retrievedChunks.length
+    });
 
     return {
       success: true,
@@ -388,7 +424,20 @@ async function ask(question, options = {}) {
       }
     };
   } catch (error) {
+    processingTime = Date.now() - (options.startTime || Date.now());
     console.error('[RAG] Erro geral:', error);
+
+    ragMetricsService.recordQuery({
+      question,
+      module_type: options.module_type || 'baby',
+      success: false,
+      response_time_ms: processingTime,
+      documents_found: 0,
+      file_search_used: false,
+      chunks_retrieved: 0,
+      error: error.message
+    });
+
     return {
       success: false,
       error: error.message || 'Erro interno do RAG'
@@ -449,5 +498,6 @@ module.exports = {
   askWithBabyId,
   isConfigured,
   DEFAULT_SYSTEM_PROMPT,
-  babyContextService
+  babyContextService,
+  ragMetricsService
 };
