@@ -80,6 +80,7 @@ export interface RAGModuleStats {
 /**
  * Faz uma pergunta ao RAG
  * Usa autenticação JWT quando disponível, fallback para API key externa
+ * Suporta callbacks de progresso
  */
 export async function askQuestion(
   question: string,
@@ -91,6 +92,7 @@ export async function askQuestion(
     enable_reranking?: boolean;
     enable_safety?: boolean;
     enable_confidence?: boolean;
+    onProgress?: (status: 'retrieving' | 'processing' | 'generating') => void;
   } = {}
 ): Promise<RAGResponse> {
   const payload = {
@@ -104,8 +106,15 @@ export async function askQuestion(
     enable_confidence: options.enable_confidence !== false,
   };
 
+  // Notifica início da recuperação
+  options.onProgress?.('retrieving');
+
   // Primeiro tenta com autenticação JWT
   try {
+    console.log('[RAGService] Tentando com autenticação JWT para:', question.substring(0, 50) + '...');
+    
+    options.onProgress?.('processing');
+    
     const response = await httpClient.post<RAGResponse>(
       '/rag/ask',
       payload,
@@ -113,20 +122,26 @@ export async function askQuestion(
     );
 
     if (response.success && response.data) {
+      console.log('[RAGService] Sucesso com JWT auth');
+      options.onProgress?.('generating');
       return response.data;
     }
 
     // Se não teve sucesso mas não é erro de auth, lança erro
     if (response.error && !response.error.includes('Token') && !response.error.includes('401')) {
+      console.error('[RAGService] Erro (JWT):', response.error);
       throw new Error(response.error);
     }
   } catch (authError) {
-    console.log('[RAGService] Auth request failed, trying external endpoint');
+    console.log('[RAGService] Falha com JWT, tentando endpoint externo');
   }
 
   // Fallback: usa a rota externa (não requer auth)
   try {
-    console.log('[RAGService] Usando rota externa');
+    console.log('[RAGService] Usando rota externa para pergunta');
+    
+    options.onProgress?.('processing');
+    
     const externalResponse = await httpClient.post<RAGResponse>(
       '/rag/external/ask',
       payload,
@@ -134,6 +149,8 @@ export async function askQuestion(
     );
 
     if (externalResponse.success && externalResponse.data) {
+      console.log('[RAGService] Sucesso com rota externa');
+      options.onProgress?.('generating');
       return externalResponse.data;
     }
 

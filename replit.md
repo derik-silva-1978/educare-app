@@ -56,6 +56,8 @@ Dashboard and other routes automatically redirect to WelcomeHub as the primary s
 - **RAG Metrics & Monitoring**: Dedicated RAGMetricsDashboard for owners, displaying success rates, response times, fallback rates, and KB usage. Health checks provide status (healthy/degraded/unhealthy).
 - **Content Management**: Admin/Owner exclusive system for creating, editing, and publishing dynamic content (news, trainings, courses) that populates WelcomeHub. Features draft/published/archived status, image URLs, target audience, and sort ordering. Accessible at `/educare-app/admin/content-management` and `/educare-app/owner/content-management`.
 - **WelcomeHub Dynamic Content**: Public `/api/content/public` endpoint serves published content filtered by type and audience. Components use React Query for real-time data with loading states.
+- **RAG Progress Bar**: Visual feedback system with RAGProgressBar component showing retrieval/processing/generation stages. RAG service supports onProgress callbacks for real-time status updates. Components: RAGProgressBar.tsx, RAGChat.tsx.
+- **TitiNauta AI Assistant**: Masculine AI assistant (tribute to user's son Thiago) with chat interface, integrated RAG system, and progress visualization. Endpoints: `/rag/ask` (authenticated), `/rag/external/ask` (external), with automatic fallback between auth routes.
 - **External API**: 13 endpoints for integration with external systems like WhatsApp via n8n.
 - **Subscription Management**: Stripe integration for handling SaaS subscriptions.
 
