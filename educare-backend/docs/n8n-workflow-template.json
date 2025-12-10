@@ -406,7 +406,7 @@
   },
   "variables": {
     "EDUCARE_API_URL": {
-      "description": "URL base da API Educare (ex: https://seu-replit.replit.dev:3001)",
+      "description": "URL base da API Educare (Replit - substituir pelo seu URL)",
       "value": "",
       "type": "string"
     },
@@ -417,19 +417,19 @@
       "secure": true
     },
     "EVOLUTION_API_URL": {
-      "description": "URL da Evolution API (ex: https://evolution.seu-dominio.com)",
-      "value": "",
+      "description": "URL da Evolution API - Confirmada",
+      "value": "https://api.educareapp.com.br",
       "type": "string"
     },
     "EVOLUTION_API_KEY": {
-      "description": "API Key da Evolution API",
-      "value": "",
+      "description": "API Key da Evolution API - Confirmada",
+      "value": "eff3ea025256694c10422fd0fc5ff169",
       "type": "string",
       "secure": true
     },
     "EVOLUTION_INSTANCE_NAME": {
-      "description": "Nome da instância no Evolution (ex: educare-whatsapp)",
-      "value": "",
+      "description": "Nome da instância no Evolution - Confirmada",
+      "value": "evolution",
       "type": "string"
     }
   }
