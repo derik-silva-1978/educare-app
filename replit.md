@@ -78,7 +78,19 @@ Dashboard and other routes automatically redirect to WelcomeHub as the primary s
 - **Automation Platform**: n8n Workflow (for WhatsApp ingestion, AI processing, context management, and response delivery)
 - **Messaging**: WhatsApp (via Evolution API)
 - **Payment Gateway**: Stripe
-- **AI/ML**: OpenAI API (for TitiNauta, LLM-generated suggestions, and various RAG optimizations)
+- **AI/ML**: **OpenAI API (EXCLUSIVE)** - Strategic decision to use best-in-class LLM resources:
+  - **File Search**: OpenAI Assistants API (primary source for RAG retrieval)
+  - **LLM Model**: gpt-4o-mini (optimized for quality and performance)
+  - **Features**: Neural re-ranking, confidence scoring, semantic search via File Search
+  - **No Gemini**: System uses OpenAI exclusively for enterprise-grade quality assurance
 - **Cloud Provider**: Digital Ocean (for hosting and infrastructure)
 - **UI Libraries**: Radix UI, Tailwind CSS (via shadcn/ui)
 - **Frontend State Management**: `@tanstack/react-query`
+
+## Strategic AI/ML Decisions (Dec 2025)
+
+**Decision**: Maintain OpenAI API as exclusive AI provider to leverage best-in-class LLM capabilities.
+- **File Search**: Uses OpenAI Assistants API (not Gemini) for superior semantic search
+- **Rationale**: OpenAI's File Search + gpt-4o-mini provides optimal balance of quality, reliability, and cost-efficiency for enterprise deployments
+- **Implementation**: Hybrid strategy prioritizes File Search (primary) → Local KB fallback (secondary)
+- **Future**: Cost optimizations will focus on query efficiency, caching, and chunking strategies rather than provider switching
