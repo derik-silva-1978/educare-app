@@ -14,18 +14,14 @@ import { useNavigate } from 'react-router-dom';
 const WelcomeHub: React.FC = () => {
   const navigate = useNavigate();
   const [showFeedback, setShowFeedback] = useState(false);
-  const [notificationCount] = useState(2);
+  const [messageCount] = useState(2);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
       {/* Icon Toolbar - Fixed at top */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="container mx-auto px-4 py-3 max-w-6xl flex justify-end">
-          <IconToolbar 
-            notificationCount={notificationCount}
-            onFeedbackClick={() => setShowFeedback(!showFeedback)}
-            onTitiNautaClick={() => navigate('/educare-app/titinauta')}
-          />
+          <IconToolbar messageCount={messageCount} />
         </div>
       </div>
 
