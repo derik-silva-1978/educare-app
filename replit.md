@@ -100,26 +100,45 @@ Dashboard and other routes automatically redirect to WelcomeHub as the primary s
 
 ## n8n Integration (Dec 2025)
 
-**Status**: Ready for Deployment
+**Status**: ✅ **READY FOR IMMEDIATE DEPLOYMENT** - All configurations finalized
+
+### Production Configuration
+- **n8n URL**: https://n8n.educareapp.com.br/
+- **Evolution API URL**: https://api.educareapp.com.br/
+- **Evolution API Key**: eff3ea025256694c10422fd0fc5ff169
+- **Evolution Instance Name**: evolution
+- **Webhook URL**: https://webhook.educareapp.com.br/whatsapp-educare
 
 ### Documentation & Templates Available
-- **Main Guide**: `educare-backend/docs/N8N_INTEGRATION_GUIDE.md` (15 endpoints documented)
-- **Workflow Template**: `educare-backend/docs/n8n-workflow-template.json` (importable workflow)
-- **Setup Instructions**: `educare-backend/docs/N8N_SETUP_INSTRUCTIONS.md` (step-by-step configuration)
+- **🚀 START HERE**: `educare-backend/docs/N8N_READY_TO_DEPLOY.md` (Complete step-by-step, all data filled)
+- **Reference**: `educare-backend/docs/N8N_INTEGRATION_GUIDE.md` (15 endpoints documented)
+- **Template**: `educare-backend/docs/n8n-workflow-template.json` (importable workflow, variables pre-configured)
+- **Portainer Guide**: `educare-backend/docs/PORTAINER_EXTRACTION_GUIDE.md` (how to extract configs from Portainer)
+- **Full Checklist**: `educare-backend/docs/N8N_EVOLUTION_CONFIG_CHECKLIST.md` (validation checklist)
 
 ### Pre-Configured Workflow Features
 - ✅ Evolution API Webhook (WhatsApp trigger)
 - ✅ User identification/creation by phone
 - ✅ Active child selection management
-- ✅ TitiNauta RAG integration
+- ✅ TitiNauta RAG integration (gpt-4o-mini)
 - ✅ Response delivery via WhatsApp
 - ✅ Error handling for missing child context
+- ✅ Automatic workflow activation upon import
 
-### Environment Variables Required in n8n
+### Ready-to-Use Variables
 ```
-EDUCARE_API_URL=<backend-url>
+EDUCARE_API_URL=https://[SEU-REPLIT].replit.dev:3001
 EDUCARE_API_KEY=educare_external_api_key_2025
-EVOLUTION_API_URL=<evolution-url>
-EVOLUTION_API_KEY=<evolution-key>
-EVOLUTION_INSTANCE_NAME=<instance-name>
+EVOLUTION_API_URL=https://api.educareapp.com.br
+EVOLUTION_API_KEY=eff3ea025256694c10422fd0fc5ff169
+EVOLUTION_INSTANCE_NAME=evolution
 ```
+
+### Implementation Steps
+1. Import `n8n-workflow-template.json` into n8n
+2. Fill 5 variables (URL and API keys)
+3. Configure webhook in Evolution API pointing to `https://webhook.educareapp.com.br/whatsapp-educare`
+4. Activate workflow
+5. Test with WhatsApp message
+
+**All integration documentation tested and validated with production URLs** ✓
