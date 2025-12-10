@@ -32,14 +32,24 @@ const NewsCarousel: React.FC = () => {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {news.map((item: ContentItem) => (
+            {news.map((item: ContentItem, index: number) => {
+              const fallbackImages = [
+                'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1522662304937-f69f11b8b739?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=250&fit=crop',
+              ];
+              const fallbackImage = fallbackImages[index % fallbackImages.length];
+              return (
               <div
                 key={item.id}
                 className="group cursor-pointer rounded-xl overflow-hidden border bg-card hover:shadow-lg transition-all duration-300"
               >
                 <div className="relative h-36 overflow-hidden">
                   <img
-                    src={item.image_url || 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&h=250&fit=crop'}
+                    src={item.image_url || fallbackImage}
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -67,7 +77,8 @@ const NewsCarousel: React.FC = () => {
                   </Button>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
       </CardContent>

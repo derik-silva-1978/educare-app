@@ -46,14 +46,24 @@ const TrainingSection: React.FC = () => {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {trainings.map((item: ContentItem) => (
+            {trainings.map((item: ContentItem, index: number) => {
+              const fallbackImages = [
+                'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1453928582348-c93905e3a7a0?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1516321318423-f06f70570ec0?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1434030216411-0b793bcad804?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1534417307012-b34494a514f5?w=400&h=250&fit=crop',
+              ];
+              const fallbackImage = fallbackImages[index % fallbackImages.length];
+              return (
               <div
                 key={item.id}
                 className="group cursor-pointer rounded-xl overflow-hidden border bg-card hover:shadow-lg transition-all duration-300"
               >
                 <div className="relative h-40 overflow-hidden">
                   <img
-                    src={item.image_url || 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&h=250&fit=crop'}
+                    src={item.image_url || fallbackImage}
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -85,7 +95,8 @@ const TrainingSection: React.FC = () => {
                   </Button>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
       </CardContent>

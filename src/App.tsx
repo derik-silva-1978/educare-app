@@ -100,7 +100,7 @@ const App = () => (
               <Route path="/educare-app" element={<EducareAppLayout />}>
                 {/* Welcome Hub - First screen after login (authenticated) */}
                 <Route path="welcome" element={<WelcomeHub />} />
-                <Route path="dashboard" element={<EducareAppDashboard />} />
+                <Route path="dashboard" element={<Navigate to="/educare-app/welcome" replace />} />
                 <Route path="titinauta" element={<TitiNautaJourney />} />
                 <Route path="children" element={<ChildrenManagement />} />
                 <Route path="child/:id" element={<ChildProfile />} />
