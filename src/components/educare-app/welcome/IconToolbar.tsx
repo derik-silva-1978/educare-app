@@ -41,10 +41,18 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
   
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackType, setFeedbackType] = useState<'suggestion' | 'bug' | 'praise'>('suggestion');
+  const [feedbackRating, setFeedbackRating] = useState<number>(5);
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   
   const [selectedDonation, setSelectedDonation] = useState<number>(10);
+  const [donationEmail, setDonationEmail] = useState('');
   const [isProcessingDonation, setIsProcessingDonation] = useState(false);
+  
+  const [chatMessages, setChatMessages] = useState<Array<{role: 'assistant' | 'user', content: string}>>([
+    { role: 'assistant', content: 'Olá! Sou o assistente do Educare+. Como posso te ajudar hoje?' }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
   const getInitials = (name?: string) => {
     if (!name) return 'U';
@@ -63,9 +71,18 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
     
     setIsSubmittingFeedback(true);
     try {
+      const feedbackData = {
+        type: feedbackType,
+        message: feedbackText,
+        rating: feedbackRating,
+        timestamp: new Date().toISOString(),
+      };
+      console.log('Feedback enviado:', feedbackData);
+      
       await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Obrigado pelo seu feedback! Sua opinião é muito importante para nós.');
+      toast.success('Obrigado pela sua opinião! Ela nos ajuda a melhorar cada vez mais.');
       setFeedbackText('');
+      setFeedbackRating(5);
       setShowFeedbackModal(false);
     } catch (error) {
       toast.error('Erro ao enviar feedback. Tente novamente.');
@@ -75,15 +92,67 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
   };
 
   const handleDonation = async () => {
+    if (!donationEmail.trim()) {
+      toast.error('Por favor, informe um e-mail para receber confirmação');
+      return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(donationEmail)) {
+      toast.error('Por favor, informe um e-mail válido');
+      return;
+    }
+    
     setIsProcessingDonation(true);
     try {
+      const donationData = {
+        amount: selectedDonation,
+        email: donationEmail,
+        timestamp: new Date().toISOString(),
+      };
+      console.log('Doação registrada:', donationData);
+      
       toast.success(`Obrigado por apoiar o Educare+ com R$ ${selectedDonation}! Redirecionando para pagamento...`);
       await new Promise(resolve => setTimeout(resolve, 1500));
       setShowDonationModal(false);
+      setDonationEmail('');
+      setSelectedDonation(10);
     } catch (error) {
       toast.error('Erro ao processar doação. Tente novamente.');
     } finally {
       setIsProcessingDonation(false);
+    }
+  };
+
+  const handleChatMessage = async () => {
+    if (!chatInput.trim()) return;
+    
+    const userMessage = chatInput;
+    setChatInput('');
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setIsChatLoading(true);
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const responses: { [key: string]: string } = {
+        'cadastr': 'Para cadastrar uma criança, clique no botão "Cadastrar uma criança" abaixo! Você precisará informar nome, data de nascimento e outras informações importantes.',
+        'titinaut': 'TitiNauta é nosso assistente de IA especializado em desenvolvimento infantil. Ele pode responder suas dúvidas sobre estimulação, marcos de desenvolvimento e muito mais!',
+        'dashboard': 'No Dashboard você consegue acompanhar o progresso das suas crianças com gráficos, marcos de desenvolvimento e recomendações personalizadas.',
+        'atividade': 'Explore nossa biblioteca de atividades de estimulação separadas por idade e área de desenvolvimento!',
+        'ajuda': 'Estou aqui para ajudar! Você pode falar comigo sobre qualquer funcionalidade da plataforma.',
+      };
+      
+      let responseText = 'Como posso te ajudar? Posso orientar sobre cadastro de crianças, TitiNauta, Dashboard, atividades e muito mais!';
+      for (const [key, value] of Object.entries(responses)) {
+        if (userMessage.toLowerCase().includes(key)) {
+          responseText = value;
+          break;
+        }
+      }
+      
+      setChatMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
+    } finally {
+      setIsChatLoading(false);
     }
   };
 
@@ -206,7 +275,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
               Enviar Feedback
             </DialogTitle>
             <DialogDescription>
-              Sua opinião nos ajuda a melhorar o Educare+
+              Sua opinião é muito importante para nós
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -215,18 +284,38 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
               <RadioGroup value={feedbackType} onValueChange={(v) => setFeedbackType(v as any)} className="flex gap-4">
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="suggestion" id="suggestion" />
-                  <Label htmlFor="suggestion" className="font-normal cursor-pointer">Sugestão</Label>
+                  <Label htmlFor="suggestion" className="font-normal cursor-pointer text-sm">Sugestão</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="bug" id="bug" />
-                  <Label htmlFor="bug" className="font-normal cursor-pointer">Problema</Label>
+                  <Label htmlFor="bug" className="font-normal cursor-pointer text-sm">Problema</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="praise" id="praise" />
-                  <Label htmlFor="praise" className="font-normal cursor-pointer">Elogio</Label>
+                  <Label htmlFor="praise" className="font-normal cursor-pointer text-sm">Elogio</Label>
                 </div>
               </RadioGroup>
             </div>
+            
+            <div className="space-y-2">
+              <Label>Como você avalia sua experiência? (1-10)</Label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                  <button
+                    key={num}
+                    onClick={() => setFeedbackRating(num)}
+                    className={`flex-1 py-2 text-sm font-medium rounded transition-all ${
+                      feedbackRating === num
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted hover:bg-muted/80'
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
             <div className="space-y-2">
               <Label htmlFor="feedback">Sua mensagem</Label>
               <Textarea
@@ -237,6 +326,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                 rows={4}
               />
             </div>
+            
             <Button 
               onClick={handleFeedbackSubmit} 
               disabled={isSubmittingFeedback}
@@ -276,13 +366,27 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                 ))}
               </div>
             </div>
+            
             <div className="bg-muted/50 rounded-lg p-4 text-center">
               <p className="text-sm text-muted-foreground mb-1">Valor selecionado</p>
               <p className="text-2xl font-bold text-primary">R$ {selectedDonation},00</p>
             </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="donation-email">E-mail para confirmação</Label>
+              <input
+                id="donation-email"
+                type="email"
+                placeholder="seu@email.com"
+                value={donationEmail}
+                onChange={(e) => setDonationEmail(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md bg-background text-foreground text-sm"
+              />
+            </div>
+            
             <Button 
               onClick={handleDonation} 
-              disabled={isProcessingDonation}
+              disabled={isProcessingDonation || !donationEmail.trim()}
               className="w-full bg-amber-600 hover:bg-amber-700"
             >
               <Coffee className="h-4 w-4 mr-2" />
@@ -297,84 +401,97 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
 
       {/* Onboarding Chat Modal */}
       <Dialog open={showOnboardingChat} onOpenChange={setShowOnboardingChat}>
-        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg h-[600px] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-purple-500" />
               Assistente de Boas-vindas
             </DialogTitle>
-            <DialogDescription>
-              Sou o assistente do Educare+ e estou aqui para te ajudar!
-            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-                  <Bot className="h-4 w-4 text-white" />
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm">
-                    Olá! Bem-vindo ao <strong>Educare+</strong>! Sou o assistente de boas-vindas e vou te ajudar a conhecer nossa plataforma.
-                  </p>
-                  <p className="text-sm">
-                    Aqui estão algumas coisas que você pode fazer:
-                  </p>
+          
+          {/* Chat Messages */}
+          <div className="flex-1 overflow-y-auto space-y-3 py-4 px-1">
+            {chatMessages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.role === 'assistant' ? 'justify-start' : 'justify-end'}`}>
+                <div className={`max-w-xs rounded-lg p-3 ${
+                  msg.role === 'assistant'
+                    ? 'bg-purple-100 dark:bg-purple-900/30 text-foreground'
+                    : 'bg-primary text-primary-foreground'
+                }`}>
+                  <p className="text-sm">{msg.content}</p>
                 </div>
               </div>
+            ))}
+            {isChatLoading && (
+              <div className="flex justify-start">
+                <div className="bg-purple-100 dark:bg-purple-900/30 rounded-lg p-3">
+                  <div className="flex gap-1">
+                    <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '100ms' }} />
+                    <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '200ms' }} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Quick Actions */}
+          {chatMessages.length === 1 && !isChatLoading && (
+            <div className="grid grid-cols-2 gap-2 py-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-auto py-2"
+                onClick={() => setChatInput('Como cadastro uma criança?')}
+              >
+                Cadastrar criança
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-auto py-2"
+                onClick={() => setChatInput('O que é TitiNauta?')}
+              >
+                Conhecer TitiNauta
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-auto py-2"
+                onClick={() => setChatInput('Como funciona o dashboard?')}
+              >
+                Ver Dashboard
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-auto py-2"
+                onClick={() => setChatInput('Quais atividades vocês têm?')}
+              >
+                Explorar Atividades
+              </Button>
             </div>
-            
-            <div className="space-y-2">
-              <Button 
-                variant="outline" 
-                className="w-full justify-start h-auto py-3"
-                onClick={() => { setShowOnboardingChat(false); navigate('/educare-app/children'); }}
-              >
-                <span className="text-left">
-                  <strong className="block">Cadastrar uma criança</strong>
-                  <span className="text-xs text-muted-foreground">Adicione os dados da criança para acompanhar seu desenvolvimento</span>
-                </span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-start h-auto py-3"
-                onClick={() => { setShowOnboardingChat(false); navigate('/educare-app/titinauta'); }}
-              >
-                <span className="text-left">
-                  <strong className="block">Conversar com TitiNauta</strong>
-                  <span className="text-xs text-muted-foreground">Nosso assistente de IA para orientações sobre desenvolvimento</span>
-                </span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-start h-auto py-3"
-                onClick={() => { setShowOnboardingChat(false); navigate('/educare-app/dashboard'); }}
-              >
-                <span className="text-left">
-                  <strong className="block">Ver Dashboard</strong>
-                  <span className="text-xs text-muted-foreground">Acompanhe métricas e progresso das crianças</span>
-                </span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-start h-auto py-3"
-                onClick={() => { setShowOnboardingChat(false); navigate('/educare-app/activities'); }}
-              >
-                <span className="text-left">
-                  <strong className="block">Explorar Atividades</strong>
-                  <span className="text-xs text-muted-foreground">Descubra atividades de estimulação para cada fase</span>
-                </span>
-              </Button>
-            </div>
-            
-            <div className="bg-muted/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-muted-foreground">
-                Precisa de ajuda? Acesse nosso <button onClick={() => { setShowOnboardingChat(false); navigate('/educare-app/support'); }} className="text-primary underline">suporte</button> ou fale com o TitiNauta!
-              </p>
-            </div>
+          )}
+          
+          {/* Chat Input */}
+          <div className="flex gap-2 pt-4 border-t">
+            <input
+              type="text"
+              placeholder="Digite sua pergunta..."
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleChatMessage()}
+              disabled={isChatLoading}
+              className="flex-1 px-3 py-2 border rounded-md bg-background text-foreground text-sm"
+            />
+            <Button
+              size="sm"
+              onClick={handleChatMessage}
+              disabled={isChatLoading || !chatInput.trim()}
+              className="px-3"
+            >
+              Enviar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -40,6 +40,12 @@ const NewsCarousel: React.FC = () => {
                 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400&h=250&fit=crop',
                 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=250&fit=crop',
                 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1521737604893-6f3031224c94?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&h=250&fit=crop',
               ];
               const fallbackImage = fallbackImages[index % fallbackImages.length];
               return (

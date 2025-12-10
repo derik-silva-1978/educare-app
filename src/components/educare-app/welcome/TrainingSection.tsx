@@ -54,6 +54,12 @@ const TrainingSection: React.FC = () => {
                 'https://images.unsplash.com/photo-1434030216411-0b793bcad804?w=400&h=250&fit=crop',
                 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=400&h=250&fit=crop',
                 'https://images.unsplash.com/photo-1534417307012-b34494a514f5?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1599133407505-b56d0ce4f2db?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1427504494784-904bc9d2b378?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1522661335684-37898b6baf30?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1531615533034-ef7a2c56b912?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1553729784-e91953dec042?w=400&h=250&fit=crop',
               ];
               const fallbackImage = fallbackImages[index % fallbackImages.length];
               return (
