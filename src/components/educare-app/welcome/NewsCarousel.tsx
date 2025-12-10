@@ -32,7 +32,7 @@ const NewsCarousel: React.FC = () => {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {news.map((item: ContentItem, index: number) => {
+            {news.map((item: ContentItem) => {
               const fallbackImages = [
                 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&h=250&fit=crop',
                 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=250&fit=crop',
@@ -46,8 +46,31 @@ const NewsCarousel: React.FC = () => {
                 'https://images.unsplash.com/photo-1521737604893-6f3031224c94?w=400&h=250&fit=crop',
                 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=250&fit=crop',
                 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1516552404090-6a0f9f4b1e7b?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1488190211105-8342361f853c?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1504711331261-cae0b4b58a9b?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1526779259212-7adae4c3d734?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1487730116645-74489c95b41b?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1469521318250-8f72c59fa1a6?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1493514789560-586cb221d7c7?w=400&h=250&fit=crop',
+                'https://images.unsplash.com/photo-1511576661531-b34c7eaf8722?w=400&h=250&fit=crop',
               ];
-              const fallbackImage = fallbackImages[index % fallbackImages.length];
+              const hashCode = (str: string) => {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                  const char = str.charCodeAt(i);
+                  hash = ((hash << 5) - hash) + char;
+                  hash = hash & hash;
+                }
+                return Math.abs(hash);
+              };
+              const fallbackImage = fallbackImages[hashCode(item.id) % fallbackImages.length];
               return (
               <div
                 key={item.id}
