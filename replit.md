@@ -97,3 +97,29 @@ Dashboard and other routes automatically redirect to WelcomeHub as the primary s
 - **Rationale**: OpenAI's File Search + gpt-4o-mini provides optimal balance of quality, reliability, and cost-efficiency for enterprise deployments
 - **Implementation**: Hybrid strategy prioritizes File Search (primary) → Local KB fallback (secondary)
 - **Future**: Cost optimizations will focus on query efficiency, caching, and chunking strategies rather than provider switching
+
+## n8n Integration (Dec 2025)
+
+**Status**: Ready for Deployment
+
+### Documentation & Templates Available
+- **Main Guide**: `educare-backend/docs/N8N_INTEGRATION_GUIDE.md` (15 endpoints documented)
+- **Workflow Template**: `educare-backend/docs/n8n-workflow-template.json` (importable workflow)
+- **Setup Instructions**: `educare-backend/docs/N8N_SETUP_INSTRUCTIONS.md` (step-by-step configuration)
+
+### Pre-Configured Workflow Features
+- ✅ Evolution API Webhook (WhatsApp trigger)
+- ✅ User identification/creation by phone
+- ✅ Active child selection management
+- ✅ TitiNauta RAG integration
+- ✅ Response delivery via WhatsApp
+- ✅ Error handling for missing child context
+
+### Environment Variables Required in n8n
+```
+EDUCARE_API_URL=<backend-url>
+EDUCARE_API_KEY=educare_external_api_key_2025
+EVOLUTION_API_URL=<evolution-url>
+EVOLUTION_API_KEY=<evolution-key>
+EVOLUTION_INSTANCE_NAME=<instance-name>
+```

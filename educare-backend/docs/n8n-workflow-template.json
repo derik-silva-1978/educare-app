@@ -1,0 +1,436 @@
+{
+  "name": "Educare+ WhatsApp Integration",
+  "description": "Fluxo completo de integração WhatsApp com Educare+ - Identificação de usuário, gestão de crianças e TitiNauta AI",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "whatsapp-educare",
+        "httpMethod": "POST",
+        "options": {}
+      },
+      "id": "webhook-evolution",
+      "name": "Evolution API Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jmesPathQuery": "{\n  phone: data.key.remoteJid | replace('@s.whatsapp.net', ''),\n  message: data.message.conversation,\n  senderName: data.pushName\n}"
+      },
+      "id": "extract-whatsapp-data",
+      "name": "Extract WhatsApp Data",
+      "type": "n8n-nodes-base.jmespath",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.EDUCARE_API_URL }}/api/external/users/search",
+        "authentication": "none",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "api_key",
+              "value": "={{ $env.EDUCARE_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "search-user",
+      "name": "Search User by Phone",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "comparator": "==",
+              "value1": "={{ $json.body.success }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "user-exists-check",
+      "name": "User Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.EDUCARE_API_URL }}/api/external/users",
+        "authentication": "none",
+        "sendBody": true,
+        "contentType": "application/json",
+        "body": {
+          "name": "={{ $json.senderName || 'Usuário WhatsApp' }}",
+          "email": "={{ $json.phone }}@whatsapp.local",
+          "phone": "={{ $json.phone }}",
+          "password": "={{ $randomString(16) }}",
+          "role": "user",
+          "subscription_status": "trial",
+          "trial_days": 7
+        },
+        "options": {}
+      },
+      "id": "create-user",
+      "name": "Create User",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        650,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "jmesPathQuery": "$json.body.success ? $json.body.data.user : $json.body.data.user"
+      },
+      "id": "normalize-user-data",
+      "name": "Normalize User Data",
+      "type": "n8n-nodes-base.jmespath",
+      "typeVersion": 1,
+      "position": [
+        850,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.EDUCARE_API_URL }}/api/external/users/by-phone/{{ $json.phone }}/active-child",
+        "authentication": "none",
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{ $env.EDUCARE_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-active-child",
+      "name": "Get Active Child",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1050,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "comparator": "==",
+              "value1": "={{ $json.body.success }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "child-exists-check",
+      "name": "Child Selected?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.EDUCARE_API_URL }}/api/rag/external/ask",
+        "authentication": "none",
+        "sendBody": true,
+        "contentType": "application/json",
+        "body": {
+          "question": "={{ $json.message }}",
+          "context": {
+            "user_phone": "={{ $json.phone }}",
+            "child_id": "={{ $json.body.data.id }}",
+            "child_age_months": "={{ $json.body.data.age_months }}",
+            "module_type": "baby"
+          }
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{ $env.EDUCARE_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ask-titinauta",
+      "name": "Ask TitiNauta AI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.EVOLUTION_API_URL }}/message/sendText/{{ $env.EVOLUTION_INSTANCE_NAME }}",
+        "authentication": "none",
+        "sendBody": true,
+        "contentType": "application/json",
+        "body": {
+          "number": "={{ $json.phone }}",
+          "text": "={{ $json.body.answer }}"
+        },
+        "headers": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.EVOLUTION_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "send-whatsapp-response",
+      "name": "Send WhatsApp Response",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.EVOLUTION_API_URL }}/message/sendText/{{ $env.EVOLUTION_INSTANCE_NAME }}",
+        "authentication": "none",
+        "sendBody": true,
+        "contentType": "application/json",
+        "body": {
+          "number": "={{ $json.phone }}",
+          "text": "Por favor, selecione uma criança no aplicativo antes de fazer perguntas. Acesse o menu principal e escolha qual criança deseja acompanhar."
+        },
+        "headers": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.EVOLUTION_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "send-select-child-message",
+      "name": "Send 'Select Child' Message",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1450,
+        450
+      ]
+    }
+  ],
+  "connections": {
+    "webhook-evolution": {
+      "main": [
+        [
+          {
+            "node": "extract-whatsapp-data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract-whatsapp-data": {
+      "main": [
+        [
+          {
+            "node": "search-user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "search-user": {
+      "main": [
+        [
+          {
+            "node": "user-exists-check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "user-exists-check": {
+      "main": [
+        [
+          {
+            "node": "get-active-child",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "create-user",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create-user": {
+      "main": [
+        [
+          {
+            "node": "normalize-user-data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "normalize-user-data": {
+      "main": [
+        [
+          {
+            "node": "get-active-child",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get-active-child": {
+      "main": [
+        [
+          {
+            "node": "child-exists-check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "child-exists-check": {
+      "main": [
+        [
+          {
+            "node": "ask-titinauta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "send-select-child-message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ask-titinauta": {
+      "main": [
+        [
+          {
+            "node": "send-whatsapp-response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send-whatsapp-response": {
+      "main": [
+        [
+          {
+            "node": "webhook-evolution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send-select-child-message": {
+      "main": [
+        [
+          {
+            "node": "webhook-evolution",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "America/Sao_Paulo",
+    "errorHandler": "continue",
+    "executionOrder": "v1"
+  },
+  "variables": {
+    "EDUCARE_API_URL": {
+      "description": "URL base da API Educare (ex: https://seu-replit.replit.dev:3001)",
+      "value": "",
+      "type": "string"
+    },
+    "EDUCARE_API_KEY": {
+      "description": "API Key para autenticação Educare",
+      "value": "educare_external_api_key_2025",
+      "type": "string",
+      "secure": true
+    },
+    "EVOLUTION_API_URL": {
+      "description": "URL da Evolution API (ex: https://evolution.seu-dominio.com)",
+      "value": "",
+      "type": "string"
+    },
+    "EVOLUTION_API_KEY": {
+      "description": "API Key da Evolution API",
+      "value": "",
+      "type": "string",
+      "secure": true
+    },
+    "EVOLUTION_INSTANCE_NAME": {
+      "description": "Nome da instância no Evolution (ex: educare-whatsapp)",
+      "value": "",
+      "type": "string"
+    }
+  }
+}
