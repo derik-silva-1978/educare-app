@@ -14,7 +14,15 @@ Educare+ is a digital platform designed to support early childhood development a
 ### UI/UX Decisions
 The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui` (Radix UI + Tailwind CSS) for a professional and WCAG-compliant interface. 
 
-**WelcomeHub** (`/educare-app/welcome`): Authenticated-only landing page featuring sticky IconToolbar (6 minimalist icons: theme toggle, notifications badge, feedback, activities, TitiNauta, profile menu). Main content: WelcomeHero (gradient banner with greeting & CTAs), NewsCarousel (dynamically loaded news cards from ContentItem), TrainingSection (training content), AcademyCourses (course listings with difficulty levels), TitiNautaWidget (AI assistant card), FeedbackPanel (collapsible), and DonationCTA (support banner). All content fetches real data from `/api/content/public` endpoint via React Query with loading states.
+**WelcomeHub** (`/educare-app/welcome`): Authenticated-only landing page featuring sticky IconToolbar with 6 functional icons (left to right):
+1. **Theme Toggle** (Sun/Moon) - Dark/light mode switch
+2. **Messages** (MessageCircle) - Badge with unread count, navigates to communication
+3. **Feedback** (MessageSquarePlus) - Modal form with type selection (suggestion/bug/praise) and text area
+4. **Donations** (Coffee) - Stripe-integrated modal with preset values (R$5-200), single payments
+5. **Onboarding Chat** (Bot) - Interactive assistant with navigation to key platform features
+6. **Profile** (Avatar) - Dropdown with user info, photo support, settings, help, and logout
+
+Main content: WelcomeHero (gradient banner with greeting & CTAs), NewsCarousel (dynamically loaded news cards from ContentItem), TrainingSection (training content), AcademyCourses (course listings with difficulty levels), TitiNautaWidget (AI assistant card), FeedbackPanel (collapsible), and DonationCTA (support banner). All content fetches real data from `/api/content/public` endpoint via React Query with loading states.
 
 **Dashboard**: Clean, focused layout showing MetricsCards, DomainProgressChart (recharts bar chart with color-coded domains), StrengthsOpportunities, MilestonesTimeline, AIInsightsCard, ParentalResourcesCarousel, and children list. Removed: "Acesso Rápido à Plataforma", empty state messages, and "Primeiros Passos" for minimalist aesthetic. Social media icons (WhatsApp, Instagram, Facebook) in header.
 
