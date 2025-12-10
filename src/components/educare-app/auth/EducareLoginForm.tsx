@@ -114,7 +114,7 @@ const EducareLoginForm: React.FC<EducareLoginFormProps> = ({ redirectPath }) => 
       });
       
       // Safe redirect path handling
-      let finalRedirect = '/educare-app/dashboard';
+      let finalRedirect = '/educare-app/welcome';
       
       if (redirectPath) {
         // Validate redirect path is safe
@@ -367,7 +367,7 @@ const EducareLoginForm: React.FC<EducareLoginFormProps> = ({ redirectPath }) => 
               });
               
               // Safe redirect path handling
-              let finalRedirect = '/educare-app/dashboard';
+              let finalRedirect = '/educare-app/welcome';
               
               if (redirectPath) {
                 // Validate redirect path is safe

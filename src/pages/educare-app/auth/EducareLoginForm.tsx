@@ -54,8 +54,8 @@ const EducareLoginForm: React.FC = () => {
         description: `Bem-vindo(a) de volta, ${user.name || 'usuário'}!`,
       });
       
-      // Redirect to dashboard
-      navigate('/educare-app/dashboard');
+      // Redirect to welcome hub
+      navigate('/educare-app/welcome');
       
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido';

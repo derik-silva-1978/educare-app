@@ -3,17 +3,10 @@ import {
   IconToolbar,
   WelcomeHero, 
   NewsCarousel, 
-  TrainingSection,
-  AcademyCourses, 
-  TitiNautaWidget, 
-  FeedbackPanel, 
-  DonationCTA 
+  TrainingSection
 } from '@/components/educare-app/welcome';
-import { useNavigate } from 'react-router-dom';
 
 const WelcomeHub: React.FC = () => {
-  const navigate = useNavigate();
-  const [showFeedback, setShowFeedback] = useState(false);
   const [messageCount] = useState(2);
 
   return (
@@ -31,17 +24,6 @@ const WelcomeHub: React.FC = () => {
         <NewsCarousel />
 
         <TrainingSection />
-
-        <AcademyCourses />
-
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2" />
-          <div className="space-y-6">
-            <TitiNautaWidget />
-            {showFeedback && <FeedbackPanel />}
-            <DonationCTA />
-          </div>
-        </div>
       </main>
     </div>
   );
