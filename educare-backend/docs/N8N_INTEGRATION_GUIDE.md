@@ -1,5 +1,25 @@
 # Guia de Integração n8n + Educare+
 
+## ✅ Checklist Pré-Integração
+
+Antes de começar, certifique-se de ter:
+
+- [ ] **API Key configurada** no backend (`EXTERNAL_API_KEY` no `.env`)
+- [ ] **Backend rodando** e acessível via URL pública
+- [ ] **n8n instalado** e configurado com acesso à internet
+- [ ] **Evolution API** configurada para receber webhooks do WhatsApp
+- [ ] **Variáveis de ambiente n8n** configuradas (veja seção abaixo)
+
+### Testando a Conexão
+```bash
+# Substitua API_URL pela URL do seu backend
+curl "https://API_URL/api/external/subscription-plans?api_key=SUA_API_KEY"
+
+# Resposta esperada: {"success": true, "data": [...]}
+```
+
+---
+
 ## Configuração Básica
 
 ### Autenticação
@@ -255,13 +275,47 @@ Histórico de respostas do quiz.
 #### POST /api/rag/external/ask
 Envia pergunta ao assistente de IA TitiNauta.
 
-**Body:**
+> **⚠️ IMPORTANTE**: Os campos `child_id` e `child_age_months` devem ser obtidos **primeiro** via endpoint `/api/external/users/by-phone/:phone/active-child`. Não invente UUIDs - use apenas IDs retornados pela API.
+
+**Campos do Body:**
+| Campo | Tipo | Obrigatório | Descrição |
+|-------|------|-------------|-----------|
+| `question` | string | ✅ Sim | Pergunta do usuário |
+| `context.user_phone` | string | Não | Telefone do usuário (para contexto) |
+| `context.child_id` | UUID | Não | ID da criança (obtido via active-child endpoint) |
+| `context.child_age_months` | number | Não | Idade em meses (obtido via active-child endpoint) |
+| `context.module_type` | string | Não | "baby", "mother" ou "professional" |
+
+**Exemplo de Fluxo Correto:**
+```
+1. GET /api/external/users/by-phone/5598991801628/active-child
+   → Retorna: {data: {id: "abc-123", age_months: 8}}
+
+2. POST /api/rag/external/ask
+   Body: {
+     "question": "Quando meu bebê deve começar a engatinhar?",
+     "context": {
+       "child_id": "abc-123",        // ← ID real obtido no passo 1
+       "child_age_months": 8,         // ← Idade real obtida no passo 1
+       "module_type": "baby"
+     }
+   }
+```
+
+**Body Mínimo (sem contexto):**
+```json
+{
+  "question": "Quando meu bebê deve começar a engatinhar?"
+}
+```
+
+**Body Completo (com contexto):**
 ```json
 {
   "question": "Quando meu bebê deve começar a engatinhar?",
   "context": {
     "user_phone": "5598991801628",
-    "child_id": "uuid-da-crianca",
+    "child_id": "abc-123-def-456",
     "child_age_months": 8,
     "module_type": "baby"
   }
