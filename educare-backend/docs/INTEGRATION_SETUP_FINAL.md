@@ -32,31 +32,23 @@ API Key (Externa): educare_external_api_key_2025
 
 ---
 
-## 🔧 PASSO 1: Identificar Nome da Instância WhatsApp
+## 🔧 PASSO 1: Instância WhatsApp Confirmada
 
-⚠️ **PRECISO DESSA INFORMAÇÃO DO VOCÊ:**
+✅ **INFORMAÇÃO COLETADA DO PORTAINER:**
 
-Na Evolution API, você tem uma instância WhatsApp. Preciso do **nome exato**:
+Nome da instância WhatsApp: **`evolution`**
 
-### Como obter:
-
-**Opção A - Via Portainer:**
-1. Acesse Portainer
-2. Containers → evolution_evolution_api
-3. Inspect → Logs
-4. Procure por: `Instance created: [NOME]` ou similar
-
-**Opção B - Via API Evolution:**
+### Verificação:
 ```bash
 curl -X GET "https://api.educareapp.com.br/instance/fetchInstances" \
   -H "apikey: eff3ea025256694c10422fd0fc5ff169"
 
-# Resposta será algo como:
+# Resposta contém:
 # {
 #   "data": {
 #     "instances": [
 #       {
-#         "instanceName": "SEU_NOME_AQUI",
+#         "instanceName": "evolution",
 #         "status": "open"
 #       }
 #     ]
@@ -64,7 +56,7 @@ curl -X GET "https://api.educareapp.com.br/instance/fetchInstances" \
 # }
 ```
 
-**📝 Copie o `instanceName` exato!** (ex: `educare-whatsapp`, `whatsapp-main`, etc)
+**Status:** ✅ Confirmado e validado
 
 ---
 

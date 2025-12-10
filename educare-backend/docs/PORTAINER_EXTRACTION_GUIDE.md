@@ -30,26 +30,24 @@ Serviço: evolution_evolution_api
 
 ---
 
-### Para Encontrar a URL Completa:
+### URLs Confirmadas:
 
 #### **n8n:**
 ```
-https://seu-dominio.com:5678
-OU
-https://seu-ip-servidor:5678
+https://n8n.educareapp.com.br
 ```
 
 #### **Evolution API:**
 ```
-https://seu-dominio.com:3333
-OU
-https://seu-ip-servidor:3333
+https://api.educareapp.com.br
 ```
 
-**Substitua:**
-- `seu-dominio.com` = seu domínio real
-- `seu-ip-servidor` = IP do servidor (ex: 192.168.1.10)
-- Os números de porta podem variar!
+#### **Webhook (n8n para Evolution):**
+```
+https://webhook.educareapp.com.br/whatsapp-educare
+```
+
+**Status:** ✅ Todas confirmadas e testadas
 
 ---
 

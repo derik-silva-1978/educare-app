@@ -9,9 +9,9 @@
 - 🌐 **EDUCARE_API_URL**: URL do seu backend (ex: `https://seu-replit.replit.dev:3001`)
 
 **Evolution API (WhatsApp):**
-- 🔑 **EVOLUTION_API_KEY**: Chave da sua instância Evolution
-- 🌐 **EVOLUTION_API_URL**: URL da sua Evolution (ex: `https://evolution.seu-dominio.com`)
-- 📱 **EVOLUTION_INSTANCE_NAME**: Nome da instância (ex: `educare-whatsapp`)
+- 🔑 **EVOLUTION_API_KEY**: `eff3ea025256694c10422fd0fc5ff169`
+- 🌐 **EVOLUTION_API_URL**: `https://api.educareapp.com.br`
+- 📱 **EVOLUTION_INSTANCE_NAME**: `evolution`
 
 ---
 
@@ -51,11 +51,11 @@ Após importar, configure as variáveis do workflow:
 
 | Variável | Exemplo | Obrigatória |
 |----------|---------|------------|
-| `EDUCARE_API_URL` | `https://1d35ed6a-d635-41d2-8d11-7db8db84ce29-00-28ylqytrll200.picard.replit.dev:3001` | ✅ Sim |
-| `EDUCARE_API_KEY` | `educare_external_api_key_2025` | ✅ Sim (já preenchida) |
-| `EVOLUTION_API_URL` | `https://evolution.seu-dominio.com` | ✅ Sim |
-| `EVOLUTION_API_KEY` | `sua-chave-evolution` | ✅ Sim |
-| `EVOLUTION_INSTANCE_NAME` | `educare-whatsapp` | ✅ Sim |
+| `EDUCARE_API_URL` | `https://[SEU-REPLIT].replit.dev:3001` | ✅ Sim (Preencher) |
+| `EDUCARE_API_KEY` | `educare_external_api_key_2025` | ✅ Sim (Pré-preenchido) |
+| `EVOLUTION_API_URL` | `https://api.educareapp.com.br` | ✅ Sim (Pré-preenchido) |
+| `EVOLUTION_API_KEY` | `eff3ea025256694c10422fd0fc5ff169` | ✅ Sim (Pré-preenchido) |
+| `EVOLUTION_INSTANCE_NAME` | `evolution` | ✅ Sim (Pré-preenchido) |
 
 ---
 

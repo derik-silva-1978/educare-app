@@ -37,20 +37,20 @@ O workflow n8n atua como camada de orquestração entre o WhatsApp e o sistema E
 ### 2. Credenciais Necessárias
 
 ```env
-# API Externa Educare+
-EDUCARE_API_URL=https://your-api-url.com/api/external
-EXTERNAL_API_KEY=educare_external_api_key_2025
+# API Externa Educare+ (Replit)
+EDUCARE_API_URL=https://[SEU-REPLIT].replit.dev:3001
+EDUCARE_API_KEY=educare_external_api_key_2025
 
-# OpenAI
-OPENAI_API_KEY=sk-...
+# Evolution API (Servidor WhatsApp)
+EVOLUTION_API_URL=https://api.educareapp.com.br
+EVOLUTION_API_KEY=eff3ea025256694c10422fd0fc5ff169
+EVOLUTION_INSTANCE_NAME=evolution
 
-# WhatsApp (Twilio ou Meta)
-TWILIO_ACCOUNT_SID=AC...
-TWILIO_AUTH_TOKEN=...
-TWILIO_WHATSAPP_NUMBER=+14155238886
-# OU
-WHATSAPP_ACCESS_TOKEN=...
-WHATSAPP_PHONE_NUMBER_ID=...
+# n8n Webhook
+N8N_WEBHOOK_URL=https://webhook.educareapp.com.br/whatsapp-educare
+
+# OpenAI (Integrado no Backend)
+OPENAI_API_KEY=sk-... (gerenciado pelo backend)
 ```
 
 ---

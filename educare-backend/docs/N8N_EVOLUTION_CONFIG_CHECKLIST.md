@@ -22,8 +22,8 @@ Resposta esperada: **HTTP 200** ou **HTTP 301** (redirecionamento é OK)
 
 | Item | Valor | Status |
 |------|-------|--------|
-| **URL do n8n** | `https://seu-n8n.com` | ☐ Coletado |
-| **User/Email** | seu-email@example.com | ☐ Coletado |
+| **URL do n8n** | `https://n8n.educareapp.com.br` | ✅ Confirmado |
+| **User/Email** | *(suas credenciais)* | ☐ Verificado |
 | **Senha** | `*****` | ☐ Verificado |
 | **Acesso ao Admin** | Sim / Não | ☐ Verificado |
 
@@ -97,9 +97,9 @@ Se retornar 401/403:
 
 | Item | Valor | Status |
 |------|-------|--------|
-| **URL Evolution** | `https://seu-evolution-servidor.com` | ☐ Coletado |
-| **Admin URL** | `https://seu-evolution-servidor.com/api` | ☐ Coletado |
-| **Usuário Admin** | seu-usuario | ☐ Coletado |
+| **URL Evolution** | `https://api.educareapp.com.br` | ✅ Confirmado |
+| **Admin URL** | `https://api.educareapp.com.br/` | ✅ Confirmado |
+| **Usuário Admin** | *(suas credenciais)* | ☐ Verificado |
 | **Senha Admin** | `*****` | ☐ Verificado |
 
 **Como obter:**
@@ -114,8 +114,9 @@ Se retornar 401/403:
 
 | Item | Valor | Status |
 |------|-------|--------|
-| **API Key** | `sua-chave-evolution-xxxxx` | ☐ Coletado |
-| **Bearer Token** | `Bearer sua-chave-xxxxx` | ☐ Gerado |
+| **API Key** | `eff3ea025256694c10422fd0fc5ff169` | ✅ Confirmado |
+| **Bearer Token** | `apikey: eff3ea025256694c10422fd0fc5ff169` | ✅ Confirmado |
+| **Instance Name** | `evolution` | ✅ Confirmado |
 
 **Como obter:**
 1. Acesse Evolution Admin Panel

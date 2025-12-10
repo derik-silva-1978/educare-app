@@ -36,8 +36,10 @@ EXTERNAL_API_KEY=educare_external_api_key_2025
 ```
 
 ### Base URLs
-- **Desenvolvimento**: `https://1d35ed6a-d635-41d2-8d11-7db8db84ce29-00-28ylqytrll200.picard.replit.dev:3001`
-- **Produção**: Configure conforme seu domínio
+- **Replit Backend**: `https://[SEU-REPLIT].replit.dev:3001`
+- **n8n Server**: `https://n8n.educareapp.com.br`
+- **Evolution API**: `https://api.educareapp.com.br`
+- **Webhook Base**: `https://webhook.educareapp.com.br`
 
 ---
 

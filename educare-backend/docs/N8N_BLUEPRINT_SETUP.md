@@ -1,19 +1,22 @@
 # 🤖 N8N Blueprint Setup Guide - Educare+ TitiNauta v2.0
 
 **Status:** ✅ Ready for Production  
-**Last Updated:** December 3, 2025  
-**Webhook URL:** https://n8neducare.whatscall.com.br/webhook-test/titnauta
+**Last Updated:** December 10, 2025  
+**n8n Server:** https://n8n.educareapp.com.br
+**Webhook URL:** https://webhook.educareapp.com.br/whatsapp-educare
+**Evolution API:** https://api.educareapp.com.br
 
 ---
 
 ## 🚀 Quick Start (5 minutos)
 
-### Passo 1: Importar Blueprint v2
+### Passo 1: Importar Blueprint Atualizado
 
-1. Acesse seu n8n: https://n8neducare.whatscall.com.br
-2. Clique em **"New Workflow"** → **"Import from File"**
-3. Selecione: **`n8n-educare-v2.json`** ⭐
-4. Clique **Import**
+1. Acesse seu n8n: https://n8n.educareapp.com.br
+2. Clique em **"Workflows"** → **"Import"** ou **"New"**
+3. Escolha: **"Import from JSON"**
+4. Cole o conteúdo de: **`n8n-workflow-template.json`** ⭐ (versão 2025)
+5. Clique **Import**
 
 > 💡 O arquivo v2 é uma versão **otimizada e limpa** com apenas os nós necessários para o Educare+.
 
@@ -23,23 +26,21 @@ No n8n, vá em **Settings → Variables** e adicione:
 
 | Variável | Valor | Descrição |
 |----------|-------|-----------|
-| `EDUCARE_API_URL` | `https://seu-backend/api/external` | URL da API Externa Educare+ |
-| `EXTERNAL_API_KEY` | `sua_chave_api` | Chave de autenticação da API |
-| `OPENAI_API_KEY` | `sk-...` | Chave da OpenAI (opcional, se não usar credencial) |
+| `EDUCARE_API_URL` | `https://[SEU-REPLIT].replit.dev:3001` | URL Backend Replit (preencher com seu Replit) |
+| `EDUCARE_API_KEY` | `educare_external_api_key_2025` | Chave de autenticação da API Externa |
+| `EVOLUTION_API_URL` | `https://api.educareapp.com.br` | URL da Evolution API (WhatsApp) |
+| `EVOLUTION_API_KEY` | `eff3ea025256694c10422fd0fc5ff169` | Chave da Evolution API |
+| `EVOLUTION_INSTANCE_NAME` | `evolution` | Nome da instância WhatsApp |
 
-### Passo 3: Configurar Credenciais
+### Passo 3: Webhook Configurado
 
-Vá em **Credentials** e configure:
+✅ Webhook já está pré-configurado:
+- **Path:** `whatsapp-educare`
+- **Method:** POST
+- **Full URL:** `https://webhook.educareapp.com.br/whatsapp-educare`
+- **Response:** onReceived
 
-1. **OpenAI API** (obrigatório)
-   - Type: OpenAI
-   - API Key: sua chave OpenAI
-
-2. **Postgres** (opcional - para memória do chat)
-   - Host: host-do-postgres
-   - Database: nome_do_banco
-   - User: usuario
-   - Password: senha
+Nenhuma configuração adicional de webhook é necessária - o template já inclui isso.
 
 ### Passo 4: Ativar e Testar
 

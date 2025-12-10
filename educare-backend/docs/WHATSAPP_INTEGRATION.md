@@ -1,12 +1,25 @@
 # Integração WhatsApp - Educare+
 
-Este documento descreve as opções de integração com WhatsApp para o sistema Educare+.
+**Status:** ✅ **IMPLEMENTAÇÃO CONFIRMADA COM EVOLUTION API**
+
+Este documento descreve a integração WhatsApp para o sistema Educare+ usando Evolution API + n8n.
 
 ---
 
 ## Visão Geral
 
 A integração WhatsApp permite que usuários do Educare+ respondam às perguntas de acompanhamento do desenvolvimento infantil diretamente pelo WhatsApp, sem precisar acessar o aplicativo web.
+
+### Solução Adotada: Evolution API + n8n
+
+**Configuração Atual:**
+- **Servidor Evolution API:** `https://api.educareapp.com.br`
+- **API Key Evolution:** `eff3ea025256694c10422fd0fc5ff169`
+- **Instance Name:** `evolution`
+- **n8n Server:** `https://n8n.educareapp.com.br`
+- **Webhook n8n:** `https://webhook.educareapp.com.br/whatsapp-educare`
+- **Backend Educare:** `https://[SEU-REPLIT].replit.dev:3001`
+- **Status:** ✅ Pronto para Deploy
 
 ---
 
