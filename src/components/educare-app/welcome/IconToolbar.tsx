@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sun, Moon, MessageCircle, MessageSquarePlus, Coffee, Bot, Camera, LogOut, Settings, HelpCircle, User } from 'lucide-react';
+import { Sun, Moon, MessageCircle, MessageSquarePlus, Coffee, Bot, Camera, LogOut, Settings, HelpCircle, User, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/providers/ThemeProvider';
 import { useNavigate } from 'react-router-dom';
@@ -22,7 +22,10 @@ import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import ragService from '@/services/api/ragService';
+import RAGProgressBar from '@/components/educare-app/RAGProgressBar';
 
 interface IconToolbarProps {
   messageCount?: number;
@@ -49,10 +52,12 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
   const [isProcessingDonation, setIsProcessingDonation] = useState(false);
   
   const [chatMessages, setChatMessages] = useState<Array<{role: 'assistant' | 'user', content: string}>>([
-    { role: 'assistant', content: 'Olá! Sou o assistente do Educare+. Como posso te ajudar hoje?' }
+    { role: 'assistant', content: 'Olá! Sou o TitiNauta, o assistente de IA do Educare+. Posso responder suas dúvidas sobre desenvolvimento infantil, estimulação, marcos de desenvolvimento e muito mais!' }
   ]);
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const [ragStatus, setRagStatus] = useState<'idle' | 'retrieving' | 'processing' | 'generating'>('idle');
+  const [ragError, setRagError] = useState<string>('');
 
   const getInitials = (name?: string) => {
     if (!name) return 'U';
@@ -131,28 +136,26 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
     setChatInput('');
     setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsChatLoading(true);
+    setRagError('');
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      const responses: { [key: string]: string } = {
-        'cadastr': 'Para cadastrar uma criança, clique no botão "Cadastrar uma criança" abaixo! Você precisará informar nome, data de nascimento e outras informações importantes.',
-        'titinaut': 'TitiNauta é nosso assistente de IA especializado em desenvolvimento infantil. Ele pode responder suas dúvidas sobre estimulação, marcos de desenvolvimento e muito mais!',
-        'dashboard': 'No Dashboard você consegue acompanhar o progresso das suas crianças com gráficos, marcos de desenvolvimento e recomendações personalizadas.',
-        'atividade': 'Explore nossa biblioteca de atividades de estimulação separadas por idade e área de desenvolvimento!',
-        'ajuda': 'Estou aqui para ajudar! Você pode falar comigo sobre qualquer funcionalidade da plataforma.',
-      };
-      
-      let responseText = 'Como posso te ajudar? Posso orientar sobre cadastro de crianças, TitiNauta, Dashboard, atividades e muito mais!';
-      for (const [key, value] of Object.entries(responses)) {
-        if (userMessage.toLowerCase().includes(key)) {
-          responseText = value;
-          break;
-        }
+      const response = await ragService.askQuestion(userMessage, undefined, {
+        module_type: 'baby',
+        onProgress: (status) => setRagStatus(status)
+      });
+
+      if (response.success) {
+        setChatMessages(prev => [...prev, { role: 'assistant', content: response.answer }]);
+      } else {
+        throw new Error('Falha ao obter resposta do TitiNauta');
       }
-      
-      setChatMessages(prev => [...prev, { role: 'assistant', content: responseText }]);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Erro ao processar pergunta. Tente novamente.';
+      setRagError(errorMsg);
+      setChatMessages(prev => [...prev, { role: 'assistant', content: `Desculpe, tive um problema ao processar sua pergunta. ${errorMsg}` }]);
     } finally {
       setIsChatLoading(false);
+      setRagStatus('idle');
     }
   };
 
@@ -399,14 +402,17 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* Onboarding Chat Modal */}
+      {/* TitiNauta AI Chat Modal */}
       <Dialog open={showOnboardingChat} onOpenChange={setShowOnboardingChat}>
         <DialogContent className="sm:max-w-lg h-[600px] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-purple-500" />
-              Assistente de Boas-vindas
+              TitiNauta - Assistente de IA
             </DialogTitle>
+            <DialogDescription>
+              Pergunte sobre desenvolvimento infantil, estimulação e marcos de desenvolvimento
+            </DialogDescription>
           </DialogHeader>
           
           {/* Chat Messages */}
@@ -422,67 +428,24 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                 </div>
               </div>
             ))}
-            {isChatLoading && (
-              <div className="flex justify-start">
-                <div className="bg-purple-100 dark:bg-purple-900/30 rounded-lg p-3">
-                  <div className="flex gap-1">
-                    <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '100ms' }} />
-                    <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '200ms' }} />
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
-          
-          {/* Quick Actions */}
-          {chatMessages.length === 1 && !isChatLoading && (
-            <div className="grid grid-cols-2 gap-2 py-2">
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-auto py-2"
-                onClick={() => setChatInput('Como cadastro uma criança?')}
-              >
-                Cadastrar criança
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-auto py-2"
-                onClick={() => setChatInput('O que é TitiNauta?')}
-              >
-                Conhecer TitiNauta
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-auto py-2"
-                onClick={() => setChatInput('Como funciona o dashboard?')}
-              >
-                Ver Dashboard
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-xs h-auto py-2"
-                onClick={() => setChatInput('Quais atividades vocês têm?')}
-              >
-                Explorar Atividades
-              </Button>
-            </div>
-          )}
+
+          {/* RAG Progress Bar */}
+          <RAGProgressBar
+            isLoading={isChatLoading}
+            status={ragStatus}
+            message="Consultando base de conhecimento..."
+            error={ragError}
+          />
           
           {/* Chat Input */}
           <div className="flex gap-2 pt-4 border-t">
-            <input
-              type="text"
-              placeholder="Digite sua pergunta..."
+            <Input
+              placeholder="Faça uma pergunta..."
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleChatMessage()}
               disabled={isChatLoading}
-              className="flex-1 px-3 py-2 border rounded-md bg-background text-foreground text-sm"
             />
             <Button
               size="sm"
@@ -490,7 +453,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
               disabled={isChatLoading || !chatInput.trim()}
               className="px-3"
             >
-              Enviar
+              <Send className="h-4 w-4" />
             </Button>
           </div>
         </DialogContent>
