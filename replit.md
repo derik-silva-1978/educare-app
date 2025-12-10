@@ -44,8 +44,11 @@ Dashboard and other routes automatically redirect to WelcomeHub as the primary s
     - **Segmented Knowledge Bases**: `kb_baby`, `kb_mother`, `kb_professional` for targeted information retrieval.
     - **Dual Ingestion & Routing**: Intelligent categorization and `dual-write` strategy for populating segmented KBs with automatic fallback.
     - **Enterprise Optimizations**: Neural re-ranking, confidence scoring with human escalation, intelligent chunking, data augmentation, context safety (sensitive data/emergency detection), and KB versioning.
+    - **Timeout Management**: File Search operations have 60-second timeout with custom polling (1s intervals, max 60 attempts). Upload operations have 120-second timeout with proper cleanup on failure.
+    - **Logging & Observability**: Detailed logging at each step (assistant creation, thread creation, run initiation, polling progress, completion) with elapsed time tracking.
     - **Auto-Improvement**: Feedback system, automated quality analysis, LLM-generated improvement suggestions, and a maturity dashboard.
     - **Legacy Management**: Controlled transition from legacy RAG with feature flags, migration services, and a robust legacy shutdown service including backup and rollback capabilities.
+    - **Table Sync Script**: `src/scripts/createKnowledgeTables.js` ensures all KB tables exist before document ingestion.
 
 ### Feature Specifications
 - **Authentication**: JWT-based with comprehensive role-based access control (Owner, Admin, Professional, Parent).

@@ -151,7 +151,40 @@ async function selectKnowledgeDocuments(filters = {}) {
   }
 }
 
+const FILE_SEARCH_TIMEOUT_MS = 60000;
+const POLL_INTERVAL_MS = 1000;
+const MAX_POLL_ATTEMPTS = 60;
+
+async function pollRunWithTimeout(openai, threadId, runId, timeoutMs = FILE_SEARCH_TIMEOUT_MS) {
+  const startTime = Date.now();
+  let attempts = 0;
+
+  while (Date.now() - startTime < timeoutMs && attempts < MAX_POLL_ATTEMPTS) {
+    attempts++;
+    const run = await openai.beta.threads.runs.retrieve(threadId, runId);
+
+    console.log(`[RAG] Poll ${attempts}: status=${run.status}, elapsed=${Date.now() - startTime}ms`);
+
+    if (['completed', 'failed', 'cancelled', 'expired'].includes(run.status)) {
+      return run;
+    }
+
+    if (run.status === 'requires_action') {
+      console.warn('[RAG] Run requer ação - não suportado');
+      return run;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL_MS));
+  }
+
+  console.error(`[RAG] Timeout após ${attempts} tentativas (${Date.now() - startTime}ms)`);
+  return { status: 'timeout', error: 'Timeout ao aguardar resposta do File Search' };
+}
+
 async function retrieveFromFileSearch(question, fileSearchIds) {
+  const startTime = Date.now();
+  let assistantId = null;
+
   try {
     const openai = getOpenAI();
     if (!openai) {
@@ -180,12 +213,16 @@ async function retrieveFromFileSearch(question, fileSearchIds) {
       };
     }
 
+    console.log(`[RAG] Iniciando File Search com ${validFileIds.length} arquivos`);
+
     const assistant = await openai.beta.assistants.create({
       name: "Educare RAG Assistant",
       instructions: "Você é um assistente de busca de informações sobre desenvolvimento infantil.",
       model: "gpt-4o-mini",
       tools: [{ type: "file_search" }]
     });
+    assistantId = assistant.id;
+    console.log(`[RAG] Assistant criado: ${assistantId} (${Date.now() - startTime}ms)`);
 
     const thread = await openai.beta.threads.create({
       messages: [
@@ -199,17 +236,55 @@ async function retrieveFromFileSearch(question, fileSearchIds) {
         }
       ]
     });
+    console.log(`[RAG] Thread criada: ${thread.id} (${Date.now() - startTime}ms)`);
 
-    const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
+    const initialRun = await openai.beta.threads.runs.create(thread.id, {
       assistant_id: assistant.id,
     });
+    console.log(`[RAG] Run iniciado: ${initialRun.id} (${Date.now() - startTime}ms)`);
+
+    const run = await pollRunWithTimeout(openai, thread.id, initialRun.id, FILE_SEARCH_TIMEOUT_MS);
+
+    if (run.status === 'timeout') {
+      console.error(`[RAG] File Search timeout após ${Date.now() - startTime}ms`);
+      try {
+        await openai.beta.threads.runs.cancel(thread.id, initialRun.id);
+      } catch (cancelError) {
+        console.warn('[RAG] Erro ao cancelar run:', cancelError.message);
+      }
+      if (assistantId) {
+        try {
+          await openai.beta.assistants.del(assistantId);
+          console.log(`[RAG] Assistant ${assistantId} deletado após timeout`);
+        } catch (cleanupError) {
+          console.warn('[RAG] Erro ao limpar assistant após timeout:', cleanupError.message);
+        }
+        assistantId = null;
+      }
+      return {
+        success: false,
+        error: 'Timeout: A busca demorou mais de 60 segundos',
+        chunks: [],
+        processing_time_ms: Date.now() - startTime
+      };
+    }
 
     if (run.status !== 'completed') {
-      console.warn('[RAG] Run não completou:', run.status);
+      console.warn(`[RAG] Run não completou: ${run.status}`);
+      if (assistantId) {
+        try {
+          await openai.beta.assistants.del(assistantId);
+          console.log(`[RAG] Assistant ${assistantId} deletado após run não-completado`);
+        } catch (cleanupError) {
+          console.warn('[RAG] Erro ao limpar assistant após run não-completado:', cleanupError.message);
+        }
+        assistantId = null;
+      }
       return {
         success: false,
         error: `Run status: ${run.status}`,
-        chunks: []
+        chunks: [],
+        processing_time_ms: Date.now() - startTime
       };
     }
 
@@ -217,12 +292,14 @@ async function retrieveFromFileSearch(question, fileSearchIds) {
     const assistantMessage = messages.data.find(m => m.role === 'assistant');
 
     await openai.beta.assistants.del(assistant.id);
+    assistantId = null;
 
     if (!assistantMessage) {
       return {
         success: true,
         chunks: [],
-        message: 'Nenhuma resposta do assistente'
+        message: 'Nenhuma resposta do assistente',
+        processing_time_ms: Date.now() - startTime
       };
     }
 
@@ -231,16 +308,30 @@ async function retrieveFromFileSearch(question, fileSearchIds) {
       .map(c => c.text.value)
       .join('\n');
 
+    console.log(`[RAG] File Search concluído em ${Date.now() - startTime}ms`);
+
     return {
       success: true,
-      chunks: [{ text: textContent, source: 'file_search' }]
+      chunks: [{ text: textContent, source: 'file_search' }],
+      processing_time_ms: Date.now() - startTime
     };
   } catch (error) {
-    console.error('[RAG] Erro no File Search:', error);
+    console.error(`[RAG] Erro no File Search após ${Date.now() - startTime}ms:`, error);
+    
+    if (assistantId) {
+      try {
+        const openai = getOpenAI();
+        await openai.beta.assistants.del(assistantId);
+      } catch (cleanupError) {
+        console.warn('[RAG] Erro ao limpar assistant:', cleanupError.message);
+      }
+    }
+
     return {
       success: false,
       error: error.message,
-      chunks: []
+      chunks: [],
+      processing_time_ms: Date.now() - startTime
     };
   }
 }

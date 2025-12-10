@@ -13,7 +13,11 @@ function getOpenAI() {
   return openaiInstance;
 }
 
+const UPLOAD_TIMEOUT_MS = 120000;
+
 async function uploadDocumentToFileSearch(filePath, fileName, metadata = {}) {
+  const startTime = Date.now();
+
   try {
     const openai = getOpenAI();
     if (!openai) {
@@ -23,27 +27,41 @@ async function uploadDocumentToFileSearch(filePath, fileName, metadata = {}) {
       };
     }
 
+    const stats = fs.statSync(filePath);
+    const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(2);
+    console.log(`[FileSearch] Iniciando upload: ${fileName} (${fileSizeMB}MB)`);
+
     const fileStream = fs.createReadStream(filePath);
 
-    const uploadedFile = await openai.files.create({
+    const uploadPromise = openai.files.create({
       file: fileStream,
       purpose: 'assistants'
     });
 
-    console.log(`[FileSearch] Arquivo enviado: ${fileName}, ID: ${uploadedFile.id}`);
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Upload timeout: excedeu 120 segundos')), UPLOAD_TIMEOUT_MS)
+    );
+
+    const uploadedFile = await Promise.race([uploadPromise, timeoutPromise]);
+
+    const uploadTime = Date.now() - startTime;
+    console.log(`[FileSearch] Upload concluído: ${fileName}, ID: ${uploadedFile.id}, tempo: ${uploadTime}ms`);
 
     return {
       success: true,
       file_search_id: uploadedFile.id,
       filename: uploadedFile.filename,
       bytes: uploadedFile.bytes,
-      created_at: uploadedFile.created_at
+      created_at: uploadedFile.created_at,
+      upload_time_ms: uploadTime
     };
   } catch (error) {
-    console.error('[FileSearch] Erro ao fazer upload:', error);
+    const errorTime = Date.now() - startTime;
+    console.error(`[FileSearch] Erro no upload após ${errorTime}ms:`, error.message);
     return {
       success: false,
-      error: error.message || 'Erro ao enviar arquivo para File Search'
+      error: error.message || 'Erro ao enviar arquivo para File Search',
+      upload_time_ms: errorTime
     };
   }
 }
