@@ -22,7 +22,18 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 5. **Onboarding Chat** (Bot) - Interactive assistant with navigation to key platform features
 6. **Profile** (Avatar) - Dropdown with user info, photo support, settings, help, and logout
 
-Main content (minimalist design - no redundancy): WelcomeHero (gradient banner with greeting & CTAs), NewsCarousel (dynamically loaded news cards with diverse fallback images), and TrainingSection (training content with diverse fallback images). All content fetches real data from `/api/content/public` endpoint via React Query with loading states. Dashboard and other routes automatically redirect to WelcomeHub as the primary screen.
+Main content (minimalist design - no redundancy): WelcomeHero (gradient banner with greeting & CTAs), NewsCarousel (dynamically loaded news cards with diverse fallback images), and TrainingSection (training content with diverse fallback images). 
+
+**Content Integration**: All content fetches real data from `/api/content/public` endpoint via React Query with loading states. Content Management System allows owners/admins to create, edit, publish, and manage news, training, and course content with image URLs, categories, and audience targeting. 
+
+**Image Diversification**: 
+- **News Cards**: 6 unique Unsplash images (educational, creative, research themes)
+- **Training Cards**: 6 unique Unsplash images (learning, mentoring, development themes)  
+- **Course Cards**: 6 unique Unsplash images (professional, skill-building themes)
+- **Seed Data**: Backend seed script includes pre-populated content with diversified images for immediate use
+- **Fallback System**: Frontend implements rotating fallback images via modulo indexing to ensure no image repetition
+
+Dashboard and other routes automatically redirect to WelcomeHub as the primary screen.
 
 **Dashboard**: Clean, focused layout showing MetricsCards, DomainProgressChart (recharts bar chart with color-coded domains), StrengthsOpportunities, MilestonesTimeline, AIInsightsCard, ParentalResourcesCarousel, and children list. Removed: "Acesso Rápido à Plataforma", empty state messages, and "Primeiros Passos" for minimalist aesthetic. Social media icons (WhatsApp, Instagram, Facebook) in header.
 
