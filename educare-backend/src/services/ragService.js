@@ -490,17 +490,49 @@ async function ask(question, options = {}) {
 
     let retrievedChunks = [];
     let fileSearchUsed = false;
+    let fileSearchFailed = false;
 
+    // ===== ESTRATÉGIA RAG HÍBRIDO - FILE SEARCH PRIORITÁRIO (PRD) =====
+    // 1. PRIMEIRO: Tenta File Search (busca semântica prioritária)
+    // 2. FALLBACK: Se File Search falhar, usa conteúdo local das tabelas KB
+    
     if (docsResult.success && docsResult.data.length > 0) {
       const fileSearchIds = docsResult.data
         .map(d => d.file_search_id)
         .filter(id => id);
 
+      // PRIORIDADE 1: File Search (quando disponível e não desabilitado)
       if (fileSearchIds.length > 0 && options.use_file_search !== false) {
+        console.log(`[RAG] PRIORIDADE: Tentando File Search com ${fileSearchIds.length} documentos`);
         const searchResult = await retrieveFromFileSearch(question, fileSearchIds);
+        
         if (searchResult.success && searchResult.chunks.length > 0) {
           retrievedChunks = searchResult.chunks;
           fileSearchUsed = true;
+          console.log(`[RAG] File Search SUCESSO: ${searchResult.chunks.length} chunks recuperados em ${searchResult.processing_time_ms}ms`);
+        } else {
+          fileSearchFailed = true;
+          console.warn(`[RAG] File Search sem resultados ou falhou: ${searchResult.error || 'Nenhum chunk recuperado'}`);
+        }
+      }
+
+      // FALLBACK: Usa descrição/conteúdo local dos documentos se File Search falhou
+      if (!fileSearchUsed && (fileSearchFailed || fileSearchIds.length === 0)) {
+        console.log(`[RAG] FALLBACK: Usando conteúdo local dos documentos (${docsResult.data.length} docs)`);
+        
+        // Extrai conteúdo textual dos documentos como fallback
+        const localChunks = docsResult.data
+          .filter(doc => doc.description || doc.content || doc.title)
+          .map(doc => ({
+            text: doc.content || doc.description || `Documento: ${doc.title}`,
+            source: 'local_fallback',
+            document_id: doc.id,
+            title: doc.title
+          }));
+        
+        if (localChunks.length > 0) {
+          retrievedChunks = localChunks;
+          console.log(`[RAG] Fallback local: ${localChunks.length} chunks de documentos locais`);
         }
       }
     }
@@ -637,6 +669,8 @@ async function ask(question, options = {}) {
       strict_mode: strictMode,
       documents_found: docsResult.data.length,
       file_search_used: fileSearchUsed,
+      file_search_failed: fileSearchFailed,  // PRD: Rastreia falhas do File Search
+      local_fallback_used: fileSearchFailed && retrievedChunks.length > 0,  // PRD: Rastreia uso do fallback local
       chunks_retrieved: retrievedChunks.length,
       reranked: !!rerankingStats,
       confidence_level: confidence?.level
@@ -671,6 +705,8 @@ async function ask(question, options = {}) {
           relevance_score: d.relevance_score
         })),
         file_search_used: fileSearchUsed,
+        file_search_failed: fileSearchFailed,  // PRD: Indica se File Search falhou
+        local_fallback_used: fileSearchFailed && retrievedChunks.length > 0,  // PRD: Indica uso de fallback local
         chunks_retrieved: retrievedChunks.length,
         model: llmResult.model,
         usage: llmResult.usage,
