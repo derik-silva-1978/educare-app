@@ -63,7 +63,10 @@ Dashboard and other routes automatically redirect to WelcomeHub as the primary s
   - Automatic JWT auth with external API fallback
   - Error handling with toast notifications
   - Endpoints: `/rag/ask` (authenticated), `/rag/external/ask` (external)
-- **External API**: 13 endpoints for integration with external systems like WhatsApp via n8n.
+- **External API**: 15 endpoints for integration with external systems like WhatsApp via n8n. Full documentation at `educare-backend/docs/N8N_INTEGRATION_GUIDE.md`.
+  - Authentication: API Key via `EXTERNAL_API_KEY` environment variable
+  - Endpoints: Users, Children, Subscription Plans, Quiz/Journey, TitiNauta RAG
+  - RAG External: `/api/rag/external/ask` and `/api/rag/external/ask-simple`
 - **Subscription Management**: Stripe integration for handling SaaS subscriptions.
 
 ### System Design Choices
