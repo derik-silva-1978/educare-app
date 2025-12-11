@@ -1,0 +1,67 @@
+# Role: Senior Full-Stack Architect & Data Engineer
+
+**Contexto:**
+Estamos implementando o **Gráfico de Marcos do Desenvolvimento** no Educare+.
+Já possuímos a tabela `journey_questions` (Micro-habilidades). Vamos criar os `official_milestones` (Marcos Oficiais).
+
+**Mudança de Escopo:**
+Para não iniciarmos com o banco vazio, precisamos de um script de **"Auto-Preenchimento Inteligente"**.
+O sistema deve tentar vincular automaticamente as perguntas existentes aos marcos oficiais baseando-se em **Coincidência de Idade e Domínio**, para que o Curador apenas refine depois.
+
+---
+
+## 🔐 1. Segurança e Roles (Base)
+
+1.  **Tabela `users`:** Garanta que existe a coluna `role`.
+2.  **Seed:** Crie um usuário `admin@educare.app` com role `'curator'`.
+3.  **Middleware:** Crie `requireCuratorRole` para proteger as rotas de edição.
+
+---
+
+## 🏗️ 2. Modelagem de Dados
+
+### A. Tabela `official_milestones` (Marcos Oficiais)
+* `id`, `title`, `category` (Motor, Cognitivo, etc), `target_month`, `source`.
+* **Seed Data:** Insira os marcos oficiais da Caderneta da Criança (0-60 meses).
+
+### B. Tabela `milestone_mappings` (O Vínculo)
+* `id`, `official_milestone_id`, `journey_question_id`, `weight`.
+* **Novo Campo:** `is_auto_generated` (Boolean, Default: false). *Para sabermos o que foi feito pelo robô.*
+* **Novo Campo:** `verified_by_curator` (Boolean, Default: false).
+
+---
+
+## 🤖 3. O "Auto-Linker" (Script de Migração Inteligente)
+
+Crie um script ou endpoint de setup (`POST /api/admin/setup/auto-link`) que execute a seguinte lógica heurística:
+
+1.  **Para cada** Marco Oficial inserido (Ex: "Sustenta a Cabeça" - Motor - 3 Meses):
+    * Converta o mês em semanas (Ex: 3 meses = semanas 11 a 14).
+    * Busque na tabela `journey_questions` todas as perguntas que:
+        * Tenham o mesmo **Domínio** (Ex: `domain` = 'motor').
+        * Estejam dentro da **Janela de Tempo** (+/- 4 semanas de tolerância).
+    * **Ação:** Insira um registro na tabela `milestone_mappings` para cada match encontrado.
+    * **Flag:** Marque `is_auto_generated = TRUE` e `verified_by_curator = FALSE`.
+
+*Resultado:* O gráfico já nascerá preenchido. O trabalho do curador será apenas remover os excessos, em vez de criar tudo do zero.
+
+---
+
+## 🛠️ 4. API do Curador (Refinamento)
+
+Endpoints para o humano corrigir o trabalho do robô:
+
+* **`GET /api/admin/mappings?verified=false`**: Lista as sugestões feitas pelo robô para aprovação.
+* **`POST /api/admin/mappings/{id}/verify`**: O curador confirma que o vínculo está correto (muda `verified` para true).
+* **`DELETE /api/admin/mappings/{id}`**: O curador remove um vínculo incorreto feito pelo robô.
+
+---
+
+## 🧮 5. Motor de Cálculo (Dashboard)
+
+Rota: `GET /api/dashboard/milestones-chart`.
+**Lógica Ajustada:**
+* Considere **TODOS** os mapeamentos ativos (seja manual ou automático) para gerar o gráfico inicial. Isso garante que o usuário final veja valor imediato, mesmo antes da curadoria fina.
+
+**Resultado Esperado:**
+Código completo focando no script de "Auto-Linker" para popular o banco rapidamente.
