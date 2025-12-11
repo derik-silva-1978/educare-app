@@ -29,7 +29,11 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 - **Knowledge Base Management**: Owner panel for managing documents across segmented KBs.
 - **RAG Metrics & Monitoring**: Dashboard for owners displaying performance metrics and health checks.
 - **Content Management**: Admin/Owner system for creating, editing, and publishing dynamic content for the WelcomeHub.
-- **TitiNauta AI Assistant**: A masculine AI assistant with a chat interface, integrated RAG system, and progress visualization. It features real-time RAG responses, a visual progress bar, automatic JWT auth, and robust error handling.
+- **TitiNauta AI Assistant**: A masculine AI assistant with a multimodal chat interface, integrated RAG system, and quick topic access. Features include:
+    - **TitiNautaQuickAccess**: Dashboard card with quick topic icons (Desenvolvimento, Jornada do Bebê, Jornada da Mãe, Vacinas, Sono)
+    - **TitiNautaAssistant**: Dedicated chat page at `/educare-app/titinauta` with topic query parameter support
+    - **Context-aware greetings**: Topic-specific initial messages based on selected theme
+    - **Jornada do Desenvolvimento**: Separate journey experience at `/educare-app/jornada-desenvolvimento`
 - **External API**: 15 endpoints for integration with external systems like WhatsApp via n8n, secured by an API Key.
 - **Subscription Management**: Stripe integration for SaaS subscriptions.
 - **Baby Health Dashboard**: Real-time health monitoring for babies, including growth charts, sleep patterns, vaccine checklists (Brazilian SBP calendar), and daily summaries, visible only to parents.
