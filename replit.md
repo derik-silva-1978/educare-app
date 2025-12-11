@@ -12,154 +12,42 @@ Educare+ is a digital platform designed to support early childhood development a
 ## System Architecture
 
 ### UI/UX Decisions
-The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui` (Radix UI + Tailwind CSS) for a professional and WCAG-compliant interface. 
-
-**WelcomeHub** (`/educare-app/welcome`): **Default authenticated landing page** - always displayed after login. Features sticky IconToolbar with 6 functional icons (left to right):
-1. **Theme Toggle** (Sun/Moon) - Dark/light mode switch
-2. **Messages** (MessageCircle) - Badge with unread count, navigates to communication
-3. **Feedback** (MessageSquarePlus) - Modal form with type selection (suggestion/bug/praise) and text area
-4. **Donations** (Coffee) - Stripe-integrated modal with preset values (R$5-200), single payments
-5. **Onboarding Chat** (Bot) - Interactive assistant with navigation to key platform features
-6. **Profile** (Avatar) - Dropdown with user info, photo support, settings, help, and logout
-
-Main content (minimalist design - no redundancy): WelcomeHero (gradient banner with greeting & CTAs), NewsCarousel (dynamically loaded news cards with diverse fallback images), and TrainingSection (training content with diverse fallback images). 
-
-**Content Integration**: All content fetches real data from `/api/content/public` endpoint via React Query with loading states. Content Management System allows owners/admins to create, edit, publish, and manage news, training, and course content with image URLs, categories, and audience targeting. 
-
-**Image Diversification**: 
-- **News Cards**: 6 unique Unsplash images (educational, creative, research themes)
-- **Training Cards**: 6 unique Unsplash images (learning, mentoring, development themes)  
-- **Course Cards**: 6 unique Unsplash images (professional, skill-building themes)
-- **Seed Data**: Backend seed script includes pre-populated content with diversified images for immediate use
-- **Fallback System**: Frontend implements rotating fallback images via modulo indexing to ensure no image repetition
-
-Dashboard and other routes automatically redirect to WelcomeHub as the primary screen.
-
-**Dashboard**: Clean, focused layout showing MetricsCards, DomainProgressChart (recharts bar chart with color-coded domains), StrengthsOpportunities, MilestonesTimeline, AIInsightsCard, ParentalResourcesCarousel, and children list. Removed: "Acesso Rápido à Plataforma", empty state messages, and "Primeiros Passos" for minimalist aesthetic. Social media icons (WhatsApp, Instagram, Facebook) in header.
+The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui` (Radix UI + Tailwind CSS) for a professional and WCAG-compliant interface. Key components include a `WelcomeHub` (default authenticated landing page with dynamic content carousels and a sticky IconToolbar) and a `Dashboard` (focused on user metrics and baby health data visualization for parents). Content is dynamically loaded and diversified with fallback images.
 
 ### Technical Implementations
-- **Frontend**: React hooks, `@tanstack/react-query` for state management, React Router for navigation, and `react-hook-form` with Zod for form validation. Custom JWT-based context provider handles authentication.
-- **Backend**: Node.js with Express.js, Sequelize ORM following a layered MVC architecture. Authentication is JWT-based, incorporating access and refresh tokens, and Row-Level Security (RLS). APIs are RESTful, with distinct internal and external routes.
+- **Frontend**: React hooks, `@tanstack/react-query`, React Router, and `react-hook-form` with Zod for validation. Authentication uses a custom JWT-based context provider.
+- **Backend**: Node.js with Express.js, Sequelize ORM, and a layered MVC architecture. Authentication is JWT-based with access/refresh tokens and Row-Level Security (RLS). APIs are RESTful.
 - **AI/RAG Architecture**: A sophisticated, segmented Retrieval-Augmented Generation (RAG) system with an 11-phase architecture. This includes:
-    - **Segmented Knowledge Bases**: `kb_baby`, `kb_mother`, `kb_professional` for targeted information retrieval.
-    - **Dual Ingestion & Routing**: Intelligent categorization and `dual-write` strategy for populating segmented KBs with automatic fallback.
-    - **Enterprise Optimizations**: Neural re-ranking, confidence scoring with human escalation, intelligent chunking, data augmentation, context safety (sensitive data/emergency detection), and KB versioning.
-    - **Timeout Management**: File Search operations have 60-second timeout with custom polling (1s intervals, max 60 attempts). Upload operations have 120-second timeout with proper cleanup on failure.
-    - **Logging & Observability**: Detailed logging at each step (assistant creation, thread creation, run initiation, polling progress, completion) with elapsed time tracking.
-    - **Auto-Improvement**: Feedback system, automated quality analysis, LLM-generated improvement suggestions, and a maturity dashboard.
-    - **Legacy Management**: Controlled transition from legacy RAG with feature flags, migration services, and a robust legacy shutdown service including backup and rollback capabilities.
-    - **Table Sync Script**: `src/scripts/createKnowledgeTables.js` ensures all KB tables exist before document ingestion.
+    - **Segmented Knowledge Bases**: `kb_baby`, `kb_mother`, `kb_professional`.
+    - **Dual Ingestion & Routing**: Intelligent categorization and `dual-write` for KBs.
+    - **Enterprise Optimizations**: Neural re-ranking, confidence scoring with human escalation, intelligent chunking, data augmentation, context safety, and KB versioning.
+    - **Robustness**: Timeout management for file operations, detailed logging, and a feedback-driven auto-improvement system.
+    - **Legacy Management**: Controlled transition from legacy RAG with feature flags and rollback capabilities.
 
 ### Feature Specifications
 - **Authentication**: JWT-based with comprehensive role-based access control (Owner, Admin, Professional, Parent).
-- **Knowledge Base Management**: Owner panel for uploading, listing, deleting, and activating/deactivating documents across the three segmented KBs.
-- **RAG Metrics & Monitoring**: Dedicated RAGMetricsDashboard for owners, displaying success rates, response times, fallback rates, and KB usage. Health checks provide status (healthy/degraded/unhealthy).
-- **Content Management**: Admin/Owner exclusive system for creating, editing, and publishing dynamic content (news, trainings, courses) that populates WelcomeHub. Features draft/published/archived status, image URLs, target audience, and sort ordering. Accessible at `/educare-app/admin/content-management` and `/educare-app/owner/content-management`.
-- **WelcomeHub Dynamic Content**: Public `/api/content/public` endpoint serves published content filtered by type and audience. Components use React Query for real-time data with loading states.
-- **RAG Progress Bar**: Visual feedback system with RAGProgressBar component showing retrieval/processing/generation stages (🔍 Recuperando → ⚙️ Processando → ✍️ Gerando). RAG service supports onProgress callbacks for real-time status updates. Integrated into IconToolbar modal. Components: RAGProgressBar.tsx, RAGChat.tsx.
-- **TitiNauta AI Assistant**: Masculine AI assistant (tribute to user's son Thiago) with chat interface, integrated RAG system, and progress visualization. **Live in IconToolbar** (icon 5 - Bot) with modal dialog showing:
-  - Real-time RAG responses using `ragService.askQuestion()`
-  - Visual progress bar with 3 animated stages
-  - Automatic JWT auth with external API fallback
-  - Error handling with toast notifications
-  - Endpoints: `/rag/ask` (authenticated), `/rag/external/ask` (external)
-- **External API**: 15 endpoints for integration with external systems like WhatsApp via n8n. Full documentation at `educare-backend/docs/N8N_INTEGRATION_GUIDE.md`.
-  - Authentication: API Key via `EXTERNAL_API_KEY` environment variable
-  - Endpoints: Users, Children, Subscription Plans, Quiz/Journey, TitiNauta RAG
-  - RAG External: `/api/rag/external/ask` and `/api/rag/external/ask-simple`
-- **Subscription Management**: Stripe integration for handling SaaS subscriptions.
-- **FAQ Dinâmica Contextual**: Query-based FAQ system with dynamic ranking algorithm based on usage metrics and user feedback. Provides contextual suggestions by child's development week (0-312 weeks / 0-6 years). Includes **77 seed FAQs** covering complete early childhood development (newborn through 6 years) with **~60% child development and 40% maternal health** focus. Organized by age periods: 0-4 weeks, 4-12 weeks, 12-26 weeks, 26-52 weeks, 52-104 weeks, 104-156 weeks, 156-208 weeks, 208-260 weeks, 260-312 weeks. Scoring formula: `(usage_count × 1.0) + (upvotes × 2.0) - (downvotes × 5.0)`. Endpoints: `GET /api/faqs/suggestions` (public, returns top 5 FAQs by relevance), `GET /api/faqs/search?q=termo` (full-text search), `POST /api/faqs/:id/feedback` (upvote/downvote), `GET /api/faqs/analytics` (admin/owner metrics). CRUD operations for admin/owner.
+- **Knowledge Base Management**: Owner panel for managing documents across segmented KBs.
+- **RAG Metrics & Monitoring**: Dashboard for owners displaying performance metrics and health checks.
+- **Content Management**: Admin/Owner system for creating, editing, and publishing dynamic content for the WelcomeHub.
+- **TitiNauta AI Assistant**: A masculine AI assistant with a chat interface, integrated RAG system, and progress visualization. It features real-time RAG responses, a visual progress bar, automatic JWT auth, and robust error handling.
+- **External API**: 15 endpoints for integration with external systems like WhatsApp via n8n, secured by an API Key.
+- **Subscription Management**: Stripe integration for SaaS subscriptions.
+- **Baby Health Dashboard**: Real-time health monitoring for babies, including growth charts, sleep patterns, vaccine checklists (Brazilian SBP calendar), and daily summaries, visible only to parents.
+- **Dynamic Contextual FAQ**: A query-based FAQ system with dynamic ranking and contextual suggestions based on a child's development week (0-312 weeks), pre-populated with 77 seed FAQs.
 
 ### System Design Choices
-- **Scalability**: Designed for cloud deployment on Digital Ocean, using multiple droplets, PostgreSQL, and Redis.
-- **Modularity**: Services are distinct, allowing for independent development and deployment (e.g., `knowledgeBaseSelector.js`, `ragService.js`, `legacyShutdownService.js`).
-- **Observability**: Extensive metrics and logging for RAG performance and system health, including a dedicated metrics service and endpoints.
-- **Controlled Rollout**: Feature flags (e.g., `USE_LEGACY_FALLBACK_FOR_*`, `ENABLE_SEGMENTED_KB`) enable safe, phased rollouts and easy rollback.
+- **Scalability**: Designed for cloud deployment on Digital Ocean using multiple droplets, PostgreSQL, and Redis.
+- **Modularity**: Distinct services for independent development and deployment.
+- **Observability**: Extensive metrics and logging for RAG performance and system health.
+- **Controlled Rollout**: Feature flags enable safe, phased rollouts and easy rollback.
 
 ## External Dependencies
 
-- **Database**: PostgreSQL (external server: 86.48.30.74)
+- **Database**: PostgreSQL (external server)
 - **Automation Platform**: n8n Workflow (for WhatsApp ingestion, AI processing, context management, and response delivery)
 - **Messaging**: WhatsApp (via Evolution API)
 - **Payment Gateway**: Stripe
-- **AI/ML**: **OpenAI API (EXCLUSIVE)** - Strategic decision to use best-in-class LLM resources:
-  - **File Search**: OpenAI Assistants API (primary source for RAG retrieval)
-  - **LLM Model**: gpt-4o-mini (optimized for quality and performance)
-  - **Features**: Neural re-ranking, confidence scoring, semantic search via File Search
-  - **No Gemini**: System uses OpenAI exclusively for enterprise-grade quality assurance
-- **Cloud Provider**: Digital Ocean (for hosting and infrastructure)
+- **AI/ML**: OpenAI API (EXCLUSIVE for File Search and LLM, specifically gpt-4o-mini)
+- **Cloud Provider**: Digital Ocean
 - **UI Libraries**: Radix UI, Tailwind CSS (via shadcn/ui)
 - **Frontend State Management**: `@tanstack/react-query`
-
-## Strategic AI/ML Decisions (Dec 2025)
-
-**Decision**: Maintain OpenAI API as exclusive AI provider to leverage best-in-class LLM capabilities.
-- **File Search**: Uses OpenAI Assistants API (not Gemini) for superior semantic search
-- **Rationale**: OpenAI's File Search + gpt-4o-mini provides optimal balance of quality, reliability, and cost-efficiency for enterprise deployments
-- **Implementation**: Hybrid strategy prioritizes File Search (primary) → Local KB fallback (secondary)
-- **Future**: Cost optimizations will focus on query efficiency, caching, and chunking strategies rather than provider switching
-
-## n8n Integration v3.0 (Dec 2025)
-
-**Status**: ✅ **READY FOR IMMEDIATE DEPLOYMENT** - Full health tracking + NLP parsing
-
-### Production Configuration
-- **n8n URL**: https://n8n.educareapp.com.br/
-- **Evolution API URL**: https://api.educareapp.com.br/
-- **Evolution API Key**: eff3ea025256694c10422fd0fc5ff169
-- **Evolution Instance Name**: evolution
-- **Webhook URL**: https://n8n.educareapp.com.br/webhook/whatsapp-educare-v3
-
-### v3.0 New Features
-- **4 Health Tracking Tables**: biometrics_logs, sleep_logs, appointments, vaccine_history
-- **NLP Parser Service**: OpenAI-powered text-to-structured-data parsing (weight/height from "8kg 60cm")
-- **Multimodal API Responses**: All endpoints return `{response_text, media_type, media_url}` format
-- **Brazilian Vaccine Calendar**: SBP schedule with 11 vaccines across first 6 years
-- **Intent Classification**: GPT-4o-mini classifier for routing (biometrics/sleep/vaccine/question/appointment)
-
-### v3.0 Endpoints
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/n8n/users/check` | GET | Gatekeeper - check user + subscription + child |
-| `/api/n8n/biometrics/update` | POST | Record weight/height with NLP parsing |
-| `/api/n8n/sleep/log` | POST | Record sleep with NLP parsing |
-| `/api/n8n/appointments/create` | POST | Schedule appointments with NLP parsing |
-| `/api/n8n/vaccines/check` | GET | SBP vaccine calendar + history |
-| `/api/n8n/content/child` | GET | Week-based child content |
-| `/api/n8n/content/mother` | GET | Week-based mother content |
-| `/api/n8n/rag/ask` | POST | TitiNauta RAG (multimodal) |
-
-### Documentation & Templates
-- **🚀 START HERE**: `educare-backend/docs/N8N_V3_DEPLOY_GUIDE.md` (v3.0 complete guide)
-- **Template v3.0**: `educare-backend/docs/n8n-workflow-template-v3.json` (importable workflow)
-- **Reference**: `educare-backend/docs/N8N_INTEGRATION_GUIDE.md` (all endpoints)
-
-### v3.0 Workflow Features
-- ✅ Evolution API Webhook (WhatsApp trigger)
-- ✅ Whisper Audio Transcription (voice messages)
-- ✅ User gatekeeper with subscription validation
-- ✅ Baby age calculation (weeks from DOB)
-- ✅ AI Intent Classification (6 categories)
-- ✅ NLP parsing for biometrics/sleep/appointments
-- ✅ Brazilian SBP vaccine calendar
-- ✅ TitiNauta RAG with context
-- ✅ Multimodal output routing (text/image/audio/document)
-- ✅ Evolution API response delivery
-
-### Ready-to-Use Variables
-```
-EDUCARE_API_URL=https://[SEU-REPLIT].replit.dev:3001
-EDUCARE_API_KEY=educare_external_api_key_2025
-EVOLUTION_API_URL=https://api.educareapp.com.br
-EVOLUTION_API_KEY=eff3ea025256694c10422fd0fc5ff169
-EVOLUTION_INSTANCE=evolution
-```
-
-### Implementation Steps
-1. Import `n8n-workflow-template-v3.json` into n8n
-2. Configure 5 variables (URLs and API keys)
-3. Add OpenAI credentials (for Whisper and Intent Classification)
-4. Configure webhook in Evolution API
-5. Activate workflow and test with WhatsApp
-
-**All v3.0 endpoints tested and validated** ✓
