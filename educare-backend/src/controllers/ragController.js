@@ -121,3 +121,46 @@ exports.healthCheck = async (req, res) => {
     timestamp: new Date().toISOString()
   });
 };
+
+exports.askMultimodal = async (req, res) => {
+  try {
+    const { question, context } = req.body;
+
+    if (!question || question.trim() === '') {
+      return res.status(400).json({
+        response_text: 'Por favor, faça uma pergunta.',
+        media_type: 'text',
+        media_url: null
+      });
+    }
+
+    const childId = context?.child_id;
+    const week = context?.week;
+
+    const result = await ragService.askWithBabyId(question, childId, {
+      use_file_search: true
+    });
+
+    if (!result.success) {
+      return res.json({
+        response_text: result.error || 'Desculpe, não consegui processar sua pergunta. Tente novamente.',
+        media_type: 'text',
+        media_url: null
+      });
+    }
+
+    return res.json({
+      response_text: result.answer,
+      media_type: 'text',
+      media_url: null,
+      metadata: result.metadata
+    });
+  } catch (error) {
+    console.error('[RAG] Erro no endpoint /ask-multimodal:', error);
+    return res.status(500).json({
+      response_text: 'Erro ao processar sua pergunta. Tente novamente mais tarde.',
+      media_type: 'text',
+      media_url: null
+    });
+  }
+};

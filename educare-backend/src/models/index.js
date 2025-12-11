@@ -29,6 +29,12 @@ const ContentItem = require('./ContentItem');
 const AppFaq = require('./AppFaq');
 const FaqUserFeedback = require('./FaqUserFeedback');
 
+// Modelos de Saúde (n8n v3.0)
+const BiometricsLog = require('./BiometricsLog');
+const SleepLog = require('./SleepLog');
+const Appointment = require('./Appointment');
+const VaccineHistory = require('./VaccineHistory');
+
 // Modelos do RAG
 const KnowledgeDocument = require('./KnowledgeDocument');
 const KbBaby = require('./KbBaby');
@@ -242,6 +248,24 @@ ContentItem.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 User.hasMany(ContentItem, { foreignKey: 'updated_by', as: 'updatedContent' });
 ContentItem.belongsTo(User, { foreignKey: 'updated_by', as: 'updater' });
 
+// === ASSOCIAÇÕES DE SAÚDE (n8n v3.0) ===
+
+// Child <-> BiometricsLog (1:N)
+Child.hasMany(BiometricsLog, { foreignKey: 'child_id', as: 'biometricsLogs' });
+BiometricsLog.belongsTo(Child, { foreignKey: 'child_id', as: 'child' });
+
+// Child <-> SleepLog (1:N)
+Child.hasMany(SleepLog, { foreignKey: 'child_id', as: 'sleepLogs' });
+SleepLog.belongsTo(Child, { foreignKey: 'child_id', as: 'child' });
+
+// Child <-> Appointment (1:N)
+Child.hasMany(Appointment, { foreignKey: 'child_id', as: 'appointments' });
+Appointment.belongsTo(Child, { foreignKey: 'child_id', as: 'child' });
+
+// Child <-> VaccineHistory (1:N)
+Child.hasMany(VaccineHistory, { foreignKey: 'child_id', as: 'vaccineHistory' });
+VaccineHistory.belongsTo(Child, { foreignKey: 'child_id', as: 'child' });
+
 // Exportação dos modelos
 module.exports = {
   sequelize,
@@ -284,5 +308,10 @@ module.exports = {
   JourneyV2Quiz,
   JourneyV2Badge,
   UserJourneyV2Progress,
-  UserJourneyV2Badge
+  UserJourneyV2Badge,
+  // Modelos de Saúde (n8n v3.0)
+  BiometricsLog,
+  SleepLog,
+  Appointment,
+  VaccineHistory
 };

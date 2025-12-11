@@ -16,4 +16,6 @@ router.post('/external/ask', apiKeyMiddleware.validateApiKey, ragController.ask)
 
 router.post('/external/ask-simple', apiKeyMiddleware.validateApiKey, ragController.askSimple);
 
+router.post('/external/ask-multimodal', apiKeyMiddleware.validateApiKey, ragController.askMultimodal);
+
 module.exports = router;

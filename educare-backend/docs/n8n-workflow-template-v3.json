@@ -1,0 +1,615 @@
+{
+  "name": "Educare+ Chat: Master System v3.0 (Full Features)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-educare-v3",
+        "responseMode": "onReceived",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook (Evolution API)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "notes": "Ponto de entrada - recebe mensagens do WhatsApp via Evolution API"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Extração Inteligente v3.0\n// Suporte a Texto, Botões e Detecção de Áudio\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json.body || item.json.data || {};\n  const key = data.key || {};\n  const msg = data.message || {};\n  \n  // 1. Filtro de Segurança (Ignora status e msg própria)\n  if (key.fromMe || key.remoteJid?.includes('status')) continue;\n\n  const phone = key.remoteJid?.replace(/\\D/g, '').replace('@s.whatsapp.net', '');\n  \n  // 2. Detectar tipo de mídia\n  let is_audio = false;\n  let media_url = null;\n  let message = '';\n  \n  if (msg.audioMessage) {\n    is_audio = true;\n    media_url = msg.audioMessage.url || data.mediaUrl;\n  } else if (msg.conversation) {\n    message = msg.conversation;\n  } else if (msg.extendedTextMessage) {\n    message = msg.extendedTextMessage.text;\n  } else if (msg.buttonsResponseMessage) {\n    message = msg.buttonsResponseMessage.selectedButtonId;\n  } else if (msg.listResponseMessage) {\n    message = msg.listResponseMessage.singleSelectReply?.selectedRowId;\n  }\n\n  results.push({\n    json: {\n      phone,\n      message,\n      is_audio: is_audio.toString(),\n      media_url,\n      raw: data\n    }\n  });\n}\n\nreturn results.length ? results : [{ json: { skip: true } }];"
+      },
+      "id": "smart-extract",
+      "name": "Smart Extraction",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.is_audio }}",
+        "rules": {
+          "rules": [
+            { "value2": "true", "output": 0 },
+            { "value2": "false", "output": 1 }
+          ]
+        }
+      },
+      "id": "router-input",
+      "name": "Router: Input Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "fileUrl": "={{ $json.media_url }}",
+        "options": { "language": "pt" }
+      },
+      "id": "whisper",
+      "name": "AI: Whisper Transcribe",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [660, 160],
+      "credentials": { "openAiApi": { "id": "YOUR_OPENAI_CREDENTIAL_ID", "name": "OpenAI Account" } }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Normaliza o áudio transcrito para texto\nreturn [{\n  json: {\n    ...$input.item.json,\n    message: $input.item.json.text, \n    is_audio_transcribed: true\n  }\n}];"
+      },
+      "id": "normalize-audio",
+      "name": "Normalize Audio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [880, 160]
+    },
+    {
+      "parameters": {
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/users/check",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "phone", "value": "={{ $json.phone }}" },
+            { "name": "api_key", "value": "={{ $vars.EDUCARE_API_KEY }}" }
+          ]
+        }
+      },
+      "id": "api-check-user",
+      "name": "API: Check User",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1100, 300],
+      "notes": "Verifica se usuário existe e status da assinatura"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { 
+              "id": "exists", 
+              "leftValue": "={{ $json.exists }}", 
+              "rightValue": true, 
+              "operator": { "type": "boolean", "operation": "equals" } 
+            }
+          ]
+        }
+      },
+      "id": "gate-exists",
+      "name": "Gate: User Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1320, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { 
+              "id": "active", 
+              "leftValue": "={{ $json.subscription_status }}", 
+              "rightValue": "active", 
+              "operator": { "type": "string", "operation": "equals" } 
+            },
+            { 
+              "id": "trialing", 
+              "leftValue": "={{ $json.subscription_status }}", 
+              "rightValue": "trialing", 
+              "operator": { "type": "string", "operation": "equals" } 
+            }
+          ],
+          "combinator": "or"
+        }
+      },
+      "id": "gate-sub",
+      "name": "Gate: Active Sub?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1540, 240]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Motor Temporal: Define a semana da criança\nconst child = $json.child || {};\nif (!child.dob) {\n  return [{ json: { error: 'no_dob', target_flow: 'onboarding', message: 'Por favor, cadastre seu bebê no app Educare+ primeiro.' } }];\n}\n\nconst dob = new Date(child.dob);\nconst diff = Math.abs(new Date() - dob);\nconst currentWeek = Math.floor(Math.ceil(diff / (1000 * 60 * 60 * 24)) / 7);\n\nreturn [{ \n  json: { \n    ...$json, \n    current_week: currentWeek, \n    child_id: child.id, \n    child_name: child.name \n  } \n}];"
+      },
+      "id": "time-engine",
+      "name": "Engine: Calc Weeks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1760, 140],
+      "notes": "Calcula a semana de vida do bebê baseado na data de nascimento"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Classifique a intenção do usuário em uma das categorias abaixo (Responda APENAS a palavra-chave):\n\n1. 'menu_nav': Navegação numérica (1, 2, 3), 'voltar', 'menu'.\n2. 'biometrics': Registrar peso ou altura (Ex: '8kg', 'Mede 60cm').\n3. 'sleep': Registrar sono (Ex: 'Dormiu', 'Acordou', 'soneca').\n4. 'vaccine': Dúvidas ou registro de vacinas.\n5. 'appointment': Marcar ou consultar médico/exames.\n6. 'question': Dúvidas gerais (Nutrição, Saúde, Comportamento, RAG)."
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.message }}"
+            }
+          ]
+        }
+      },
+      "id": "ai-intent",
+      "name": "AI Intent Classifier",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [1980, 140],
+      "credentials": { "openAiApi": { "id": "YOUR_OPENAI_CREDENTIAL_ID", "name": "OpenAI Account" } }
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.message.content.trim().toLowerCase() }}",
+        "rules": {
+          "rules": [
+            { "value2": "menu_nav", "output": 0 },
+            { "value2": "biometrics", "output": 1 },
+            { "value2": "sleep", "output": 2 },
+            { "value2": "vaccine", "output": 3 },
+            { "value2": "question", "output": 4 },
+            { "value2": "appointment", "output": 5 }
+          ]
+        },
+        "fallbackOutput": 4
+      },
+      "id": "router-intent",
+      "name": "Router: Intent Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [2200, 140]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $('Smart Extraction').item.json.message }}",
+        "rules": {
+          "rules": [
+            { "value2": "1", "output": 0 },
+            { "value2": "2", "output": 1 },
+            { "value2": "3", "output": 2 },
+            { "value2": "4", "output": 3 },
+            { "value2": "5", "output": 4 }
+          ]
+        },
+        "fallbackOutput": 0
+      },
+      "id": "router-menu",
+      "name": "Router: Menu Options",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [2460, -100]
+    },
+    {
+      "parameters": { 
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/biometrics/update",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "api_key", "value": "={{ $vars.EDUCARE_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"child_id\": \"{{ $('Engine: Calc Weeks').item.json.child_id }}\",\n  \"raw_text\": \"{{ $('Smart Extraction').item.json.message }}\"\n}"
+      },
+      "id": "api-bio",
+      "name": "API: Biometrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2460, 60],
+      "notes": "Registra peso/altura com NLP parsing"
+    },
+    {
+      "parameters": { 
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/sleep/log",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "api_key", "value": "={{ $vars.EDUCARE_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"child_id\": \"{{ $('Engine: Calc Weeks').item.json.child_id }}\",\n  \"raw_text\": \"{{ $('Smart Extraction').item.json.message }}\"\n}"
+      },
+      "id": "api-sleep",
+      "name": "API: Sleep Log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2460, 140],
+      "notes": "Registra sono com NLP parsing"
+    },
+    {
+      "parameters": { 
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/vaccines/check",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "age_weeks", "value": "={{ $('Engine: Calc Weeks').item.json.current_week }}" },
+            { "name": "child_id", "value": "={{ $('Engine: Calc Weeks').item.json.child_id }}" },
+            { "name": "api_key", "value": "={{ $vars.EDUCARE_API_KEY }}" }
+          ]
+        }
+      },
+      "id": "api-vac",
+      "name": "API: Vaccines",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2460, 220],
+      "notes": "Verifica calendário vacinal SBP"
+    },
+    {
+      "parameters": { 
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/rag/ask",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "api_key", "value": "={{ $vars.EDUCARE_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"question\": \"{{ $('Smart Extraction').item.json.message }}\",\n  \"context\": {\n    \"week\": {{ $('Engine: Calc Weeks').item.json.current_week }},\n    \"child_name\": \"{{ $('Engine: Calc Weeks').item.json.child_name }}\",\n    \"child_id\": \"{{ $('Engine: Calc Weeks').item.json.child_id }}\"\n  }\n}"
+      },
+      "id": "api-rag",
+      "name": "API: RAG (TitiNauta)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2460, 380],
+      "notes": "Perguntas gerais via RAG com contexto do bebê"
+    },
+    {
+      "parameters": { 
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/appointments/create",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "api_key", "value": "={{ $vars.EDUCARE_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"child_id\": \"{{ $('Engine: Calc Weeks').item.json.child_id }}\",\n  \"raw_text\": \"{{ $('Smart Extraction').item.json.message }}\"\n}"
+      },
+      "id": "api-appt",
+      "name": "API: Appointments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2460, 460],
+      "notes": "Agenda consultas com NLP parsing"
+    },
+    {
+      "parameters": { 
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/content/child",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "week", "value": "={{ $('Engine: Calc Weeks').item.json.current_week }}" },
+            { "name": "api_key", "value": "={{ $vars.EDUCARE_API_KEY }}" }
+          ]
+        }
+      },
+      "id": "api-content-child",
+      "name": "API: Child Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2700, -260]
+    },
+    {
+      "parameters": { 
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/content/mother",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "week", "value": "={{ $('Engine: Calc Weeks').item.json.current_week }}" },
+            { "name": "api_key", "value": "={{ $vars.EDUCARE_API_KEY }}" }
+          ]
+        }
+      },
+      "id": "api-content-mother",
+      "name": "API: Mother Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2700, -120]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.media_type || 'text' }}",
+        "rules": {
+          "rules": [
+            { "value2": "text", "output": 0 },
+            { "value2": "image", "output": 1 },
+            { "value2": "audio", "output": 2 },
+            { "value2": "document", "output": 3 }
+          ]
+        },
+        "fallbackOutput": 0
+      },
+      "id": "router-output",
+      "name": "Router: Output Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [3000, 140],
+      "notes": "Roteia resposta baseado no tipo de mídia"
+    },
+    {
+      "parameters": { 
+        "method": "POST",
+        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendText/{{ $vars.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $vars.EVOLUTION_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Smart Extraction').item.json.phone }}\",\n  \"text\": \"{{ $json.response_text || 'Mensagem recebida!' }}\"\n}"
+      },
+      "id": "send-text",
+      "name": "Evo: Send Text",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3260, 0]
+    },
+    {
+      "parameters": { 
+        "method": "POST",
+        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendMedia/{{ $vars.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $vars.EVOLUTION_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Smart Extraction').item.json.phone }}\",\n  \"mediatype\": \"image\",\n  \"mimetype\": \"image/jpeg\",\n  \"caption\": \"{{ $json.response_text }}\",\n  \"media\": \"{{ $json.media_url }}\"\n}"
+      },
+      "id": "send-image",
+      "name": "Evo: Send Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3260, 160]
+    },
+    {
+      "parameters": { 
+        "method": "POST",
+        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendWhatsAppAudio/{{ $vars.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $vars.EVOLUTION_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Smart Extraction').item.json.phone }}\",\n  \"audio\": \"{{ $json.media_url }}\"\n}"
+      },
+      "id": "send-audio",
+      "name": "Evo: Send Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3260, 320]
+    },
+    {
+      "parameters": { 
+        "method": "POST",
+        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendMedia/{{ $vars.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $vars.EVOLUTION_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Smart Extraction').item.json.phone }}\",\n  \"mediatype\": \"document\",\n  \"mimetype\": \"application/pdf\",\n  \"caption\": \"{{ $json.response_text }}\",\n  \"media\": \"{{ $json.media_url }}\"\n}"
+      },
+      "id": "send-document",
+      "name": "Evo: Send Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3260, 480]
+    },
+    {
+      "parameters": { 
+        "method": "POST",
+        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendText/{{ $vars.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $vars.EVOLUTION_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Smart Extraction').item.json.phone }}\",\n  \"text\": \"Olá! 👋 Não encontramos seu cadastro. Acesse o app Educare+ para criar sua conta e cadastrar seu bebê. Assim poderei te ajudar melhor! 🌟\"\n}"
+      },
+      "id": "send-no-user",
+      "name": "Evo: No User Found",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1540, 400]
+    },
+    {
+      "parameters": { 
+        "method": "POST",
+        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendText/{{ $vars.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $vars.EVOLUTION_API_KEY }}" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Smart Extraction').item.json.phone }}\",\n  \"text\": \"Olá! Sua assinatura está inativa. 😔\\n\\nPara continuar usando o Educare+, renove sua assinatura em:\\n{{ $json.stripe_checkout_url || 'https://educareapp.com.br/assinar' }}\"\n}"
+      },
+      "id": "send-inactive-sub",
+      "name": "Evo: Inactive Sub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1760, 340]
+    }
+  ],
+  "connections": {
+    "Webhook (Evolution API)": { 
+      "main": [[{ "node": "Smart Extraction", "type": "main", "index": 0 }]] 
+    },
+    "Smart Extraction": { 
+      "main": [[{ "node": "Router: Input Type", "type": "main", "index": 0 }]] 
+    },
+    "Router: Input Type": { 
+      "main": [
+        [{ "node": "AI: Whisper Transcribe", "type": "main", "index": 0 }],
+        [{ "node": "API: Check User", "type": "main", "index": 0 }]
+      ] 
+    },
+    "AI: Whisper Transcribe": { 
+      "main": [[{ "node": "Normalize Audio", "type": "main", "index": 0 }]] 
+    },
+    "Normalize Audio": { 
+      "main": [[{ "node": "API: Check User", "type": "main", "index": 0 }]] 
+    },
+    "API: Check User": { 
+      "main": [[{ "node": "Gate: User Exists?", "type": "main", "index": 0 }]] 
+    },
+    "Gate: User Exists?": { 
+      "main": [
+        [{ "node": "Gate: Active Sub?", "type": "main", "index": 0 }],
+        [{ "node": "Evo: No User Found", "type": "main", "index": 0 }]
+      ] 
+    },
+    "Gate: Active Sub?": { 
+      "main": [
+        [{ "node": "Engine: Calc Weeks", "type": "main", "index": 0 }],
+        [{ "node": "Evo: Inactive Sub", "type": "main", "index": 0 }]
+      ] 
+    },
+    "Engine: Calc Weeks": { 
+      "main": [[{ "node": "AI Intent Classifier", "type": "main", "index": 0 }]] 
+    },
+    "AI Intent Classifier": { 
+      "main": [[{ "node": "Router: Intent Switch", "type": "main", "index": 0 }]] 
+    },
+    "Router: Intent Switch": { 
+      "main": [
+        [{ "node": "Router: Menu Options", "type": "main", "index": 0 }],
+        [{ "node": "API: Biometrics", "type": "main", "index": 0 }],
+        [{ "node": "API: Sleep Log", "type": "main", "index": 0 }],
+        [{ "node": "API: Vaccines", "type": "main", "index": 0 }],
+        [{ "node": "API: RAG (TitiNauta)", "type": "main", "index": 0 }],
+        [{ "node": "API: Appointments", "type": "main", "index": 0 }]
+      ] 
+    },
+    "Router: Menu Options": { 
+      "main": [
+        [{ "node": "API: Child Content", "type": "main", "index": 0 }],
+        [{ "node": "API: Mother Content", "type": "main", "index": 0 }],
+        [{ "node": "API: Vaccines", "type": "main", "index": 0 }],
+        [{ "node": "API: RAG (TitiNauta)", "type": "main", "index": 0 }],
+        [{ "node": "API: RAG (TitiNauta)", "type": "main", "index": 0 }]
+      ] 
+    },
+    "API: Biometrics": { 
+      "main": [[{ "node": "Router: Output Type", "type": "main", "index": 0 }]] 
+    },
+    "API: Sleep Log": { 
+      "main": [[{ "node": "Router: Output Type", "type": "main", "index": 0 }]] 
+    },
+    "API: Vaccines": { 
+      "main": [[{ "node": "Router: Output Type", "type": "main", "index": 0 }]] 
+    },
+    "API: RAG (TitiNauta)": { 
+      "main": [[{ "node": "Router: Output Type", "type": "main", "index": 0 }]] 
+    },
+    "API: Appointments": { 
+      "main": [[{ "node": "Router: Output Type", "type": "main", "index": 0 }]] 
+    },
+    "API: Child Content": { 
+      "main": [[{ "node": "Router: Output Type", "type": "main", "index": 0 }]] 
+    },
+    "API: Mother Content": { 
+      "main": [[{ "node": "Router: Output Type", "type": "main", "index": 0 }]] 
+    },
+    "Router: Output Type": { 
+      "main": [
+        [{ "node": "Evo: Send Text", "type": "main", "index": 0 }],
+        [{ "node": "Evo: Send Image", "type": "main", "index": 0 }],
+        [{ "node": "Evo: Send Audio", "type": "main", "index": 0 }],
+        [{ "node": "Evo: Send Document", "type": "main", "index": 0 }]
+      ] 
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": ["educare", "whatsapp", "evolution-api", "rag"],
+  "triggerCount": 0,
+  "updatedAt": "2025-12-11T17:55:00.000Z",
+  "versionId": "3.0.0"
+}

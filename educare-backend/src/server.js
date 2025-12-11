@@ -168,6 +168,10 @@ app.use('/api/content', contentRoutes);
 const faqRoutes = require('./routes/faqRoutes');
 app.use('/api/faqs', faqRoutes);
 
+// n8n Integration routes (v3.0 - Omnicanal)
+const n8nRoutes = require('./routes/n8nRoutes');
+app.use('/api/n8n', n8nRoutes);
+
 // Rotas de health check (sem prefixo /api para acesso direto)
 app.use('/health', healthRoutes);
 

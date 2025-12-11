@@ -1,0 +1,42 @@
+# Role: Senior Backend Developer
+
+**Status:** ✅ PLANO APROVADO.
+**Ação:** Executar o Plano de Correção Imediatamente.
+
+Por favor, gere e aplique o código para cobrir todas as lacunas identificadas no diagnóstico. Siga estas diretrizes técnicas estritas para garantir que o n8n consiga se comunicar com o backend:
+
+### 1. Banco de Dados (PostgreSQL)
+Execute as migrações (ou forneça o SQL) para criar as tabelas faltantes:
+* `biometrics_logs` (child_id, weight, height, recorded_at, raw_input)
+* `sleep_logs` (child_id, start_time, end_time, duration_minutes, notes)
+* `appointments` (child_id, doctor_name, appointment_date, specialty)
+* `vaccine_history` (child_id, vaccine_name, taken_at, status)
+
+### 2. Implementação dos Endpoints (Node.js)
+
+**A. Gatekeeper (/api/users/check):**
+* Faça o JOIN com a tabela de `subscriptions` (se houver) para retornar o campo `subscription_status` ('active', 'trialing', 'past_due', 'canceled') no nível raiz do JSON.
+* Retorne também `child: { id, name, dob }`.
+
+**B. Endpoints com NLP (Biometria, Sono, Consultas):**
+* Nos endpoints POST (`/biometrics/update`, `/sleep/log`, `/appointments/create`), o n8n enviará apenas `{ child_id, raw_text }`.
+* **CRÍTICO:** Utilize a `OPENAI_API_KEY` para processar o `raw_text` e extrair os dados estruturados (ex: extrair 8.5 de "peso 8.5kg") antes de salvar no banco.
+* Retorne JSON com `response_text` confirmando o que foi salvo.
+
+**C. Lógica Híbrida de Vacinas (/api/vaccines/check):**
+* Receba `?age_weeks=X`.
+* Consulte o banco `vaccine_history` para ver o que já foi tomado.
+* (Opcional para agora): Se não tiver o calendário SBP no banco, retorne uma lista estática baseada na idade ou use a OpenAI para gerar a recomendação do que falta.
+
+**D. Contrato Multimodal (RAG & Conteúdo):**
+* Atualize o `ragController` e os endpoints de conteúdo (`/content/child`) para retornar SEMPRE este formato:
+    ```json
+    {
+      "response_text": "Texto explicativo...",
+      "media_type": "text" (ou 'image', 'audio', 'document'),
+      "media_url": "https://..." (ou null)
+    }
+    ```
+
+**3. Execução**
+Gere o código completo dos Controllers e Rotas. Se precisar instalar pacotes (ex: `openai` se não tiver), avise-me.

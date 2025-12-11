@@ -1,0 +1,56 @@
+# Role: Senior Solutions Architect & Lead Systems Auditor
+
+**Contexto Crítico:**
+Estou prestes a realizar o deploy da **Versão 3.0 (Master Release)** do fluxo de automação do **Educare+ Chat** no n8n.
+Este novo blueprint transforma a aplicação em um ecossistema **Omnicanal, Multimodal e SaaS**. O n8n atuará como orquestrador, mas ele depende 100% de que o Backend (Node.js) e o Banco de Dados (PostgreSQL) estejam expondo as rotas e tabelas corretas.
+
+**Sua Missão:**
+Realizar uma **Auditoria de Conformidade (Compliance Check)** profunda no código atual do projeto. Você deve verificar se a infraestrutura suporta todas as funcionalidades descritas abaixo. Se algo estiver faltando, você deve gerar o código para corrigir imediatamente.
+
+---
+
+## 📋 CHECKLIST DE AUDITORIA TÉCNICA
+
+### 1. Auditoria de Banco de Dados (Schema PostgreSQL)
+O n8n enviará dados para serem persistidos. Verifique se as seguintes tabelas existem e possuem as colunas mínimas necessárias:
+
+* [ ] **`users`**: Deve ter `subscription_status` (Enum: 'active', 'trialing', 'past_due') e `stripe_customer_id`.
+* [ ] **`children`**: Deve ter `dob` (Date of Birth) para o cálculo do Motor Temporal.
+* [ ] **`biometrics_logs`**: Para registrar peso/altura. Colunas: `child_id`, `weight`, `height`, `recorded_at`.
+* [ ] **`sleep_logs`**: Para registro de sono. Colunas: `child_id`, `start_time`, `end_time`, `notes`.
+* [ ] **`appointments`**: Para agendamento médico. Colunas: `child_id`, `doctor_name`, `appointment_date`.
+* [ ] **`vaccine_history`**: Para o histórico vacinal. Colunas: `child_id`, `vaccine_name`, `taken_at`.
+* [ ] **`app_faqs`**: Para as perguntas sementes. Colunas: `min_week`, `max_week`, `usage_count`, `score`.
+* [ ] **`quiz_progress`**: Para gamificação. Colunas: `week_number`, `status`, `score`.
+
+### 2. Auditoria de Endpoints da API (Rotas Node.js)
+O fluxo do n8n fará requisições para as seguintes rotas. Verifique se elas existem, se o método HTTP está correto e se aceitam o payload descrito:
+
+#### **Grupo A: Gatekeepers & Core**
+* `GET /api/users/check`:
+    * **Input:** `?phone=5511...`
+    * **Output Esperado:** `{ "exists": true, "subscription_status": "active", "child": { "id": "...", "dob": "..." } }`
+    * *Nota:* Se o status for 'past_due', deve retornar também `stripe_checkout_url`.
+
+#### **Grupo B: Módulos de Saúde (Write Operations - NLP Required)**
+* `POST /api/biometrics/update`: Payload `{ child_id, raw_text }` (Ex: "Peso 8kg"). **Atenção:** A API deve processar a string `raw_text` (usando Regex ou OpenAI) para extrair os números antes de salvar.
+* `POST /api/sleep/log`: Payload `{ child_id, raw_text }`.
+* `POST /api/appointments/create`: Payload `{ child_id, raw_text }`.
+
+#### **Grupo C: Inteligência & Conteúdo (Read Operations)**
+* `GET /api/vaccines/check`: Input `?age_weeks=X`. Deve retornar lógica híbrida (O que tomou vs. Calendário SBP).
+* `GET /api/content/child` & `/api/content/mother`: Input `?week=X`.
+* `GET /api/faqs/suggestions`: Input `?week=X`. Deve retornar Top 5 perguntas ranqueadas.
+* `POST /api/rag/ask`: Payload `{ question, context }`.
+
+### 3. Auditoria de Contrato Multimodal (Crítico)
+O n8n possui um **Router de Mídia** na saída.
+**Regra:** Todas as rotas de leitura (Grupo C e RAG) **DEVEM** retornar a resposta seguindo este padrão JSON estrito.
+*Verifique se seus controllers atuais estão retornando essa estrutura. Se retornarem apenas texto, o fluxo quebrará.*
+
+```json
+{
+  "response_text": "Texto da resposta aqui...",
+  "media_type": "text" | "image" | "audio" | "document",
+  "media_url": "[https://url-do-arquivo.com/arquivo.pdf](https://url-do-arquivo.com/arquivo.pdf)" (Opcional, se type != text)
+}

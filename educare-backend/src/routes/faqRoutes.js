@@ -129,7 +129,7 @@ router.get('/suggestions',
  *           default: 1
  *       - in: query
  *         name: limit
- *           schema:
+ *         schema:
  *           type: integer
  *           default: 20
  *     responses:
