@@ -99,32 +99,52 @@ Dashboard and other routes automatically redirect to WelcomeHub as the primary s
 - **Implementation**: Hybrid strategy prioritizes File Search (primary) → Local KB fallback (secondary)
 - **Future**: Cost optimizations will focus on query efficiency, caching, and chunking strategies rather than provider switching
 
-## n8n Integration (Dec 2025)
+## n8n Integration v3.0 (Dec 2025)
 
-**Status**: ✅ **READY FOR IMMEDIATE DEPLOYMENT** - All configurations finalized
+**Status**: ✅ **READY FOR IMMEDIATE DEPLOYMENT** - Full health tracking + NLP parsing
 
 ### Production Configuration
 - **n8n URL**: https://n8n.educareapp.com.br/
 - **Evolution API URL**: https://api.educareapp.com.br/
 - **Evolution API Key**: eff3ea025256694c10422fd0fc5ff169
 - **Evolution Instance Name**: evolution
-- **Webhook URL**: https://webhook.educareapp.com.br/whatsapp-educare
+- **Webhook URL**: https://n8n.educareapp.com.br/webhook/whatsapp-educare-v3
 
-### Documentation & Templates Available
-- **🚀 START HERE**: `educare-backend/docs/N8N_READY_TO_DEPLOY.md` (Complete step-by-step, all data filled)
-- **Reference**: `educare-backend/docs/N8N_INTEGRATION_GUIDE.md` (15 endpoints documented)
-- **Template**: `educare-backend/docs/n8n-workflow-template.json` (importable workflow, variables pre-configured)
-- **Portainer Guide**: `educare-backend/docs/PORTAINER_EXTRACTION_GUIDE.md` (how to extract configs from Portainer)
-- **Full Checklist**: `educare-backend/docs/N8N_EVOLUTION_CONFIG_CHECKLIST.md` (validation checklist)
+### v3.0 New Features
+- **4 Health Tracking Tables**: biometrics_logs, sleep_logs, appointments, vaccine_history
+- **NLP Parser Service**: OpenAI-powered text-to-structured-data parsing (weight/height from "8kg 60cm")
+- **Multimodal API Responses**: All endpoints return `{response_text, media_type, media_url}` format
+- **Brazilian Vaccine Calendar**: SBP schedule with 11 vaccines across first 6 years
+- **Intent Classification**: GPT-4o-mini classifier for routing (biometrics/sleep/vaccine/question/appointment)
 
-### Pre-Configured Workflow Features
+### v3.0 Endpoints
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/n8n/users/check` | GET | Gatekeeper - check user + subscription + child |
+| `/api/n8n/biometrics/update` | POST | Record weight/height with NLP parsing |
+| `/api/n8n/sleep/log` | POST | Record sleep with NLP parsing |
+| `/api/n8n/appointments/create` | POST | Schedule appointments with NLP parsing |
+| `/api/n8n/vaccines/check` | GET | SBP vaccine calendar + history |
+| `/api/n8n/content/child` | GET | Week-based child content |
+| `/api/n8n/content/mother` | GET | Week-based mother content |
+| `/api/n8n/rag/ask` | POST | TitiNauta RAG (multimodal) |
+
+### Documentation & Templates
+- **🚀 START HERE**: `educare-backend/docs/N8N_V3_DEPLOY_GUIDE.md` (v3.0 complete guide)
+- **Template v3.0**: `educare-backend/docs/n8n-workflow-template-v3.json` (importable workflow)
+- **Reference**: `educare-backend/docs/N8N_INTEGRATION_GUIDE.md` (all endpoints)
+
+### v3.0 Workflow Features
 - ✅ Evolution API Webhook (WhatsApp trigger)
-- ✅ User identification/creation by phone
-- ✅ Active child selection management
-- ✅ TitiNauta RAG integration (gpt-4o-mini)
-- ✅ Response delivery via WhatsApp
-- ✅ Error handling for missing child context
-- ✅ Automatic workflow activation upon import
+- ✅ Whisper Audio Transcription (voice messages)
+- ✅ User gatekeeper with subscription validation
+- ✅ Baby age calculation (weeks from DOB)
+- ✅ AI Intent Classification (6 categories)
+- ✅ NLP parsing for biometrics/sleep/appointments
+- ✅ Brazilian SBP vaccine calendar
+- ✅ TitiNauta RAG with context
+- ✅ Multimodal output routing (text/image/audio/document)
+- ✅ Evolution API response delivery
 
 ### Ready-to-Use Variables
 ```
@@ -132,14 +152,14 @@ EDUCARE_API_URL=https://[SEU-REPLIT].replit.dev:3001
 EDUCARE_API_KEY=educare_external_api_key_2025
 EVOLUTION_API_URL=https://api.educareapp.com.br
 EVOLUTION_API_KEY=eff3ea025256694c10422fd0fc5ff169
-EVOLUTION_INSTANCE_NAME=evolution
+EVOLUTION_INSTANCE=evolution
 ```
 
 ### Implementation Steps
-1. Import `n8n-workflow-template.json` into n8n
-2. Fill 5 variables (URL and API keys)
-3. Configure webhook in Evolution API pointing to `https://webhook.educareapp.com.br/whatsapp-educare`
-4. Activate workflow
-5. Test with WhatsApp message
+1. Import `n8n-workflow-template-v3.json` into n8n
+2. Configure 5 variables (URLs and API keys)
+3. Add OpenAI credentials (for Whisper and Intent Classification)
+4. Configure webhook in Evolution API
+5. Activate workflow and test with WhatsApp
 
-**All integration documentation tested and validated with production URLs** ✓
+**All v3.0 endpoints tested and validated** ✓
