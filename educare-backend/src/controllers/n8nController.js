@@ -138,6 +138,14 @@ const n8nController = {
         });
       }
 
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(child_id)) {
+        return res.status(400).json({
+          response_text: 'child_id inválido. Deve ser um UUID válido.',
+          media_type: 'text',
+          media_url: null
+        });
+      }
+
       const child = await Child.findByPk(child_id);
       if (!child) {
         return res.status(404).json({
@@ -195,6 +203,14 @@ const n8nController = {
       if (!child_id || !raw_text) {
         return res.status(400).json({
           response_text: 'Dados incompletos. Informe child_id e raw_text.',
+          media_type: 'text',
+          media_url: null
+        });
+      }
+
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(child_id)) {
+        return res.status(400).json({
+          response_text: 'child_id inválido. Deve ser um UUID válido.',
           media_type: 'text',
           media_url: null
         });
@@ -270,6 +286,14 @@ const n8nController = {
       if (!child_id || !raw_text) {
         return res.status(400).json({
           response_text: 'Dados incompletos. Informe child_id e raw_text.',
+          media_type: 'text',
+          media_url: null
+        });
+      }
+
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(child_id)) {
+        return res.status(400).json({
+          response_text: 'child_id inválido. Deve ser um UUID válido.',
           media_type: 'text',
           media_url: null
         });

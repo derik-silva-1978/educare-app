@@ -9,6 +9,7 @@ const nlpParserService = {
     try {
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
+        timeout: 30000,
         messages: [
           {
             role: 'system',
@@ -45,6 +46,7 @@ Exemplos:
     try {
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
+        timeout: 30000,
         messages: [
           {
             role: 'system',
@@ -82,6 +84,7 @@ Exemplos:
     try {
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
+        timeout: 30000,
         messages: [
           {
             role: 'system',

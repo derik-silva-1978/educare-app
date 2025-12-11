@@ -212,4 +212,56 @@ curl -X POST "https://api.educareapp.com.br/webhook/set/evolution" \
 
 ---
 
+## ⚠️ Respostas de Erro Esperadas
+
+### Códigos HTTP
+
+| Código | Situação | Resposta |
+|--------|----------|----------|
+| **200** | Sucesso | `{response_text, media_type, media_url}` |
+| **400** | Dados inválidos | `{response_text: "erro de validação", media_type: "text"}` |
+| **401** | API key faltando/inválida | `{success: false, error: "API key..."}` |
+| **404** | Criança não encontrada | `{response_text: "Criança não encontrada.", media_type: "text"}` |
+| **500** | Erro interno | `{response_text: "Erro ao processar...", media_type: "text"}` |
+
+### Erros Comuns
+
+**API Key:**
+```
+GET /api/n8n/vaccines/check (sem ?api_key=...)
+→ 401 {success: false, error: "API key não fornecida"}
+```
+
+**UUID Inválido:**
+```
+POST /api/n8n/biometrics/update
+Body: {"child_id": "abc123", "raw_text": "..."}
+→ 400 {response_text: "child_id inválido. Deve ser um UUID válido.", media_type: "text"}
+```
+
+**Criança Não Existe:**
+```
+POST /api/n8n/biometrics/update
+Body: {"child_id": "550e8400-e29b-41d4-a716-446655440000", "raw_text": "..."}
+→ 404 {response_text: "Criança não encontrada.", media_type: "text"}
+```
+
+**OpenAI Timeout (>30s):**
+```
+POST /api/n8n/biometrics/update (se OpenAI demora >30s)
+→ 500 {response_text: "Erro ao registrar dados...", media_type: "text"}
+```
+
+---
+
+## 🔐 Segurança
+
+- ✅ API Key obrigatória em todos os endpoints n8n
+- ✅ Validação de UUID para child_id
+- ✅ Timeout de 30s para chamadas OpenAI (evita travamentos)
+- ✅ Input sanitization no NLP Parser
+- ✅ Sem exposição de dados sensíveis em respostas de erro
+
+---
+
 **Última atualização:** 2025-12-11
