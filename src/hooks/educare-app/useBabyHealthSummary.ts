@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { authService } from '@/services/api/authService';
+import { getStoredAuthToken } from '@/utils/authStorage';
 
 export interface BiometricsData {
   id: string;
@@ -78,7 +78,7 @@ export interface BabyHealthSummary {
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 async function fetchBabyHealthSummary(childId?: string): Promise<BabyHealthSummary> {
-  const token = authService.getToken();
+  const token = getStoredAuthToken();
   const url = childId 
     ? `${API_BASE_URL}/api/dashboard/baby-health-summary?childId=${childId}`
     : `${API_BASE_URL}/api/dashboard/baby-health-summary`;
