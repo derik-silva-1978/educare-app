@@ -35,13 +35,13 @@ const SuggestedQuestions: React.FC<SuggestedQuestionsProps> = ({
     const loadSuggestedQuestions = async () => {
       setIsLoading(true);
       try {
-        const params = childAgeInWeeks ? `?ageInWeeks=${childAgeInWeeks}` : '';
-        const response = await httpClient.get<{ faqs: FAQ[] }>(
-          `faqs/contextual${params}`
+        const week = childAgeInWeeks || 12;
+        const response = await httpClient.get<{ data: FAQ[] }>(
+          `faqs/suggestions?week=${week}`
         );
         
-        if (response.success && response.data?.faqs) {
-          setQuestions(response.data.faqs.slice(0, 5));
+        if (response.success && response.data) {
+          setQuestions(response.data.slice(0, 5));
         }
       } catch (error) {
         console.error('Erro ao carregar perguntas sugeridas:', error);
