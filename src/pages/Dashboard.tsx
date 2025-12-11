@@ -6,6 +6,7 @@ import WelcomePanel from '@/components/dashboard/WelcomePanel';
 import StatisticsCards from '@/components/dashboard/StatisticsCards';
 import RecentActivities from '@/components/dashboard/RecentActivities';
 import CallToActionPanel from '@/components/dashboard/CallToActionPanel';
+import BabyMilestonesCard from '@/components/dashboard/BabyMilestonesCard';
 
 const Dashboard = () => {
   useEffect(() => {
@@ -30,6 +31,11 @@ const Dashboard = () => {
             <div className="mb-8">
               <h3 className="text-lg font-medium mb-4">Visão Geral</h3>
               <StatisticsCards />
+            </div>
+
+            <div className="mb-8">
+              <h3 className="text-lg font-medium mb-4">Desenvolvimento do Bebê</h3>
+              <BabyMilestonesCard />
             </div>
             
             <div className="mb-8">

@@ -57,6 +57,8 @@ const MilestonesCuration: React.FC = () => {
   const [selectedMapping, setSelectedMapping] = useState<MilestoneMapping | null>(null);
   const [verifyNotes, setVerifyNotes] = useState('');
   const [activeTab, setActiveTab] = useState('pending');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedMappings, setSelectedMappings] = useState<Set<string>>(new Set());
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -246,10 +248,39 @@ const MilestonesCuration: React.FC = () => {
     );
   };
 
-  const renderMappingsTable = (mappings: MilestoneMapping[] | undefined, isPending: boolean) => {
-    if (!mappings || mappings.length === 0) {
+  const toggleMapping = (id: string) => {
+    const newSelected = new Set(selectedMappings);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedMappings(newSelected);
+  };
+
+  const batchApprove = () => {
+    selectedMappings.forEach(id => {
+      const mapping = pendingMappings?.find(m => m.id === id);
+      if (mapping) {
+        verifyMutation.mutate({ id, notes: '' });
+      }
+    });
+    setSelectedMappings(new Set());
+  };
+
+  const filteredMappings = (mappings: MilestoneMapping[] | undefined) => {
+    if (!mappings) return [];
+    return selectedCategory 
+      ? mappings.filter(m => m.milestone?.category === selectedCategory)
+      : mappings;
+  };
+
+  const renderMappingsCards = (mappings: MilestoneMapping[] | undefined, isPending: boolean) => {
+    const filtered = filteredMappings(mappings);
+
+    if (!filtered || filtered.length === 0) {
       return (
-        <div className="text-center py-8 text-muted-foreground">
+        <div className="text-center py-12 text-muted-foreground">
           <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
           <p>{isPending ? 'Nenhum mapeamento pendente' : 'Nenhum mapeamento verificado'}</p>
         </div>
@@ -257,72 +288,84 @@ const MilestonesCuration: React.FC = () => {
     }
 
     return (
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Marco Oficial</TableHead>
-            <TableHead>Categoria</TableHead>
-            <TableHead>Pergunta da Jornada</TableHead>
-            <TableHead>Semana</TableHead>
-            <TableHead className="text-right">Acoes</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {mappings.map((mapping) => (
-            <TableRow key={mapping.id}>
-              <TableCell>
-                <div className="font-medium">{mapping.milestone?.title}</div>
-                <div className="text-xs text-muted-foreground">
-                  Mes alvo: {mapping.milestone?.target_month}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge className={getCategoryBadgeColor(mapping.milestone?.category)}>
-                  {mapping.milestone?.category}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="max-w-md truncate">{mapping.journeyQuestion?.domain_question}</div>
-                <div className="text-xs text-muted-foreground">
-                  Dominio: {mapping.journeyQuestion?.domain_name}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge variant="outline">Semana {mapping.journeyQuestion?.week}</Badge>
-              </TableCell>
-              <TableCell className="text-right">
-                {isPending ? (
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-green-600 hover:text-green-700"
-                      onClick={() => handleVerify(mapping)}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      Aprovar
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-red-600 hover:text-red-700"
-                      onClick={() => handleDelete(mapping)}
-                    >
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Rejeitar
-                    </Button>
+      <div className="space-y-3">
+        {filtered.map((mapping) => (
+          <Card 
+            key={mapping.id} 
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              selectedMappings.has(mapping.id) ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+            }`}
+            onClick={() => isPending && toggleMapping(mapping.id)}
+          >
+            <CardContent className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Marco Oficial */}
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Marco Oficial</div>
+                  <p className="font-medium text-sm">{mapping.milestone?.title}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge className={getCategoryBadgeColor(mapping.milestone?.category)}>
+                      {mapping.milestone?.category}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      Mês {mapping.milestone?.target_month}
+                    </span>
                   </div>
-                ) : (
-                  <div className="flex items-center justify-end gap-2 text-green-600">
-                    <CheckCircle className="h-4 w-4" />
-                    <span className="text-sm">Verificado</span>
+                </div>
+
+                {/* Pergunta da Jornada */}
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase font-semibold mb-1">Pergunta da Jornada</div>
+                  <p className="font-medium text-sm">{mapping.journeyQuestion?.domain_question}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="outline" className="text-xs">
+                      Sem. {mapping.journeyQuestion?.week}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {mapping.journeyQuestion?.domain_name}
+                    </span>
                   </div>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                </div>
+              </div>
+
+              {/* Ações */}
+              {isPending ? (
+                <div className="flex gap-2 mt-4 justify-end">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-green-600 hover:bg-green-50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleVerify(mapping);
+                    }}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-1" />
+                    Aprovar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-red-600 hover:bg-red-50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(mapping);
+                    }}
+                  >
+                    <XCircle className="h-4 w-4 mr-1" />
+                    Rejeitar
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-end gap-2 mt-4 text-green-600 text-sm">
+                  <CheckCircle className="h-4 w-4" />
+                  Aprovado
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     );
   };
 
@@ -364,10 +407,23 @@ const MilestonesCuration: React.FC = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ListChecks className="h-5 w-5" />
-            Mapeamentos
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <ListChecks className="h-5 w-5" />
+              Mapeamentos
+            </CardTitle>
+            {activeTab === 'pending' && selectedMappings.size > 0 && (
+              <Button 
+                size="sm" 
+                onClick={batchApprove}
+                disabled={verifyMutation.isPending}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Aprovar {selectedMappings.size} selecionados
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -381,17 +437,41 @@ const MilestonesCuration: React.FC = () => {
                 Verificados ({verifiedMappings?.length || 0})
               </TabsTrigger>
             </TabsList>
+
+            {activeTab === 'pending' && (
+              <div className="mb-4 flex gap-2 flex-wrap">
+                <Button 
+                  variant={selectedCategory === null ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedCategory(null)}
+                >
+                  Todas
+                </Button>
+                {['motor', 'cognitivo', 'linguagem', 'social', 'emocional', 'sensorial'].map(cat => (
+                  <Button
+                    key={cat}
+                    variant={selectedCategory === cat ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedCategory(cat)}
+                    className={selectedCategory === cat ? getCategoryBadgeColor(cat) : ''}
+                  >
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </Button>
+                ))}
+              </div>
+            )}
+
             <TabsContent value="pending">
               {loadingPending ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : (
-                renderMappingsTable(pendingMappings, true)
+                renderMappingsCards(pendingMappings, true)
               )}
             </TabsContent>
             <TabsContent value="verified">
-              {renderMappingsTable(verifiedMappings, false)}
+              {renderMappingsCards(verifiedMappings, false)}
             </TabsContent>
           </Tabs>
         </CardContent>
