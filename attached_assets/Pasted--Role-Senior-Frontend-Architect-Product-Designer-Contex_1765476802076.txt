@@ -1,0 +1,54 @@
+# Role: Senior Frontend Architect & Product Designer
+
+**Contexto:**
+Acabamos de realizar um upgrade massivo no Backend (Node.js/Postgres) para suportar o fluxo "Educare+ Chat v3.0".
+Novas tabelas foram criadas e agora estão sendo alimentadas via WhatsApp:
+1.  `biometrics_logs` (Peso/Altura)
+2.  `sleep_logs` (Registros de sono)
+3.  `vaccine_history` (Vacinas tomadas)
+4.  `quiz_progress` (Gamificação e Desenvolvimento)
+
+**Objetivo:**
+Preciso que você **revisite e revitalize o Dashboard Web atual**. Ele precisa refletir esses novos dados em tempo real, transformando números brutos em **Insights Visuais** para a mãe. O design deve ser limpo, intuitivo e separar claramente a "Jornada da Mãe" da "Jornada do Bebê".
+
+---
+
+## 📋 REQUISITOS DE UX/UI E NOVOS WIDGETS
+
+Analise a estrutura atual das views do Dashboard e proponha/implemente as seguintes melhorias:
+
+### 1. Visão Geral (Home do Dashboard)
+Crie ou atualize o "Resumo do Dia":
+* **Card de Status:** Idade da Criança (em semanas e meses) + Próximo Salto de Desenvolvimento.
+* **Card de Alerta:** "Próxima Vacina: [Nome]" (Baseado na lógica híbrida de idade).
+* **KPI de Gamificação:** Barra de progresso do Quiz da Semana atual.
+
+### 2. Aba "Meu Bebê" (Data Visualization)
+Implemente gráficos usando a biblioteca atual (ou sugira Recharts/Chart.js):
+* **Curva de Crescimento:** Gráfico de Linha plotando os dados de `biometrics_logs` (Eixo X: Data, Eixo Y: Peso/Altura).
+* **Padrão de Sono:** Gráfico de Barras ou Heatmap mostrando as horas de sono registradas em `sleep_logs` nos últimos 7 dias.
+* **Carteira de Vacinação:** Uma lista visual (Checklist) separando:
+    * ✅ Tomadas (vinda de `vaccine_history`)
+    * ⏳ Pendentes (calculadas pela idade).
+
+### 3. Aba "Minha Jornada" (A Mãe)
+* **Nível de Engajamento:** Mostre quais módulos ela mais acessa.
+* **Histórico de Dúvidas:** Liste as últimas perguntas que ela fez ao TitiNauta (via RAG), para ela lembrar das orientações.
+
+---
+
+## 🛠️ INSTRUÇÕES TÉCNICAS
+
+1.  **Auditoria Frontend:** Verifique quais componentes de UI (Cards, Tables, Charts) já existem e reutilize-os.
+2.  **Novas Rotas de API:**
+    * Crie um endpoint `GET /api/dashboard/summary` que agregue esses dados para o frontend não fazer 10 requisições separadas.
+    * A query deve ser performática (use JOINs).
+3.  **Implementação:**
+    * Atualize o código do Frontend (React/HTML/EJS - conforme sua estrutura atual).
+    * Conecte aos novos dados.
+    * Se não houver dados (ex: usuário novo), mostre "Empty States" bonitos incentivando o uso do WhatsApp (ex: *"Registre o primeiro peso pelo WhatsApp para ver o gráfico!"*).
+
+**Saída Esperada:**
+* Código do novo endpoint de agregação de dados.
+* Código atualizado dos componentes do Dashboard.
+* Sugestão de layout para acomodar os novos gráficos.

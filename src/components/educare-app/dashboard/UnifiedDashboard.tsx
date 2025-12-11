@@ -18,6 +18,7 @@ import StrengthsOpportunities from './StrengthsOpportunities';
 import AIInsightsCard from './AIInsightsCard';
 import ParentalResourcesCarousel from './ParentalResourcesCarousel';
 import MilestonesTimeline from './MilestonesTimeline';
+import { BabyHealthDashboard } from './baby-health';
 
 const UnifiedDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -61,6 +62,10 @@ const UnifiedDashboard: React.FC = () => {
 
           {isParent && totalChildren > 0 && (
             <ChildSelector children={children as any} />
+          )}
+
+          {isParent && (
+            <BabyHealthDashboard childId={selectedChild?.id} />
           )}
 
           <EnhancedMetricsCards 

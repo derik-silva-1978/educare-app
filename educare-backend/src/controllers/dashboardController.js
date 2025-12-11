@@ -1,5 +1,32 @@
-const { User, Profile, Subscription, SubscriptionPlan, Team, TeamMember, Child } = require('../models');
+const { User, Profile, Subscription, SubscriptionPlan, Team, TeamMember, Child, BiometricsLog, SleepLog, VaccineHistory, Appointment } = require('../models');
 const { Op, fn, col, literal } = require('sequelize');
+
+const SBP_VACCINE_CALENDAR = [
+  { vaccine: 'BCG', weeks: 0, dose: 1 },
+  { vaccine: 'Hepatite B', weeks: 0, dose: 1 },
+  { vaccine: 'Pentavalente (DTP+Hib+HB)', weeks: 8, dose: 1 },
+  { vaccine: 'VIP (Polio inativada)', weeks: 8, dose: 1 },
+  { vaccine: 'Pneumocócica 10V', weeks: 8, dose: 1 },
+  { vaccine: 'Rotavírus', weeks: 8, dose: 1 },
+  { vaccine: 'Meningocócica C', weeks: 12, dose: 1 },
+  { vaccine: 'Pentavalente (DTP+Hib+HB)', weeks: 16, dose: 2 },
+  { vaccine: 'VIP (Polio inativada)', weeks: 16, dose: 2 },
+  { vaccine: 'Pneumocócica 10V', weeks: 16, dose: 2 },
+  { vaccine: 'Rotavírus', weeks: 16, dose: 2 },
+  { vaccine: 'Meningocócica C', weeks: 20, dose: 2 },
+  { vaccine: 'Pentavalente (DTP+Hib+HB)', weeks: 24, dose: 3 },
+  { vaccine: 'VIP (Polio inativada)', weeks: 24, dose: 3 },
+  { vaccine: 'Febre Amarela', weeks: 36, dose: 1 },
+  { vaccine: 'Tríplice Viral (SCR)', weeks: 52, dose: 1 },
+  { vaccine: 'Pneumocócica 10V', weeks: 52, dose: 'reforço' },
+  { vaccine: 'Meningocócica C', weeks: 52, dose: 'reforço' },
+  { vaccine: 'DTP', weeks: 60, dose: 'reforço 1' },
+  { vaccine: 'VOP (Polio oral)', weeks: 60, dose: 'reforço 1' },
+  { vaccine: 'Hepatite A', weeks: 60, dose: 1 },
+  { vaccine: 'Tetra Viral (SCRV)', weeks: 60, dose: 1 },
+  { vaccine: 'DTP', weeks: 208, dose: 'reforço 2' },
+  { vaccine: 'VOP (Polio oral)', weeks: 208, dose: 'reforço 2' }
+];
 
 // Métricas do dashboard do usuário (parent/professional)
 exports.getUserDashboardMetrics = async (req, res) => {
@@ -424,6 +451,181 @@ exports.getRevenueAnalytics = async (req, res) => {
     res.json({ analytics, period });
   } catch (error) {
     console.error('Erro ao buscar análise de receita:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+};
+
+exports.getBabyHealthSummary = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { childId } = req.query;
+
+    const profile = await Profile.findOne({ where: { userId } });
+    if (!profile) {
+      return res.status(404).json({ error: 'Perfil não encontrado' });
+    }
+
+    let child;
+    if (childId) {
+      child = await Child.findOne({ 
+        where: { id: childId, profileId: profile.id } 
+      });
+    } else {
+      child = await Child.findOne({ 
+        where: { profileId: profile.id, isActive: true },
+        order: [['createdAt', 'DESC']]
+      });
+    }
+
+    if (!child) {
+      return res.json({
+        hasChild: false,
+        child: null,
+        biometrics: [],
+        sleepLogs: [],
+        vaccines: { taken: [], pending: [], nextVaccine: null },
+        appointments: [],
+        summary: null
+      });
+    }
+
+    const birthDate = new Date(child.birthDate);
+    const today = new Date();
+    const ageInWeeks = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24 * 7));
+    const ageInMonths = Math.floor(ageInWeeks / 4.33);
+
+    const biometrics = await BiometricsLog.findAll({
+      where: { childId: child.id },
+      order: [['recordedAt', 'DESC']],
+      limit: 20
+    });
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const sleepLogs = await SleepLog.findAll({
+      where: { 
+        childId: child.id,
+        createdAt: { [Op.gte]: sevenDaysAgo }
+      },
+      order: [['createdAt', 'DESC']]
+    });
+
+    const vaccineHistory = await VaccineHistory.findAll({
+      where: { childId: child.id }
+    });
+
+    const takenVaccineKeys = new Set(
+      vaccineHistory.map(v => `${v.vaccineName}-${v.doseNumber}`)
+    );
+
+    const takenVaccines = SBP_VACCINE_CALENDAR.filter(v => 
+      takenVaccineKeys.has(`${v.vaccine}-${v.dose}`)
+    ).map(v => ({
+      ...v,
+      status: 'taken',
+      takenAt: vaccineHistory.find(vh => vh.vaccineName === v.vaccine && vh.doseNumber == v.dose)?.takenAt
+    }));
+
+    const pendingVaccines = SBP_VACCINE_CALENDAR.filter(v => 
+      !takenVaccineKeys.has(`${v.vaccine}-${v.dose}`) && v.weeks <= ageInWeeks
+    ).map(v => ({ ...v, status: 'pending' }));
+
+    const upcomingVaccines = SBP_VACCINE_CALENDAR.filter(v => 
+      !takenVaccineKeys.has(`${v.vaccine}-${v.dose}`) && v.weeks > ageInWeeks
+    ).map(v => ({ ...v, status: 'upcoming' }));
+
+    const nextVaccine = [...pendingVaccines, ...upcomingVaccines][0] || null;
+
+    const appointments = await Appointment.findAll({
+      where: { 
+        childId: child.id,
+        appointmentDate: { [Op.gte]: today }
+      },
+      order: [['appointmentDate', 'ASC']],
+      limit: 5
+    });
+
+    const latestBiometrics = biometrics[0] || null;
+    const totalSleepMinutes = sleepLogs.reduce((sum, log) => sum + (log.durationMinutes || 0), 0);
+    const avgSleepPerDay = sleepLogs.length > 0 ? Math.round(totalSleepMinutes / 7) : null;
+
+    const developmentLeaps = [
+      { week: 5, name: 'Mundo das Sensações' },
+      { week: 8, name: 'Mundo dos Padrões' },
+      { week: 12, name: 'Mundo das Transições Suaves' },
+      { week: 19, name: 'Mundo dos Eventos' },
+      { week: 26, name: 'Mundo dos Relacionamentos' },
+      { week: 37, name: 'Mundo das Categorias' },
+      { week: 46, name: 'Mundo das Sequências' },
+      { week: 55, name: 'Mundo dos Programas' },
+      { week: 64, name: 'Mundo dos Princípios' },
+      { week: 75, name: 'Mundo dos Sistemas' }
+    ];
+
+    const nextLeap = developmentLeaps.find(leap => leap.week > ageInWeeks) || null;
+    const currentLeap = developmentLeaps.filter(leap => leap.week <= ageInWeeks).pop() || null;
+
+    return res.json({
+      hasChild: true,
+      child: {
+        id: child.id,
+        firstName: child.firstName,
+        lastName: child.lastName,
+        birthDate: child.birthDate,
+        ageInWeeks,
+        ageInMonths,
+        ageDisplay: ageInMonths < 1 
+          ? `${ageInWeeks} semanas` 
+          : ageInMonths < 24 
+            ? `${ageInMonths} meses` 
+            : `${Math.floor(ageInMonths / 12)} anos e ${ageInMonths % 12} meses`
+      },
+      biometrics: biometrics.map(b => ({
+        id: b.id,
+        weight: b.weight,
+        height: b.height,
+        headCircumference: b.headCircumference,
+        recordedAt: b.recordedAt,
+        source: b.source
+      })),
+      sleepLogs: sleepLogs.map(s => ({
+        id: s.id,
+        startTime: s.startTime,
+        endTime: s.endTime,
+        durationMinutes: s.durationMinutes,
+        sleepType: s.sleepType,
+        quality: s.quality,
+        createdAt: s.createdAt
+      })),
+      vaccines: {
+        taken: takenVaccines,
+        pending: pendingVaccines,
+        upcoming: upcomingVaccines.slice(0, 5),
+        nextVaccine
+      },
+      appointments: appointments.map(a => ({
+        id: a.id,
+        doctorName: a.doctorName,
+        specialty: a.specialty,
+        appointmentDate: a.appointmentDate,
+        location: a.location,
+        status: a.status
+      })),
+      summary: {
+        latestWeight: latestBiometrics?.weight || null,
+        latestHeight: latestBiometrics?.height || null,
+        lastMeasurementDate: latestBiometrics?.recordedAt || null,
+        avgSleepPerDay,
+        pendingVaccinesCount: pendingVaccines.length,
+        upcomingAppointmentsCount: appointments.length,
+        currentLeap,
+        nextLeap,
+        nextLeapWeeksAway: nextLeap ? nextLeap.week - ageInWeeks : null
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao buscar resumo de saúde do bebê:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 };

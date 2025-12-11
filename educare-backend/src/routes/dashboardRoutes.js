@@ -342,4 +342,28 @@ router.get('/users-by-role', authMiddleware.verifyToken, dashboardController.get
  */
 router.get('/subscriptions-by-status', authMiddleware.verifyToken, dashboardController.getSubscriptionsByStatus);
 
+/**
+ * @swagger
+ * /api/dashboard/baby-health-summary:
+ *   get:
+ *     summary: Resumo completo de saúde do bebê (biometria, sono, vacinas, consultas)
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: childId
+ *         schema:
+ *           type: string
+ *         description: ID da criança (opcional, usa a criança ativa se não informado)
+ *     responses:
+ *       200:
+ *         description: Resumo de saúde do bebê
+ *       401:
+ *         description: Não autorizado
+ *       500:
+ *         description: Erro interno do servidor
+ */
+router.get('/baby-health-summary', authMiddleware.verifyToken, dashboardController.getBabyHealthSummary);
+
 module.exports = router;
