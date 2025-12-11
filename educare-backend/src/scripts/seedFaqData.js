@@ -38,7 +38,24 @@ const seedFaqs = [
   { category: 'child', question_text: 'Quando cortam o cabelo do bebê pela primeira vez?', answer_rag_context: 'Sem pressa. Pode cortar quando preferir, não há regra fixa. Alguns esperam 1 ano, outros cortam antes.', min_week: 12, max_week: 24 },
   
   { category: 'mother', question_text: 'Sinto culpa por não poder ficar sempre com bebê', answer_rag_context: 'Culpa é comum mas não produtiva. Mãe saudável = bebê saudável. Tempo de qualidade importa mais que quantidade.', min_week: 12, max_week: 24 },
-  { category: 'mother', question_text: 'Como equilibra trabalho e maternidade?', answer_rag_context: 'Não há fórmula perfeita. Ajusta expectativas, busca apoio, comunica limites, prioriza o que importa.', min_week: 12, max_week: 24 }
+  { category: 'mother', question_text: 'Como equilibra trabalho e maternidade?', answer_rag_context: 'Não há fórmula perfeita. Ajusta expectativas, busca apoio, comunica limites, prioriza o que importa.', min_week: 12, max_week: 24 },
+  
+  // Semana 0-4: FAQs adicionais para completar especificação
+  { category: 'mother', question_text: 'Como cuidar dos pontos da episiotomia ou cesariana?', answer_rag_context: 'Higiene com água morna, evita infeccionar, secagem suave, repousa bem. Procura médico se sinais de infecção.', min_week: 0, max_week: 4 },
+  { category: 'mother', question_text: 'É normal ter sangramento abundante pós-parto?', answer_rag_context: 'Sangramento intenso nos primeiros dias é normal. Reduz gradualmente. Avisa médico se aumenta ou tem odor.', min_week: 0, max_week: 4 },
+  
+  // Semana 4-12: FAQs adicionais
+  { category: 'mother', question_text: 'Como lidar com hormônios flutuantes e irritabilidade?', answer_rag_context: 'Hormônios mudam rapidamente pós-parto. Comunicação com parceiro, tempo para si, ajuda profissional se persiste.', min_week: 4, max_week: 12 },
+  { category: 'mother', question_text: 'Posso amamentar se estou tomando medicação?', answer_rag_context: 'Maioria dos medicamentos é segura na amamentação. Consulta pediatra e obstetra, eles orientam sobre compatibilidade.', min_week: 4, max_week: 12 },
+  { category: 'mother', question_text: 'Quando voltar a fazer exercícios e atividades físicas?', answer_rag_context: 'Após 6 semanas e aprovação médica. Começa com exercícios leves, caminhadas, fortalecimento gradual.', min_week: 4, max_week: 12 },
+  
+  // Semana 12-24: FAQs adicionais
+  { category: 'mother', question_text: 'Como preparar-se para desmamar gradualmente?', answer_rag_context: 'Começa removendo uma mamada por vez a cada 3-5 dias. Oferece alternativas (leite artificial), acompanha desconforto físico.', min_week: 12, max_week: 24 },
+  { category: 'mother', question_text: 'Sinto que estou perdendo minha identidade', answer_rag_context: 'Comum durante transição à maternidade. Reserva tempo para hobbies, hobby, amigos. Identidade mãe + pessoa coexistem.', min_week: 12, max_week: 24 },
+  
+  // FAQs child adicionais para atingir especificação 35+
+  { category: 'child', question_text: 'Quando começam os primeiros dentes a nascer?', answer_rag_context: 'Geralmente entre 4-7 meses. Sinais: babação, coceira nas gengivas, inchaço. Mordedor frio ajuda.', min_week: 16, max_week: 26 },
+  { category: 'child', question_text: 'Como reconhecer e aliviar cólicas de gases?', answer_rag_context: 'Gases causam desconforto abdominal. Oferece posições diferentes, massagem circular no abdômen, bactérias probióticas orientadas.', min_week: 4, max_week: 12 }
 ];
 
 async function seedFaqData() {
