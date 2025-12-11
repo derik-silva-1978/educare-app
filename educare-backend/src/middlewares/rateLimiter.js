@@ -16,10 +16,7 @@ const faqFeedbackLimiter = rateLimit({
   },
   standardHeaders: true, // Retorna info do rate limit nos headers `RateLimit-*`
   legacyHeaders: false, // Desabilita headers `X-RateLimit-*`
-  keyGenerator: (req) => {
-    // Usa IP real considerando proxies
-    return req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  },
+  validate: { xForwardedForHeader: false }, // Desabilita validação IPv6 para keyGenerator customizado
   handler: (req, res, next, options) => {
     console.warn(`[RATE_LIMIT] IP ${req.ip} excedeu limite no endpoint ${req.path}`);
     res.status(429).json(options.message);

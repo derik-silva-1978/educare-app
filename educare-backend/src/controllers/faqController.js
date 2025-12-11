@@ -57,16 +57,18 @@ exports.getSuggestionsByWeek = async (req, res) => {
         updated_at,
         (usage_count * 1.0 + upvotes * 2.0 - downvotes * 5.0) as relevance_score
       FROM app_faqs
-      WHERE min_week <= $1 AND max_week >= $1
+      WHERE min_week <= :weekNum AND max_week >= :weekNum
         AND (deleted_at IS NULL)
-      ${category ? `AND category = $2` : ''}
+      ${category ? `AND category = :category` : ''}
       ORDER BY relevance_score DESC
       LIMIT 5
     `;
     
-    const params = category ? [weekNum, category] : [weekNum];
+    const replacements = { weekNum };
+    if (category) replacements.category = category;
+    
     const suggestions = await sequelize.query(query, {
-      replacements: params,
+      replacements,
       type: sequelize.QueryTypes.SELECT
     });
     
@@ -516,21 +518,20 @@ exports.search = async (req, res) => {
         (usage_count * 1.0 + upvotes * 2.0 - downvotes * 5.0) as relevance_score
       FROM app_faqs
       WHERE deleted_at IS NULL
-        AND (LOWER(question_text) LIKE $1 OR LOWER(answer_rag_context) LIKE $1)
+        AND (LOWER(question_text) LIKE :searchTerm OR LOWER(answer_rag_context) LIKE :searchTerm)
     `;
     
-    const params = [searchTerm];
+    const replacements = { searchTerm, limit: parseInt(limit, 10) };
     
     if (category) {
-      query += ` AND category = $2`;
-      params.push(category);
+      query += ` AND category = :category`;
+      replacements.category = category;
     }
     
-    query += ` ORDER BY relevance_score DESC LIMIT $${params.length + 1}`;
-    params.push(parseInt(limit, 10));
+    query += ` ORDER BY relevance_score DESC LIMIT :limit`;
     
     const results = await sequelize.query(query, {
-      replacements: params,
+      replacements,
       type: sequelize.QueryTypes.SELECT
     });
     
