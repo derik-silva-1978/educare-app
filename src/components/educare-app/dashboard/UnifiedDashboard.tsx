@@ -13,7 +13,7 @@ import HealthMetricsCards from './HealthMetricsCards';
 import HealthInsights from './HealthInsights';
 import SocialMediaAccess from './SocialMediaAccess';
 import DomainProgressChart from './DomainProgressChart';
-import AIInsightsCard from './AIInsightsCard';
+import TitiNautaQuickAccess from './TitiNautaQuickAccess';
 import ParentalResourcesCarousel from './ParentalResourcesCarousel';
 import MilestonesTimeline from './MilestonesTimeline';
 import { BabyHealthDashboard } from './baby-health';
@@ -127,12 +127,13 @@ const UnifiedDashboardContent: React.FC = () => {
         <HealthInsights healthData={healthCardsData} />
       </div>
 
+      <TitiNautaQuickAccess />
+
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <MilestonesTimeline childAge={getChildAge()} />
         </div>
         <div className="space-y-6">
-          <AIInsightsCard />
           <ParentalResourcesCarousel />
         </div>
       </div>
