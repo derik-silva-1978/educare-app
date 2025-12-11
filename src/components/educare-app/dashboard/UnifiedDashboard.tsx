@@ -23,8 +23,12 @@ import { BabyHealthDashboard } from './baby-health';
 const UnifiedDashboard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const isParent = user?.role === 'parent' || (user?.role as string) === 'user';
-  const isProfessional = user?.role === 'professional';
+  const role = user?.role as string;
+  const isOwner = role === 'owner';
+  const isAdmin = role === 'admin';
+  const isParent = role === 'parent' || role === 'user';
+  const isProfessional = role === 'professional';
+  const hasFullAccess = isOwner || isAdmin;
 
   const { metrics, rawData, isLoading, error } = useDashboardMetrics();
 
@@ -60,11 +64,11 @@ const UnifiedDashboard: React.FC = () => {
             <SocialMediaAccess />
           </div>
 
-          {isParent && totalChildren > 0 && (
+          {(hasFullAccess || isParent) && totalChildren > 0 && (
             <ChildSelector children={children as any} />
           )}
 
-          {isParent && (
+          {(hasFullAccess || (isParent && totalChildren > 0)) && (
             <BabyHealthDashboard childId={selectedChild?.id} />
           )}
 
@@ -95,11 +99,11 @@ const UnifiedDashboard: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  <span>{isParent ? 'Suas Crianças' : 'Seus Pacientes'}</span>
+                  <span>{(isParent || hasFullAccess) ? 'Suas Crianças' : 'Seus Pacientes'}</span>
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => navigate(isParent ? '/educare-app/children' : '/educare-app/professional/dashboard')}
+                    onClick={() => navigate((isParent || hasFullAccess) ? '/educare-app/children' : '/educare-app/professional/dashboard')}
                   >
                     Ver todos <ArrowRight className="h-4 w-4 ml-1" />
                   </Button>
@@ -108,7 +112,7 @@ const UnifiedDashboard: React.FC = () => {
               <CardContent>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {children.slice(0, 3).map((child: any) => {
-                    const childWithProgress = isParent && metrics.childrenWithProgress 
+                    const childWithProgress = (isParent || hasFullAccess) && metrics.childrenWithProgress 
                       ? metrics.childrenWithProgress.find(c => c.id === child.id) || child
                       : child;
                     
@@ -125,7 +129,7 @@ const UnifiedDashboard: React.FC = () => {
                               {child.birthDate || child.birthdate ? getDetailedAgeDisplay(child.birthDate || child.birthdate) : 'Idade não informada'}
                             </p>
                           </div>
-                          {isParent && (
+                          {(isParent || hasFullAccess) && (
                             <div className="space-y-2">
                               <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Progresso</span>
