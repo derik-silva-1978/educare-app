@@ -26,6 +26,7 @@ const JourneyBotResponse = require('./JourneyBotResponse');
 const JourneyBotQuestion = require('./JourneyBotQuestion');
 const Activity = require('./Activity');
 const ContentItem = require('./ContentItem');
+const AppFaq = require('./AppFaq');
 
 // Modelos do RAG
 const KnowledgeDocument = require('./KnowledgeDocument');
@@ -268,6 +269,7 @@ module.exports = {
   JourneyBotQuestion,
   Activity,
   ContentItem,
+  AppFaq,
   // Modelos do RAG
   KnowledgeDocument,
   KbBaby,

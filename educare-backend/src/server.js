@@ -164,6 +164,10 @@ app.use('/api/stripe', stripeRoutes);
 // Content management routes (WelcomeHub)
 app.use('/api/content', contentRoutes);
 
+// FAQ Dinâmica Contextual routes
+const faqRoutes = require('./routes/faqRoutes');
+app.use('/api/faqs', faqRoutes);
+
 // Rotas de health check (sem prefixo /api para acesso direto)
 app.use('/health', healthRoutes);
 

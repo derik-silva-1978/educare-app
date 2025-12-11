@@ -68,6 +68,7 @@ Dashboard and other routes automatically redirect to WelcomeHub as the primary s
   - Endpoints: Users, Children, Subscription Plans, Quiz/Journey, TitiNauta RAG
   - RAG External: `/api/rag/external/ask` and `/api/rag/external/ask-simple`
 - **Subscription Management**: Stripe integration for handling SaaS subscriptions.
+- **FAQ Dinâmica Contextual**: Query-based FAQ system with dynamic ranking algorithm based on usage metrics and user feedback. Provides contextual suggestions by child's development week (0-999 weeks). Includes 35+ seed FAQs covering newborn to 6-month periods with 60% focus on child development and 40% on maternal health. Scoring formula: `(usage_count × 1.0) + (upvotes × 2.0) - (downvotes × 5.0)`. Endpoints: `GET /api/faqs/suggestions` (public), CRUD operations for admin/owner.
 
 ### System Design Choices
 - **Scalability**: Designed for cloud deployment on Digital Ocean, using multiple droplets, PostgreSQL, and Redis.

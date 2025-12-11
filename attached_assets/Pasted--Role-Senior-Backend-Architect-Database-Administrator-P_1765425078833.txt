@@ -1,0 +1,82 @@
+# Role: Senior Backend Architect & Database Administrator (PostgreSQL/Node.js)
+
+**Contexto:**
+Estou em um estágio avançado de desenvolvimento de uma aplicação de Jornada do Desenvolvimento Infantil. O sistema já está em produção ou pré-produção, rodando em Node.js com banco de dados PostgreSQL.
+
+**Objetivo:**
+Implementar uma nova funcionalidade de **"FAQ Dinâmica Contextual"** (Sugestão de perguntas baseadas na idade da criança), garantindo zero downtime e integridade dos dados existentes.
+
+---
+
+## ⚠️ PRECAUÇÕES CRÍTICAS DE SEGURANÇA (LEIA ANTES DE GERAR CÓDIGO)
+
+1.  **Non-Destructive Approach:** Não use comandos `DROP` em tabelas existentes. Use `CREATE TABLE IF NOT EXISTS` ou `ALTER TABLE` com verificações de segurança.
+2.  **Integridade:** Todo script de modificação de banco de dados deve ser encapsulado em transações (`BEGIN; ... COMMIT;`) para permitir rollback em caso de erro.
+3.  **Dependências:** Não altere configurações de conexão do banco de dados nem remova dependências do `package.json` sem necessidade explícita.
+4.  **Conflitos:** Verifique se os nomes de tabelas ou rotas sugeridos não conflitam com entidades existentes no sistema.
+
+---
+
+## Tarefa 1: Modelagem de Dados (DDL)
+
+Gere o SQL para criar a tabela `app_faqs`. Esta tabela será o motor de sugestões do chatbot.
+
+**Especificações da Tabela:**
+* **Nome:** `app_faqs`
+* **Colunas:**
+    * `id`: UUID (Primary Key, default `gen_random_uuid()` ou equivalente).
+    * `category`: VARCHAR/ENUM ('child', 'mother', 'system') NOT NULL.
+    * `question_text`: TEXT NOT NULL (O texto do botão).
+    * `answer_rag_context`: TEXT (Opcional, contexto para injetar no prompt da IA).
+    * `min_week`: INT NOT NULL DEFAULT 0 (Início da vigência da pergunta).
+    * `max_week`: INT NOT NULL DEFAULT 999 (Fim da vigência).
+    * `is_seed`: BOOLEAN DEFAULT FALSE (Indica se foi inserida pelo sistema).
+    * `usage_count`: INT DEFAULT 0.
+    * `upvotes`: INT DEFAULT 0.
+    * `downvotes`: INT DEFAULT 0.
+    * `created_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP.
+    * `updated_at`: TIMESTAMP DEFAULT CURRENT_TIMESTAMP.
+* **Índices (Performance Crítica):**
+    * Crie um índice composto para busca por intervalo: `idx_faqs_weeks` em `(min_week, max_week)`.
+    * Crie um índice para ordenação: `idx_faqs_ranking` em `(usage_count, upvotes)`.
+
+---
+
+## Tarefa 2: Dados Semente Inteligentes (Seed Data)
+
+Gere um script SQL `INSERT` robusto para popular a tabela com **35 a 40 perguntas iniciais**.
+* **Atenção:** Use `ON CONFLICT DO NOTHING` (ou verifique existência) para evitar duplicatas se o script rodar duas vezes.
+
+**Diretrizes de Conteúdo:**
+1.  **Cobertura:** Cubra o período de **0 a 24 semanas** (0 a 6 meses).
+2.  **Intervalos (Buckets):** Não crie perguntas para uma única semana. Use intervalos lógicos (Ex: 0-4 semanas, 4-12 semanas, 12-24 semanas).
+3.  **Balanceamento:** 60% foco no Bebê (Sono, Cólica, Mamada), 40% foco na Mãe (Cansaço, Puerpério, Rede de Apoio).
+4.  **Estilo:** Perguntas curtas, em primeira pessoa ("Meu bebê...", "Sinto que...").
+5.  **Flag:** Defina `is_seed = TRUE`.
+
+---
+
+## Tarefa 3: Lógica de Backend (Node.js/SQL Strategy)
+
+Forneça a **Query SQL Otimizada** que será utilizada na rota da API (ex: `GET /api/faqs/suggestions`).
+
+**Regra de Negócio (Algoritmo de Ranqueamento):**
+A query deve receber um parâmetro `$1` (semana atual da criança) e retornar 5 registros.
+1.  **Filtro:** `min_week <= $1` E `max_week >= $1`.
+2.  **Ordenação (Score):** Calcule dinamicamente: `(usage_count * 1.0) + (upvotes * 2.0) - (downvotes * 5.0)`.
+3.  **Resultado:** Retorne o top 5 com maior score.
+4.  **Fallback:** Garanta que, se não houver dados de uso suficiente, as perguntas `is_seed` apareçam (o algoritmo de score já deve cobrir isso, pois começam com 0, mas verifique a lógica).
+
+---
+
+## Tarefa 4: Documentação Técnica
+
+Ao final da implementação, forneça o texto para atualizar a documentação do projeto (README.md ou Swagger/OpenAPI Docs):
+1.  Descreva a nova tabela `app_faqs` e seu propósito.
+2.  Explique o algoritmo de ranqueamento para futuros desenvolvedores.
+3.  Documente os novos endpoints da API (`GET /suggestions`, `POST /feedback`).
+
+---
+
+**Output Esperado:**
+Por favor, forneça o código em blocos separados (SQL Migration, SQL Seeds, Node.js Logic) com comentários explicativos em cada linha crítica.
