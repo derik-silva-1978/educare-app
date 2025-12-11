@@ -35,6 +35,10 @@ const SleepLog = require('./SleepLog');
 const Appointment = require('./Appointment');
 const VaccineHistory = require('./VaccineHistory');
 
+// Modelos de Marcos do Desenvolvimento
+const OfficialMilestone = require('./OfficialMilestone');
+const MilestoneMapping = require('./MilestoneMapping');
+
 // Modelos do RAG
 const KnowledgeDocument = require('./KnowledgeDocument');
 const KbBaby = require('./KbBaby');
@@ -266,6 +270,20 @@ Appointment.belongsTo(Child, { foreignKey: 'child_id', as: 'child' });
 Child.hasMany(VaccineHistory, { foreignKey: 'child_id', as: 'vaccineHistory' });
 VaccineHistory.belongsTo(Child, { foreignKey: 'child_id', as: 'child' });
 
+// === ASSOCIAÇÕES DE MARCOS DO DESENVOLVIMENTO ===
+
+// OfficialMilestone <-> MilestoneMapping (1:N)
+OfficialMilestone.hasMany(MilestoneMapping, { foreignKey: 'official_milestone_id', as: 'mappings' });
+MilestoneMapping.belongsTo(OfficialMilestone, { foreignKey: 'official_milestone_id', as: 'milestone' });
+
+// JourneyBotQuestion <-> MilestoneMapping (1:N)
+JourneyBotQuestion.hasMany(MilestoneMapping, { foreignKey: 'journey_question_id', as: 'milestoneMappings' });
+MilestoneMapping.belongsTo(JourneyBotQuestion, { foreignKey: 'journey_question_id', as: 'journeyQuestion' });
+
+// User (Curador) <-> MilestoneMapping (1:N) - quem verificou
+User.hasMany(MilestoneMapping, { foreignKey: 'verified_by', as: 'verifiedMappings' });
+MilestoneMapping.belongsTo(User, { foreignKey: 'verified_by', as: 'verifier' });
+
 // Exportação dos modelos
 module.exports = {
   sequelize,
@@ -313,5 +331,8 @@ module.exports = {
   BiometricsLog,
   SleepLog,
   Appointment,
-  VaccineHistory
+  VaccineHistory,
+  // Modelos de Marcos do Desenvolvimento
+  OfficialMilestone,
+  MilestoneMapping
 };

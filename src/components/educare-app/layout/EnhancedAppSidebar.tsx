@@ -151,6 +151,11 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         url: "/educare-app/owner/kb-management",
         icon: Database,
       },
+      {
+        title: "Marcos do Desenvolvimento",
+        url: "/educare-app/owner/milestones-curation",
+        icon: Baby,
+      },
       ...baseItems,
     ];
   }
@@ -207,6 +212,11 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         title: "Gestor de Mídias",
         url: "/educare-app/admin/media-resources",
         icon: FileVideo,
+      },
+      {
+        title: "Marcos do Desenvolvimento",
+        url: "/educare-app/admin/milestones-curation",
+        icon: Baby,
       },
       ...baseItems,
     ];

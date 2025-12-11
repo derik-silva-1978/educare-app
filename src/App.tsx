@@ -49,6 +49,7 @@ import RAGMetricsDashboard from "./pages/admin/RAGMetricsDashboard";
 import KnowledgeBaseManagement from "./pages/admin/KnowledgeBaseManagement";
 import ContentManagement from "./pages/admin/ContentManagement";
 import FAQAnalyticsDashboard from "./pages/admin/FAQAnalyticsDashboard";
+import MilestonesCuration from "./pages/admin/MilestonesCuration";
 import CommunicationPage from "./pages/educare-app/CommunicationPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import TitiNautaJourney from "./pages/educare-app/TitiNautaJourney";
@@ -158,6 +159,8 @@ const App = () => (
                 <Route path="owner/kb-management" element={<KnowledgeBaseManagement />} />
                 <Route path="owner/content-management" element={<ContentManagement />} />
                 <Route path="owner/faq-analytics" element={<FAQAnalyticsDashboard />} />
+                <Route path="owner/milestones-curation" element={<MilestonesCuration />} />
+                <Route path="admin/milestones-curation" element={<MilestonesCuration />} />
                 <Route path="admin/content-management" element={<ContentManagement />} />
                 
                 {/* Professional Routes - Gestão de Crianças */}
