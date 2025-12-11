@@ -3,6 +3,7 @@ const router = express.Router();
 const { body, param, query, validationResult } = require('express-validator');
 const faqController = require('../controllers/faqController');
 const { verifyToken, isAdminOrOwner } = require('../middlewares/auth');
+const { faqFeedbackLimiter } = require('../middlewares/rateLimiter');
 
 /**
  * @swagger
@@ -237,15 +238,54 @@ router.put('/:id',
 );
 
 /**
+ * GET /api/faqs/analytics
+ * 
+ * Métricas agregadas de uso das FAQs. Apenas admin/owner.
+ */
+router.get('/analytics', verifyToken, isAdminOrOwner, faqController.getAnalytics);
+
+/**
+ * GET /api/faqs/search?q=termo
+ * 
+ * Busca full-text em FAQs. Público.
+ */
+router.get('/search',
+  query('q')
+    .trim()
+    .isLength({ min: 2 })
+    .withMessage('Termo de busca deve ter pelo menos 2 caracteres'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+    next();
+  },
+  faqController.search
+);
+
+/**
  * DELETE /api/faqs/:id
  * 
- * Deletar FAQ. Apenas para admin/owner.
+ * Soft delete FAQ. Apenas para admin/owner.
  */
 router.delete('/:id',
   verifyToken,
   isAdminOrOwner,
   param('id').isUUID().withMessage('ID deve ser UUID válido'),
   faqController.delete
+);
+
+/**
+ * PUT /api/faqs/:id/restore
+ * 
+ * Restaurar FAQ deletada. Apenas admin/owner.
+ */
+router.put('/:id/restore',
+  verifyToken,
+  isAdminOrOwner,
+  param('id').isUUID().withMessage('ID deve ser UUID válido'),
+  faqController.restore
 );
 
 /**
@@ -285,6 +325,7 @@ router.delete('/:id',
  *         description: FAQ não encontrada
  */
 router.post('/:id/feedback',
+  faqFeedbackLimiter, // Rate limit: 10 req/min por IP
   param('id').isUUID().withMessage('ID deve ser UUID válido'),
   body('type')
     .isIn(['upvote', 'downvote'])

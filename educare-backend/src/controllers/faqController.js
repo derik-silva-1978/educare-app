@@ -1,12 +1,24 @@
-const { AppFaq } = require('../models');
+const { AppFaq, FaqUserFeedback } = require('../models');
 const { sequelize } = require('../config/database');
-const { literal } = require('sequelize');
+const { Op } = require('sequelize');
 
 /**
  * Controller: FAQ Dinâmica Contextual
  * 
  * Gerencia sugestões de FAQs baseadas na idade da criança e feedback dos usuários.
  */
+
+/**
+ * Helper: Extrai identificador único do usuário
+ */
+const getUserIdentifier = (req) => {
+  // Prioridade: userId autenticado > IP
+  if (req.user && req.user.id) {
+    return { identifier: req.user.id, type: 'user_id' };
+  }
+  const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
+  return { identifier: ip, type: 'ip' };
+};
 
 /**
  * GET /api/faqs/suggestions?week=X
@@ -28,6 +40,7 @@ exports.getSuggestionsByWeek = async (req, res) => {
     const weekNum = parseInt(week, 10);
     
     // Query SQL otimizada com ranking dinâmico
+    // Filtra apenas FAQs não deletadas (deleted_at IS NULL)
     const query = `
       SELECT 
         id,
@@ -42,25 +55,23 @@ exports.getSuggestionsByWeek = async (req, res) => {
         downvotes,
         created_at,
         updated_at,
-        -- Score de ranqueamento dinâmico
         (usage_count * 1.0 + upvotes * 2.0 - downvotes * 5.0) as relevance_score
       FROM app_faqs
       WHERE min_week <= $1 AND max_week >= $1
+        AND (deleted_at IS NULL)
       ${category ? `AND category = $2` : ''}
       ORDER BY relevance_score DESC
       LIMIT 5
     `;
     
-    // Executar query raw para melhor performance
     const params = category ? [weekNum, category] : [weekNum];
     const suggestions = await sequelize.query(query, {
       replacements: params,
       type: sequelize.QueryTypes.SELECT
     });
     
-    // Se não encontrar FAQs relevantes, incrementa usage_count do que foi retornado
+    // Incrementa usage_count para rastreamento
     if (suggestions.length > 0) {
-      // Incrementa usage_count para rastreamento
       const faqIds = suggestions.map(f => f.id);
       await AppFaq.update(
         { usage_count: sequelize.literal('usage_count + 1') },
@@ -88,14 +99,19 @@ exports.getSuggestionsByWeek = async (req, res) => {
  * GET /api/faqs
  * 
  * Lista todas as FAQs com paginação. Apenas admin/owner.
+ * Exclui FAQs deletadas (soft delete).
  */
 exports.listAll = async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 20;
     const offset = (page - 1) * limit;
+    const includeDeleted = req.query.includeDeleted === 'true';
+    
+    const whereClause = includeDeleted ? {} : { deleted_at: null };
     
     const { count, rows } = await AppFaq.findAndCountAll({
+      where: whereClause,
       offset,
       limit,
       order: [['created_at', 'DESC']]
@@ -130,7 +146,6 @@ exports.create = async (req, res) => {
   try {
     const { question_text, category, answer_rag_context, min_week, max_week } = req.body;
     
-    // Validação adicional de lógica de negócio
     if (min_week > max_week) {
       return res.status(400).json({
         success: false,
@@ -144,7 +159,7 @@ exports.create = async (req, res) => {
       answer_rag_context: answer_rag_context || null,
       min_week,
       max_week,
-      is_seed: false, // Criado manualmente pelo admin, não é seed
+      is_seed: false,
       usage_count: 0,
       upvotes: 0,
       downvotes: 0
@@ -175,7 +190,6 @@ exports.update = async (req, res) => {
     const { id } = req.params;
     const { question_text, category, answer_rag_context, min_week, max_week } = req.body;
     
-    // Verificar se FAQ existe
     const faq = await AppFaq.findByPk(id);
     if (!faq) {
       return res.status(404).json({
@@ -184,7 +198,6 @@ exports.update = async (req, res) => {
       });
     }
     
-    // Validação de lógica de negócio
     if (min_week !== undefined && max_week !== undefined && min_week > max_week) {
       return res.status(400).json({
         success: false,
@@ -192,7 +205,6 @@ exports.update = async (req, res) => {
       });
     }
     
-    // Atualizar campos fornecidos
     const updateData = {};
     if (question_text !== undefined) updateData.question_text = question_text;
     if (category !== undefined) updateData.category = category;
@@ -220,8 +232,8 @@ exports.update = async (req, res) => {
 /**
  * DELETE /api/faqs/:id
  * 
- * Deletar FAQ. Apenas admin/owner.
- * Soft delete (não remove completamente) para manter histórico.
+ * SOFT DELETE: Marca deleted_at em vez de remover permanentemente.
+ * Apenas admin/owner.
  */
 exports.delete = async (req, res) => {
   try {
@@ -235,12 +247,12 @@ exports.delete = async (req, res) => {
       });
     }
     
-    // Hard delete (pode ser modificado para soft delete se necessário)
-    await faq.destroy();
+    // Soft delete: apenas marca deleted_at
+    await faq.update({ deleted_at: new Date() });
     
     return res.json({
       success: true,
-      message: 'FAQ deletada com sucesso'
+      message: 'FAQ movida para lixeira'
     });
   } catch (error) {
     console.error('Erro ao deletar FAQ:', error);
@@ -253,12 +265,51 @@ exports.delete = async (req, res) => {
 };
 
 /**
+ * PUT /api/faqs/:id/restore
+ * 
+ * Restaurar FAQ deletada (soft delete). Apenas admin/owner.
+ */
+exports.restore = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const faq = await AppFaq.findByPk(id);
+    if (!faq) {
+      return res.status(404).json({
+        success: false,
+        message: 'FAQ não encontrada'
+      });
+    }
+    
+    if (!faq.deleted_at) {
+      return res.status(400).json({
+        success: false,
+        message: 'FAQ não está deletada'
+      });
+    }
+    
+    await faq.update({ deleted_at: null });
+    
+    return res.json({
+      success: true,
+      message: 'FAQ restaurada com sucesso',
+      data: faq
+    });
+  } catch (error) {
+    console.error('Erro ao restaurar FAQ:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erro ao restaurar FAQ',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+/**
  * POST /api/faqs/:id/feedback
  * 
  * Registrar feedback do usuário (upvote/downvote).
- * Incrementa counters que alimentam o algoritmo de ranqueamento.
- * 
- * O feedback é anônimo e não rastreia usuário específico.
+ * Implementa voto único por usuário/IP com possibilidade de alterar.
  */
 exports.recordFeedback = async (req, res) => {
   try {
@@ -273,21 +324,75 @@ exports.recordFeedback = async (req, res) => {
       });
     }
     
-    // Incrementar counter apropriado
-    if (type === 'upvote') {
-      await faq.update({
-        upvotes: sequelize.literal('upvotes + 1')
-      });
-    } else if (type === 'downvote') {
-      await faq.update({
-        downvotes: sequelize.literal('downvotes + 1')
+    // Obter identificador do usuário
+    const { identifier, type: identifierType } = getUserIdentifier(req);
+    
+    // Verificar se já votou nesta FAQ
+    const existingFeedback = await FaqUserFeedback.findOne({
+      where: {
+        faq_id: id,
+        user_identifier: identifier
+      }
+    });
+    
+    if (existingFeedback) {
+      // Já votou - verificar se é o mesmo tipo
+      if (existingFeedback.feedback_type === type) {
+        return res.status(400).json({
+          success: false,
+          message: `Você já deu ${type} nesta FAQ`
+        });
+      }
+      
+      // Mudando o voto: reverter o anterior e aplicar o novo
+      // Reverter voto anterior
+      if (existingFeedback.feedback_type === 'upvote') {
+        await faq.update({ upvotes: sequelize.literal('upvotes - 1') });
+      } else {
+        await faq.update({ downvotes: sequelize.literal('downvotes - 1') });
+      }
+      
+      // Aplicar novo voto
+      if (type === 'upvote') {
+        await faq.update({ upvotes: sequelize.literal('upvotes + 1') });
+      } else {
+        await faq.update({ downvotes: sequelize.literal('downvotes + 1') });
+      }
+      
+      // Atualizar registro de feedback
+      await existingFeedback.update({ feedback_type: type });
+      
+      await faq.reload();
+      const currentScore = faq.usage_count * 1.0 + faq.upvotes * 2.0 - faq.downvotes * 5.0;
+      
+      return res.json({
+        success: true,
+        message: `Voto alterado para ${type}`,
+        data: {
+          id: faq.id,
+          upvotes: faq.upvotes,
+          downvotes: faq.downvotes,
+          relevance_score: currentScore,
+          changed: true
+        }
       });
     }
     
-    // Recarregar para retornar valores atualizados
-    await faq.reload();
+    // Primeiro voto: criar registro e incrementar
+    await FaqUserFeedback.create({
+      faq_id: id,
+      user_identifier: identifier,
+      identifier_type: identifierType,
+      feedback_type: type
+    });
     
-    // Calcular score atual
+    if (type === 'upvote') {
+      await faq.update({ upvotes: sequelize.literal('upvotes + 1') });
+    } else {
+      await faq.update({ downvotes: sequelize.literal('downvotes + 1') });
+    }
+    
+    await faq.reload();
     const currentScore = faq.usage_count * 1.0 + faq.upvotes * 2.0 - faq.downvotes * 5.0;
     
     return res.json({
@@ -297,7 +402,8 @@ exports.recordFeedback = async (req, res) => {
         id: faq.id,
         upvotes: faq.upvotes,
         downvotes: faq.downvotes,
-        relevance_score: currentScore
+        relevance_score: currentScore,
+        changed: false
       }
     });
   } catch (error) {
@@ -305,6 +411,140 @@ exports.recordFeedback = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Erro ao registrar feedback',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+/**
+ * GET /api/faqs/analytics
+ * 
+ * Métricas agregadas de uso das FAQs. Apenas admin/owner.
+ */
+exports.getAnalytics = async (req, res) => {
+  try {
+    // Top 10 FAQs por score
+    const topFaqs = await sequelize.query(`
+      SELECT 
+        id, category, question_text, usage_count, upvotes, downvotes,
+        (usage_count * 1.0 + upvotes * 2.0 - downvotes * 5.0) as relevance_score
+      FROM app_faqs
+      WHERE deleted_at IS NULL
+      ORDER BY relevance_score DESC
+      LIMIT 10
+    `, { type: sequelize.QueryTypes.SELECT });
+    
+    // FAQs com mais downvotes (candidatas a revisão)
+    const problemFaqs = await sequelize.query(`
+      SELECT 
+        id, category, question_text, downvotes, upvotes,
+        (downvotes * 1.0 / NULLIF(upvotes + downvotes, 0)) as negative_ratio
+      FROM app_faqs
+      WHERE deleted_at IS NULL AND downvotes > 0
+      ORDER BY downvotes DESC
+      LIMIT 5
+    `, { type: sequelize.QueryTypes.SELECT });
+    
+    // Estatísticas gerais
+    const stats = await sequelize.query(`
+      SELECT 
+        COUNT(*) as total_faqs,
+        SUM(usage_count) as total_usage,
+        SUM(upvotes) as total_upvotes,
+        SUM(downvotes) as total_downvotes,
+        AVG(usage_count) as avg_usage,
+        COUNT(*) FILTER (WHERE is_seed = TRUE) as seed_faqs,
+        COUNT(*) FILTER (WHERE is_seed = FALSE) as custom_faqs
+      FROM app_faqs
+      WHERE deleted_at IS NULL
+    `, { type: sequelize.QueryTypes.SELECT });
+    
+    // Por categoria
+    const byCategory = await sequelize.query(`
+      SELECT 
+        category,
+        COUNT(*) as count,
+        SUM(usage_count) as total_usage,
+        SUM(upvotes) as total_upvotes,
+        SUM(downvotes) as total_downvotes
+      FROM app_faqs
+      WHERE deleted_at IS NULL
+      GROUP BY category
+    `, { type: sequelize.QueryTypes.SELECT });
+    
+    return res.json({
+      success: true,
+      data: {
+        summary: stats[0] || {},
+        topFaqs,
+        problemFaqs,
+        byCategory
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao obter analytics:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erro ao obter analytics',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+/**
+ * GET /api/faqs/search?q=termo
+ * 
+ * Busca full-text em FAQs.
+ */
+exports.search = async (req, res) => {
+  try {
+    const { q, category, limit = 10 } = req.query;
+    
+    if (!q || q.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: 'Termo de busca deve ter pelo menos 2 caracteres'
+      });
+    }
+    
+    const searchTerm = `%${q.trim().toLowerCase()}%`;
+    
+    let query = `
+      SELECT 
+        id, category, question_text, answer_rag_context,
+        min_week, max_week, usage_count, upvotes, downvotes,
+        (usage_count * 1.0 + upvotes * 2.0 - downvotes * 5.0) as relevance_score
+      FROM app_faqs
+      WHERE deleted_at IS NULL
+        AND (LOWER(question_text) LIKE $1 OR LOWER(answer_rag_context) LIKE $1)
+    `;
+    
+    const params = [searchTerm];
+    
+    if (category) {
+      query += ` AND category = $2`;
+      params.push(category);
+    }
+    
+    query += ` ORDER BY relevance_score DESC LIMIT $${params.length + 1}`;
+    params.push(parseInt(limit, 10));
+    
+    const results = await sequelize.query(query, {
+      replacements: params,
+      type: sequelize.QueryTypes.SELECT
+    });
+    
+    return res.json({
+      success: true,
+      data: results,
+      count: results.length,
+      query: q
+    });
+  } catch (error) {
+    console.error('Erro ao buscar FAQs:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erro ao buscar FAQs',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }

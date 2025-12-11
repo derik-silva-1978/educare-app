@@ -85,6 +85,14 @@ const AppFaq = sequelize.define('AppFaq', {
     comment: 'Número de downvotes (avaliação negativa)'
   },
   
+  // Soft Delete
+  deleted_at: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+    comment: 'Data de exclusão (soft delete) - NULL significa ativo'
+  },
+  
   // Auditoria
   created_at: {
     type: DataTypes.DATE,
@@ -102,6 +110,7 @@ const AppFaq = sequelize.define('AppFaq', {
   timestamps: true,
   createdAt: 'created_at',
   updatedAt: 'updated_at',
+  paranoid: false, // Usamos deleted_at manual, não paranoid do Sequelize
   indexes: [
     // Índice composto para filtro por intervalo de semanas (Performance crítica)
     {
@@ -122,6 +131,11 @@ const AppFaq = sequelize.define('AppFaq', {
     {
       name: 'idx_faqs_seed',
       fields: ['is_seed']
+    },
+    // Índice para soft delete
+    {
+      name: 'idx_faqs_deleted',
+      fields: ['deleted_at']
     }
   ]
 });
