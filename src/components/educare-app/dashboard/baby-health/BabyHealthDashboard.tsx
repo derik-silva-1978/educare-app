@@ -94,7 +94,7 @@ const MotherJourneySection: React.FC = () => {
             Historico de Perguntas
           </h3>
           <p className="text-sm text-muted-foreground max-w-xs">
-            Suas ultimas perguntas ao TitiNauta aparecerao aqui para voce relembrar as orientacoes.
+            Suas ultimas perguntas ao Assistente aparecerao aqui para voce relembrar as orientacoes.
           </p>
         </CardContent>
       </Card>

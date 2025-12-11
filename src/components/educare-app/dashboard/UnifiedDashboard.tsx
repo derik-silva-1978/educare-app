@@ -1,36 +1,35 @@
 import React from 'react';
 import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
 import { getDetailedAgeDisplay } from '@/utils/educare-app/calculateAge';
 import { useDashboardMetrics } from '@/hooks/educare-app/useDashboardMetrics';
-import { SelectedChildProvider } from '@/contexts/SelectedChildContext';
+import { useBabyHealthSummary } from '@/hooks/educare-app/useBabyHealthSummary';
+import { SelectedChildProvider, useSelectedChild } from '@/contexts/SelectedChildContext';
 import DashboardErrorBoundary from './DashboardErrorBoundary';
 import DashboardLoadingState from './DashboardLoadingState';
 import EnhancedDashboardHeader from './EnhancedDashboardHeader';
-import EnhancedMetricsCards from './EnhancedMetricsCards';
-import ChildSelector from './ChildSelector';
+import ChildrenTopBar from './ChildrenTopBar';
+import HealthMetricsCards from './HealthMetricsCards';
+import HealthInsights from './HealthInsights';
 import SocialMediaAccess from './SocialMediaAccess';
 import DomainProgressChart from './DomainProgressChart';
-import StrengthsOpportunities from './StrengthsOpportunities';
 import AIInsightsCard from './AIInsightsCard';
 import ParentalResourcesCarousel from './ParentalResourcesCarousel';
 import MilestonesTimeline from './MilestonesTimeline';
 import { BabyHealthDashboard } from './baby-health';
 
-const UnifiedDashboard: React.FC = () => {
+const UnifiedDashboardContent: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { selectedChildId } = useSelectedChild();
   const role = user?.role as string;
   const isOwner = role === 'owner';
   const isAdmin = role === 'admin';
   const isParent = role === 'parent' || role === 'user';
-  const isProfessional = role === 'professional';
   const hasFullAccess = isOwner || isAdmin;
 
   const { metrics, rawData, isLoading, error } = useDashboardMetrics();
+  const { data: healthData, isLoading: healthLoading } = useBabyHealthSummary(selectedChildId);
 
   if (isLoading) {
     return <DashboardLoadingState message="Carregando seu dashboard..." />;
@@ -42,7 +41,7 @@ const UnifiedDashboard: React.FC = () => {
 
   const children = rawData?.children || [];
   const totalChildren = metrics.totalChildren;
-  const selectedChild = totalChildren > 0 ? (children[0] as any) : null;
+  const selectedChild = children.find((c: any) => c.id === selectedChildId) || (totalChildren > 0 ? children[0] : null);
 
   const getChildAge = () => {
     if (!selectedChild) return undefined;
@@ -55,114 +54,97 @@ const UnifiedDashboard: React.FC = () => {
     }
   };
 
+  const transformHealthDataForCards = () => {
+    if (!healthData) return undefined;
+    
+    return {
+      child: healthData.child ? {
+        ageInWeeks: healthData.child.ageInWeeks,
+        ageInMonths: healthData.child.ageInMonths,
+        ageDisplay: healthData.child.ageDisplay
+      } : undefined,
+      biometrics: healthData.biometrics?.map(b => ({
+        weight: b.weight?.toString(),
+        height: b.height?.toString(),
+        recordedAt: b.recordedAt
+      })),
+      sleepLogs: healthData.sleepLogs?.map(s => ({
+        durationMinutes: s.durationMinutes || undefined,
+        quality: s.quality
+      })),
+      vaccines: [
+        ...(healthData.vaccines?.taken || []).map(v => ({
+          status: 'taken' as const,
+          vaccineName: v.vaccine,
+          scheduledAt: v.takenAt
+        })),
+        ...(healthData.vaccines?.pending || []).map(v => ({
+          status: 'pending' as const,
+          vaccineName: v.vaccine,
+          scheduledAt: undefined
+        }))
+      ],
+      appointments: healthData.appointments?.map(a => ({
+        appointmentDate: a.appointmentDate,
+        doctorName: a.doctorName,
+        specialty: a.specialty,
+        status: a.status
+      }))
+    };
+  };
+
+  const healthCardsData = transformHealthDataForCards();
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <EnhancedDashboardHeader />
+        <SocialMediaAccess />
+      </div>
+
+      {(hasFullAccess || isParent) && totalChildren > 0 && (
+        <ChildrenTopBar 
+          childList={children} 
+          onChildClick={(childId) => navigate(`/educare-app/child/${childId}`)}
+        />
+      )}
+
+      {(hasFullAccess || (isParent && totalChildren > 0)) && (
+        <HealthMetricsCards 
+          healthData={healthCardsData}
+          isLoading={healthLoading}
+        />
+      )}
+
+      {(hasFullAccess || (isParent && totalChildren > 0)) && (
+        <BabyHealthDashboard childId={selectedChild?.id} />
+      )}
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <DomainProgressChart 
+          childName={selectedChild?.firstName || selectedChild?.first_name}
+        />
+        <HealthInsights healthData={healthCardsData} />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <MilestonesTimeline childAge={getChildAge()} />
+        </div>
+        <div className="space-y-6">
+          <AIInsightsCard />
+          <ParentalResourcesCarousel />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const UnifiedDashboard: React.FC = () => {
   return (
     <SelectedChildProvider>
       <DashboardErrorBoundary>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <EnhancedDashboardHeader />
-            <SocialMediaAccess />
-          </div>
-
-          {(hasFullAccess || isParent) && totalChildren > 0 && (
-            <ChildSelector children={children as any} />
-          )}
-
-          {(hasFullAccess || (isParent && totalChildren > 0)) && (
-            <BabyHealthDashboard childId={selectedChild?.id} />
-          )}
-
-          <EnhancedMetricsCards 
-            metrics={metrics}
-            userRole={isParent ? 'parent' : (user?.role || 'parent')}
-            individualMode={isParent}
-          />
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <DomainProgressChart 
-              childName={selectedChild?.firstName || selectedChild?.first_name}
-            />
-            <StrengthsOpportunities />
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <MilestonesTimeline childAge={getChildAge()} />
-            </div>
-            <div className="space-y-6">
-              <AIInsightsCard />
-              <ParentalResourcesCarousel />
-            </div>
-          </div>
-
-          {totalChildren > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>{(isParent || hasFullAccess) ? 'Suas Crianças' : 'Seus Pacientes'}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => navigate((isParent || hasFullAccess) ? '/educare-app/children' : '/educare-app/professional/dashboard')}
-                  >
-                    Ver todos <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {children.slice(0, 3).map((child: any) => {
-                    const childWithProgress = (isParent || hasFullAccess) && metrics.childrenWithProgress 
-                      ? metrics.childrenWithProgress.find(c => c.id === child.id) || child
-                      : child;
-                    
-                    return (
-                      <div 
-                        key={child.id} 
-                        className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow cursor-pointer"
-                        onClick={() => navigate(`/educare-app/child/${child.id}`)}
-                      >
-                        <div className="space-y-3">
-                          <div>
-                            <h4 className="font-medium">{child.firstName || child.first_name} {child.lastName || child.last_name}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              {child.birthDate || child.birthdate ? getDetailedAgeDisplay(child.birthDate || child.birthdate) : 'Idade não informada'}
-                            </p>
-                          </div>
-                          {(isParent || hasFullAccess) && (
-                            <div className="space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Progresso</span>
-                                <span className="font-medium">{childWithProgress.calculatedProgress || childWithProgress.journey_progress || 0}%</span>
-                              </div>
-                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                <div
-                                  className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                                  style={{ width: `${childWithProgress.calculatedProgress || childWithProgress.journey_progress || 0}%` }}
-                                />
-                              </div>
-                              {childWithProgress.sessionCount > 0 && (
-                                <div className="text-xs text-muted-foreground">
-                                  {childWithProgress.sessionCount} sessões • {childWithProgress.reportCount} relatórios
-                                </div>
-                              )}
-                              {childWithProgress.hasActiveSession && (
-                                <div className="text-xs text-green-600 flex items-center gap-1">
-                                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                  Sessão ativa
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+        <UnifiedDashboardContent />
       </DashboardErrorBoundary>
     </SelectedChildProvider>
   );

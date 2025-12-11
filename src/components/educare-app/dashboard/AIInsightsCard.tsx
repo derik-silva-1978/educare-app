@@ -23,7 +23,7 @@ const defaultInsights: Insight[] = [
   {
     id: '1',
     type: 'tip',
-    title: 'Dica do TitiNauta',
+    title: 'Dica de Desenvolvimento',
     description: 'Converse com seu filho durante as atividades diárias. Narrar o que você está fazendo ajuda no desenvolvimento da linguagem.',
     action: 'Ver mais dicas',
     actionUrl: '/educare-app/titinauta',
@@ -86,7 +86,7 @@ const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
             <div className="h-7 w-7 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
-            Insights do TitiNauta
+            Insights do Desenvolvimento
           </CardTitle>
           {onRefresh && (
             <Button
@@ -139,7 +139,7 @@ const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
           onClick={() => navigate('/educare-app/titinauta')}
         >
           <Sparkles className="h-4 w-4 mr-2" />
-          Conversar com TitiNauta
+          Assistente de Desenvolvimento
         </Button>
       </CardContent>
     </Card>

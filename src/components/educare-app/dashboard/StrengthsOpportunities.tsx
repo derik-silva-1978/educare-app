@@ -100,7 +100,7 @@ const StrengthsOpportunities: React.FC<StrengthsOpportunitiesProps> = ({
           <div className="py-8 text-center">
             <Target className="h-12 w-12 text-muted-foreground/30 mx-auto mb-2" />
             <p className="text-muted-foreground text-sm">
-              Complete a jornada do TitiNauta para ver a análise de pontos fortes e oportunidades.
+              Continue acompanhando o desenvolvimento para ver a análise de pontos fortes e oportunidades.
             </p>
           </div>
         )}
