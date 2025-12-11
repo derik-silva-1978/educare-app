@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useCustomChildren } from '@/hooks/educare-app/useCustomChildren';
+import { calculateAgeInWeeks } from '@/utils/educare-app/calculateAge';
 import { AIChat } from '@/components/educare-app/ai-chat/AIChat';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import SuggestedQuestions from '@/components/educare-app/dashboard/SuggestedQuestions';
 import { 
   Bot, 
   ArrowLeft, 
@@ -77,9 +80,27 @@ const TitiNautaAssistant: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const topicParam = searchParams.get('topic');
+  const { children } = useCustomChildren();
   
   const [selectedTopic, setSelectedTopic] = useState<QuickTopic | null>(null);
   const [customGreeting, setCustomGreeting] = useState<string>('');
+  const [childAgeInWeeks, setChildAgeInWeeks] = useState<number | undefined>();
+
+  // Calcular idade da criança mais jovem em semanas para sugestões contextualizadas
+  useEffect(() => {
+    if (children && children.length > 0) {
+      const youngestChild = children[0];
+      const birthDate = youngestChild.birthDate || youngestChild.birthdate;
+      if (birthDate) {
+        try {
+          const ageInWeeks = calculateAgeInWeeks(birthDate);
+          setChildAgeInWeeks(ageInWeeks);
+        } catch {
+          // Ignorar erro de cálculo
+        }
+      }
+    }
+  }, [children]);
 
   useEffect(() => {
     if (topicParam) {
@@ -102,6 +123,12 @@ const TitiNautaAssistant: React.FC = () => {
   const handleTopicSelect = (topic: QuickTopic) => {
     setSelectedTopic(topic);
     setCustomGreeting(topic.greeting);
+  };
+
+  const handleQuestionClick = (question: string) => {
+    // A pergunta será enviada automaticamente via referência da AIChat
+    const event = new CustomEvent('sendSuggestedQuestion', { detail: { question } });
+    window.dispatchEvent(event);
   };
 
   const defaultGreeting = "Olá! Sou o TitiNauta, seu assistente virtual especializado em desenvolvimento infantil e saúde materna. Como posso ajudar você hoje?";
@@ -167,13 +194,19 @@ const TitiNautaAssistant: React.FC = () => {
         </CardContent>
       </Card>
 
-      <div className="flex-1 min-h-0">
-        <AIChat 
-          assistantType="titibot"
-          title="TitiNauta - Assistente Virtual Especialista"
-          initialPrompt={customGreeting || defaultGreeting}
-          key={selectedTopic?.id || 'default'}
+      <div className="flex-1 flex flex-col min-h-0 gap-4">
+        <SuggestedQuestions 
+          childAgeInWeeks={childAgeInWeeks}
+          onQuestionClick={handleQuestionClick}
         />
+        <div className="flex-1 min-h-0">
+          <AIChat 
+            assistantType="titibot"
+            title="TitiNauta - Assistente Virtual Especialista"
+            initialPrompt={customGreeting || defaultGreeting}
+            key={selectedTopic?.id || 'default'}
+          />
+        </div>
       </div>
     </div>
   );

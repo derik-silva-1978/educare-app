@@ -61,6 +61,20 @@ export const AIChat: React.FC<AIChatProps> = ({
     }
   }, [initialPrompt]);
 
+  // Listen for suggested questions from external components
+  useEffect(() => {
+    const handleSuggestedQuestion = (event: Event) => {
+      const customEvent = event as CustomEvent<{ question: string }>;
+      if (customEvent.detail?.question && textareaRef.current) {
+        setInput(customEvent.detail.question);
+        setTimeout(() => textareaRef.current?.focus(), 100);
+      }
+    };
+
+    window.addEventListener('sendSuggestedQuestion', handleSuggestedQuestion);
+    return () => window.removeEventListener('sendSuggestedQuestion', handleSuggestedQuestion);
+  }, []);
+
   // Set child context when available
   useEffect(() => {
     if (childContext) {
