@@ -161,7 +161,8 @@ async function pollRunWithTimeout(openai, threadId, runId, timeoutMs = FILE_SEAR
 
   while (Date.now() - startTime < timeoutMs && attempts < MAX_POLL_ATTEMPTS) {
     attempts++;
-    const run = await openai.beta.threads.runs.retrieve(threadId, runId);
+    // SDK v6+ requires { thread_id } as second parameter
+    const run = await openai.beta.threads.runs.retrieve(runId, { thread_id: threadId });
 
     console.log(`[RAG] Poll ${attempts}: status=${run.status}, elapsed=${Date.now() - startTime}ms`);
 
@@ -248,13 +249,14 @@ async function retrieveFromFileSearch(question, fileSearchIds) {
     if (run.status === 'timeout') {
       console.error(`[RAG] File Search timeout após ${Date.now() - startTime}ms`);
       try {
-        await openai.beta.threads.runs.cancel(thread.id, initialRun.id);
+        // SDK v6+ requires { thread_id } as second parameter
+        await openai.beta.threads.runs.cancel(initialRun.id, { thread_id: thread.id });
       } catch (cancelError) {
         console.warn('[RAG] Erro ao cancelar run:', cancelError.message);
       }
       if (assistantId) {
         try {
-          await openai.beta.assistants.del(assistantId);
+          await openai.beta.assistants.delete(assistantId);
           console.log(`[RAG] Assistant ${assistantId} deletado após timeout`);
         } catch (cleanupError) {
           console.warn('[RAG] Erro ao limpar assistant após timeout:', cleanupError.message);
@@ -273,7 +275,7 @@ async function retrieveFromFileSearch(question, fileSearchIds) {
       console.warn(`[RAG] Run não completou: ${run.status}`);
       if (assistantId) {
         try {
-          await openai.beta.assistants.del(assistantId);
+          await openai.beta.assistants.delete(assistantId);
           console.log(`[RAG] Assistant ${assistantId} deletado após run não-completado`);
         } catch (cleanupError) {
           console.warn('[RAG] Erro ao limpar assistant após run não-completado:', cleanupError.message);
@@ -291,7 +293,7 @@ async function retrieveFromFileSearch(question, fileSearchIds) {
     const messages = await openai.beta.threads.messages.list(thread.id);
     const assistantMessage = messages.data.find(m => m.role === 'assistant');
 
-    await openai.beta.assistants.del(assistant.id);
+    await openai.beta.assistants.delete(assistant.id);
     assistantId = null;
 
     if (!assistantMessage) {
@@ -321,7 +323,7 @@ async function retrieveFromFileSearch(question, fileSearchIds) {
     if (assistantId) {
       try {
         const openai = getOpenAI();
-        await openai.beta.assistants.del(assistantId);
+        await openai.beta.assistants.delete(assistantId);
       } catch (cleanupError) {
         console.warn('[RAG] Erro ao limpar assistant:', cleanupError.message);
       }

@@ -184,9 +184,39 @@ exports.uploadDocument = async (req, res) => {
       fs.unlinkSync(req.file.path);
     }
 
+    // Handle Sequelize validation errors with specific messages
+    if (error.name === 'SequelizeValidationError') {
+      const validationErrors = error.errors.map(e => e.message).join(', ');
+      return res.status(400).json({
+        success: false,
+        error: `Erro de validação: ${validationErrors}`,
+        details: error.errors.map(e => ({
+          field: e.path,
+          message: e.message,
+          value: e.value
+        }))
+      });
+    }
+
+    // Handle unique constraint violations
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({
+        success: false,
+        error: 'Documento com este título já existe'
+      });
+    }
+
+    // Handle database connection errors
+    if (error.name === 'SequelizeConnectionError') {
+      return res.status(503).json({
+        success: false,
+        error: 'Erro de conexão com o banco de dados. Tente novamente.'
+      });
+    }
+
     return res.status(500).json({
       success: false,
-      error: 'Erro interno ao processar upload'
+      error: error.message || 'Erro interno ao processar upload'
     });
   }
 };
