@@ -24,12 +24,15 @@ const getUserIdentifier = (req) => {
  * GET /api/faqs/suggestions?week=X
  * 
  * Retorna 5 FAQs mais relevantes usando algoritmo de ranqueamento.
+ * Com fallback para semanas adjacentes quando não houver 5 FAQs.
  * 
  * Lógica:
  * 1. Filtra por semana: min_week <= week <= max_week
  * 2. Calcula score: (usage_count * 1.0) + (upvotes * 2.0) - (downvotes * 5.0)
  * 3. Ordena por score DESC
- * 4. Retorna top 5
+ * 4. Se menos de 5 FAQs, expande busca para semanas adjacentes (±8 semanas)
+ * 5. Se ainda menos de 5, busca FAQs genéricas mais populares
+ * 6. Retorna top 5
  * 
  * @param {Request} req - week (query param), category (opcional)
  * @returns {Response} - {success, data: [...]}
@@ -38,39 +41,78 @@ exports.getSuggestionsByWeek = async (req, res) => {
   try {
     const { week, category } = req.query;
     const weekNum = parseInt(week, 10);
+    const TARGET_COUNT = 5;
     
-    // Query SQL otimizada com ranking dinâmico
-    // Filtra apenas FAQs não deletadas (deleted_at IS NULL)
-    const query = `
-      SELECT 
-        id,
-        category,
-        question_text,
-        answer_rag_context,
-        min_week,
-        max_week,
-        is_seed,
-        usage_count,
-        upvotes,
-        downvotes,
-        created_at,
-        updated_at,
-        (usage_count * 1.0 + upvotes * 2.0 - downvotes * 5.0) as relevance_score
-      FROM app_faqs
-      WHERE min_week <= :weekNum AND max_week >= :weekNum
-        AND (deleted_at IS NULL)
-      ${category ? `AND category = :category` : ''}
-      ORDER BY relevance_score DESC
-      LIMIT 5
-    `;
+    const buildQuery = (weekCondition, excludeIds = []) => {
+      const excludeClause = excludeIds.length > 0 
+        ? `AND id NOT IN (${excludeIds.map(id => `'${id}'`).join(',')})` 
+        : '';
+      return `
+        SELECT 
+          id,
+          category,
+          question_text,
+          answer_rag_context,
+          min_week,
+          max_week,
+          is_seed,
+          usage_count,
+          upvotes,
+          downvotes,
+          created_at,
+          updated_at,
+          (usage_count * 1.0 + upvotes * 2.0 - downvotes * 5.0) as relevance_score
+        FROM app_faqs
+        WHERE ${weekCondition}
+          AND (deleted_at IS NULL)
+          ${excludeClause}
+          ${category ? `AND category = :category` : ''}
+        ORDER BY relevance_score DESC
+        LIMIT :limit
+      `;
+    };
     
-    const replacements = { weekNum };
-    if (category) replacements.category = category;
+    const replacements = { weekNum, category, limit: TARGET_COUNT };
+    let suggestions = [];
     
-    const suggestions = await sequelize.query(query, {
+    // Fase 1: Buscar FAQs para a semana exata
+    const exactQuery = buildQuery('min_week <= :weekNum AND max_week >= :weekNum');
+    suggestions = await sequelize.query(exactQuery, {
       replacements,
       type: sequelize.QueryTypes.SELECT
     });
+    
+    // Fase 2: Se menos de 5, buscar semanas adjacentes (±8 semanas)
+    if (suggestions.length < TARGET_COUNT) {
+      const remaining = TARGET_COUNT - suggestions.length;
+      const existingIds = suggestions.map(f => f.id);
+      const expandedQuery = buildQuery(
+        '(min_week <= :weekMax AND max_week >= :weekMin) AND NOT (min_week <= :weekNum AND max_week >= :weekNum)',
+        existingIds
+      );
+      const adjacentFaqs = await sequelize.query(expandedQuery, {
+        replacements: { 
+          ...replacements, 
+          weekMin: Math.max(0, weekNum - 8),
+          weekMax: weekNum + 8,
+          limit: remaining 
+        },
+        type: sequelize.QueryTypes.SELECT
+      });
+      suggestions = [...suggestions, ...adjacentFaqs];
+    }
+    
+    // Fase 3: Se ainda menos de 5, buscar FAQs genéricas mais populares
+    if (suggestions.length < TARGET_COUNT) {
+      const remaining = TARGET_COUNT - suggestions.length;
+      const existingIds = suggestions.map(f => f.id);
+      const genericQuery = buildQuery('1=1', existingIds);
+      const genericFaqs = await sequelize.query(genericQuery, {
+        replacements: { ...replacements, limit: remaining },
+        type: sequelize.QueryTypes.SELECT
+      });
+      suggestions = [...suggestions, ...genericFaqs];
+    }
     
     // Incrementa usage_count para rastreamento
     if (suggestions.length > 0) {
