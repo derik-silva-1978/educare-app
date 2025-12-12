@@ -20,7 +20,13 @@ exports.listMyChildren = async (req, res) => {
       order: [['createdAt', 'DESC']]
     });
     
-    return res.status(200).json({ children });
+    // Adicionar userId às crianças para compatibilidade com o frontend
+    const childrenWithUserId = children.map(child => ({
+      ...child.toJSON(),
+      userId: userId
+    }));
+    
+    return res.status(200).json({ children: childrenWithUserId });
   } catch (error) {
     console.error('Erro ao listar crianças:', error);
     return res.status(500).json({ error: 'Erro ao listar crianças' });
