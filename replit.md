@@ -45,6 +45,21 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 - **Observability**: Extensive metrics and logging for RAG performance and system health.
 - **Controlled Rollout**: Feature flags enable safe, phased rollouts and easy rollback.
 
+## Recent Changes (December 2025)
+
+### RAG System Fixes
+- **OpenAI SDK v6+ Compatibility**: Updated `runs.retrieve`, `runs.cancel` to use new syntax `(runId, { thread_id })` and `assistants.delete()` method
+- **Knowledge Base Ingestion**: Aligned frontend form to send required fields (`title`, `source_type`, `knowledge_category`) for successful document uploads
+- **Error Handling**: Backend returns HTTP 400 for validation errors, HTTP 503 for database connection issues (instead of generic 500)
+- **File Search**: End-to-end document indexing and RAG queries working with OpenAI File Search
+
+### Development Notes
+- **OpenAI SDK v6 Breaking Changes**: 
+  - `runs.retrieve(runId, { thread_id: threadId })` instead of `runs.retrieve(threadId, runId)`
+  - `runs.cancel(runId, { thread_id: threadId })` instead of `runs.cancel(threadId, runId)`
+  - `assistants.delete(assistantId)` instead of `assistants.del(assistantId)`
+- **Database User Limitation**: User `educareapp` lacks FK constraint rights - use `constraints: false` in Sequelize associations
+
 ## External Dependencies
 
 - **Database**: PostgreSQL (external server)
