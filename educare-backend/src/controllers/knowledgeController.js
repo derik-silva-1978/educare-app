@@ -71,18 +71,24 @@ exports.uploadDocument = async (req, res) => {
     let fileSearchError = null;
 
     if (fileSearchService.isConfigured()) {
-      const uploadResult = await fileSearchService.uploadDocumentToFileSearch(
-        finalPath,
-        req.file.originalname,
-        { title, source_type, age_range, domain }
-      );
+      try {
+        console.log(`[Knowledge] Iniciando indexação do arquivo: ${req.file.originalname} (${req.file.size} bytes)`);
+        const uploadResult = await fileSearchService.uploadDocumentToFileSearch(
+          finalPath,
+          req.file.originalname,
+          { title, source_type, age_range, domain }
+        );
 
-      if (uploadResult.success) {
-        fileSearchId = uploadResult.file_search_id;
-        console.log(`[Knowledge] Documento indexado no File Search: ${fileSearchId}`);
-      } else {
-        fileSearchError = uploadResult.error;
-        console.warn(`[Knowledge] Erro ao indexar no File Search: ${fileSearchError}`);
+        if (uploadResult.success) {
+          fileSearchId = uploadResult.file_search_id;
+          console.log(`[Knowledge] ✓ Documento indexado no File Search: ${fileSearchId} (${uploadResult.upload_time_ms}ms)`);
+        } else {
+          fileSearchError = uploadResult.error;
+          console.warn(`[Knowledge] ⚠ Erro ao indexar no File Search: ${fileSearchError} (${uploadResult.upload_time_ms}ms)`);
+        }
+      } catch (fileSearchErr) {
+        fileSearchError = fileSearchErr.message || 'Erro desconhecido no File Search';
+        console.error(`[Knowledge] ✗ Exceção ao indexar: ${fileSearchError}`);
       }
     } else {
       console.warn('[Knowledge] OpenAI não configurado, documento salvo apenas localmente');
