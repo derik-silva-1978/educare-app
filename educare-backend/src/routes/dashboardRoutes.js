@@ -366,4 +366,57 @@ router.get('/subscriptions-by-status', authMiddleware.verifyToken, dashboardCont
  */
 router.get('/baby-health-summary', authMiddleware.verifyToken, dashboardController.getBabyHealthSummary);
 
+/**
+ * @swagger
+ * /api/dashboard/child-progress/{childId}:
+ *   get:
+ *     summary: Calcula o progresso dos módulos de desenvolvimento de uma criança
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: childId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID da criança
+ *     responses:
+ *       200:
+ *         description: Progresso calculado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     child_id:
+ *                       type: string
+ *                     age_in_months:
+ *                       type: integer
+ *                     completed_modules:
+ *                       type: integer
+ *                     total_modules:
+ *                       type: integer
+ *                     completion_percentage:
+ *                       type: number
+ *                     current_module:
+ *                       type: object
+ *                     next_module:
+ *                       type: object
+ *                     modules:
+ *                       type: array
+ *       401:
+ *         description: Não autorizado
+ *       404:
+ *         description: Criança não encontrada
+ *       500:
+ *         description: Erro interno do servidor
+ */
+router.get('/child-progress/:childId', authMiddleware.verifyToken, dashboardController.getChildProgress);
+
 module.exports = router;

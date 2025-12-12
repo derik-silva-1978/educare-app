@@ -167,9 +167,99 @@ function isConfigured() {
   return !!process.env.OPENAI_API_KEY;
 }
 
+async function generateQuizAssistance(domain, questions, studentContext, customPrompt) {
+  try {
+    const openai = getOpenAI();
+    if (!openai) {
+      return {
+        success: false,
+        error: 'OpenAI não configurado'
+      };
+    }
+
+    const domainNames = {
+      motor: 'Motor',
+      language: 'Linguagem',
+      cognitive: 'Cognitivo',
+      social: 'Social',
+      emotional: 'Emocional',
+      sensory: 'Sensorial'
+    };
+
+    const domainName = domainNames[domain] || domain;
+    
+    let questionsContext = '';
+    if (questions && questions.length > 0) {
+      questionsContext = `\n\nPerguntas do domínio:\n${questions.map(q => `- ${q.title || q.question}`).join('\n')}`;
+    }
+
+    let studentInfo = '';
+    if (studentContext) {
+      studentInfo = `\n\nContexto do aluno/criança: ${studentContext}`;
+    }
+
+    const prompt = customPrompt || `Sugira atividades práticas e lúdicas para estimular o desenvolvimento no domínio ${domainName} de uma criança.`;
+
+    const systemMessage = `Você é TitiNauta, especialista em desenvolvimento infantil da plataforma Educare+.
+Seu objetivo é gerar sugestões de atividades práticas, lúdicas e estimuladoras para o desenvolvimento infantil.
+
+Ao responder:
+1. Forneça uma resposta principal clara e objetiva
+2. Liste 3-5 sugestões de atividades específicas para o domínio solicitado
+3. Inclua recursos ou materiais sugeridos quando apropriado
+4. Use linguagem simples e acessível para pais e cuidadores
+5. Seja encorajador e empático`;
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemMessage },
+        { role: 'user', content: `${prompt}${questionsContext}${studentInfo}` }
+      ],
+      temperature: 0.7,
+      max_tokens: 800
+    });
+
+    const content = response.choices[0].message.content;
+    
+    const suggestions = [];
+    const lines = content.split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.match(/^[\d\-\*•\.]+\s/) && trimmed.length > 10) {
+        suggestions.push(trimmed.replace(/^[\d\-\*•\.]+\s*/, ''));
+      }
+    }
+
+    const resources = [];
+    if (domain === 'motor') {
+      resources.push({ title: 'Guia de Atividades Motoras - Caderneta da Criança', url: '/resources/motor-guide' });
+    } else if (domain === 'language') {
+      resources.push({ title: 'Estimulação da Linguagem - Primeiros Anos', url: '/resources/language-guide' });
+    } else if (domain === 'cognitive') {
+      resources.push({ title: 'Atividades Cognitivas para Bebês', url: '/resources/cognitive-guide' });
+    }
+
+    return {
+      success: true,
+      answer: content,
+      suggestions: suggestions.slice(0, 5),
+      resources,
+      usage: response.usage
+    };
+  } catch (error) {
+    console.error('OpenAI Quiz Assistance Error:', error);
+    return {
+      success: false,
+      error: error.message || 'Erro ao gerar assistência do quiz'
+    };
+  }
+}
+
 module.exports = {
   chat,
   generateFeedback,
   analyzeProgress,
+  generateQuizAssistance,
   isConfigured
 };

@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { httpClient } from '@/services/api';
 import type { DevelopmentDomain, DevelopmentQuestion } from '@/types/assessment';
 
 interface QuizAssistanceResponse {
@@ -11,6 +10,7 @@ interface QuizAssistanceResponse {
 
 /**
  * Hook for generating personalized quiz assistance based on domain and questions
+ * Migrated from Supabase Edge Function to backend endpoint POST /api/journey/quiz-assistant
  */
 export function useQuizAssistant() {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +35,6 @@ export function useQuizAssistant() {
       setIsLoading(true);
       setError(null);
 
-      // Prepare the request payload
       const prompt = customPrompt || `Preciso de sugestões de atividades para o domínio ${domain}`;
       
       const payload = {
@@ -45,25 +44,21 @@ export function useQuizAssistant() {
         prompt
       };
 
-      // Call the Supabase Edge Function
-      const { data: responseData, error: fnError } = await supabase.functions.invoke(
-        'quiz-assistant',
-        {
-          body: JSON.stringify(payload)
-        }
+      const response = await httpClient.post<QuizAssistanceResponse>(
+        '/journey/quiz-assistant',
+        payload
       );
 
-      if (fnError) {
-        throw new Error(`Error calling quiz-assistant function: ${fnError.message}`);
+      if (!response.success) {
+        throw new Error(response.error || 'Erro ao chamar quiz-assistant');
       }
 
-      if (!responseData) {
-        throw new Error('No data received from the quiz-assistant function');
+      if (!response.data) {
+        throw new Error('Nenhum dado recebido do quiz-assistant');
       }
 
-      const typedResponse = responseData as QuizAssistanceResponse;
-      setData(typedResponse);
-      return typedResponse;
+      setData(response.data);
+      return response.data;
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error occurred');
       setError(error);

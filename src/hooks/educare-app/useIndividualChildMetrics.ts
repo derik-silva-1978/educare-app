@@ -1,8 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { httpClient } from '@/services/api';
 import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 import { useSelectedChild } from '@/contexts/SelectedChildContext';
 
+/**
+ * Hook para calcular métricas de progresso de desenvolvimento de uma criança
+ * Migrado de Supabase Edge Function para backend endpoint GET /api/dashboard/child-progress/:childId
+ */
 export const useIndividualChildMetrics = () => {
   const { user } = useAuth();
   const { selectedChildId } = useSelectedChild();
@@ -12,19 +16,13 @@ export const useIndividualChildMetrics = () => {
     queryFn: async () => {
       if (!selectedChildId || !user?.id) return null;
 
-      // Chamar Edge Function para calcular módulos individuais
-      const { data, error } = await supabase.functions.invoke('calculate-child-progress', {
-        body: {
-          child_id: selectedChildId,
-          user_id: user.id,
-          calculate_modules: true
-        }
-      });
+      const response = await httpClient.get(`/dashboard/child-progress/${selectedChildId}`);
 
-      if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || 'Failed to calculate modules');
+      if (!response.success) {
+        throw new Error(response.error || 'Failed to calculate modules');
+      }
 
-      return data.data;
+      return response.data;
     },
     enabled: !!selectedChildId && !!user?.id,
   });

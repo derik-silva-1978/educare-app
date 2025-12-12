@@ -283,4 +283,42 @@ router.post('/:childId/chat', verifyToken, titiNautaController.chat);
  */
 router.get('/:childId/analyze', verifyToken, titiNautaController.analyzeProgress);
 
+/**
+ * @swagger
+ * /api/journey/quiz-assistant:
+ *   post:
+ *     summary: Gera sugestões de atividades para domínios de desenvolvimento
+ *     tags: [TitiNauta]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - domain
+ *             properties:
+ *               domain:
+ *                 type: string
+ *                 description: Domínio de desenvolvimento (motor, language, cognitive, social, emotional, sensory)
+ *               questions:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *               studentContext:
+ *                 type: string
+ *               prompt:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Sugestões geradas com sucesso
+ *       400:
+ *         description: Domínio não fornecido
+ *       503:
+ *         description: Serviço de IA não configurado
+ */
+router.post('/quiz-assistant', verifyToken, titiNautaController.quizAssistant);
+
 module.exports = router;

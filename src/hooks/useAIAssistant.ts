@@ -76,14 +76,11 @@ export const useAIAssistant = () => {
     try {
       // Call TitiNauta chat endpoint
       const response = await httpClient.post<{
-        success: boolean;
-        data: {
-          message: string;
-          usage?: {
-            prompt_tokens: number;
-            completion_tokens: number;
-            total_tokens: number;
-          };
+        message: string;
+        usage?: {
+          prompt_tokens: number;
+          completion_tokens: number;
+          total_tokens: number;
         };
       }>('journey/chat', {
         message: prompt,
@@ -92,13 +89,13 @@ export const useAIAssistant = () => {
         childContext: contextToSend
       });
 
-      if (!response.success || !response.data?.data?.message) {
-        throw new Error(response.data?.error || 'Failed to get response from AI assistant');
+      if (!response.success || !response.data?.message) {
+        throw new Error(response.error || 'Failed to get response from AI assistant');
       }
 
       return {
-        response: response.data.data.message,
-        usage: response.data.data.usage,
+        response: response.data.message,
+        usage: response.data.usage,
         model: 'gpt-4o-mini',
         assistantType: 'titibot',
         isDataDriven: !!contextToSend
@@ -220,20 +217,25 @@ export const useAIAssistant = () => {
         includeDomainExpertise: !!domain
       };
 
-      const { data, error: apiError } = await supabase.functions.invoke('ai-assistant', {
-        body: {
-          prompt,
-          options,
-          childContext: childContextData
-        }
+      const response = await httpClient.post<{
+        message: string;
+        usage?: {
+          prompt_tokens: number;
+          completion_tokens: number;
+          total_tokens: number;
+        };
+      }>('journey/chat', {
+        message: prompt,
+        conversationHistory: [],
+        options,
+        childContext: childContextData
       });
 
-      if (apiError) {
-        throw new Error(apiError.message || 'Failed to generate insight');
+      if (!response.success || !response.data?.message) {
+        throw new Error(response.error || 'Failed to generate insight');
       }
 
-      const response = data as AIAssistantResponse;
-      return response.response;
+      return response.data.message;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);

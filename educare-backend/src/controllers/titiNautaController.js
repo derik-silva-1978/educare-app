@@ -583,3 +583,56 @@ exports.getAIStatus = async (req, res) => {
     });
   }
 };
+
+/**
+ * Quiz Assistant - Gera sugestões de atividades para domínios de desenvolvimento
+ * Migrado de Supabase Edge Function para backend Node.js
+ */
+exports.quizAssistant = async (req, res) => {
+  try {
+    const { domain, questions, studentContext, prompt } = req.body;
+
+    if (!domain) {
+      return res.status(400).json({
+        success: false,
+        error: 'Domínio de desenvolvimento não fornecido'
+      });
+    }
+
+    if (!openaiService.isConfigured()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Serviço de IA não configurado'
+      });
+    }
+
+    const result = await openaiService.generateQuizAssistance(
+      domain,
+      questions,
+      studentContext,
+      prompt
+    );
+
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        error: result.error || 'Erro ao gerar assistência'
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        answer: result.answer,
+        suggestions: result.suggestions,
+        resources: result.resources
+      }
+    });
+  } catch (error) {
+    console.error('Erro no quiz assistant:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao processar solicitação'
+    });
+  }
+};

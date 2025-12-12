@@ -455,6 +455,172 @@ exports.getRevenueAnalytics = async (req, res) => {
   }
 };
 
+/**
+ * Calcula o progresso dos módulos de desenvolvimento de uma criança
+ * Migrado de Supabase Edge Function para backend Node.js
+ */
+exports.getChildProgress = async (req, res) => {
+  try {
+    const { childId } = req.params;
+    const userId = req.user.id;
+
+    if (!childId) {
+      return res.status(400).json({
+        success: false,
+        error: 'ID da criança não fornecido'
+      });
+    }
+
+    const profile = await Profile.findOne({ where: { userId } });
+    
+    if (!profile) {
+      return res.status(403).json({
+        success: false,
+        error: 'Perfil não encontrado'
+      });
+    }
+
+    const child = await Child.findOne({
+      where: {
+        id: childId,
+        profileId: profile.id
+      }
+    });
+    
+    if (!child) {
+      return res.status(404).json({
+        success: false,
+        error: 'Criança não encontrada ou sem permissão de acesso'
+      });
+    }
+
+    const birthDate = new Date(child.birthDate);
+    const today = new Date();
+    const ageInMonths = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24 * 30.44));
+    const ageInWeeks = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24 * 7));
+
+    const MODULE_DEFINITIONS = [
+      { id: 1, name: '0-3 meses', age_min_months: 0, age_max_months: 3 },
+      { id: 2, name: '4-6 meses', age_min_months: 4, age_max_months: 6 },
+      { id: 3, name: '7-9 meses', age_min_months: 7, age_max_months: 9 },
+      { id: 4, name: '10-12 meses', age_min_months: 10, age_max_months: 12 },
+      { id: 5, name: '13-18 meses', age_min_months: 13, age_max_months: 18 },
+      { id: 6, name: '19-24 meses', age_min_months: 19, age_max_months: 24 },
+      { id: 7, name: '25-36 meses', age_min_months: 25, age_max_months: 36 },
+      { id: 8, name: '37-48 meses', age_min_months: 37, age_max_months: 48 },
+      { id: 9, name: '49-60 meses', age_min_months: 49, age_max_months: 60 },
+      { id: 10, name: '61-72 meses', age_min_months: 61, age_max_months: 72 }
+    ];
+
+    const currentModuleIndex = MODULE_DEFINITIONS.findIndex(
+      m => ageInMonths >= m.age_min_months && ageInMonths <= m.age_max_months
+    );
+
+    const currentModule = currentModuleIndex >= 0 ? MODULE_DEFINITIONS[currentModuleIndex] : null;
+    const nextModule = currentModuleIndex >= 0 && currentModuleIndex < MODULE_DEFINITIONS.length - 1 
+      ? MODULE_DEFINITIONS[currentModuleIndex + 1] 
+      : null;
+
+    const completedModules = currentModuleIndex >= 0 ? currentModuleIndex : 0;
+    const totalModules = MODULE_DEFINITIONS.length;
+
+    const { JourneyBotResponse, JourneyBotQuestion } = require('../models');
+    
+    let currentModuleProgress = 0;
+    let answeredQuestions = 0;
+    let totalQuestions = 0;
+
+    if (currentModule) {
+      try {
+        const questionsInModule = await JourneyBotQuestion.count({
+          where: {
+            meta_min_months: { [Op.gte]: currentModule.age_min_months },
+            meta_max_months: { [Op.lte]: currentModule.age_max_months },
+            is_active: true
+          }
+        });
+        totalQuestions = questionsInModule;
+
+        const answeredInModule = await JourneyBotResponse.count({
+          where: {
+            child_id: childId
+          },
+          include: [{
+            model: JourneyBotQuestion,
+            as: 'question',
+            where: {
+              meta_min_months: { [Op.gte]: currentModule.age_min_months },
+              meta_max_months: { [Op.lte]: currentModule.age_max_months }
+            },
+            required: true
+          }]
+        });
+        answeredQuestions = answeredInModule;
+
+        currentModuleProgress = totalQuestions > 0 
+          ? Math.round((answeredQuestions / totalQuestions) * 100) 
+          : 0;
+      } catch (queryError) {
+        console.warn('Erro ao calcular progresso do módulo:', queryError);
+        currentModuleProgress = 0;
+      }
+    }
+
+    const overallProgress = totalModules > 0 
+      ? Math.round(((completedModules + (currentModuleProgress / 100)) / totalModules) * 100) 
+      : 0;
+
+    const modules = MODULE_DEFINITIONS.map((module, index) => {
+      let status = 'pending';
+      let completion = 0;
+
+      if (index < currentModuleIndex) {
+        status = 'completed';
+        completion = 100;
+      } else if (index === currentModuleIndex) {
+        status = 'in_progress';
+        completion = currentModuleProgress;
+      }
+
+      return {
+        ...module,
+        status,
+        completion_percentage: completion
+      };
+    });
+
+    return res.json({
+      success: true,
+      data: {
+        child_id: childId,
+        age_in_months: ageInMonths,
+        age_in_weeks: ageInWeeks,
+        completed_modules: completedModules,
+        total_modules: totalModules,
+        completion_percentage: overallProgress,
+        current_module: currentModule ? {
+          ...currentModule,
+          module_name: currentModule.name,
+          completion_percentage: currentModuleProgress,
+          total_questions: totalQuestions,
+          answered_questions: answeredQuestions
+        } : null,
+        next_module: nextModule ? {
+          ...nextModule,
+          module_name: nextModule.name
+        } : null,
+        modules
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao calcular progresso da criança:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao calcular progresso'
+    });
+  }
+};
+
 exports.getBabyHealthSummary = async (req, res) => {
   try {
     const userId = req.user.id;
