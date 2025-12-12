@@ -52,6 +52,12 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 - **Knowledge Base Ingestion**: Aligned frontend form to send required fields (`title`, `source_type`, `knowledge_category`) for successful document uploads
 - **Error Handling**: Backend returns HTTP 400 for validation errors, HTTP 503 for database connection issues (instead of generic 500)
 - **File Search**: End-to-end document indexing and RAG queries working with OpenAI File Search
+- **Hybrid Ingestion Timeouts** (Dec 12): Fixed infinite loading issue in document uploads by adding:
+  - Gemini OCR timeout: 120 seconds (2 min) per document
+  - Gemini Embedding timeout: 30 seconds per chunk
+  - Total ingestion timeout: 600 seconds (10 min) per upload
+  - Proper error handling for timeout scenarios
+  - File: `educare-backend/src/services/hybridIngestionService.js`
 
 ### Development Notes
 - **OpenAI SDK v6 Breaking Changes**: 

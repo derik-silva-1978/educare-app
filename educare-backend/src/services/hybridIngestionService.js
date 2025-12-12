@@ -5,6 +5,21 @@ const { v4: uuidv4 } = require('uuid');
 const ENABLE_GEMINI = process.env.ENABLE_GEMINI_RAG !== 'false';
 const ENABLE_QDRANT = process.env.ENABLE_QDRANT_RAG !== 'false';
 
+// Timeouts em ms
+const GEMINI_OCR_TIMEOUT = 120000; // 2 minutos para OCR
+const GEMINI_EMBEDDING_TIMEOUT = 30000; // 30 segundos por embedding
+const INGESTION_TOTAL_TIMEOUT = 600000; // 10 minutos total
+
+// Promisecom timeout
+function withTimeout(promise, timeoutMs, operationName) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`Timeout após ${timeoutMs}ms em ${operationName}`)), timeoutMs)
+    )
+  ]);
+}
+
 async function generateEmbedding(text) {
   try {
     const { GoogleGenAI } = require('@google/genai');
@@ -18,10 +33,14 @@ async function generateEmbedding(text) {
 
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     
-    const result = await ai.models.embedContent({
-      model: 'text-embedding-004',
-      content: text
-    });
+    const result = await withTimeout(
+      ai.models.embedContent({
+        model: 'text-embedding-004',
+        content: text
+      }),
+      GEMINI_EMBEDDING_TIMEOUT,
+      'Gemini embedding'
+    );
 
     return {
       success: true,
@@ -58,22 +77,26 @@ async function extractTextFromFile(filePath, mimeType) {
       const fileBuffer = fs.readFileSync(filePath);
       const base64Data = fileBuffer.toString('base64');
       
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [{
-          parts: [
-            { 
-              inlineData: { 
-                mimeType: mimeType, 
-                data: base64Data 
-              } 
-            },
-            { 
-              text: 'Extraia todo o texto deste documento. Inclua texto de tabelas, imagens e gráficos. Retorne apenas o texto extraído, sem formatação adicional.' 
-            }
-          ]
-        }]
-      });
+      const response = await withTimeout(
+        ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: [{
+            parts: [
+              { 
+                inlineData: { 
+                  mimeType: mimeType, 
+                  data: base64Data 
+                } 
+              },
+              { 
+                text: 'Extraia todo o texto deste documento. Inclua texto de tabelas, imagens e gráficos. Retorne apenas o texto extraído, sem formatação adicional.' 
+              }
+            ]
+          }]
+        }),
+        GEMINI_OCR_TIMEOUT,
+        'Gemini OCR'
+      );
       
       return { success: true, text: response.text };
     }
@@ -127,87 +150,104 @@ async function ingestDocument(filePath, fileName, metadata = {}) {
 
   console.log(`[HybridIngestion] Iniciando ingestão: ${fileName}`);
 
-  if (ENABLE_GEMINI && geminiFileSearchService.isConfigured()) {
-    try {
-      console.log(`[HybridIngestion] → Gemini File Search...`);
-      const geminiResult = await geminiFileSearchService.uploadDocument(filePath, fileName, metadata);
-      results.gemini = geminiResult;
-      
-      if (geminiResult.success) {
-        results.providers.push('gemini');
-        metadata.gemini_file_id = geminiResult.gemini_file_id;
-      }
-    } catch (error) {
-      console.error('[HybridIngestion] Erro no Gemini:', error.message);
-      results.gemini = { success: false, error: error.message };
-    }
-  }
+  try {
+    // Timeout geral para toda a ingestão
+    await withTimeout(
+      (async () => {
+        if (ENABLE_GEMINI && geminiFileSearchService.isConfigured()) {
+          try {
+            console.log(`[HybridIngestion] → Gemini File Search...`);
+            const geminiResult = await geminiFileSearchService.uploadDocument(filePath, fileName, metadata);
+            results.gemini = geminiResult;
+            
+            if (geminiResult.success) {
+              results.providers.push('gemini');
+              metadata.gemini_file_id = geminiResult.gemini_file_id;
+            }
+          } catch (error) {
+            console.error('[HybridIngestion] Erro no Gemini:', error.message);
+            results.gemini = { success: false, error: error.message };
+          }
+        }
 
-  if (ENABLE_QDRANT && qdrantService.isConfigured()) {
-    try {
-      console.log(`[HybridIngestion] → Qdrant embeddings com extração de texto...`);
-      
-      const parentDocumentId = metadata.document_id || uuidv4();
-      const mimeType = metadata.mime_type || 'application/pdf';
-      
-      const extractionResult = await extractTextFromFile(filePath, mimeType);
-      
-      if (!extractionResult.success) {
-        console.warn(`[HybridIngestion] Extração de texto falhou: ${extractionResult.error}`);
-        results.qdrant = { success: false, error: extractionResult.error };
-      } else {
-        const extractedText = extractionResult.text;
-        console.log(`[HybridIngestion] Texto extraído: ${extractedText.length} caracteres`);
-        
-        const chunks = chunkText(extractedText, 1000, 200);
-        console.log(`[HybridIngestion] Chunks criados: ${chunks.length}`);
-        
-        const documentsToIndex = [];
-        
-        for (let i = 0; i < chunks.length; i++) {
-          const chunk = chunks[i];
-          const chunkId = `${parentDocumentId}_chunk_${i}`;
-          
-          const embeddingResult = await generateEmbedding(chunk);
-          
-          if (embeddingResult.success) {
-            documentsToIndex.push({
-              id: chunkId,
-              embedding: embeddingResult.embedding,
-              title: metadata.title || fileName,
-              description: metadata.description,
-              source_type: metadata.source_type,
-              knowledge_category: metadata.knowledge_category,
-              age_range: metadata.age_range,
-              domain: metadata.domain,
-              chunk_index: i,
-              parent_document_id: parentDocumentId,
-              content_preview: chunk.substring(0, 500)
-            });
+        if (ENABLE_QDRANT && qdrantService.isConfigured()) {
+          try {
+            console.log(`[HybridIngestion] → Qdrant embeddings com extração de texto...`);
+            
+            const parentDocumentId = metadata.document_id || uuidv4();
+            const mimeType = metadata.mime_type || 'application/pdf';
+            
+            const extractionResult = await extractTextFromFile(filePath, mimeType);
+            
+            if (!extractionResult.success) {
+              console.warn(`[HybridIngestion] Extração de texto falhou: ${extractionResult.error}`);
+              results.qdrant = { success: false, error: extractionResult.error };
+            } else {
+              const extractedText = extractionResult.text;
+              console.log(`[HybridIngestion] Texto extraído: ${extractedText.length} caracteres`);
+              
+              const chunks = chunkText(extractedText, 1000, 200);
+              console.log(`[HybridIngestion] Chunks criados: ${chunks.length}`);
+              
+              const documentsToIndex = [];
+              
+              for (let i = 0; i < chunks.length; i++) {
+                const chunk = chunks[i];
+                const chunkId = `${parentDocumentId}_chunk_${i}`;
+                
+                const embeddingResult = await generateEmbedding(chunk);
+                
+                if (embeddingResult.success) {
+                  documentsToIndex.push({
+                    id: chunkId,
+                    embedding: embeddingResult.embedding,
+                    title: metadata.title || fileName,
+                    description: metadata.description,
+                    source_type: metadata.source_type,
+                    knowledge_category: metadata.knowledge_category,
+                    age_range: metadata.age_range,
+                    domain: metadata.domain,
+                    chunk_index: i,
+                    parent_document_id: parentDocumentId,
+                    content_preview: chunk.substring(0, 500)
+                  });
+                } else {
+                  console.warn(`[HybridIngestion] Falha ao gerar embedding para chunk ${i}: ${embeddingResult.error}`);
+                }
+              }
+              
+              if (documentsToIndex.length > 0) {
+                const batchResult = await qdrantService.batchUpsert(documentsToIndex);
+                
+                if (batchResult.success) {
+                  results.providers.push('qdrant');
+                  results.chunks_indexed = documentsToIndex.length;
+                  results.qdrant = { 
+                    success: true, 
+                    chunks_count: documentsToIndex.length,
+                    parent_document_id: parentDocumentId
+                  };
+                } else {
+                  results.qdrant = batchResult;
+                }
+              } else {
+                results.qdrant = { success: false, error: 'Nenhum chunk pôde ser indexado' };
+              }
+            }
+          } catch (error) {
+            console.error('[HybridIngestion] Erro no Qdrant:', error.message);
+            results.qdrant = { success: false, error: error.message };
           }
         }
-        
-        if (documentsToIndex.length > 0) {
-          const batchResult = await qdrantService.batchUpsert(documentsToIndex);
-          
-          if (batchResult.success) {
-            results.providers.push('qdrant');
-            results.chunks_indexed = documentsToIndex.length;
-            results.qdrant = { 
-              success: true, 
-              chunks_count: documentsToIndex.length,
-              parent_document_id: parentDocumentId
-            };
-          } else {
-            results.qdrant = batchResult;
-          }
-        } else {
-          results.qdrant = { success: false, error: 'Nenhum chunk pôde ser indexado' };
-        }
-      }
-    } catch (error) {
-      console.error('[HybridIngestion] Erro no Qdrant:', error.message);
-      results.qdrant = { success: false, error: error.message };
+      })(),
+      INGESTION_TOTAL_TIMEOUT,
+      'Ingestão híbrida completa'
+    );
+  } catch (timeoutError) {
+    console.error('[HybridIngestion] Timeout na ingestão:', timeoutError.message);
+    results.success = results.providers.length > 0;
+    if (results.providers.length === 0) {
+      results.qdrant = { success: false, error: timeoutError.message };
     }
   }
 
