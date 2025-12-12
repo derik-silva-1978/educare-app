@@ -328,11 +328,12 @@ export const AIChat: React.FC<AIChatProps> = ({
                   className="flex-1 min-h-[60px] resize-none border-slate-300 text-slate-900"
                 />
                 <Button
-                  className="ml-2 h-auto bg-primary hover:bg-primary-600 text-white"
+                  className="ml-2 h-auto min-w-[48px] px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white shadow-md"
                   onClick={handleSend}
                   disabled={!input.trim() || isLoading}
+                  title="Enviar mensagem"
                 >
-                  <Send className="h-4 w-4" />
+                  <Send className="h-5 w-5" />
                 </Button>
               </div>
               

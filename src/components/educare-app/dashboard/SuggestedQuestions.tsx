@@ -36,12 +36,16 @@ const SuggestedQuestions: React.FC<SuggestedQuestionsProps> = ({
       setIsLoading(true);
       try {
         const week = childAgeInWeeks || 12;
-        const response = await httpClient.get<{ data: FAQ[] }>(
+        const response = await httpClient.get<{ success: boolean; data: FAQ[]; count: number; week: number }>(
           `faqs/suggestions?week=${week}`
         );
         
         if (response.success && response.data) {
-          setQuestions(response.data.slice(0, 5));
+          const faqs = Array.isArray(response.data) ? response.data : [];
+          const uniqueFaqs = faqs.filter((faq, index, self) => 
+            index === self.findIndex(f => f.id === faq.id || f.question_text === faq.question_text)
+          );
+          setQuestions(uniqueFaqs.slice(0, 5));
         }
       } catch (error) {
         console.error('Erro ao carregar perguntas sugeridas:', error);
