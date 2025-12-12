@@ -1,11 +1,10 @@
 /**
- * Knowledge Base Management
- * Gestão de ingestão e documentos do RAG
- * Exclusivo para Owner
+ * Knowledge Base Management - Versão Modernizada
+ * Interface amigável com indicadores de provedores RAG
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Upload, Trash2, RefreshCw, CheckCircle, AlertCircle, FileText, X, Loader2, Database, Search, Filter } from 'lucide-react';
+import { Upload, Trash2, RefreshCw, CheckCircle, AlertCircle, FileText, X, Loader2, Database, Search, Filter, Zap, Brain, Cloud } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,6 +33,11 @@ interface KBDocument {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  metadata?: {
+    rag_providers?: string[];
+    gemini_file_id?: string;
+    qdrant_document_id?: string;
+  };
 }
 
 interface UploadFormData {
@@ -79,6 +83,25 @@ const DOMAINS = [
   { value: 'vacinas', label: 'Vacinas' },
 ];
 
+const ProviderBadge = ({ provider }: { provider: string }) => {
+  const config = {
+    gemini: { icon: Zap, label: 'Gemini OCR', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+    qdrant: { icon: Brain, label: 'Qdrant Embeddings', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+    openai: { icon: Cloud, label: 'OpenAI File Search', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+  };
+
+  const prov = config[provider as keyof typeof config];
+  if (!prov) return null;
+
+  const Icon = prov.icon;
+  return (
+    <Badge className={prov.color}>
+      <Icon className="w-3 h-3 mr-1" />
+      {prov.label}
+    </Badge>
+  );
+};
+
 const KnowledgeBaseManagement: React.FC = () => {
   const { hasRole } = useCustomAuth();
   const { toast } = useToast();
@@ -88,6 +111,7 @@ const KnowledgeBaseManagement: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [documents, setDocuments] = useState<KBDocument[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [dragActive, setDragActive] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -137,36 +161,61 @@ const KnowledgeBaseManagement: React.FC = () => {
     }
   };
 
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const validExtensions = ['.pdf', '.txt', '.csv', '.json', '.md', '.doc', '.docx'];
-      const fileExt = '.' + file.name.split('.').pop()?.toLowerCase();
-      
-      if (!validExtensions.includes(fileExt)) {
-        toast({
-          title: 'Arquivo inválido',
-          description: 'Formatos aceitos: PDF, TXT, CSV, JSON, MD, DOC, DOCX',
-          variant: 'destructive',
-        });
-        return;
-      }
+      processFile(file);
+    }
+  };
 
-      if (file.size > 50 * 1024 * 1024) {
-        toast({
-          title: 'Arquivo muito grande',
-          description: 'O tamanho máximo permitido é 50MB',
-          variant: 'destructive',
-        });
-        return;
-      }
+  const processFile = (file: File) => {
+    const validExtensions = ['.pdf', '.txt', '.csv', '.json', '.md', '.doc', '.docx', '.png', '.jpg', '.jpeg', '.webp'];
+    const fileExt = '.' + file.name.split('.').pop()?.toLowerCase();
+    
+    if (!validExtensions.includes(fileExt)) {
+      toast({
+        title: 'Arquivo inválido',
+        description: 'Formatos aceitos: PDF, TXT, CSV, JSON, MD, DOC, DOCX, PNG, JPG, JPEG, WEBP',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-      setSelectedFile(file);
-      
-      if (!formData.title) {
-        const titleFromFile = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
-        setFormData(prev => ({ ...prev, title: titleFromFile }));
-      }
+    if (file.size > 50 * 1024 * 1024) {
+      toast({
+        title: 'Arquivo muito grande',
+        description: 'O tamanho máximo permitido é 50MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+    
+    if (!formData.title) {
+      const titleFromFile = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+      setFormData(prev => ({ ...prev, title: titleFromFile }));
     }
   };
 
@@ -224,11 +273,13 @@ const KnowledgeBaseManagement: React.FC = () => {
       if (response.ok && result.success) {
         setUploadProgress(100);
         
+        const providerInfo = result.data?.rag_providers?.length > 0 
+          ? `indexado em: ${result.data.rag_providers.join(', ')}`
+          : 'salvo localmente';
+        
         toast({
-          title: 'Documento enviado com sucesso!',
-          description: result.data?.indexed 
-            ? `"${formData.title}" foi indexado no sistema de busca.`
-            : `"${formData.title}" foi salvo. ${result.data?.warning || ''}`,
+          title: '✨ Documento enviado com sucesso!',
+          description: `"${formData.title}" foi ${providerInfo}.`,
         });
         
         setSelectedFile(null);
@@ -346,96 +397,119 @@ const KnowledgeBaseManagement: React.FC = () => {
   const stats = {
     total: documents.length,
     active: documents.filter(d => d.is_active).length,
-    indexed: documents.filter(d => d.file_search_id).length,
+    indexed: documents.filter(d => d.file_search_id || d.metadata?.rag_providers?.length).length,
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <Database className="h-8 w-8 text-blue-600" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
+              <Database className="h-9 w-9 text-blue-600" />
               Base de Conhecimento
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Gerencie os documentos que alimentam o assistente TitiNauta
+            <p className="text-gray-600 dark:text-gray-400 mt-2 text-lg">
+              Gerencie os documentos que alimentam TitiNauta com inteligência moderna
             </p>
           </div>
-          <Button onClick={loadDocuments} disabled={loading} variant="outline" size="sm">
+          <Button onClick={loadDocuments} disabled={loading} variant="outline" size="sm" className="hover:bg-blue-50 dark:hover:bg-gray-800">
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Atualizar
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-white dark:bg-gray-800">
-            <CardContent className="p-4">
+        {/* Stats Cards com Gradientes */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total de Documentos</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total de Documentos</p>
+                  <p className="text-4xl font-bold text-gray-900 dark:text-white mt-2">{stats.total}</p>
                 </div>
-                <FileText className="h-10 w-10 text-blue-500 opacity-50" />
+                <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
+                  <FileText className="h-6 w-6 text-blue-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-white dark:bg-gray-800">
-            <CardContent className="p-4">
+          
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Ativos</p>
-                  <p className="text-3xl font-bold text-green-600">{stats.active}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Documentos Ativos</p>
+                  <p className="text-4xl font-bold text-green-600 mt-2">{stats.active}</p>
                 </div>
-                <CheckCircle className="h-10 w-10 text-green-500 opacity-50" />
+                <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg">
+                  <CheckCircle className="h-6 w-6 text-green-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-white dark:bg-gray-800">
-            <CardContent className="p-4">
+          
+          <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-shadow">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Indexados (OpenAI)</p>
-                  <p className="text-3xl font-bold text-purple-600">{stats.indexed}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Indexados</p>
+                  <p className="text-4xl font-bold text-purple-600 mt-2">{stats.indexed}</p>
                 </div>
-                <Search className="h-10 w-10 text-purple-500 opacity-50" />
+                <div className="bg-purple-100 dark:bg-purple-900/30 p-3 rounded-lg">
+                  <Search className="h-6 w-6 text-purple-600" />
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Upload Form */}
-        <Card className="bg-white dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
+        <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <CardHeader className="pb-4 border-b dark:border-gray-700">
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Upload className="h-6 w-6 text-blue-600" />
               Enviar Novo Documento
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Left Column */}
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <Label htmlFor="file-input">Arquivo *</Label>
-                  <div className="mt-1">
-                    <Input
+                  <Label htmlFor="file-input" className="text-base font-semibold">Upload de Arquivo *</Label>
+                  <div 
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                    className={`mt-3 p-8 border-2 border-dashed rounded-lg transition-all cursor-pointer ${
+                      dragActive 
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                        : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
+                    }`}
+                  >
+                    <input
                       id="file-input"
                       type="file"
                       onChange={handleFileChange}
-                      accept=".pdf,.txt,.csv,.json,.md,.doc,.docx"
-                      className="cursor-pointer"
+                      accept=".pdf,.txt,.csv,.json,.md,.doc,.docx,.png,.jpg,.jpeg,.webp"
+                      className="hidden"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      PDF, TXT, CSV, JSON, MD, DOC, DOCX - Máximo 50MB
-                    </p>
+                    <label htmlFor="file-input" className="cursor-pointer text-center">
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-blue-500" />
+                      <p className="font-semibold text-gray-700 dark:text-gray-300">Arraste seu arquivo aqui</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">ou clique para selecionar</p>
+                    </label>
                   </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    PDF, TXT, CSV, JSON, MD, DOC, DOCX, PNG, JPG - Máximo 50MB
+                  </p>
                   {selectedFile && (
-                    <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded flex items-center justify-between">
-                      <span className="text-sm text-blue-700 dark:text-blue-300">
-                        {selectedFile.name} ({formatFileSize(selectedFile.size)})
+                    <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between border border-blue-200 dark:border-blue-900">
+                      <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">
+                        ✓ {selectedFile.name} ({formatFileSize(selectedFile.size)})
                       </span>
                       <Button
                         variant="ghost"
@@ -453,38 +527,38 @@ const KnowledgeBaseManagement: React.FC = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="title">Título *</Label>
+                  <Label htmlFor="title" className="font-semibold">Título *</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
                     placeholder="Ex: Guia de Desenvolvimento Motor 0-6 meses"
-                    className="mt-1"
+                    className="mt-2 border-gray-300 dark:border-gray-600"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="description">Descrição</Label>
+                  <Label htmlFor="description" className="font-semibold">Descrição</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     placeholder="Breve descrição do conteúdo do documento..."
-                    className="mt-1"
+                    className="mt-2 border-gray-300 dark:border-gray-600"
                     rows={3}
                   />
                 </div>
               </div>
 
               {/* Right Column */}
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div>
-                  <Label>Base de Conhecimento *</Label>
+                  <Label className="font-semibold">Base de Conhecimento *</Label>
                   <Select
                     value={formData.knowledge_category}
                     onValueChange={(value) => handleInputChange('knowledge_category', value)}
                   >
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-2 border-gray-300 dark:border-gray-600">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -498,12 +572,12 @@ const KnowledgeBaseManagement: React.FC = () => {
                 </div>
 
                 <div>
-                  <Label>Tipo de Fonte *</Label>
+                  <Label className="font-semibold">Tipo de Fonte *</Label>
                   <Select
                     value={formData.source_type}
                     onValueChange={(value) => handleInputChange('source_type', value)}
                   >
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-2 border-gray-300 dark:border-gray-600">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -518,12 +592,12 @@ const KnowledgeBaseManagement: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label>Faixa Etária</Label>
+                    <Label className="font-semibold">Faixa Etária</Label>
                     <Select
                       value={formData.age_range}
                       onValueChange={(value) => handleInputChange('age_range', value)}
                     >
-                      <SelectTrigger className="mt-1">
+                      <SelectTrigger className="mt-2 border-gray-300 dark:border-gray-600">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -537,12 +611,12 @@ const KnowledgeBaseManagement: React.FC = () => {
                   </div>
 
                   <div>
-                    <Label>Domínio</Label>
+                    <Label className="font-semibold">Domínio</Label>
                     <Select
                       value={formData.domain}
                       onValueChange={(value) => handleInputChange('domain', value)}
                     >
-                      <SelectTrigger className="mt-1">
+                      <SelectTrigger className="mt-2 border-gray-300 dark:border-gray-600">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -557,35 +631,36 @@ const KnowledgeBaseManagement: React.FC = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="tags">Tags (separadas por vírgula)</Label>
+                  <Label htmlFor="tags" className="font-semibold">Tags (separadas por vírgula)</Label>
                   <Input
                     id="tags"
                     value={formData.tags}
                     onChange={(e) => handleInputChange('tags', e.target.value)}
                     placeholder="desenvolvimento, motor, bebê"
-                    className="mt-1"
+                    className="mt-2 border-gray-300 dark:border-gray-600"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Upload Progress */}
             {uploading && (
-              <div className="mt-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Enviando documento...</span>
-                  <span className="text-sm font-medium">{uploadProgress}%</span>
+              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                    <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Indexando documento...</span>
+                  </div>
+                  <span className="text-sm font-bold text-blue-700 dark:text-blue-300">{uploadProgress}%</span>
                 </div>
                 <Progress value={uploadProgress} className="h-2" />
               </div>
             )}
 
-            {/* Submit Button */}
             <div className="mt-6 flex justify-end">
               <Button
                 onClick={handleUpload}
                 disabled={uploading || !selectedFile}
-                className="bg-blue-600 hover:bg-blue-700 min-w-[200px]"
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-8"
               >
                 {uploading ? (
                   <>
@@ -603,135 +678,113 @@ const KnowledgeBaseManagement: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Documents List */}
-        <Card className="bg-white dark:bg-gray-800">
-          <CardHeader>
+        {/* Documents List - Card View */}
+        <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
+          <CardHeader className="pb-4 border-b dark:border-gray-700">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <CardTitle>Documentos Cadastrados</CardTitle>
+              <CardTitle className="text-2xl">Documentos Cadastrados</CardTitle>
               <div className="flex gap-2 w-full sm:w-auto">
                 <div className="relative flex-1 sm:flex-initial">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Buscar..."
+                    placeholder="Buscar documentos..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 w-full sm:w-[200px]"
+                    className="pl-10 w-full sm:w-[220px] border-gray-300 dark:border-gray-600"
                   />
                 </div>
-                <Select value={filterCategory} onValueChange={setFilterCategory}>
-                  <SelectTrigger className="w-[140px]">
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    {SOURCE_TYPES.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {loading ? (
-              <div className="text-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-500" />
-                <p className="text-gray-600 dark:text-gray-400">Carregando documentos...</p>
+              <div className="text-center py-16">
+                <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4 text-blue-500" />
+                <p className="text-gray-600 dark:text-gray-400 font-medium">Carregando documentos...</p>
               </div>
             ) : filteredDocs.length === 0 ? (
-              <div className="text-center py-12">
-                <FileText className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400 text-lg">
+              <div className="text-center py-16">
+                <FileText className="w-20 h-20 text-gray-200 dark:text-gray-700 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400 text-lg font-medium">
                   {documents.length === 0 
                     ? 'Nenhum documento cadastrado ainda' 
-                    : 'Nenhum documento encontrado com os filtros atuais'}
+                    : 'Nenhum documento encontrado'}
                 </p>
-                {documents.length === 0 && (
-                  <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">
-                    Use o formulário acima para enviar seu primeiro documento
-                  </p>
-                )}
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="border-b dark:border-gray-700">
-                    <tr>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Título</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Fonte</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Arquivo</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Status</th>
-                      <th className="text-center py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Indexado</th>
-                      <th className="text-right py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y dark:divide-gray-700">
-                    {filteredDocs.map((doc) => (
-                      <tr key={doc.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        <td className="py-3 px-4">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white">{doc.title}</p>
-                            {doc.description && (
-                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">
-                                {doc.description}
-                              </p>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <Badge variant="outline" className="text-xs">
-                            {getSourceLabel(doc.source_type)}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredDocs.map((doc) => (
+                  <div 
+                    key={doc.id} 
+                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md dark:hover:bg-gray-700/50 transition-all"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 dark:text-white truncate text-sm">{doc.title}</h3>
+                        {doc.description && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">{doc.description}</p>
+                        )}
+                      </div>
+                      <Badge variant="outline" className="text-xs flex-shrink-0 ml-2">
+                        {getSourceLabel(doc.source_type).substring(0, 8)}
+                      </Badge>
+                    </div>
+
+                    {/* Providers */}
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {doc.metadata?.rag_providers?.map((provider) => (
+                        <ProviderBadge key={provider} provider={provider} />
+                      ))}
+                      {!doc.metadata?.rag_providers?.length && doc.file_search_id && (
+                        <ProviderBadge provider="openai" />
+                      )}
+                    </div>
+
+                    {/* File Info */}
+                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-3 pb-3 border-b dark:border-gray-700">
+                      <span>{doc.original_filename}</span>
+                      <span>{formatFileSize(doc.file_size)}</span>
+                    </div>
+
+                    {/* Status & Actions */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {doc.is_active ? (
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
+                            ✓ Ativo
                           </Badge>
-                        </td>
-                        <td className="py-3 px-4 text-gray-600 dark:text-gray-400">
-                          <div>
-                            <p className="truncate max-w-[150px]">{doc.original_filename || 'N/A'}</p>
-                            <p className="text-xs text-gray-400">{formatFileSize(doc.file_size)}</p>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          {doc.is_active ? (
-                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                              Ativo
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary">Inativo</Badge>
-                          )}
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          {doc.file_search_id ? (
-                            <CheckCircle className="w-5 h-5 text-purple-500 mx-auto" />
-                          ) : (
-                            <AlertCircle className="w-5 h-5 text-gray-400 mx-auto" />
-                          )}
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button
-                              onClick={() => handleToggleActive(doc.id, doc.is_active)}
-                              variant="ghost"
-                              size="sm"
-                              className={doc.is_active ? 'text-orange-600 hover:text-orange-700' : 'text-green-600 hover:text-green-700'}
-                            >
-                              {doc.is_active ? 'Desativar' : 'Ativar'}
-                            </Button>
-                            <Button
-                              onClick={() => handleDelete(doc.id, doc.title)}
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">
+                            Inativo
+                          </Badge>
+                        )}
+                        {doc.file_search_id || doc.metadata?.rag_providers?.length ? (
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-gray-400" />
+                        )}
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          onClick={() => handleToggleActive(doc.id, doc.is_active)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs h-8"
+                        >
+                          {doc.is_active ? 'Desativar' : 'Ativar'}
+                        </Button>
+                        <Button
+                          onClick={() => handleDelete(doc.id, doc.title)}
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 h-8"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
