@@ -39,6 +39,9 @@ const VaccineHistory = require('./VaccineHistory');
 const OfficialMilestone = require('./OfficialMilestone');
 const MilestoneMapping = require('./MilestoneMapping');
 
+// Modelos de Relatórios de Desenvolvimento
+const ChildDevelopmentReport = require('./ChildDevelopmentReport');
+
 // Modelos do RAG
 const KnowledgeDocument = require('./KnowledgeDocument');
 const KbBaby = require('./KbBaby');
@@ -284,6 +287,20 @@ MilestoneMapping.belongsTo(JourneyBotQuestion, { foreignKey: 'journey_question_i
 User.hasMany(MilestoneMapping, { foreignKey: 'verified_by', as: 'verifiedMappings' });
 MilestoneMapping.belongsTo(User, { foreignKey: 'verified_by', as: 'verifier' });
 
+// === ASSOCIAÇÕES DE RELATÓRIOS DE DESENVOLVIMENTO ===
+
+// Child <-> ChildDevelopmentReport (1:N)
+Child.hasMany(ChildDevelopmentReport, { foreignKey: 'child_id', as: 'developmentReports' });
+ChildDevelopmentReport.belongsTo(Child, { foreignKey: 'child_id', as: 'child' });
+
+// User <-> ChildDevelopmentReport (1:N)
+User.hasMany(ChildDevelopmentReport, { foreignKey: 'user_id', as: 'developmentReports' });
+ChildDevelopmentReport.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// JourneyBotSession <-> ChildDevelopmentReport (1:1)
+JourneyBotSession.hasOne(ChildDevelopmentReport, { foreignKey: 'session_id', as: 'report', constraints: false });
+ChildDevelopmentReport.belongsTo(JourneyBotSession, { foreignKey: 'session_id', as: 'session', constraints: false });
+
 // Exportação dos modelos
 module.exports = {
   sequelize,
@@ -334,5 +351,7 @@ module.exports = {
   VaccineHistory,
   // Modelos de Marcos do Desenvolvimento
   OfficialMilestone,
-  MilestoneMapping
+  MilestoneMapping,
+  // Modelos de Relatórios de Desenvolvimento
+  ChildDevelopmentReport
 };

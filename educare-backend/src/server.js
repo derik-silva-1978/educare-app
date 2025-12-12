@@ -172,6 +172,10 @@ app.use('/api/faqs', faqRoutes);
 const milestonesRoutes = require('./routes/milestonesRoutes');
 app.use('/api/admin/milestones', milestonesRoutes);
 
+// Development Reports routes
+const developmentReportRoutes = require('./routes/developmentReportRoutes');
+app.use('/api/development-reports', developmentReportRoutes);
+
 // n8n Integration routes (v3.0 - Omnicanal)
 const n8nRoutes = require('./routes/n8nRoutes');
 app.use('/api/n8n', n8nRoutes);
