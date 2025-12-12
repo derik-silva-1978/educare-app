@@ -1,8 +1,10 @@
 const KnowledgeDocument = require('../models/KnowledgeDocument');
 const fileSearchService = require('../services/fileSearchService');
+const hybridIngestionService = require('../services/hybridIngestionService');
 const knowledgeBaseRepository = require('../repositories/knowledgeBaseRepository');
 const path = require('path');
 const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
 
 const UPLOAD_DIR = process.env.KNOWLEDGE_UPLOAD_PATH || './uploads/knowledge';
 
@@ -68,11 +70,56 @@ exports.uploadDocument = async (req, res) => {
     fs.renameSync(req.file.path, finalPath);
 
     let fileSearchId = null;
+    let geminiFileId = null;
+    let qdrantDocumentId = null;
     let fileSearchError = null;
+    let hybridProviders = [];
 
-    if (fileSearchService.isConfigured()) {
+    const documentId = uuidv4();
+    const category = knowledge_category || inferCategory(req.body);
+
+    const activeProviders = hybridIngestionService.getActiveProviders();
+    
+    if (activeProviders.length > 0) {
       try {
-        console.log(`[Knowledge] Iniciando indexação do arquivo: ${req.file.originalname} (${req.file.size} bytes)`);
+        console.log(`[Knowledge] Iniciando ingestão híbrida: ${req.file.originalname} (${req.file.size} bytes)`);
+        const ingestionResult = await hybridIngestionService.ingestDocument(
+          finalPath,
+          req.file.originalname,
+          { 
+            document_id: documentId,
+            title, 
+            description,
+            source_type, 
+            age_range, 
+            domain,
+            knowledge_category: category
+          }
+        );
+
+        if (ingestionResult.success) {
+          hybridProviders = ingestionResult.providers;
+          
+          if (ingestionResult.gemini?.success) {
+            geminiFileId = ingestionResult.gemini.gemini_file_id;
+          }
+          
+          if (ingestionResult.qdrant?.success) {
+            qdrantDocumentId = documentId;
+          }
+          
+          console.log(`[Knowledge] ✓ Ingestão híbrida: providers=[${hybridProviders.join(', ')}] (${ingestionResult.ingestion_time_ms}ms)`);
+        } else {
+          fileSearchError = 'Nenhum provedor RAG conseguiu indexar o documento';
+          console.warn(`[Knowledge] ⚠ Falha na ingestão híbrida`);
+        }
+      } catch (ingestionErr) {
+        fileSearchError = ingestionErr.message || 'Erro desconhecido na ingestão';
+        console.error(`[Knowledge] ✗ Exceção na ingestão: ${fileSearchError}`);
+      }
+    } else if (fileSearchService.isConfigured()) {
+      try {
+        console.log(`[Knowledge] Fallback para OpenAI File Search: ${req.file.originalname}`);
         const uploadResult = await fileSearchService.uploadDocumentToFileSearch(
           finalPath,
           req.file.originalname,
@@ -81,17 +128,17 @@ exports.uploadDocument = async (req, res) => {
 
         if (uploadResult.success) {
           fileSearchId = uploadResult.file_search_id;
-          console.log(`[Knowledge] ✓ Documento indexado no File Search: ${fileSearchId} (${uploadResult.upload_time_ms}ms)`);
+          hybridProviders = ['openai'];
+          console.log(`[Knowledge] ✓ Documento indexado no OpenAI: ${fileSearchId}`);
         } else {
           fileSearchError = uploadResult.error;
-          console.warn(`[Knowledge] ⚠ Erro ao indexar no File Search: ${fileSearchError} (${uploadResult.upload_time_ms}ms)`);
         }
       } catch (fileSearchErr) {
         fileSearchError = fileSearchErr.message || 'Erro desconhecido no File Search';
         console.error(`[Knowledge] ✗ Exceção ao indexar: ${fileSearchError}`);
       }
     } else {
-      console.warn('[Knowledge] OpenAI não configurado, documento salvo apenas localmente');
+      console.warn('[Knowledge] Nenhum provedor RAG configurado, documento salvo apenas localmente');
     }
 
     const parsedTags = typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : (tags || []);
@@ -101,7 +148,7 @@ exports.uploadDocument = async (req, res) => {
       title,
       description: description || null,
       source_type,
-      file_search_id: fileSearchId,
+      file_search_id: fileSearchId || geminiFileId,
       file_path: finalPath,
       original_filename: req.file.originalname,
       file_size: req.file.size,
@@ -113,21 +160,23 @@ exports.uploadDocument = async (req, res) => {
       created_by: req.user.id,
       metadata: {
         upload_timestamp: timestamp,
-        file_search_error: fileSearchError
+        file_search_error: fileSearchError,
+        gemini_file_id: geminiFileId,
+        qdrant_document_id: qdrantDocumentId,
+        rag_providers: hybridProviders
       }
     };
 
     // Segmented data (optional, based on knowledge_category)
     let segmentedData = null;
-    const category = knowledge_category || inferCategory(req.body);
 
     if (process.env.ENABLE_SEGMENTED_KB === 'true' && category && ['baby', 'mother', 'professional'].includes(category)) {
       segmentedData = {
         title,
-        content: '',  // Content will be indexed by File Search
+        content: '',
         description: description || null,
         source_type,
-        file_search_id: fileSearchId,
+        file_search_id: fileSearchId || geminiFileId,
         file_path: finalPath,
         original_filename: req.file.originalname,
         file_size: req.file.size,
@@ -137,7 +186,10 @@ exports.uploadDocument = async (req, res) => {
         created_by: req.user.id,
         metadata: {
           upload_timestamp: timestamp,
-          file_search_error: fileSearchError
+          file_search_error: fileSearchError,
+          gemini_file_id: geminiFileId,
+          qdrant_document_id: qdrantDocumentId,
+          rag_providers: hybridProviders
         }
       };
 
@@ -177,7 +229,10 @@ exports.uploadDocument = async (req, res) => {
         title: result.data.legacy.title,
         file_search_id: result.data.legacy.file_search_id,
         file_path: result.data.legacy.file_path,
-        indexed: !!fileSearchId,
+        indexed: hybridProviders.length > 0 || !!fileSearchId,
+        rag_providers: hybridProviders,
+        gemini_file_id: geminiFileId,
+        qdrant_document_id: qdrantDocumentId,
         category: category || 'legado',
         segmented_id: result.data.segmented ? result.data.segmented.id : null,
         warning: fileSearchError ? `Arquivo salvo mas não indexado: ${fileSearchError}` : null
