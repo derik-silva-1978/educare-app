@@ -118,12 +118,19 @@ const ContentManagement: React.FC = () => {
     },
   });
 
+  const invalidateAllContentQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-content'] });
+    queryClient.invalidateQueries({ queryKey: ['welcome-news'] });
+    queryClient.invalidateQueries({ queryKey: ['welcome-trainings'] });
+    queryClient.invalidateQueries({ queryKey: ['welcome-courses'] });
+  };
+
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       return httpClient.post('/api/content', data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-content'] });
+      invalidateAllContentQueries();
       toast.success('Conteúdo criado com sucesso!');
       handleCloseDialog();
     },
@@ -137,7 +144,7 @@ const ContentManagement: React.FC = () => {
       return httpClient.put(`/api/content/${id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-content'] });
+      invalidateAllContentQueries();
       toast.success('Conteúdo atualizado com sucesso!');
       handleCloseDialog();
     },
@@ -151,7 +158,7 @@ const ContentManagement: React.FC = () => {
       return httpClient.delete(`/api/content/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-content'] });
+      invalidateAllContentQueries();
       toast.success('Conteúdo excluído com sucesso!');
     },
     onError: (error: any) => {
@@ -164,7 +171,7 @@ const ContentManagement: React.FC = () => {
       return httpClient.patch(`/api/content/${id}/status`, { status });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-content'] });
+      invalidateAllContentQueries();
       toast.success('Status atualizado com sucesso!');
     },
     onError: (error: any) => {
