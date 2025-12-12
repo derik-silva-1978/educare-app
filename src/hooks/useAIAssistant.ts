@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import httpClient from '@/services/api/httpClient';
 
 export interface AIAssistantOptions {
   model?: 'gpt-4o-mini' | 'gpt-4o';
@@ -74,26 +74,41 @@ export const useAIAssistant = () => {
     const contextToSend = childContextData || childContext;
 
     try {
-      const { data, error: apiError } = await supabase.functions.invoke('ai-assistant', {
-        body: {
-          prompt,
-          options,
-          conversationId,
-          childContext: contextToSend
-        }
+      // Call TitiNauta chat endpoint
+      const response = await httpClient.post<{
+        success: boolean;
+        data: {
+          message: string;
+          usage?: {
+            prompt_tokens: number;
+            completion_tokens: number;
+            total_tokens: number;
+          };
+        };
+      }>('journey/chat', {
+        message: prompt,
+        conversationHistory: [],
+        options,
+        childContext: contextToSend
       });
 
-      if (apiError) {
-        throw new Error(apiError.message || 'Failed to get response from AI assistant');
+      if (!response.success || !response.data?.data?.message) {
+        throw new Error(response.data?.error || 'Failed to get response from AI assistant');
       }
 
-      return data as AIAssistantResponse;
+      return {
+        response: response.data.data.message,
+        usage: response.data.data.usage,
+        model: 'gpt-4o-mini',
+        assistantType: 'titibot',
+        isDataDriven: !!contextToSend
+      } as AIAssistantResponse;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       
       toast({
-        title: 'AI Assistant Error',
+        title: 'Erro ao conectar com TitiNauta',
         description: errorMessage,
         variant: 'destructive'
       });
