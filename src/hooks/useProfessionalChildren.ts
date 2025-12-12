@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 import { useToast } from '@/hooks/use-toast';
+import { httpClient } from '@/services/api/httpClient';
 
 export type ProfessionalChildAccess = {
   childId: string;
@@ -26,46 +26,26 @@ export function useProfessionalChildren(childId?: string) {
       }
       
       try {
-        const { data, error } = await supabase
-          .from('educare_professional_children')
-          .select(`
-            child_id,
-            status,
-            created_at,
-            educare_children(first_name, last_name)
-          `)
-          .eq('professional_id', user.id);
-          
-        if (error) {
-          throw error;
-        }
+        const response = await httpClient.get('/children/professional/children');
+        const backendChildren = response.data.children;
         
-        if (data) {
-          const formattedData: ProfessionalChildAccess[] = data.map((item) => {
-            // Handle the case where educare_children might be null or an array
-            const childData = Array.isArray(item.educare_children) 
-              ? item.educare_children[0] 
-              : item.educare_children;
-            
-            return {
-              childId: item.child_id,
-              childName: childData 
-                ? `${childData.first_name} ${childData.last_name}`
-                : 'Unknown Child',
-              status: item.status as 'pending' | 'approved' | 'rejected',
-              createdAt: item.created_at
-            };
-          });
-          
-          setChildrenAccess(formattedData);
-          
-          // If childId is provided, check if professional has access to this specific child
-          if (childId) {
-            const accessToChild = formattedData.find(
-              child => child.childId === childId && child.status === 'approved'
-            );
-            setHasAccess(!!accessToChild);
-          }
+        const formattedData: ProfessionalChildAccess[] = backendChildren.map((child: any) => {
+          return {
+            childId: child.id,
+            childName: `${child.firstName} ${child.lastName}`,
+            status: child.status as 'pending' | 'approved' | 'rejected',
+            createdAt: child.createdAt
+          };
+        });
+        
+        setChildrenAccess(formattedData);
+        
+        // If childId is provided, check if professional has access to this specific child
+        if (childId) {
+          const accessToChild = formattedData.find(
+            child => child.childId === childId && child.status === 'approved'
+          );
+          setHasAccess(!!accessToChild);
         }
       } catch (error: any) {
         console.error("Error loading professional children:", error.message);

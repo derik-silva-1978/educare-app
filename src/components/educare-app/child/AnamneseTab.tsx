@@ -65,33 +65,25 @@ export const AnamneseTab: React.FC<AnamneseTabProps> = ({ childId }) => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-1">Anamnese</h3>
+        <h3 className="text-lg font-semibold mb-1">
+          Anamnese
+          <span className="ml-2 inline-block px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full font-medium">
+            Em Desenvolvimento
+          </span>
+        </h3>
         <p className="text-muted-foreground text-sm">
           Registro de informações importantes sobre gestação, parto e primeiros dias de vida da criança.
         </p>
       </div>
       
-      {!anamneseData && (
-        <Alert className="bg-blue-50 border-blue-100 text-blue-800">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Informações não registradas</AlertTitle>
-          <AlertDescription>
-            Preencha o formulário abaixo para registrar os dados de anamnese da criança. 
-            Essas informações são importantes para o acompanhamento do desenvolvimento.
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      <Card>
-        <CardContent className="pt-6">
-          <AnamneseForm 
-            childId={childId}
-            existingData={anamneseData}
-            onSubmit={handleSaveAnamnese}
-            onCancel={() => {}}
-          />
-        </CardContent>
-      </Card>
+      <Alert className="bg-amber-50 border-amber-200 text-amber-900">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Funcionalidade em desenvolvimento</AlertTitle>
+        <AlertDescription>
+          Esta seção está sendo aprimorada e ainda não está disponível para uso. 
+          Voltaremos em breve com a funcionalidade completa.
+        </AlertDescription>
+      </Alert>
     </div>
   );
 };

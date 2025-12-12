@@ -112,6 +112,9 @@ const isAdminOrOwner = [
 // Middleware para verificar limite de crianças no plano
 const checkChildLimit = subscriptionMiddleware.checkChildrenLimit;
 
+// Rota para listar crianças com acesso de profissional
+router.get('/professional/children', isAuthenticated, childController.listProfessionalChildren);
+
 // Rota para listar todas as crianças do usuário logado
 router.get('/', isAuthenticated, childController.listMyChildren);
 

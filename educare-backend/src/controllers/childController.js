@@ -567,3 +567,69 @@ exports.deleteDevelopmentNote = async (req, res) => {
     return res.status(500).json({ error: 'Erro ao excluir nota de desenvolvimento' });
   }
 };
+
+// Listar crianças com acesso de profissional
+exports.listProfessionalChildren = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Buscar todos os TeamMembers onde o usuário é profissional
+    const { TeamMember, Team, User, Profile, Child } = require('../models');
+    
+    const teamMemberships = await TeamMember.findAll({
+      where: { userId },
+      include: [
+        {
+          model: Team,
+          as: 'team',
+          attributes: ['id', 'ownerId'],
+          include: [
+            {
+              model: User,
+              as: 'owner',
+              attributes: ['id'],
+              include: [
+                {
+                  model: Profile,
+                  as: 'profile',
+                  attributes: ['id', 'userId'],
+                  include: [
+                    {
+                      model: Child,
+                      as: 'children',
+                      attributes: ['id', 'firstName', 'lastName', 'birthDate', 'gender', 'avatarUrl', 'notes', 'createdAt', 'updatedAt']
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
+    
+    // Extrair crianças de todos os times aos quais o profissional tem acesso
+    const children = [];
+    const seenChildIds = new Set();
+    
+    teamMemberships.forEach(membership => {
+      if (membership.team && membership.team.owner && membership.team.owner.profile && membership.team.owner.profile.children) {
+        membership.team.owner.profile.children.forEach(child => {
+          if (!seenChildIds.has(child.id)) {
+            seenChildIds.add(child.id);
+            children.push({
+              ...child.toJSON(),
+              userId: membership.team.owner.id,
+              status: membership.status === 'active' ? 'approved' : 'pending'
+            });
+          }
+        });
+      }
+    });
+    
+    return res.status(200).json({ children });
+  } catch (error) {
+    console.error('Erro ao listar crianças do profissional:', error);
+    return res.status(500).json({ error: 'Erro ao listar crianças do profissional' });
+  }
+};
