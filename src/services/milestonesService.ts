@@ -169,13 +169,14 @@ class MilestonesService {
   }
 
   async getCurationView(): Promise<CurationViewResponse> {
-    const response = await httpClient.get<CurationViewResponse>(
+    const response = await httpClient.get<AgeRangeGroup[]>(
       '/admin/milestones/curation-view'
     );
+    const ageRanges = Array.isArray(response.data) ? response.data : [];
     return {
       success: response.success ?? true,
-      data: response.data || [],
-      total_milestones: response.total_milestones || 0
+      data: ageRanges,
+      total_milestones: ageRanges.reduce((sum, range) => sum + (range.milestones_count || 0), 0)
     };
   }
 
