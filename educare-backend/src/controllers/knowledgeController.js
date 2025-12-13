@@ -26,13 +26,21 @@ const ALLOWED_MIME_TYPES = [
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 exports.uploadDocument = async (req, res) => {
+  const requestId = Date.now().toString(36);
+  console.log(`[Knowledge:${requestId}] ========== INÍCIO UPLOAD ==========`);
+  console.log(`[Knowledge:${requestId}] Usuário: ${req.user?.email} (${req.user?.role})`);
+  console.log(`[Knowledge:${requestId}] Headers: Content-Type=${req.headers['content-type']}`);
+  
   try {
     if (!req.file) {
+      console.log(`[Knowledge:${requestId}] ERRO: Nenhum arquivo recebido`);
       return res.status(400).json({
         success: false,
         error: 'Nenhum arquivo enviado'
       });
     }
+    
+    console.log(`[Knowledge:${requestId}] Arquivo: ${req.file.originalname} (${req.file.size} bytes, ${req.file.mimetype})`);
 
     const { title, description, source_type, age_range, domain, tags, knowledge_category, trimester, specialty, subdomain } = req.body;
 
@@ -79,10 +87,11 @@ exports.uploadDocument = async (req, res) => {
     const category = knowledge_category || inferCategory(req.body);
 
     const activeProviders = hybridIngestionService.getActiveProviders();
+    console.log(`[Knowledge:${requestId}] Provedores ativos: [${activeProviders.join(', ')}]`);
     
     if (activeProviders.length > 0) {
       try {
-        console.log(`[Knowledge] Iniciando ingestão híbrida: ${req.file.originalname} (${req.file.size} bytes)`);
+        console.log(`[Knowledge:${requestId}] Iniciando ingestão híbrida...`);
         const ingestionResult = await hybridIngestionService.ingestDocument(
           finalPath,
           req.file.originalname,
@@ -93,10 +102,13 @@ exports.uploadDocument = async (req, res) => {
             source_type, 
             age_range, 
             domain,
-            knowledge_category: category
+            knowledge_category: category,
+            mime_type: req.file.mimetype
           }
         );
 
+        console.log(`[Knowledge:${requestId}] Resultado da ingestão:`, JSON.stringify(ingestionResult, null, 2));
+        
         if (ingestionResult.success) {
           hybridProviders = ingestionResult.providers;
           
@@ -108,7 +120,7 @@ exports.uploadDocument = async (req, res) => {
             qdrantDocumentId = documentId;
           }
           
-          console.log(`[Knowledge] ✓ Ingestão híbrida: providers=[${hybridProviders.join(', ')}] (${ingestionResult.ingestion_time_ms}ms)`);
+          console.log(`[Knowledge:${requestId}] ✓ Ingestão OK: providers=[${hybridProviders.join(', ')}] (${ingestionResult.ingestion_time_ms}ms)`);
         } else {
           fileSearchError = 'Nenhum provedor RAG conseguiu indexar o documento';
           console.warn(`[Knowledge] ⚠ Falha na ingestão híbrida`);
@@ -221,6 +233,8 @@ exports.uploadDocument = async (req, res) => {
 
     console.log(`[Knowledge] Documento criado por ${req.user.email}: ${result.data.legacy.id} - ${title} (categoria: ${category || 'legado'})`);
 
+    console.log(`[Knowledge:${requestId}] ========== FIM UPLOAD (sucesso) ==========`);
+    
     return res.status(201).json({
       success: true,
       message: 'Documento de conhecimento cadastrado com sucesso',
@@ -239,7 +253,9 @@ exports.uploadDocument = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('[Knowledge] Erro ao fazer upload:', error);
+    console.error(`[Knowledge:${requestId}] ========== ERRO NO UPLOAD ==========`);
+    console.error(`[Knowledge:${requestId}] Tipo: ${error.name}, Mensagem: ${error.message}`);
+    console.error(`[Knowledge:${requestId}] Stack:`, error.stack);
 
     if (req.file && req.file.path && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
