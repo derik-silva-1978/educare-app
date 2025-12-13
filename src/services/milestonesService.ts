@@ -62,6 +62,50 @@ export interface ChartData {
   coverage: number;
 }
 
+export interface LinkedQuestion {
+  mapping_id: string;
+  question_id: string;
+  domain_name: string;
+  domain_question: string;
+  week: number;
+  is_verified: boolean;
+  weight: number;
+}
+
+export interface CandidateQuestion {
+  id: string;
+  domain_name: string;
+  domain_question: string;
+  week: number;
+  meta_min_months: number;
+}
+
+export interface MilestoneWithCandidates {
+  id: string;
+  title: string;
+  description?: string;
+  category: string;
+  target_month: number;
+  source: string;
+  linked_questions: LinkedQuestion[];
+  candidate_questions: CandidateQuestion[];
+}
+
+export interface AgeRangeGroup {
+  range_id: string;
+  range_label: string;
+  min_month: number;
+  max_month: number;
+  milestones: MilestoneWithCandidates[];
+  milestones_count: number;
+}
+
+export interface CurationViewResponse {
+  success: boolean;
+  data: AgeRangeGroup[];
+  total_milestones: number;
+}
+
 class MilestonesService {
   async getCurationStats(): Promise<CurationStats> {
     const response = await httpClient.get<{ success: boolean; data: CurationStats }>(

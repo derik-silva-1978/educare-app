@@ -486,6 +486,202 @@ const getCurationStats = async (req, res) => {
   }
 };
 
+/**
+ * Faixas etárias para agrupamento (em meses)
+ */
+const AGE_RANGES = [
+  { id: '0-3', label: '0 a 3 Meses', min: 0, max: 3 },
+  { id: '4-6', label: '4 a 6 Meses', min: 4, max: 6 },
+  { id: '7-9', label: '7 a 9 Meses', min: 7, max: 9 },
+  { id: '10-12', label: '10 a 12 Meses', min: 10, max: 12 },
+  { id: '13-18', label: '13 a 18 Meses', min: 13, max: 18 },
+  { id: '19-24', label: '19 a 24 Meses', min: 19, max: 24 },
+  { id: '25-36', label: '25 a 36 Meses (2-3 anos)', min: 25, max: 36 },
+  { id: '37-48', label: '37 a 48 Meses (3-4 anos)', min: 37, max: 48 },
+  { id: '49-60', label: '49 a 60 Meses (4-5 anos)', min: 49, max: 60 },
+  { id: '61-72', label: '61 a 72 Meses (5-6 anos)', min: 61, max: 72 }
+];
+
+/**
+ * Visão cronológica para curadoria
+ * Retorna marcos agrupados por faixa etária com perguntas vinculadas e candidatas
+ */
+const getCurationView = async (req, res) => {
+  try {
+    const { category } = req.query;
+    
+    const milestoneWhere = { is_active: true };
+    if (category) milestoneWhere.category = category;
+
+    const milestones = await OfficialMilestone.findAll({
+      where: milestoneWhere,
+      order: [['target_month', 'ASC'], ['order_index', 'ASC']],
+      include: [{
+        model: MilestoneMapping,
+        as: 'mappings',
+        required: false,
+        include: [{
+          model: JourneyBotQuestion,
+          as: 'journeyQuestion',
+          attributes: ['id', 'domain_name', 'domain_question', 'week', 'meta_min_months']
+        }]
+      }]
+    });
+
+    const allQuestions = await JourneyBotQuestion.findAll({
+      where: { is_active: true },
+      attributes: ['id', 'domain_name', 'domain_question', 'week', 'meta_min_months'],
+      order: [['week', 'ASC']]
+    });
+
+    const result = AGE_RANGES.map(range => {
+      const rangeMilestones = milestones.filter(m => 
+        m.target_month >= range.min && m.target_month <= range.max
+      );
+
+      const milestonesWithCandidates = rangeMilestones.map(milestone => {
+        const linkedQuestionIds = new Set(
+          (milestone.mappings || []).map(m => m.journeyQuestion?.id).filter(Boolean)
+        );
+
+        const targetWeek = monthToWeeks(milestone.target_month);
+        const minWeek = Math.max(0, targetWeek - 6);
+        const maxWeek = targetWeek + 6;
+
+        const candidateQuestions = allQuestions.filter(q => {
+          if (linkedQuestionIds.has(q.id)) return false;
+          
+          const questionWeek = q.week || monthToWeeks(q.meta_min_months || 0);
+          if (questionWeek < minWeek || questionWeek > maxWeek) return false;
+          
+          const normalizedDomain = normalizeDomain(q.domain_name);
+          return normalizedDomain === milestone.category;
+        });
+
+        return {
+          id: milestone.id,
+          title: milestone.title,
+          description: milestone.description,
+          category: milestone.category,
+          target_month: milestone.target_month,
+          source: milestone.source,
+          linked_questions: (milestone.mappings || []).map(m => ({
+            mapping_id: m.id,
+            question_id: m.journeyQuestion?.id,
+            domain_name: m.journeyQuestion?.domain_name,
+            domain_question: m.journeyQuestion?.domain_question,
+            week: m.journeyQuestion?.week,
+            is_verified: m.verified_by_curator,
+            weight: m.weight
+          })),
+          candidate_questions: candidateQuestions.map(q => ({
+            id: q.id,
+            domain_name: q.domain_name,
+            domain_question: q.domain_question,
+            week: q.week,
+            meta_min_months: q.meta_min_months
+          }))
+        };
+      });
+
+      return {
+        range_id: range.id,
+        range_label: range.label,
+        min_month: range.min,
+        max_month: range.max,
+        milestones: milestonesWithCandidates,
+        milestones_count: milestonesWithCandidates.length
+      };
+    }).filter(range => range.milestones_count > 0);
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+      total_milestones: milestones.length,
+      age_ranges: AGE_RANGES
+    });
+  } catch (error) {
+    console.error('Erro ao obter visão de curadoria:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erro ao obter visão de curadoria',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Criar novo mapeamento (vincular pergunta a marco)
+ */
+const createMapping = async (req, res) => {
+  try {
+    const { milestone_id, question_id, weight, notes } = req.body;
+
+    if (!milestone_id || !question_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'milestone_id e question_id são obrigatórios'
+      });
+    }
+
+    const milestone = await OfficialMilestone.findByPk(milestone_id);
+    if (!milestone) {
+      return res.status(404).json({
+        success: false,
+        message: 'Marco não encontrado'
+      });
+    }
+
+    const question = await JourneyBotQuestion.findByPk(question_id);
+    if (!question) {
+      return res.status(404).json({
+        success: false,
+        message: 'Pergunta não encontrada'
+      });
+    }
+
+    const existingMapping = await MilestoneMapping.findOne({
+      where: {
+        official_milestone_id: milestone_id,
+        journey_question_id: question_id
+      }
+    });
+
+    if (existingMapping) {
+      return res.status(409).json({
+        success: false,
+        message: 'Mapeamento já existe'
+      });
+    }
+
+    const mapping = await MilestoneMapping.create({
+      official_milestone_id: milestone_id,
+      journey_question_id: question_id,
+      weight: weight || 1.0,
+      is_auto_generated: false,
+      verified_by_curator: true,
+      verified_at: new Date(),
+      verified_by: req.user.id,
+      notes: notes || null
+    });
+
+    console.log(`✅ Mapeamento criado: ${milestone.title} <-> ${question.domain_question}`);
+
+    return res.status(201).json({
+      success: true,
+      message: 'Mapeamento criado com sucesso',
+      data: mapping
+    });
+  } catch (error) {
+    console.error('Erro ao criar mapeamento:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erro ao criar mapeamento',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   seedOfficialMilestones,
   autoLinkMilestones,
@@ -494,5 +690,7 @@ module.exports = {
   verifyMapping,
   deleteMapping,
   getMilestonesChart,
-  getCurationStats
+  getCurationStats,
+  getCurationView,
+  createMapping
 };

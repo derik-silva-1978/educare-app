@@ -21,8 +21,14 @@ router.get('/milestones', verifyToken, requireCuratorRole, milestonesController.
 // Listar mapeamentos para curadoria
 router.get('/mappings', verifyToken, requireCuratorRole, milestonesController.listMappings);
 
+// Criar novo mapeamento (vincular pergunta a marco)
+router.post('/mappings', verifyToken, requireCuratorRole, milestonesController.createMapping);
+
 // Verificar um mapeamento
 router.post('/mappings/:id/verify', verifyToken, requireCuratorRole, milestonesController.verifyMapping);
+
+// Visão cronológica para curadoria
+router.get('/curation-view', verifyToken, requireCuratorRole, milestonesController.getCurationView);
 
 // Remover um mapeamento
 router.delete('/mappings/:id', verifyToken, requireCuratorRole, milestonesController.deleteMapping);
