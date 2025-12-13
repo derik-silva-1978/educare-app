@@ -44,4 +44,7 @@ router.post('/setup/seed', verifyToken, requireOwnerRole, milestonesController.s
 // Auto-Linker
 router.post('/setup/auto-link', verifyToken, requireOwnerRole, milestonesController.autoLinkMilestones);
 
+// AI Matching - Ranqueamento semântico com IA (curators can execute)
+router.post('/ai-matching', verifyToken, requireCuratorRole, milestonesController.runAIMatching);
+
 module.exports = router;

@@ -69,7 +69,10 @@ export interface LinkedQuestion {
   domain_question: string;
   week: number;
   is_verified: boolean;
+  is_auto_generated?: boolean;
   weight: number;
+  relevance_score?: number | null;
+  ai_reasoning?: string | null;
 }
 
 export interface CandidateQuestion {
@@ -78,6 +81,20 @@ export interface CandidateQuestion {
   domain_question: string;
   week: number;
   meta_min_months: number;
+  relevance_score?: number | null;
+  ai_reasoning?: string | null;
+}
+
+export interface AIMatchingResult {
+  success: boolean;
+  message: string;
+  totalProcessed: number;
+  autoLinked: number;
+  details: Array<{
+    milestone: string;
+    category: string;
+    processed: number;
+  }>;
 }
 
 export interface MilestoneWithCandidates {
@@ -186,6 +203,14 @@ class MilestonesService {
       { official_milestone_id: milestoneId, journey_question_id: questionId, weight }
     );
     return response.data!;
+  }
+
+  async runAIMatching(milestoneId?: string): Promise<AIMatchingResult> {
+    const response = await httpClient.post<AIMatchingResult>(
+      '/admin/milestones/ai-matching',
+      milestoneId ? { milestoneId } : {}
+    );
+    return response as AIMatchingResult;
   }
 }
 

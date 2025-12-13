@@ -17,7 +17,8 @@ import { useToast } from '../../hooks/use-toast';
 import { 
   Loader2, 
   Baby, 
-  Filter
+  Filter,
+  Sparkles
 } from 'lucide-react';
 import MilestoneTransferList from '../../components/admin/MilestoneTransferList';
 
@@ -162,6 +163,25 @@ const MilestonesCurationTimeline: React.FC = () => {
     unlinkMultipleMutation.mutate(mappingIds);
   };
 
+  const aiMatchingMutation = useMutation({
+    mutationFn: () => milestonesService.runAIMatching(),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['curation-view'] });
+      queryClient.invalidateQueries({ queryKey: ['milestones-stats'] });
+      toast({
+        title: "AI Matching concluído",
+        description: `${result.totalProcessed} pares analisados, ${result.autoLinked} auto-vinculados`
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Falha ao executar AI Matching",
+        variant: "destructive"
+      });
+    }
+  });
+
   const domains = ['Motor', 'Cognitivo', 'Linguagem', 'Social', 'Emocional'];
 
   if (isLoading) {
@@ -183,28 +203,47 @@ const MilestonesCurationTimeline: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 flex-wrap p-3 bg-muted/50 rounded-lg">
-        <Filter className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-medium text-muted-foreground mr-2">Filtrar por domínio:</span>
-        <Button
-          variant={selectedDomain === null ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setSelectedDomain(null)}
-          className={selectedDomain === null ? 'bg-gray-800 text-white hover:bg-gray-900' : ''}
-        >
-          Todos
-        </Button>
-        {domains.map((domain) => (
+      <div className="flex items-center justify-between gap-4 p-3 bg-muted/50 rounded-lg flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-medium text-muted-foreground mr-2">Filtrar por domínio:</span>
           <Button
-            key={domain}
-            variant={selectedDomain === domain ? 'default' : 'outline'}
+            variant={selectedDomain === null ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setSelectedDomain(domain)}
-            className={selectedDomain === domain ? getDomainBadgeColor(domain) : ''}
+            onClick={() => setSelectedDomain(null)}
+            className={selectedDomain === null ? 'bg-gray-800 text-white hover:bg-gray-900' : ''}
           >
-            {domain}
+            Todos
           </Button>
-        ))}
+          {domains.map((domain) => (
+            <Button
+              key={domain}
+              variant={selectedDomain === domain ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedDomain(domain)}
+              className={selectedDomain === domain ? getDomainBadgeColor(domain) : ''}
+            >
+              {domain}
+            </Button>
+          ))}
+        </div>
+        <Button
+          onClick={() => aiMatchingMutation.mutate()}
+          disabled={aiMatchingMutation.isPending}
+          className="bg-purple-600 hover:bg-purple-700 text-white"
+        >
+          {aiMatchingMutation.isPending ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Processando...
+            </>
+          ) : (
+            <>
+              <Sparkles className="h-4 w-4 mr-2" />
+              Executar AI Matching
+            </>
+          )}
+        </Button>
       </div>
 
       <Accordion 

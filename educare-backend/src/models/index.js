@@ -38,6 +38,7 @@ const VaccineHistory = require('./VaccineHistory');
 // Modelos de Marcos do Desenvolvimento
 const OfficialMilestone = require('./OfficialMilestone');
 const MilestoneMapping = require('./MilestoneMapping');
+const MilestoneCandidateScore = require('./MilestoneCandidateScore');
 
 // Modelos de Relatórios de Desenvolvimento
 const ChildDevelopmentReport = require('./ChildDevelopmentReport');
@@ -287,6 +288,14 @@ MilestoneMapping.belongsTo(JourneyBotQuestion, { foreignKey: 'journey_question_i
 User.hasMany(MilestoneMapping, { foreignKey: 'verified_by', as: 'verifiedMappings' });
 MilestoneMapping.belongsTo(User, { foreignKey: 'verified_by', as: 'verifier' });
 
+// OfficialMilestone <-> MilestoneCandidateScore (1:N)
+OfficialMilestone.hasMany(MilestoneCandidateScore, { foreignKey: 'official_milestone_id', as: 'candidateScores' });
+MilestoneCandidateScore.belongsTo(OfficialMilestone, { foreignKey: 'official_milestone_id', as: 'milestone' });
+
+// JourneyBotQuestion <-> MilestoneCandidateScore (1:N)
+JourneyBotQuestion.hasMany(MilestoneCandidateScore, { foreignKey: 'journey_question_id', as: 'candidateScores' });
+MilestoneCandidateScore.belongsTo(JourneyBotQuestion, { foreignKey: 'journey_question_id', as: 'question' });
+
 // === ASSOCIAÇÕES DE RELATÓRIOS DE DESENVOLVIMENTO ===
 
 // Child <-> ChildDevelopmentReport (1:N)
@@ -352,6 +361,7 @@ module.exports = {
   // Modelos de Marcos do Desenvolvimento
   OfficialMilestone,
   MilestoneMapping,
+  MilestoneCandidateScore,
   // Modelos de Relatórios de Desenvolvimento
   ChildDevelopmentReport
 };

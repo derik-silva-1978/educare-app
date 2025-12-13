@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { ScrollArea } from '../ui/scroll-area';
 import { Checkbox } from '../ui/checkbox';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { 
   ChevronRight, 
   ChevronLeft, 
@@ -11,9 +12,32 @@ import {
   ChevronsLeft,
   Baby,
   Clock,
-  Loader2
+  Loader2,
+  Star,
+  Bot
 } from 'lucide-react';
 import { LinkedQuestion, CandidateQuestion, MilestoneWithCandidates } from '../../services/milestonesService';
+
+const renderStars = (score: number | null | undefined) => {
+  if (score === null || score === undefined) return null;
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    stars.push(
+      <Star
+        key={i}
+        className={`h-3 w-3 ${i <= score ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+      />
+    );
+  }
+  return <div className="flex items-center gap-0.5">{stars}</div>;
+};
+
+const getOpacityClass = (score: number | null | undefined) => {
+  if (score === null || score === undefined) return '';
+  if (score <= 1) return 'opacity-40';
+  if (score === 2) return 'opacity-60';
+  return '';
+};
 
 const getCategoryBadgeColor = (category: string | undefined): string => {
   if (!category) return 'bg-gray-100 text-gray-800';
@@ -178,32 +202,43 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
                   </p>
                 ) : (
                   milestone.candidate_questions.map((q) => (
-                    <div 
-                      key={q.id}
-                      onClick={() => toggleCandidate(q.id)}
-                      className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                        selectedCandidates.has(q.id) 
-                          ? 'bg-blue-100 dark:bg-blue-900/40 ring-1 ring-blue-400' 
-                          : 'hover:bg-blue-100/50 dark:hover:bg-blue-900/20'
-                      }`}
-                    >
-                      <Checkbox 
-                        checked={selectedCandidates.has(q.id)}
-                        onCheckedChange={() => toggleCandidate(q.id)}
-                        className="mt-0.5"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm leading-snug">{q.domain_question}</p>
-                        <div className="flex items-center gap-1 mt-1 flex-wrap">
-                          <Badge variant="outline" className="text-[10px] h-5">
-                            Sem. {q.week}
-                          </Badge>
-                          <Badge className={getDomainBadgeColor(q.domain_name) + " text-[10px] h-5"}>
-                            {q.domain_name}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
+                    <TooltipProvider key={q.id}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div 
+                            onClick={() => toggleCandidate(q.id)}
+                            className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-colors ${getOpacityClass(q.relevance_score)} ${
+                              selectedCandidates.has(q.id) 
+                                ? 'bg-blue-100 dark:bg-blue-900/40 ring-1 ring-blue-400' 
+                                : 'hover:bg-blue-100/50 dark:hover:bg-blue-900/20'
+                            }`}
+                          >
+                            <Checkbox 
+                              checked={selectedCandidates.has(q.id)}
+                              onCheckedChange={() => toggleCandidate(q.id)}
+                              className="mt-0.5"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm leading-snug">{q.domain_question}</p>
+                              <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                {renderStars(q.relevance_score)}
+                                <Badge variant="outline" className="text-[10px] h-5">
+                                  Sem. {q.week}
+                                </Badge>
+                                <Badge className={getDomainBadgeColor(q.domain_name) + " text-[10px] h-5"}>
+                                  {q.domain_name}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        {q.ai_reasoning && (
+                          <TooltipContent side="right" className="max-w-xs">
+                            <p className="text-xs">{q.ai_reasoning}</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   ))
                 )}
               </div>
@@ -277,32 +312,48 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
                   </p>
                 ) : (
                   milestone.linked_questions.map((q) => (
-                    <div 
-                      key={q.mapping_id}
-                      onClick={() => toggleLinked(q.mapping_id)}
-                      className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                        selectedLinked.has(q.mapping_id) 
-                          ? 'bg-green-100 dark:bg-green-900/40 ring-1 ring-green-400' 
-                          : 'hover:bg-green-100/50 dark:hover:bg-green-900/20'
-                      }`}
-                    >
-                      <Checkbox 
-                        checked={selectedLinked.has(q.mapping_id)}
-                        onCheckedChange={() => toggleLinked(q.mapping_id)}
-                        className="mt-0.5"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm leading-snug">{q.domain_question}</p>
-                        <div className="flex items-center gap-1 mt-1 flex-wrap">
-                          <Badge variant="outline" className="text-[10px] h-5">
-                            Sem. {q.week}
-                          </Badge>
-                          <Badge className={getDomainBadgeColor(q.domain_name) + " text-[10px] h-5"}>
-                            {q.domain_name}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
+                    <TooltipProvider key={q.mapping_id}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div 
+                            onClick={() => toggleLinked(q.mapping_id)}
+                            className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                              selectedLinked.has(q.mapping_id) 
+                                ? 'bg-green-100 dark:bg-green-900/40 ring-1 ring-green-400' 
+                                : 'hover:bg-green-100/50 dark:hover:bg-green-900/20'
+                            }`}
+                          >
+                            <Checkbox 
+                              checked={selectedLinked.has(q.mapping_id)}
+                              onCheckedChange={() => toggleLinked(q.mapping_id)}
+                              className="mt-0.5"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1">
+                                <p className="text-sm leading-snug flex-1">{q.domain_question}</p>
+                                {q.is_auto_generated && (
+                                  <Bot className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                {renderStars(q.relevance_score)}
+                                <Badge variant="outline" className="text-[10px] h-5">
+                                  Sem. {q.week}
+                                </Badge>
+                                <Badge className={getDomainBadgeColor(q.domain_name) + " text-[10px] h-5"}>
+                                  {q.domain_name}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        {q.ai_reasoning && (
+                          <TooltipContent side="left" className="max-w-xs">
+                            <p className="text-xs">{q.ai_reasoning}</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   ))
                 )}
               </div>
