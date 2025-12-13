@@ -1,0 +1,73 @@
+Aqui está o prompt completo e profissional em Markdown puro. Ele consolida a refatoração da **Interface de Curadoria (UI)**, o **Ajuste de Lógica de Busca (Backend)** e a **Auditoria de Qualidade (QA)**.
+
+Copie o conteúdo abaixo e envie para o Replit.
+
+```markdown
+# Role: Senior Full-Stack Engineer & UX/UI Specialist
+
+**Contexto do Projeto:**
+Estamos refinando o **Módulo de Curadoria de Marcos (Back-office)** do Educare+.
+O objetivo é transformar a interface atual (lista simples) em uma ferramenta profissional de **"Transfer List" (Lista de Transferência)**, além de corrigir a lógica de busca de perguntas e enriquecer os dados clínicos.
+
+**Status Atual:**
+A tela já exibe os Marcos Oficiais, mas a usabilidade para vincular perguntas está lenta e a lógica de sugestão está restritiva demais (filtrando por tags).
+
+---
+
+## 📋 TAREFA 1: ENRIQUECIMENTO DE DADOS (Schema & Seeds)
+
+Precisamos que o curador tenha o "gabarito" clínico na tela para tomar decisões.
+
+1.  **Alteração de Schema:**
+    * Adicione uma coluna `description` (TEXT) na tabela `official_milestones`.
+2.  **Seed Data Update:**
+    * Atualize o script de população dos marcos para incluir a **descrição clínica oficial** do Ministério da Saúde.
+    * *Exemplo:* Para o marco "Sustenta a Cabeça", a descrição deve ser: *"Quando colocado de bruços, o bebê consegue levantar a cabeça e apoiar-se nos antebraços."*
+
+---
+
+## ⚙️ 2. REVISÃO DE LÓGICA (Backend API)
+
+**Problema:** O endpoint atual de "Perguntas Candidatas" está filtrando perguntas que possuem a mesma *Tag de Domínio* do Marco.
+**Correção Obrigatória:**
+* **Remova o filtro de domínio.** Uma pergunta classificada como "Social" no app pode, sim, ser usada para compor um marco "Cognitivo" ou "Linguagem" se o curador desejar.
+* **Mantenha apenas o filtro temporal:** O sistema deve sugerir *todas* as perguntas do banco cuja `week` esteja dentro da janela de tempo do marco (tolerância de +/- 4 semanas).
+
+---
+
+## 🎨 3. NOVO COMPONENTE DE UI: "TRANSFER LIST"
+
+Substitua a lista atual de checkboxes por um componente de **Duas Colunas (Transfer List)** dentro do card de cada Marco.
+
+### Layout do Componente:
+* **Cabeçalho do Marco:**
+    * Exiba o **Título** em destaque.
+    * Logo abaixo, exiba a nova **Descrição Clínica** (texto cinza, fonte menor) para guiar o curador.
+
+* **Coluna Esquerda ("Candidatas / Disponíveis"):**
+    * Lista todas as perguntas retornadas pela lógica temporal (Item 2).
+    * Permite seleção múltipla.
+
+* **Coluna Central (Ações):**
+    * Botão `[ > ]` (Adicionar): Move as selecionadas da Esquerda para a Direita.
+    * Botão `[ < ]` (Remover): Move as selecionadas da Direita para a Esquerda.
+    * Botão `[ >> ]` / `[ << ]`: Move todas.
+
+* **Coluna Direita ("Vinculadas / Compondo o Marco"):**
+    * Lista as perguntas que efetivamente estão salvas na tabela `milestone_mappings`.
+
+**Requisito de UX:** A ação de mover para a direita deve salvar o vínculo no banco de dados (auto-save ou botão "Salvar Alterações" evidente).
+
+---
+
+## 🐞 4. AUDITORIA E CORREÇÃO (QA)
+
+Antes de entregar, realize uma bateria de testes na tela deste módulo:
+
+1.  **Broken Links:** Verifique se todos os botões de paginação, filtros de topo e breadcrumbs estão roteando para os lugares certos. Corrija qualquer link morto (404).
+2.  **Funcionalidade dos Botões:** Teste se os botões de ação (Salvar, Cancelar, Filtros de Categoria) estão disparando os eventos JavaScript corretos.
+3.  **Contraste:** Verifique os botões de filtro de categoria no topo (Motor, Social, etc.). Quando ativos/selecionados, garanta que tenham **alto contraste** (Ex: Fundo Escuro + Texto Branco) para indicar claramente o estado.
+
+**Entregável:**
+Código atualizado do Frontend (componente Transfer List), ajuste na query do Backend e script de migration para as descrições.
+```

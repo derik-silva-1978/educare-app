@@ -3,204 +3,33 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   milestonesService, 
   AgeRangeGroup, 
-  MilestoneWithCandidates, 
-  LinkedQuestion, 
-  CandidateQuestion 
+  MilestoneWithCandidates
 } from '../../services/milestonesService';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
-import { Switch } from '../../components/ui/switch';
 import { 
   Accordion, 
   AccordionContent, 
   AccordionItem, 
   AccordionTrigger 
 } from '../../components/ui/accordion';
-import { ScrollArea } from '../../components/ui/scroll-area';
 import { useToast } from '../../hooks/use-toast';
 import { 
   Loader2, 
   Baby, 
-  ChevronRight, 
-  Link2, 
-  Unlink, 
-  CheckCircle,
-  Clock,
   Filter
 } from 'lucide-react';
-
-const getCategoryBadgeColor = (category: string | undefined): string => {
-  if (!category) return 'bg-gray-100 text-gray-800';
-  
-  const colors: Record<string, string> = {
-    'motor': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    'cognitivo': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-    'linguagem': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-    'social': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-    'emocional': 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
-    'sensorial': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200'
-  };
-  
-  return colors[category] || 'bg-gray-100 text-gray-800';
-};
+import MilestoneTransferList from '../../components/admin/MilestoneTransferList';
 
 const getDomainBadgeColor = (domain: string): string => {
   const colors: Record<string, string> = {
-    'Motor': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-    'Cognitivo': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-    'Linguagem': 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200',
-    'Social': 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200',
-    'Emocional': 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200',
+    'Motor': 'bg-emerald-600 text-white hover:bg-emerald-700',
+    'Cognitivo': 'bg-amber-600 text-white hover:bg-amber-700',
+    'Linguagem': 'bg-sky-600 text-white hover:bg-sky-700',
+    'Social': 'bg-violet-600 text-white hover:bg-violet-700',
+    'Emocional': 'bg-rose-600 text-white hover:bg-rose-700',
   };
-  return colors[domain] || 'bg-gray-100 text-gray-800';
-};
-
-interface MilestoneCardProps {
-  milestone: MilestoneWithCandidates;
-  onLink: (milestoneId: string, questionId: string) => void;
-  onUnlink: (mappingId: string) => void;
-  isLinking: boolean;
-  isUnlinking: boolean;
-  selectedDomain: string | null;
-}
-
-const MilestoneCard: React.FC<MilestoneCardProps> = ({ 
-  milestone, 
-  onLink, 
-  onUnlink, 
-  isLinking, 
-  isUnlinking,
-  selectedDomain 
-}) => {
-  const filteredCandidates = selectedDomain 
-    ? milestone.candidate_questions.filter(q => q.domain_name === selectedDomain)
-    : milestone.candidate_questions;
-
-  const filteredLinked = selectedDomain
-    ? milestone.linked_questions.filter(q => q.domain_name === selectedDomain)
-    : milestone.linked_questions;
-
-  return (
-    <Card className="mb-4">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <Baby className="h-4 w-4 text-primary" />
-              {milestone.title}
-            </CardTitle>
-            {milestone.description && (
-              <p className="text-sm text-muted-foreground mt-1">{milestone.description}</p>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge className={getCategoryBadgeColor(milestone.category)}>
-              {milestone.category}
-            </Badge>
-            <Badge variant="outline">
-              <Clock className="h-3 w-3 mr-1" />
-              Mês {milestone.target_month}
-            </Badge>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400">
-              <Link2 className="h-4 w-4" />
-              Perguntas Vinculadas ({filteredLinked.length})
-            </div>
-            <ScrollArea className="h-[200px] rounded-md border p-3">
-              {filteredLinked.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Nenhuma pergunta vinculada
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {filteredLinked.map((q) => (
-                    <div 
-                      key={q.mapping_id} 
-                      className="flex items-start justify-between p-2 bg-green-50 dark:bg-green-900/20 rounded-lg"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{q.domain_question}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="text-xs">
-                            Sem. {q.week}
-                          </Badge>
-                          <Badge className={getDomainBadgeColor(q.domain_name) + " text-xs"}>
-                            {q.domain_name}
-                          </Badge>
-                          {q.is_verified && (
-                            <CheckCircle className="h-3 w-3 text-green-600" />
-                          )}
-                        </div>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 ml-2"
-                        onClick={() => onUnlink(q.mapping_id)}
-                        disabled={isUnlinking}
-                      >
-                        <Unlink className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </ScrollArea>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400">
-              <ChevronRight className="h-4 w-4" />
-              Perguntas Candidatas ({filteredCandidates.length})
-            </div>
-            <ScrollArea className="h-[200px] rounded-md border p-3">
-              {filteredCandidates.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Nenhuma candidata disponível
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {filteredCandidates.map((q) => (
-                    <div 
-                      key={q.id} 
-                      className="flex items-start justify-between p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{q.domain_question}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="text-xs">
-                            Sem. {q.week}
-                          </Badge>
-                          <Badge className={getDomainBadgeColor(q.domain_name) + " text-xs"}>
-                            {q.domain_name}
-                          </Badge>
-                        </div>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 ml-2"
-                        onClick={() => onLink(milestone.id, q.id)}
-                        disabled={isLinking}
-                      >
-                        <Link2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </ScrollArea>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  return colors[domain] || 'bg-gray-600 text-white';
 };
 
 const MilestonesCurationTimeline: React.FC = () => {
@@ -263,6 +92,76 @@ const MilestonesCurationTimeline: React.FC = () => {
     unlinkMutation.mutate(mappingId);
   };
 
+  const linkMultipleMutation = useMutation({
+    mutationFn: async ({ milestoneId, questionIds }: { milestoneId: string; questionIds: string[] }) => {
+      const results = [];
+      for (const questionId of questionIds) {
+        try {
+          const result = await milestonesService.createMapping(milestoneId, questionId);
+          results.push(result);
+        } catch (err) {
+          console.error('Erro ao vincular:', err);
+        }
+      }
+      return results;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['curation-view'] });
+      queryClient.invalidateQueries({ queryKey: ['milestones-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['milestones-mappings'] });
+      toast({
+        title: "Sucesso",
+        description: `${variables.questionIds.length} perguntas vinculadas!`
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Falha ao vincular algumas perguntas",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const unlinkMultipleMutation = useMutation({
+    mutationFn: async (mappingIds: string[]) => {
+      for (const mappingId of mappingIds) {
+        try {
+          await milestonesService.deleteMapping(mappingId);
+        } catch (err) {
+          console.error('Erro ao desvincular:', err);
+        }
+      }
+      return mappingIds.length;
+    },
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: ['curation-view'] });
+      queryClient.invalidateQueries({ queryKey: ['milestones-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['milestones-mappings'] });
+      toast({
+        title: "Sucesso",
+        description: `${count} vínculos removidos!`
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Falha ao remover alguns vínculos",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleLinkMultiple = (milestoneId: string, questionIds: string[]) => {
+    if (linkMultipleMutation.isPending) return;
+    linkMultipleMutation.mutate({ milestoneId, questionIds });
+  };
+
+  const handleUnlinkMultiple = (mappingIds: string[]) => {
+    if (unlinkMultipleMutation.isPending) return;
+    unlinkMultipleMutation.mutate(mappingIds);
+  };
+
   const domains = ['Motor', 'Cognitivo', 'Linguagem', 'Social', 'Emocional'];
 
   if (isLoading) {
@@ -275,15 +174,23 @@ const MilestonesCurationTimeline: React.FC = () => {
 
   const ageRanges = curationData?.data || [];
 
+  const filterMilestonesByDomain = (milestones: MilestoneWithCandidates[]) => {
+    if (!selectedDomain) return milestones;
+    return milestones.filter(m => 
+      m.category?.toLowerCase() === selectedDomain.toLowerCase()
+    );
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap p-3 bg-muted/50 rounded-lg">
         <Filter className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-medium text-muted-foreground">Filtrar por domínio:</span>
+        <span className="text-sm font-medium text-muted-foreground mr-2">Filtrar por domínio:</span>
         <Button
           variant={selectedDomain === null ? 'default' : 'outline'}
           size="sm"
           onClick={() => setSelectedDomain(null)}
+          className={selectedDomain === null ? 'bg-gray-800 text-white hover:bg-gray-900' : ''}
         >
           Todos
         </Button>
@@ -306,47 +213,54 @@ const MilestonesCurationTimeline: React.FC = () => {
         onValueChange={setExpandedRanges}
         className="space-y-4"
       >
-        {ageRanges.map((range: AgeRangeGroup) => (
-          <AccordionItem 
-            key={range.range_id} 
-            value={range.range_id}
-            className="border rounded-lg px-4"
-          >
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center justify-between w-full pr-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Baby className="h-5 w-5 text-primary" />
+        {ageRanges.map((range: AgeRangeGroup) => {
+          const filteredMilestones = filterMilestonesByDomain(range.milestones);
+          if (filteredMilestones.length === 0 && selectedDomain) return null;
+          
+          return (
+            <AccordionItem 
+              key={range.range_id} 
+              value={range.range_id}
+              className="border rounded-lg px-4 bg-card"
+            >
+              <AccordionTrigger className="hover:no-underline py-4">
+                <div className="flex items-center justify-between w-full pr-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Baby className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-semibold text-lg">{range.range_label}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {filteredMilestones.length} marcos do desenvolvimento
+                        {selectedDomain && ` (${selectedDomain})`}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-left">
-                    <h3 className="font-semibold text-lg">{range.range_label}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {range.milestones_count} marcos do desenvolvimento
-                    </p>
-                  </div>
+                  <Badge variant="secondary" className="ml-auto mr-4">
+                    {range.min_month} - {range.max_month} meses
+                  </Badge>
                 </div>
-                <Badge variant="secondary" className="ml-auto mr-4">
-                  {range.min_month} - {range.max_month} meses
-                </Badge>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="pb-4">
-              <div className="space-y-4 pt-2">
-                {range.milestones.map((milestone: MilestoneWithCandidates) => (
-                  <MilestoneCard
-                    key={milestone.id}
-                    milestone={milestone}
-                    onLink={handleLink}
-                    onUnlink={handleUnlink}
-                    isLinking={linkMutation.isPending}
-                    isUnlinking={unlinkMutation.isPending}
-                    selectedDomain={selectedDomain}
-                  />
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
+              </AccordionTrigger>
+              <AccordionContent className="pb-4">
+                <div className="space-y-4 pt-2">
+                  {filteredMilestones.map((milestone: MilestoneWithCandidates) => (
+                    <MilestoneTransferList
+                      key={milestone.id}
+                      milestone={milestone}
+                      onLink={handleLink}
+                      onUnlink={handleUnlink}
+                      onLinkMultiple={handleLinkMultiple}
+                      onUnlinkMultiple={handleUnlinkMultiple}
+                      isLinking={linkMutation.isPending || linkMultipleMutation.isPending}
+                      isUnlinking={unlinkMutation.isPending || unlinkMultipleMutation.isPending}
+                    />
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
       </Accordion>
 
       {ageRanges.length === 0 && (

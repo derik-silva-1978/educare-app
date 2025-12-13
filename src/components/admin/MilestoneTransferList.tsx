@@ -1,0 +1,317 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
+import { ScrollArea } from '../ui/scroll-area';
+import { Checkbox } from '../ui/checkbox';
+import { 
+  ChevronRight, 
+  ChevronLeft, 
+  ChevronsRight, 
+  ChevronsLeft,
+  Baby,
+  Clock,
+  Loader2
+} from 'lucide-react';
+import { LinkedQuestion, CandidateQuestion, MilestoneWithCandidates } from '../../services/milestonesService';
+
+const getCategoryBadgeColor = (category: string | undefined): string => {
+  if (!category) return 'bg-gray-100 text-gray-800';
+  
+  const colors: Record<string, string> = {
+    'motor': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    'cognitivo': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+    'linguagem': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    'social': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+    'emocional': 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200',
+    'sensorial': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200'
+  };
+  
+  return colors[category] || 'bg-gray-100 text-gray-800';
+};
+
+const getDomainBadgeColor = (domain: string): string => {
+  const normalized = domain?.toLowerCase() || '';
+  const colors: Record<string, string> = {
+    'motor': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200',
+    'cognitivo': 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200',
+    'linguagem': 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-200',
+    'social': 'bg-violet-100 text-violet-800 dark:bg-violet-900/50 dark:text-violet-200',
+    'emocional': 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-200',
+  };
+  return colors[normalized] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
+};
+
+interface MilestoneTransferListProps {
+  milestone: MilestoneWithCandidates;
+  onLink: (milestoneId: string, questionId: string) => void;
+  onUnlink: (mappingId: string) => void;
+  onLinkMultiple: (milestoneId: string, questionIds: string[]) => void;
+  onUnlinkMultiple: (mappingIds: string[]) => void;
+  isLinking: boolean;
+  isUnlinking: boolean;
+}
+
+const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
+  milestone,
+  onLink,
+  onUnlink,
+  onLinkMultiple,
+  onUnlinkMultiple,
+  isLinking,
+  isUnlinking
+}) => {
+  const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(new Set());
+  const [selectedLinked, setSelectedLinked] = useState<Set<string>>(new Set());
+
+  const toggleCandidate = (id: string) => {
+    const newSet = new Set(selectedCandidates);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedCandidates(newSet);
+  };
+
+  const toggleLinked = (mappingId: string) => {
+    const newSet = new Set(selectedLinked);
+    if (newSet.has(mappingId)) {
+      newSet.delete(mappingId);
+    } else {
+      newSet.add(mappingId);
+    }
+    setSelectedLinked(newSet);
+  };
+
+  const handleAddSelected = () => {
+    if (selectedCandidates.size === 0) return;
+    const ids = Array.from(selectedCandidates);
+    if (ids.length === 1) {
+      onLink(milestone.id, ids[0]);
+    } else {
+      onLinkMultiple(milestone.id, ids);
+    }
+    setSelectedCandidates(new Set());
+  };
+
+  const handleRemoveSelected = () => {
+    if (selectedLinked.size === 0) return;
+    const ids = Array.from(selectedLinked);
+    if (ids.length === 1) {
+      onUnlink(ids[0]);
+    } else {
+      onUnlinkMultiple(ids);
+    }
+    setSelectedLinked(new Set());
+  };
+
+  const handleAddAll = () => {
+    const ids = milestone.candidate_questions.map(q => q.id);
+    onLinkMultiple(milestone.id, ids);
+    setSelectedCandidates(new Set());
+  };
+
+  const handleRemoveAll = () => {
+    const ids = milestone.linked_questions.map(q => q.mapping_id);
+    onUnlinkMultiple(ids);
+    setSelectedLinked(new Set());
+  };
+
+  const selectAllCandidates = () => {
+    setSelectedCandidates(new Set(milestone.candidate_questions.map(q => q.id)));
+  };
+
+  const selectAllLinked = () => {
+    setSelectedLinked(new Set(milestone.linked_questions.map(q => q.mapping_id)));
+  };
+
+  return (
+    <Card className="mb-6 shadow-sm">
+      <CardHeader className="pb-3 bg-muted/30">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2">
+              <Baby className="h-5 w-5 text-primary" />
+              {milestone.title}
+            </CardTitle>
+            {milestone.description && (
+              <p className="text-sm text-muted-foreground mt-2 leading-relaxed bg-background/50 p-3 rounded-md border-l-4 border-primary/30">
+                {milestone.description}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2 ml-4">
+            <Badge className={getCategoryBadgeColor(milestone.category)}>
+              {milestone.category}
+            </Badge>
+            <Badge variant="outline">
+              <Clock className="h-3 w-3 mr-1" />
+              Mês {milestone.target_month}
+            </Badge>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-4">
+        <div className="grid grid-cols-[1fr,auto,1fr] gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                Candidatas ({milestone.candidate_questions.length})
+              </span>
+              {milestone.candidate_questions.length > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={selectAllCandidates}
+                  className="text-xs h-6"
+                >
+                  Selecionar Todas
+                </Button>
+              )}
+            </div>
+            <ScrollArea className="h-[280px] rounded-md border bg-blue-50/30 dark:bg-blue-950/20">
+              <div className="p-2 space-y-1">
+                {milestone.candidate_questions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    Nenhuma candidata disponível
+                  </p>
+                ) : (
+                  milestone.candidate_questions.map((q) => (
+                    <div 
+                      key={q.id}
+                      onClick={() => toggleCandidate(q.id)}
+                      className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                        selectedCandidates.has(q.id) 
+                          ? 'bg-blue-100 dark:bg-blue-900/40 ring-1 ring-blue-400' 
+                          : 'hover:bg-blue-100/50 dark:hover:bg-blue-900/20'
+                      }`}
+                    >
+                      <Checkbox 
+                        checked={selectedCandidates.has(q.id)}
+                        onCheckedChange={() => toggleCandidate(q.id)}
+                        className="mt-0.5"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm leading-snug">{q.domain_question}</p>
+                        <div className="flex items-center gap-1 mt-1 flex-wrap">
+                          <Badge variant="outline" className="text-[10px] h-5">
+                            Sem. {q.week}
+                          </Badge>
+                          <Badge className={getDomainBadgeColor(q.domain_name) + " text-[10px] h-5"}>
+                            {q.domain_name}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+
+          <div className="flex flex-col items-center justify-center gap-2 py-8">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleAddAll}
+              disabled={isLinking || milestone.candidate_questions.length === 0}
+              className="w-10 h-8"
+              title="Adicionar Todas"
+            >
+              {isLinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronsRight className="h-4 w-4" />}
+            </Button>
+            <Button
+              size="sm"
+              variant="default"
+              onClick={handleAddSelected}
+              disabled={isLinking || selectedCandidates.size === 0}
+              className="w-10 h-8 bg-green-600 hover:bg-green-700"
+              title="Adicionar Selecionadas"
+            >
+              {isLinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronRight className="h-4 w-4" />}
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleRemoveSelected}
+              disabled={isUnlinking || selectedLinked.size === 0}
+              className="w-10 h-8"
+              title="Remover Selecionadas"
+            >
+              {isUnlinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronLeft className="h-4 w-4" />}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleRemoveAll}
+              disabled={isUnlinking || milestone.linked_questions.length === 0}
+              className="w-10 h-8 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+              title="Remover Todas"
+            >
+              {isUnlinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronsLeft className="h-4 w-4" />}
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                Vinculadas ({milestone.linked_questions.length})
+              </span>
+              {milestone.linked_questions.length > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={selectAllLinked}
+                  className="text-xs h-6"
+                >
+                  Selecionar Todas
+                </Button>
+              )}
+            </div>
+            <ScrollArea className="h-[280px] rounded-md border bg-green-50/30 dark:bg-green-950/20">
+              <div className="p-2 space-y-1">
+                {milestone.linked_questions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    Nenhuma pergunta vinculada
+                  </p>
+                ) : (
+                  milestone.linked_questions.map((q) => (
+                    <div 
+                      key={q.mapping_id}
+                      onClick={() => toggleLinked(q.mapping_id)}
+                      className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                        selectedLinked.has(q.mapping_id) 
+                          ? 'bg-green-100 dark:bg-green-900/40 ring-1 ring-green-400' 
+                          : 'hover:bg-green-100/50 dark:hover:bg-green-900/20'
+                      }`}
+                    >
+                      <Checkbox 
+                        checked={selectedLinked.has(q.mapping_id)}
+                        onCheckedChange={() => toggleLinked(q.mapping_id)}
+                        className="mt-0.5"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm leading-snug">{q.domain_question}</p>
+                        <div className="flex items-center gap-1 mt-1 flex-wrap">
+                          <Badge variant="outline" className="text-[10px] h-5">
+                            Sem. {q.week}
+                          </Badge>
+                          <Badge className={getDomainBadgeColor(q.domain_name) + " text-[10px] h-5"}>
+                            {q.domain_name}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default MilestoneTransferList;

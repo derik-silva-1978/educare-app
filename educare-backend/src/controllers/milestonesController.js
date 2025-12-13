@@ -545,17 +545,19 @@ const getCurationView = async (req, res) => {
         );
 
         const targetWeek = monthToWeeks(milestone.target_month);
-        const minWeek = Math.max(0, targetWeek - 6);
-        const maxWeek = targetWeek + 6;
+        // Tolerância de ±4 semanas conforme especificado
+        const minWeek = Math.max(0, targetWeek - 4);
+        const maxWeek = targetWeek + 4;
 
+        // CORREÇÃO: Removido filtro de domínio - manter apenas filtro temporal (±4 semanas convertido para 6)
+        // Uma pergunta classificada como "Social" pode compor um marco "Cognitivo" ou "Linguagem" a critério do curador
         const candidateQuestions = allQuestions.filter(q => {
+          // Excluir perguntas já vinculadas a este marco
           if (linkedQuestionIds.has(q.id)) return false;
           
+          // Aplicar apenas filtro temporal (semanas)
           const questionWeek = q.week || monthToWeeks(q.meta_min_months || 0);
-          if (questionWeek < minWeek || questionWeek > maxWeek) return false;
-          
-          const normalizedDomain = normalizeDomain(q.domain_name);
-          return normalizedDomain === milestone.category;
+          return questionWeek >= minWeek && questionWeek <= maxWeek;
         });
 
         return {
@@ -615,7 +617,10 @@ const getCurationView = async (req, res) => {
  */
 const createMapping = async (req, res) => {
   try {
-    const { milestone_id, question_id, weight, notes } = req.body;
+    // Aceita tanto milestone_id/question_id quanto official_milestone_id/journey_question_id
+    const milestone_id = req.body.milestone_id || req.body.official_milestone_id;
+    const question_id = req.body.question_id || req.body.journey_question_id;
+    const { weight, notes } = req.body;
 
     if (!milestone_id || !question_id) {
       return res.status(400).json({
