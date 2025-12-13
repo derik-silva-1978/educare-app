@@ -240,7 +240,10 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
                           >
                             <Checkbox 
                               checked={selectedCandidates.has(q.id)}
-                              onCheckedChange={() => toggleCandidate(q.id)}
+                              onCheckedChange={(e) => {
+                                e.stopPropagation?.();
+                              }}
+                              onClick={(e) => e.stopPropagation()}
                               className="mt-0.5"
                             />
                             <div className="flex-1 min-w-0">
@@ -350,7 +353,10 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
                           >
                             <Checkbox 
                               checked={selectedLinked.has(q.mapping_id)}
-                              onCheckedChange={() => toggleLinked(q.mapping_id)}
+                              onCheckedChange={(e) => {
+                                e.stopPropagation?.();
+                              }}
+                              onClick={(e) => e.stopPropagation()}
                               className="mt-0.5"
                             />
                             <div className="flex-1 min-w-0">
