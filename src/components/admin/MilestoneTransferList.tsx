@@ -14,7 +14,8 @@ import {
   Clock,
   Loader2,
   Star,
-  Bot
+  Bot,
+  Sparkles
 } from 'lucide-react';
 import { LinkedQuestion, CandidateQuestion, MilestoneWithCandidates } from '../../services/milestonesService';
 
@@ -72,8 +73,10 @@ interface MilestoneTransferListProps {
   onUnlink: (mappingId: string) => void;
   onLinkMultiple: (milestoneId: string, questionIds: string[]) => void;
   onUnlinkMultiple: (mappingIds: string[]) => void;
+  onAIMatching: (milestoneId: string) => void;
   isLinking: boolean;
   isUnlinking: boolean;
+  isAIMatching: boolean;
 }
 
 const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
@@ -82,8 +85,10 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
   onUnlink,
   onLinkMultiple,
   onUnlinkMultiple,
+  onAIMatching,
   isLinking,
-  isUnlinking
+  isUnlinking,
+  isAIMatching
 }) => {
   const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(new Set());
   const [selectedLinked, setSelectedLinked] = useState<Set<string>>(new Set());
@@ -166,6 +171,25 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
             )}
           </div>
           <div className="flex items-center gap-2 ml-4">
+            <Button
+              size="sm"
+              onClick={() => onAIMatching(milestone.id)}
+              disabled={isAIMatching || milestone.candidate_questions.length === 0}
+              className="bg-purple-600 hover:bg-purple-700 text-white h-8"
+              title="Ranquear candidatas com IA"
+            >
+              {isAIMatching ? (
+                <>
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  IA...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Ranquear
+                </>
+              )}
+            </Button>
             <Badge className={getCategoryBadgeColor(milestone.category)}>
               {milestone.category}
             </Badge>

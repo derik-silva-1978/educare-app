@@ -17,8 +17,7 @@ import { useToast } from '../../hooks/use-toast';
 import { 
   Loader2, 
   Baby, 
-  Filter,
-  Sparkles
+  Filter
 } from 'lucide-react';
 import MilestoneTransferList from '../../components/admin/MilestoneTransferList';
 
@@ -163,24 +162,34 @@ const MilestonesCurationTimeline: React.FC = () => {
     unlinkMultipleMutation.mutate(mappingIds);
   };
 
+  const [aiMatchingMilestoneId, setAiMatchingMilestoneId] = useState<string | null>(null);
+
   const aiMatchingMutation = useMutation({
-    mutationFn: () => milestonesService.runAIMatching(),
+    mutationFn: (milestoneId: string) => milestonesService.runAIMatching(milestoneId),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['curation-view'] });
       queryClient.invalidateQueries({ queryKey: ['milestones-stats'] });
       toast({
-        title: "AI Matching concluído",
-        description: `${result.totalProcessed} pares analisados, ${result.autoLinked} auto-vinculados`
+        title: "Ranqueamento concluído",
+        description: `${result.totalProcessed} candidatas analisadas, ${result.autoLinked} auto-vinculadas`
       });
+      setAiMatchingMilestoneId(null);
     },
     onError: () => {
       toast({
         title: "Erro",
-        description: "Falha ao executar AI Matching",
+        description: "Falha ao ranquear candidatas",
         variant: "destructive"
       });
+      setAiMatchingMilestoneId(null);
     }
   });
+
+  const handleAIMatching = (milestoneId: string) => {
+    if (aiMatchingMutation.isPending) return;
+    setAiMatchingMilestoneId(milestoneId);
+    aiMatchingMutation.mutate(milestoneId);
+  };
 
   const domains = ['Motor', 'Cognitivo', 'Linguagem', 'Social', 'Emocional'];
 
@@ -203,7 +212,7 @@ const MilestonesCurationTimeline: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4 p-3 bg-muted/50 rounded-lg flex-wrap">
+      <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           <Filter className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm font-medium text-muted-foreground mr-2">Filtrar por domínio:</span>
@@ -227,23 +236,6 @@ const MilestonesCurationTimeline: React.FC = () => {
             </Button>
           ))}
         </div>
-        <Button
-          onClick={() => aiMatchingMutation.mutate()}
-          disabled={aiMatchingMutation.isPending}
-          className="bg-purple-600 hover:bg-purple-700 text-white"
-        >
-          {aiMatchingMutation.isPending ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Processando...
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-4 w-4 mr-2" />
-              Executar AI Matching
-            </>
-          )}
-        </Button>
       </div>
 
       <Accordion 
@@ -291,8 +283,10 @@ const MilestonesCurationTimeline: React.FC = () => {
                       onUnlink={handleUnlink}
                       onLinkMultiple={handleLinkMultiple}
                       onUnlinkMultiple={handleUnlinkMultiple}
+                      onAIMatching={handleAIMatching}
                       isLinking={linkMutation.isPending || linkMultipleMutation.isPending}
                       isUnlinking={unlinkMutation.isPending || unlinkMultipleMutation.isPending}
+                      isAIMatching={aiMatchingMutation.isPending && aiMatchingMilestoneId === milestone.id}
                     />
                   ))}
                 </div>
