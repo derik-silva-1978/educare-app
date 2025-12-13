@@ -174,7 +174,7 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
             <Button
               size="sm"
               onClick={() => onAIMatching(milestone.id)}
-              disabled={isAIMatching || milestone.candidate_questions.length === 0}
+              disabled={isAIMatching}
               className="bg-purple-600 hover:bg-purple-700 text-white h-8"
               title="Ranquear candidatas com IA"
             >
