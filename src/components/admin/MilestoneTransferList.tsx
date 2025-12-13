@@ -63,6 +63,7 @@ const getDomainBadgeColor = (domain: string): string => {
     'linguagem': 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-200',
     'social': 'bg-violet-100 text-violet-800 dark:bg-violet-900/50 dark:text-violet-200',
     'emocional': 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-200',
+    'sensorial': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200',
   };
   return colors[normalized] || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
 };
@@ -158,24 +159,24 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
   return (
     <Card className="mb-6 shadow-sm">
       <CardHeader className="pb-3 bg-muted/30">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2">
-              <Baby className="h-5 w-5 text-primary" />
-              {milestone.title}
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2 flex-wrap">
+              <Baby className="h-5 w-5 text-primary flex-shrink-0" />
+              <span className="break-words">{milestone.title}</span>
             </CardTitle>
             {milestone.description && (
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed bg-background/50 p-3 rounded-md border-l-4 border-primary/30">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-2 leading-relaxed bg-background/50 p-2 sm:p-3 rounded-md border-l-4 border-primary/30">
                 {milestone.description}
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2 ml-4">
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
             <Button
               size="sm"
               onClick={() => onAIMatching(milestone.id)}
               disabled={isAIMatching}
-              className="bg-purple-600 hover:bg-purple-700 text-white h-8"
+              className="bg-purple-600 hover:bg-purple-700 text-white h-8 text-xs sm:text-sm"
               title="Ranquear candidatas com IA"
             >
               {isAIMatching ? (
@@ -190,10 +191,10 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
                 </>
               )}
             </Button>
-            <Badge className={getCategoryBadgeColor(milestone.category)}>
+            <Badge className={getCategoryBadgeColor(milestone.category) + " text-xs"}>
               {milestone.category}
             </Badge>
-            <Badge variant="outline">
+            <Badge variant="outline" className="text-xs">
               <Clock className="h-3 w-3 mr-1" />
               Mês {milestone.target_month}
             </Badge>
@@ -201,8 +202,8 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
         </div>
       </CardHeader>
       <CardContent className="pt-4">
-        <div className="grid grid-cols-[1fr,auto,1fr] gap-4">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto,1fr] gap-4">
+          <div className="space-y-2 order-1 lg:order-1">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                 Candidatas ({milestone.candidate_questions.length})
@@ -218,7 +219,7 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
                 </Button>
               )}
             </div>
-            <ScrollArea className="h-[280px] rounded-md border bg-blue-50/30 dark:bg-blue-950/20">
+            <ScrollArea className="h-[200px] sm:h-[240px] lg:h-[280px] rounded-md border bg-blue-50/30 dark:bg-blue-950/20">
               <div className="p-2 space-y-1">
                 {milestone.candidate_questions.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-8">
@@ -269,13 +270,13 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
             </ScrollArea>
           </div>
 
-          <div className="flex flex-col items-center justify-center gap-2 py-8">
+          <div className="flex flex-row lg:flex-col items-center justify-center gap-2 py-4 lg:py-8 order-2 lg:order-2">
             <Button
               size="sm"
               variant="outline"
               onClick={handleAddAll}
               disabled={isLinking || milestone.candidate_questions.length === 0}
-              className="w-10 h-8"
+              className="w-10 h-8 rotate-90 lg:rotate-0"
               title="Adicionar Todas"
             >
               {isLinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronsRight className="h-4 w-4" />}
@@ -285,7 +286,7 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
               variant="default"
               onClick={handleAddSelected}
               disabled={isLinking || selectedCandidates.size === 0}
-              className="w-10 h-8 bg-green-600 hover:bg-green-700"
+              className="w-10 h-8 bg-green-600 hover:bg-green-700 rotate-90 lg:rotate-0"
               title="Adicionar Selecionadas"
             >
               {isLinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronRight className="h-4 w-4" />}
@@ -295,7 +296,7 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
               variant="destructive"
               onClick={handleRemoveSelected}
               disabled={isUnlinking || selectedLinked.size === 0}
-              className="w-10 h-8"
+              className="w-10 h-8 rotate-90 lg:rotate-0"
               title="Remover Selecionadas"
             >
               {isUnlinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronLeft className="h-4 w-4" />}
@@ -305,14 +306,14 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
               variant="outline"
               onClick={handleRemoveAll}
               disabled={isUnlinking || milestone.linked_questions.length === 0}
-              className="w-10 h-8 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+              className="w-10 h-8 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rotate-90 lg:rotate-0"
               title="Remover Todas"
             >
               {isUnlinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronsLeft className="h-4 w-4" />}
             </Button>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 order-3 lg:order-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-green-600 dark:text-green-400">
                 Vinculadas ({milestone.linked_questions.length})
@@ -328,7 +329,7 @@ const MilestoneTransferList: React.FC<MilestoneTransferListProps> = ({
                 </Button>
               )}
             </div>
-            <ScrollArea className="h-[280px] rounded-md border bg-green-50/30 dark:bg-green-950/20">
+            <ScrollArea className="h-[200px] sm:h-[240px] lg:h-[280px] rounded-md border bg-green-50/30 dark:bg-green-950/20">
               <div className="p-2 space-y-1">
                 {milestone.linked_questions.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-8">

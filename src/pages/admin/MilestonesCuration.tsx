@@ -175,7 +175,7 @@ const MilestonesCuration: React.FC = () => {
     if (!statsData) return null;
 
     return (
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4 mb-6">
         <Card>
           <CardContent className="pt-4">
             <div className="text-2xl font-bold text-blue-600">{statsData.totalMilestones}</div>
@@ -382,45 +382,48 @@ const MilestonesCuration: React.FC = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Baby className="h-6 w-6" />
+          <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+            <Baby className="h-5 w-5 sm:h-6 sm:w-6" />
             Curadoria de Marcos do Desenvolvimento
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Verifique e aprove os mapeamentos entre marcos oficiais e perguntas da jornada
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex bg-muted rounded-lg p-1">
             <Button
               variant={mainView === 'timeline' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setMainView('timeline')}
             >
-              <Calendar className="h-4 w-4 mr-2" />
-              Timeline
+              <Calendar className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Timeline</span>
             </Button>
             <Button
               variant={mainView === 'list' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setMainView('list')}
             >
-              <ListChecks className="h-4 w-4 mr-2" />
-              Lista
+              <ListChecks className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Lista</span>
             </Button>
           </div>
           <Button
             onClick={() => autoLinkMutation.mutate()}
             disabled={autoLinkMutation.isPending}
+            size="sm"
+            className="text-xs sm:text-sm"
           >
             {autoLinkMutation.isPending ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
             ) : (
-              <Sparkles className="h-4 w-4 mr-2" />
+              <Sparkles className="h-4 w-4 sm:mr-2" />
             )}
-            Executar Auto-Linker
+            <span className="hidden sm:inline">Executar Auto-Linker</span>
+            <span className="sm:hidden">Auto-Link</span>
           </Button>
         </div>
       </div>

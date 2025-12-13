@@ -28,6 +28,7 @@ const getDomainBadgeColor = (domain: string): string => {
     'Linguagem': 'bg-sky-600 text-white hover:bg-sky-700',
     'Social': 'bg-violet-600 text-white hover:bg-violet-700',
     'Emocional': 'bg-rose-600 text-white hover:bg-rose-700',
+    'Sensorial': 'bg-indigo-600 text-white hover:bg-indigo-700',
   };
   return colors[domain] || 'bg-gray-600 text-white';
 };
@@ -191,7 +192,7 @@ const MilestonesCurationTimeline: React.FC = () => {
     aiMatchingMutation.mutate(milestoneId);
   };
 
-  const domains = ['Motor', 'Cognitivo', 'Linguagem', 'Social', 'Emocional'];
+  const domains = ['Motor', 'Cognitivo', 'Linguagem', 'Social', 'Emocional', 'Sensorial'];
 
   if (isLoading) {
     return (
