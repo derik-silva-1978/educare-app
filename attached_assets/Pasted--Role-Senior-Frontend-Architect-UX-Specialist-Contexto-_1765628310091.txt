@@ -1,0 +1,66 @@
+# Role: Senior Frontend Architect & UX Specialist
+
+**Contexto do Projeto:**
+Estamos aprimorando o módulo administrativo de **Curadoria de Conteúdo** do Educare+.
+Já possuímos o backend que relaciona "Marcos Oficiais" (Macro) com "Perguntas da Jornada" (Micro).
+Agora, precisamos refinar a interface de mapeamento para eliminar o atrito de usabilidade e permitir uma tomada de decisão clínica mais rápida e contextualizada.
+
+**Problema Atual:**
+A visualização atual é fragmentada ou plana. O curador especialista perde o contexto temporal ao tentar vincular uma pergunta solta a um marco.
+
+**Objetivo:**
+Implementar uma **Interface de Curadoria Cronológica e Hierárquica**. O especialista deve ser capaz de percorrer a linha do tempo do desenvolvimento (do nascimento aos 6 anos) e, para cada marco oficial, selecionar quais perguntas do app compõem aquele requisito.
+
+---
+
+## 🎨 1. Requisitos de Interface (UX/UI Refinement)
+
+Transforme a tela de "Mapeamentos" em uma **Lista Mestra Cronológica**:
+
+### A. Estrutura de Agrupamento (Timeline)
+* **Ordenação Mandatória:** A tela deve ser ordenada estritamente pelo campo `target_month` dos Marcos Oficiais (Crescente: 1 mês, 2 meses, 3 meses...).
+* **Seções Expansíveis (Accordions):** Agrupe os marcos por Faixa Etária.
+    * *Exemplo de Cabeçalho:* "Faixa: 0 a 3 Meses". Ao expandir, lista todos os marcos oficiais deste período.
+
+### B. O Card de Decisão (Split View)
+Para cada Marco Oficial listado, crie um card dividido em duas colunas:
+
+* **Coluna Esquerda (O Alvo - Marco Oficial):**
+    * Exiba o Título do Marco (Ex: "Sustenta a Cabeça").
+    * Exiba a Categoria (Motor, Cognitivo).
+    * Exiba a Fonte (Ex: "Ministério da Saúde").
+
+* **Coluna Direita (Os Candidatos - Perguntas do App):**
+    * Liste **TODAS** as perguntas da tabela `journey_questions` que se encaixam na janela temporal do marco (Ex: Se o marco é de 3 meses, mostre perguntas da semana 10 a 14).
+    * **Controle de Vínculo:** Ao lado de cada pergunta, coloque um **Checkbox** ou **Toggle Switch**.
+        * **[ ON ] Aprovado:** A pergunta é vinculada ao marco na tabela `milestone_mappings`.
+        * **[ OFF ] Ignorado:** A pergunta existe na jornada, mas não conta para este marco oficial específico.
+
+### C. Filtros de Foco
+* Adicione filtros no topo para que o curador possa trabalhar por domínio: "Mostrar apenas Marcos Motores", "Mostrar apenas Linguagem".
+
+---
+
+## ⚙️ 2. Adaptação do Backend (API)
+
+Ajuste ou crie o endpoint `GET /api/admin/curation-view` para suportar essa visão rica:
+
+1.  **Query Otimizada:**
+    * Busque todos os `official_milestones` ordenados por `target_month ASC`.
+    * Para cada marco, faça um JOIN (ou subquery) para trazer:
+        1.  Perguntas JÁ vinculadas (tabela `milestone_mappings`).
+        2.  Perguntas "Candidatas" (tabela `journey_questions`) que estão na mesma faixa de idade/domínio, mas ainda não vinculadas.
+2.  **Payload Esperado:**
+    O JSON deve vir aninhado para facilitar a renderização no frontend (Grouped by Age -> List of Milestones -> List of Candidates).
+
+---
+
+## 🧠 3. Regra de Negócio (Impacto no Dashboard)
+
+Reitere na implementação que esta tela é a **Fonte da Verdade Clínica**:
+* Ao marcar "Check" em uma pergunta nesta tela, o sistema deve salvar o registro em `milestone_mappings`.
+* Este vínculo é o que alimentará o cálculo de porcentagem (%) no Dashboard da Mãe.
+    * *Exemplo:* Se o curador vincular 3 perguntas ao marco "Rolar", a mãe precisará ter respondido "Sim" nessas 3 perguntas específicas para que o marco apareça "Atingido" (Verde) no gráfico oficial.
+
+**Entregável:**
+Código Frontend (React/Componentes) atualizado para essa nova visualização em lista/timeline e o código Backend necessário para alimentar os dados.
