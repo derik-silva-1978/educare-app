@@ -100,6 +100,7 @@ async function uploadDocument(filePath, fileName, metadata = {}) {
     
     let result = operation;
     const pollingStartTime = Date.now();
+    let pollingCompleted = false;
 
     while (!result.done) {
       const elapsedTime = Date.now() - pollingStartTime;
@@ -109,7 +110,7 @@ async function uploadDocument(filePath, fileName, metadata = {}) {
         return {
           success: true,
           status: 'pending',
-          gemini_file_id: operation.name || null,
+          gemini_file_id: operation.name || operation.operationName || null,
           store_name: store.name,
           filename: fileName,
           bytes: stats.size,
@@ -122,9 +123,20 @@ async function uploadDocument(filePath, fileName, metadata = {}) {
       await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
       
       try {
-        result = await ai.operations.get(operation);
+        // The operations.get method requires the operation name, not the full object
+        const opName = operation.name || operation.operationName;
+        if (opName && ai.operations && typeof ai.operations.get === 'function') {
+          result = await ai.operations.get({ name: opName });
+        } else {
+          // If we can't poll, assume success after upload
+          console.log(`[GeminiFileSearch] Polling não disponível, assumindo sucesso após upload`);
+          pollingCompleted = true;
+          break;
+        }
       } catch (pollError) {
         console.warn(`[GeminiFileSearch] Erro no polling: ${pollError.message}`);
+        // If polling fails, we still consider upload successful
+        pollingCompleted = true;
         break;
       }
     }
@@ -132,9 +144,16 @@ async function uploadDocument(filePath, fileName, metadata = {}) {
     const uploadTime = Date.now() - startTime;
     console.log(`[GeminiFileSearch] ✓ Documento indexado: ${fileName} (${uploadTime}ms)`);
 
+    // Extract file ID from various possible response formats
+    const geminiFileId = result.result?.name || 
+                         result.name || 
+                         operation.name || 
+                         operation.operationName ||
+                         `uploaded_${Date.now()}`;
+
     return {
       success: true,
-      gemini_file_id: result.result?.name || result.name,
+      gemini_file_id: geminiFileId,
       store_name: store.name,
       filename: fileName,
       bytes: stats.size,

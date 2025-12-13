@@ -112,6 +112,7 @@ async function upsertDocument(documentId, embedding, metadata = {}) {
 
 async function batchUpsert(documents) {
   const startTime = Date.now();
+  const { v4: uuidv4 } = require('uuid');
 
   try {
     const client = getQdrant();
@@ -124,23 +125,36 @@ async function batchUpsert(documents) {
 
     await ensureCollection();
 
-    const points = documents.map(doc => ({
-      id: doc.id,
-      vector: doc.embedding,
-      payload: {
-        title: doc.title || 'Sem título',
-        description: doc.description || null,
-        source_type: doc.source_type || 'document',
-        knowledge_category: doc.knowledge_category || 'general',
-        age_range: doc.age_range || null,
-        domain: doc.domain || null,
-        chunk_index: doc.chunk_index || 0,
-        parent_document_id: doc.parent_document_id || null,
-        content_preview: doc.content_preview || null,
-        created_at: new Date().toISOString()
+    const points = documents.map((doc, index) => {
+      const pointId = uuidv4();
+      
+      if (!doc.embedding || !Array.isArray(doc.embedding)) {
+        console.error(`[Qdrant] Embedding inválido para doc ${index}:`, typeof doc.embedding);
+        throw new Error(`Embedding inválido para documento ${index}`);
       }
-    }));
+      
+      console.log(`[Qdrant] Preparando ponto ${index}: id=${pointId}, embedding_dim=${doc.embedding.length}`);
+      
+      return {
+        id: pointId,
+        vector: doc.embedding,
+        payload: {
+          original_id: doc.id,
+          title: doc.title || 'Sem título',
+          description: doc.description || null,
+          source_type: doc.source_type || 'document',
+          knowledge_category: doc.knowledge_category || 'general',
+          age_range: doc.age_range || null,
+          domain: doc.domain || null,
+          chunk_index: doc.chunk_index || 0,
+          parent_document_id: doc.parent_document_id || null,
+          content_preview: doc.content_preview || null,
+          created_at: new Date().toISOString()
+        }
+      };
+    });
 
+    console.log(`[Qdrant] Enviando ${points.length} pontos para upsert...`);
     await client.upsert(COLLECTION_NAME, { points });
 
     const upsertTime = Date.now() - startTime;

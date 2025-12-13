@@ -36,16 +36,27 @@ async function generateEmbedding(text) {
     const result = await withTimeout(
       ai.models.embedContent({
         model: 'text-embedding-004',
-        content: text
+        contents: text
       }),
       GEMINI_EMBEDDING_TIMEOUT,
       'Gemini embedding'
     );
 
+    // Handle different response formats from Gemini API
+    const embedding = result.embeddings?.[0]?.values || result.embedding?.values;
+    
+    if (!embedding || !Array.isArray(embedding)) {
+      console.error('[HybridIngestion] Resposta de embedding inesperada:', JSON.stringify(result, null, 2));
+      return {
+        success: false,
+        error: 'Formato de resposta de embedding inválido'
+      };
+    }
+
     return {
       success: true,
-      embedding: result.embedding.values,
-      dimension: result.embedding.values.length
+      embedding: embedding,
+      dimension: embedding.length
     };
   } catch (error) {
     console.error('[HybridIngestion] Erro ao gerar embedding:', error.message);
