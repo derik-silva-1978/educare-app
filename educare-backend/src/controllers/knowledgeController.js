@@ -422,25 +422,28 @@ exports.deleteDocument = async (req, res) => {
     }
 
     const metadata = document.metadata || {};
-    const ragProviders = metadata.rag_providers || [];
+    let hybridDeleteHandled = false;
 
-    if (ragProviders.length > 0 || metadata.gemini_file_id || metadata.qdrant_document_id) {
+    if (metadata.gemini_file_id || metadata.qdrant_document_id) {
       try {
         console.log(`[Knowledge] Deletando do RAG híbrido: id=${id}, gemini=${metadata.gemini_file_id}, qdrant=${metadata.qdrant_document_id}`);
         const hybridDeleteResult = await hybridIngestionService.deleteDocument({
-          document_id: metadata.qdrant_document_id || id,
-          gemini_file_id: metadata.gemini_file_id
+          document_id: metadata.qdrant_document_id || null,
+          gemini_file_id: metadata.gemini_file_id || null
         });
         
-        if (!hybridDeleteResult.success) {
-          console.warn(`[Knowledge] Falha parcial na deleção do RAG híbrido:`, hybridDeleteResult);
-        } else {
+        if (hybridDeleteResult.success) {
           console.log(`[Knowledge] ✓ Documento removido do RAG híbrido`);
+          hybridDeleteHandled = true;
+        } else {
+          console.warn(`[Knowledge] Falha parcial na deleção do RAG híbrido:`, hybridDeleteResult);
         }
       } catch (hybridErr) {
         console.error(`[Knowledge] Erro ao deletar do RAG híbrido:`, hybridErr.message);
       }
-    } else if (document.file_search_id && fileSearchService.isConfigured()) {
+    }
+
+    if (!hybridDeleteHandled && document.file_search_id && fileSearchService.isConfigured()) {
       const deleteResult = await fileSearchService.deleteDocumentFromFileSearch(document.file_search_id);
       if (!deleteResult.success) {
         console.warn(`[Knowledge] Erro ao deletar do File Search: ${deleteResult.error}`);
