@@ -18,6 +18,9 @@ DB_HOST = "86.48.30.74"
 DB_PORT = "5432"
 DB_DIALECT = "postgres"
 DB_TIMEZONE = "America/Sao_Paulo"
+ENABLE_GEMINI_RAG = "true"
+ENABLE_QDRANT_RAG = "true"
+RAG_PRIMARY_PROVIDER = "gemini"
 
 [workflows]
 runButton = "Project"

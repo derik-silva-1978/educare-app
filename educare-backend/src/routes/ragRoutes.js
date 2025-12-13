@@ -15,11 +15,9 @@ router.get('/documents', verifyToken, ragController.getKnowledgeDocuments);
 
 router.post('/hybrid/query', verifyToken, hybridRagController.query);
 
-router.get('/hybrid/status', verifyToken, hybridRagController.getStatus);
+router.get('/hybrid/status', verifyToken, hybridRagController.status);
 
-router.get('/hybrid/providers', verifyToken, hybridRagController.getProviders);
-
-router.get('/hybrid/test', verifyToken, hybridRagController.testConnection);
+router.get('/hybrid/health', hybridRagController.healthCheck);
 
 router.post('/external/ask', apiKeyMiddleware.validateApiKey, ragController.ask);
 
