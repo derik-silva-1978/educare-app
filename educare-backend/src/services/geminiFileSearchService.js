@@ -8,6 +8,11 @@ let fileSearchStore = null;
 const STORE_NAME = 'educare-knowledge-base';
 const MODEL_NAME = 'gemini-2.5-flash';
 
+// Timeouts para evitar loops infinitos
+const POLLING_INTERVAL_MS = 2000; // 2 segundos entre tentativas
+const MAX_POLLING_TIME_MS = 30000; // 30 segundos máximo de polling
+const STORE_CREATION_TIMEOUT_MS = 15000; // 15 segundos para criar store
+
 function getGenAI() {
   if (!genaiInstance && process.env.GEMINI_API_KEY) {
     genaiInstance = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -91,23 +96,37 @@ async function uploadDocument(filePath, fileName, metadata = {}) {
       }
     });
 
-    console.log(`[GeminiFileSearch] Aguardando indexação...`);
+    console.log(`[GeminiFileSearch] Aguardando indexação (max ${MAX_POLLING_TIME_MS/1000}s)...`);
     
     let result = operation;
-    let attempts = 0;
-    const maxAttempts = 60;
+    const pollingStartTime = Date.now();
 
-    while (!result.done && attempts < maxAttempts) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      result = await ai.operations.get(operation);
-      attempts++;
-    }
-
-    if (!result.done) {
-      return {
-        success: false,
-        error: 'Timeout ao indexar documento (máximo 2 minutos)'
-      };
+    while (!result.done) {
+      const elapsedTime = Date.now() - pollingStartTime;
+      
+      if (elapsedTime >= MAX_POLLING_TIME_MS) {
+        console.warn(`[GeminiFileSearch] Timeout de polling após ${elapsedTime}ms - retornando status pendente`);
+        return {
+          success: true,
+          status: 'pending',
+          gemini_file_id: operation.name || null,
+          store_name: store.name,
+          filename: fileName,
+          bytes: stats.size,
+          upload_time_ms: Date.now() - startTime,
+          provider: 'gemini',
+          message: 'Documento enviado, indexação em andamento (verifique o status posteriormente)'
+        };
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL_MS));
+      
+      try {
+        result = await ai.operations.get(operation);
+      } catch (pollError) {
+        console.warn(`[GeminiFileSearch] Erro no polling: ${pollError.message}`);
+        break;
+      }
     }
 
     const uploadTime = Date.now() - startTime;
