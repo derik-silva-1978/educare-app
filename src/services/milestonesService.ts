@@ -167,6 +167,25 @@ class MilestonesService {
     );
     return { totalMappings: (response as any).totalMappings || 0, skippedDuplicates: (response as any).skippedDuplicates || 0 };
   }
+
+  async getCurationView(): Promise<CurationViewResponse> {
+    const response = await httpClient.get<CurationViewResponse>(
+      '/admin/milestones/curation-view'
+    );
+    return {
+      success: response.success ?? true,
+      data: response.data || [],
+      total_milestones: response.total_milestones || 0
+    };
+  }
+
+  async createMapping(milestoneId: string, questionId: string, weight: number = 1.0): Promise<MilestoneMapping> {
+    const response = await httpClient.post<{ success: boolean; data: MilestoneMapping }>(
+      '/admin/milestones/mappings',
+      { official_milestone_id: milestoneId, journey_question_id: questionId, weight }
+    );
+    return response.data!;
+  }
 }
 
 export const milestonesService = new MilestonesService();

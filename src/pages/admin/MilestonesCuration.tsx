@@ -33,8 +33,10 @@ import {
   Sparkles,
   RefreshCw,
   FileText,
-  Baby
+  Baby,
+  Calendar
 } from 'lucide-react';
+import MilestonesCurationTimeline from './MilestonesCurationTimeline';
 
 const getCategoryBadgeColor = (category: string | undefined): string => {
   if (!category) return 'bg-gray-100 text-gray-800';
@@ -57,6 +59,7 @@ const MilestonesCuration: React.FC = () => {
   const [selectedMapping, setSelectedMapping] = useState<MilestoneMapping | null>(null);
   const [verifyNotes, setVerifyNotes] = useState('');
   const [activeTab, setActiveTab] = useState('pending');
+  const [mainView, setMainView] = useState<'list' | 'timeline'>('timeline');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedMappings, setSelectedMappings] = useState<Set<string>>(new Set());
 
@@ -389,22 +392,55 @@ const MilestonesCuration: React.FC = () => {
             Verifique e aprove os mapeamentos entre marcos oficiais e perguntas da jornada
           </p>
         </div>
-        <Button
-          onClick={() => autoLinkMutation.mutate()}
-          disabled={autoLinkMutation.isPending}
-        >
-          {autoLinkMutation.isPending ? (
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          ) : (
-            <Sparkles className="h-4 w-4 mr-2" />
-          )}
-          Executar Auto-Linker
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex bg-muted rounded-lg p-1">
+            <Button
+              variant={mainView === 'timeline' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setMainView('timeline')}
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Timeline
+            </Button>
+            <Button
+              variant={mainView === 'list' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setMainView('list')}
+            >
+              <ListChecks className="h-4 w-4 mr-2" />
+              Lista
+            </Button>
+          </div>
+          <Button
+            onClick={() => autoLinkMutation.mutate()}
+            disabled={autoLinkMutation.isPending}
+          >
+            {autoLinkMutation.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4 mr-2" />
+            )}
+            Executar Auto-Linker
+          </Button>
+        </div>
       </div>
 
       {renderStatsCards(stats)}
       {renderCoverageChart(chartData)}
 
+      {mainView === 'timeline' ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Visao Cronologica por Faixa Etaria
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <MilestonesCurationTimeline />
+          </CardContent>
+        </Card>
+      ) : (
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -476,6 +512,7 @@ const MilestonesCuration: React.FC = () => {
           </Tabs>
         </CardContent>
       </Card>
+      )}
 
       <Dialog open={showVerifyDialog} onOpenChange={setShowVerifyDialog}>
         <DialogContent>
