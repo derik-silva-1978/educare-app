@@ -112,7 +112,8 @@ async function upsertDocument(documentId, embedding, metadata = {}) {
 
 async function batchUpsert(documents) {
   const startTime = Date.now();
-  const { v4: uuidv4 } = require('uuid');
+  const { v5: uuidv5 } = require('uuid');
+  const NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
 
   try {
     const client = getQdrant();
@@ -126,14 +127,14 @@ async function batchUpsert(documents) {
     await ensureCollection();
 
     const points = documents.map((doc, index) => {
-      const pointId = uuidv4();
+      const pointId = uuidv5(doc.id, NAMESPACE);
       
       if (!doc.embedding || !Array.isArray(doc.embedding)) {
         console.error(`[Qdrant] Embedding inválido para doc ${index}:`, typeof doc.embedding);
         throw new Error(`Embedding inválido para documento ${index}`);
       }
       
-      console.log(`[Qdrant] Preparando ponto ${index}: id=${pointId}, embedding_dim=${doc.embedding.length}`);
+      console.log(`[Qdrant] Preparando ponto ${index}: id=${pointId}, embedding_dim=${doc.embedding.length}, original_id=${doc.id}`);
       
       return {
         id: pointId,
@@ -253,7 +254,7 @@ function buildFilter(options) {
   return { must };
 }
 
-async function deleteDocument(documentId) {
+async function deleteDocument(parentDocumentId) {
   try {
     const client = getQdrant();
     if (!client) {
@@ -264,14 +265,19 @@ async function deleteDocument(documentId) {
     }
 
     await client.delete(COLLECTION_NAME, {
-      points: [documentId]
+      filter: {
+        must: [{
+          key: 'parent_document_id',
+          match: { value: parentDocumentId }
+        }]
+      }
     });
 
-    console.log(`[Qdrant] Documento deletado: ${documentId}`);
+    console.log(`[Qdrant] Chunks do documento ${parentDocumentId} deletados`);
 
     return {
       success: true,
-      message: 'Documento deletado com sucesso'
+      message: 'Documento e chunks deletados com sucesso'
     };
   } catch (error) {
     console.error('[Qdrant] Erro ao deletar:', error);
