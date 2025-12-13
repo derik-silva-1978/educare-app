@@ -1,0 +1,90 @@
+# Role: Senior AI Backend Engineer & UX/UI Specialist
+
+**Contexto do Projeto:**
+Estamos realizando um upgrade crítico no **Módulo de Curadoria de Marcos** do Educare+.
+A versão anterior, baseada em filtros rígidos (tags/domínios), mostrou-se insuficiente e limitante.
+Vamos substituí-la por um **Motor de Ranqueamento Semântico (AI Matchmaker)**.
+
+**Diretriz Estratégica ("No Discard Policy"):**
+O sistema **NÃO DEVE** ocultar ou descartar perguntas automaticamente.
+Todas as perguntas que estiverem na janela temporal do marco devem ser exibidas.
+A função da IA será **ranquear e ordenar** essas perguntas por relevância (0 a 5 estrelas), facilitando o trabalho do curador, mas mantendo todas as opções disponíveis.
+
+---
+
+## 🏗️ 1. Arquitetura de Dados (Schema Evolution)
+
+Precisamos de tabelas para suportar a persistência da inteligência e os novos dados descritivos dos marcos oficiais.
+
+### A. Tabela `official_milestones` (Ajuste)
+* **Adicionar Coluna:** `description` (TEXT).
+    * *Finalidade:* Armazenar o texto descritivo oficial do Ministério da Saúde (ex: "O bebê deve sustentar a cabeça em 45 graus quando de bruços...").
+* **Ação de Seed:** Atualize o script de *seed* para popular essas descrições nos marcos existentes. Caso não tenhamos o texto exato agora, gere descrições plausíveis baseadas no título para fins de desenvolvimento.
+
+### B. Nova Tabela `milestone_candidate_scores` (Cache de Inteligência)
+Crie esta tabela para evitar chamar a OpenAI repetidamente para o mesmo par (Marco/Pergunta) e permitir ordenação rápida:
+* `official_milestone_id`: FK.
+* `journey_question_id`: FK.
+* `relevance_score`: Integer (0 a 5).
+* `ai_reasoning`: Text (Justificativa curta da IA).
+* `updated_at`: Timestamp.
+
+---
+
+## 🧠 2. O Novo Motor "Auto-Linker" (Backend Logic)
+
+**⚠️ ATENÇÃO:** Localize a função/rota atual que faz o "auto-link" ou "sugestão de candidatas". **Remova** qualquer lógica que filtre por `question.domain == milestone.category`.
+
+Crie ou atualize o endpoint de processamento (`/api/admin/ai-matching`) com a seguinte lógica sequencial:
+
+1.  **Escopo Temporal (Abertura):** Para o Marco Oficial selecionado, busque **TODAS** as perguntas do app cuja `week` esteja dentro da janela de tempo (+/- 4 semanas). *Ignore completamente o domínio/tag da pergunta.*
+2.  **Verificação de Cache:** Para cada pergunta, verifique se já existe nota na tabela `milestone_candidate_scores`. Se não, chame a OpenAI.
+3.  **Prompt da OpenAI (Classificação Semântica):**
+    > "Atue como um Pediatra Especialista em Desenvolvimento Infantil.
+    > Analise se a 'Pergunta do App' serve como evidência/sinal de que a criança atingiu o 'Marco Oficial'.
+    >
+    > **Marco Oficial:** [Título] - [Descrição do MS].
+    > **Pergunta do App:** [Texto da Pergunta].
+    >
+    > **Tarefa:** Dê uma nota de 0 a 5.
+    > 5 = Evidência Perfeita (A pergunta prova o marco).
+    > 4 = Fortemente Relacionada.
+    > 3 = Relacionada (Pode servir).
+    > 0-2 = Baixa ou Nenhuma relação direta.
+    >
+    > Retorne JSON: `{ score: int, reason: string }`."
+
+4.  **Persistência:** Salve o resultado no banco.
+5.  **Regra de Auto-Vínculo (Opcional):** Se `score == 5`, crie automaticamente o registro na tabela final `milestone_mappings` com a flag `is_auto_generated = true`.
+
+---
+
+## 🎨 3. Refinamento da Interface (Frontend - Transfer List)
+
+Atualize o componente de curadoria para refletir essa inteligência visualmente:
+
+### A. Cabeçalho do Marco (Contexto Clínico)
+* Abaixo do Título do Marco e da Badge de Mês, adicione um parágrafo (texto cinza/itálico) exibindo a nova **`description`**. Isso serve de "gabarito" para o curador.
+
+### B. Coluna Esquerda ("Candidatas / Disponíveis")
+* **Ordenação:** A lista deve vir ordenada estritamente por `relevance_score DESC`.
+    * *Topo:* Perguntas com 5 e 4 estrelas.
+    * *Fundo:* Perguntas com 0, 1 ou 2 estrelas.
+* **Visualização de Relevância:**
+    * Ao lado de cada pergunta, renderize as **Estrelas** (⭐⭐⭐⭐⭐) baseadas no score.
+    * **Tooltip Inteligente:** Ao passar o mouse nas estrelas, mostre o texto do `ai_reasoning` (Ex: *"Alta correlação: ambos falam sobre controle de pescoço"*).
+* **Tratamento Visual (No Discard):** Perguntas com score baixo (0-2) devem ter opacidade levemente reduzida (ex: `opacity: 0.6`) para reduzir ruído visual, mas **DEVEM continuar clicáveis e movíveis**. O curador humano tem a palavra final.
+
+### C. Coluna Direita ("Vinculadas")
+* **Ícone de Automação:** Se a pergunta foi movida automaticamente pelo script (score 5), exiba um ícone de robô 🤖 ou um highlight sutil para indicar que requer revisão humana.
+
+---
+
+## 🧪 4. Critérios de Aceite (QA)
+
+1.  **Teste de Domínio Cruzado:** Verifique se uma pergunta de domínio "Social" aparece como candidata para um marco "Cognitivo" (se estiver na mesma semana). Ela deve aparecer, provando que o filtro rígido foi removido.
+2.  **Teste de Ordenação:** As perguntas mais relevantes estão no topo da lista esquerda?
+3.  **Teste de Persistência:** Ao mover uma pergunta de 0 estrelas para a direita manualmente, o vínculo é salvo corretamente? (Deve ser SIM).
+
+**Entregável:**
+Código Backend refatorado (nova lógica de busca + integração OpenAI) e Frontend atualizado com as melhorias de UX.
