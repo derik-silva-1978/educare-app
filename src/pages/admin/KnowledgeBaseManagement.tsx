@@ -179,7 +179,7 @@ const KnowledgeBaseManagement: React.FC = () => {
     try {
       const response = await fetch(`/api/admin/knowledge/${documentId}/status`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Authorization': `Bearer ${localStorage.getItem('educare_auth_token')}`,
         },
       });
 
@@ -286,7 +286,7 @@ const KnowledgeBaseManagement: React.FC = () => {
     try {
       const response = await fetch('/api/admin/knowledge', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Authorization': `Bearer ${localStorage.getItem('educare_auth_token')}`,
         },
       });
       
@@ -420,7 +420,7 @@ const KnowledgeBaseManagement: React.FC = () => {
       const response = await fetch('/api/admin/knowledge/upload', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Authorization': `Bearer ${localStorage.getItem('educare_auth_token')}`,
         },
         body: formDataToSend,
         signal: controller.signal,
@@ -507,7 +507,7 @@ const KnowledgeBaseManagement: React.FC = () => {
       const response = await fetch(`/api/admin/knowledge/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Authorization': `Bearer ${localStorage.getItem('educare_auth_token')}`,
         },
       });
 
@@ -536,7 +536,7 @@ const KnowledgeBaseManagement: React.FC = () => {
       const response = await fetch(`/api/admin/knowledge/${id}/toggle-active`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Authorization': `Bearer ${localStorage.getItem('educare_auth_token')}`,
           'Content-Type': 'application/json',
         },
       });
