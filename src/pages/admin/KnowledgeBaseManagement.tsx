@@ -102,6 +102,24 @@ const ProviderBadge = ({ provider }: { provider: string }) => {
   );
 };
 
+type IngestionStep = 'uploading' | 'saving' | 'processing' | 'indexing' | 'completed' | 'failed';
+
+interface IngestionState {
+  documentId: string | null;
+  status: IngestionStep;
+  providers: string[];
+  error: string | null;
+  startedAt: number | null;
+}
+
+const INGESTION_STEPS: { key: IngestionStep; label: string; icon: React.ElementType }[] = [
+  { key: 'uploading', label: 'Enviando arquivo...', icon: Upload },
+  { key: 'saving', label: 'Salvando documento...', icon: FileText },
+  { key: 'processing', label: 'Processando OCR...', icon: Zap },
+  { key: 'indexing', label: 'Indexando no RAG...', icon: Brain },
+  { key: 'completed', label: 'Concluído!', icon: CheckCircle },
+];
+
 const KnowledgeBaseManagement: React.FC = () => {
   const { hasRole } = useCustomAuth();
   const { toast } = useToast();
@@ -114,6 +132,15 @@ const KnowledgeBaseManagement: React.FC = () => {
   const [dragActive, setDragActive] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const [ingestionState, setIngestionState] = useState<IngestionState>({
+    documentId: null,
+    status: 'uploading',
+    providers: [],
+    error: null,
+    startedAt: null,
+  });
+  const pollingIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
   
   const [formData, setFormData] = useState<UploadFormData>({
     title: '',
@@ -132,6 +159,127 @@ const KnowledgeBaseManagement: React.FC = () => {
   useEffect(() => {
     loadDocuments();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, []);
+
+  const stopPolling = useCallback(() => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+  }, []);
+
+  const pollIngestionStatus = useCallback(async (documentId: string) => {
+    try {
+      const response = await fetch(`/api/admin/knowledge/${documentId}/status`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao verificar status');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        const { ingestion_status, rag_providers, ingestion_error, ingestion_started_at } = result.data;
+        
+        if (ingestion_status === 'pending') {
+          setIngestionState(prev => ({
+            ...prev,
+            status: 'saving',
+          }));
+        } else if (ingestion_status === 'processing') {
+          setIngestionState(prev => {
+            const startedAt = ingestion_started_at 
+              ? new Date(ingestion_started_at).getTime() 
+              : (prev.startedAt || Date.now());
+            const elapsed = Date.now() - startedAt;
+            
+            return {
+              ...prev,
+              status: elapsed < 5000 ? 'processing' : 'indexing',
+            };
+          });
+        } else if (ingestion_status === 'completed') {
+          stopPolling();
+          setIngestionState(prev => ({
+            ...prev,
+            status: 'completed',
+            providers: rag_providers || [],
+          }));
+          
+          const providerInfo = rag_providers?.length > 0 
+            ? `Indexado em: ${rag_providers.join(', ')}`
+            : 'Salvo localmente';
+          
+          toast({
+            title: '✨ Documento processado com sucesso!',
+            description: providerInfo,
+          });
+          
+          setTimeout(() => {
+            setUploading(false);
+            setUploadProgress(0);
+            setIngestionState({
+              documentId: null,
+              status: 'uploading',
+              providers: [],
+              error: null,
+              startedAt: null,
+            });
+            loadDocuments();
+          }, 1500);
+          
+        } else if (ingestion_status === 'failed') {
+          stopPolling();
+          setIngestionState(prev => ({
+            ...prev,
+            status: 'failed',
+            error: ingestion_error || 'Falha ao processar documento',
+          }));
+          
+          toast({
+            title: 'Erro no processamento',
+            description: ingestion_error || 'Falha ao indexar documento. Tente novamente.',
+            variant: 'destructive',
+          });
+          
+          setTimeout(() => {
+            setUploading(false);
+            setUploadProgress(0);
+            loadDocuments();
+          }, 2000);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao verificar status de ingestão:', error);
+    }
+  }, [stopPolling, toast]);
+
+  const startPolling = useCallback((documentId: string) => {
+    setIngestionState({
+      documentId,
+      status: 'saving',
+      providers: [],
+      error: null,
+      startedAt: Date.now(),
+    });
+    
+    pollIngestionStatus(documentId);
+    
+    pollingIntervalRef.current = setInterval(() => {
+      pollIngestionStatus(documentId);
+    }, 2000);
+  }, [pollIngestionStatus]);
 
   const loadDocuments = async () => {
     setLoading(true);
@@ -244,6 +392,13 @@ const KnowledgeBaseManagement: React.FC = () => {
 
     setUploading(true);
     setUploadProgress(10);
+    setIngestionState({
+      documentId: null,
+      status: 'uploading',
+      providers: [],
+      error: null,
+      startedAt: Date.now(),
+    });
 
     try {
       const formDataToSend = new FormData();
@@ -266,37 +421,54 @@ const KnowledgeBaseManagement: React.FC = () => {
         body: formDataToSend,
       });
 
-      setUploadProgress(70);
+      setUploadProgress(50);
 
       const result = await response.json();
 
       if (response.ok && result.success) {
-        setUploadProgress(100);
+        const documentId = result.data?.id;
         
-        const providerInfo = result.data?.rag_providers?.length > 0 
-          ? `indexado em: ${result.data.rag_providers.join(', ')}`
-          : 'salvo localmente';
-        
-        toast({
-          title: '✨ Documento enviado com sucesso!',
-          description: `"${formData.title}" foi ${providerInfo}.`,
-        });
-        
-        setSelectedFile(null);
-        setFormData({
-          title: '',
-          description: '',
-          source_type: 'educare',
-          knowledge_category: 'baby',
-          age_range: 'all',
-          domain: 'saude',
-          tags: '',
-        });
-        
-        const fileInput = document.getElementById('file-input') as HTMLInputElement;
-        if (fileInput) fileInput.value = '';
-        
-        await loadDocuments();
+        if (documentId) {
+          setSelectedFile(null);
+          setFormData({
+            title: '',
+            description: '',
+            source_type: 'educare',
+            knowledge_category: 'baby',
+            age_range: 'all',
+            domain: 'saude',
+            tags: '',
+          });
+          
+          const fileInput = document.getElementById('file-input') as HTMLInputElement;
+          if (fileInput) fileInput.value = '';
+          
+          startPolling(documentId);
+        } else {
+          setUploadProgress(100);
+          toast({
+            title: '✨ Documento enviado!',
+            description: 'O documento foi salvo com sucesso.',
+          });
+          
+          setSelectedFile(null);
+          setFormData({
+            title: '',
+            description: '',
+            source_type: 'educare',
+            knowledge_category: 'baby',
+            age_range: 'all',
+            domain: 'saude',
+            tags: '',
+          });
+          
+          const fileInput = document.getElementById('file-input') as HTMLInputElement;
+          if (fileInput) fileInput.value = '';
+          
+          setUploading(false);
+          setUploadProgress(0);
+          await loadDocuments();
+        }
       } else {
         throw new Error(result.error || result.message || 'Erro ao fazer upload');
       }
@@ -307,9 +479,15 @@ const KnowledgeBaseManagement: React.FC = () => {
         description: error instanceof Error ? error.message : 'Erro desconhecido ao processar arquivo',
         variant: 'destructive',
       });
-    } finally {
       setUploading(false);
       setUploadProgress(0);
+      setIngestionState({
+        documentId: null,
+        status: 'uploading',
+        providers: [],
+        error: null,
+        startedAt: null,
+      });
     }
   };
 
@@ -644,15 +822,110 @@ const KnowledgeBaseManagement: React.FC = () => {
             </div>
 
             {uploading && (
-              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                    <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Indexando documento...</span>
+              <div className="mt-6 p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="relative">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                      {ingestionState.status === 'failed' ? (
+                        <AlertCircle className="h-5 w-5 text-red-500" />
+                      ) : ingestionState.status === 'completed' ? (
+                        <CheckCircle className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                      )}
+                    </div>
                   </div>
-                  <span className="text-sm font-bold text-blue-700 dark:text-blue-300">{uploadProgress}%</span>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-800 dark:text-gray-200">
+                      {ingestionState.status === 'failed' ? 'Falha no processamento' : 
+                       ingestionState.status === 'completed' ? 'Processamento concluído!' :
+                       'Processando documento...'}
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {ingestionState.status === 'failed' 
+                        ? ingestionState.error || 'Erro desconhecido'
+                        : ingestionState.status === 'completed'
+                        ? `Indexado em: ${ingestionState.providers.join(', ') || 'local'}`
+                        : 'Aguarde enquanto processamos seu documento'}
+                    </p>
+                  </div>
                 </div>
-                <Progress value={uploadProgress} className="h-2" />
+                
+                <div className="space-y-2">
+                  {INGESTION_STEPS.map((step, index) => {
+                    const stepIndex = INGESTION_STEPS.findIndex(s => s.key === ingestionState.status);
+                    const currentIndex = INGESTION_STEPS.findIndex(s => s.key === step.key);
+                    const isCompleted = currentIndex < stepIndex;
+                    const isActive = step.key === ingestionState.status;
+                    const isFailed = ingestionState.status === 'failed' && step.key !== 'completed';
+                    
+                    const Icon = step.icon;
+                    
+                    return (
+                      <div key={step.key} className="flex items-center gap-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                          isFailed 
+                            ? 'bg-red-100 dark:bg-red-900/30' 
+                            : isCompleted 
+                            ? 'bg-green-100 dark:bg-green-900/30' 
+                            : isActive 
+                            ? 'bg-blue-100 dark:bg-blue-900/30' 
+                            : 'bg-gray-100 dark:bg-gray-800'
+                        }`}>
+                          {isFailed ? (
+                            <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                          ) : isCompleted ? (
+                            <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+                          ) : isActive ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
+                          ) : (
+                            <Icon className="w-3.5 h-3.5 text-gray-400" />
+                          )}
+                        </div>
+                        <span className={`text-sm ${
+                          isFailed 
+                            ? 'text-red-600 dark:text-red-400 font-medium' 
+                            : isCompleted 
+                            ? 'text-green-600 dark:text-green-400' 
+                            : isActive 
+                            ? 'text-blue-600 dark:text-blue-400 font-medium' 
+                            : 'text-gray-400'
+                        }`}>
+                          {step.label}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {ingestionState.status === 'completed' && (
+                  <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                        Documento indexado com sucesso!
+                      </span>
+                    </div>
+                    {ingestionState.providers.length > 0 && (
+                      <div className="flex gap-2 mt-2">
+                        {ingestionState.providers.map(p => (
+                          <ProviderBadge key={p} provider={p} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {ingestionState.status === 'failed' && (
+                  <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-red-500" />
+                      <span className="text-sm font-medium text-red-700 dark:text-red-400">
+                        {ingestionState.error || 'Falha ao processar documento'}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

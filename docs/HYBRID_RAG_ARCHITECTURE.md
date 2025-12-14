@@ -1,193 +1,199 @@
-# Arquitetura do Sistema RAG Híbrido
+# Hybrid RAG Architecture
 
-## Visão Geral
+## Overview
 
-O Educare+ utiliza uma arquitetura de RAG (Retrieval-Augmented Generation) híbrida que combina múltiplos provedores para maximizar a qualidade das respostas e a robustez do sistema.
+The Educare+ platform uses a hybrid RAG (Retrieval-Augmented Generation) system that combines multiple providers for optimal document processing and retrieval. This document describes the architecture, ingestion flow, and configuration.
 
-## Provedores Suportados
+## Architecture Components
 
-### 1. Gemini (Google AI)
-- **Função**: OCR e extração de texto de documentos
-- **Embedding**: Modelo `text-embedding-004` (768 dimensões)
-- **Configuração**: `ENABLE_GEMINI_RAG=true`
-- **Secrets**: `GEMINI_API_KEY`
+### 1. RAG Providers
 
-### 2. Qdrant (Vector Database)
-- **Função**: Armazenamento e busca vetorial
-- **Coleção**: `educare_knowledge`
-- **Índices**: `knowledge_category`, `source_type`, `domain`
-- **Configuração**: `ENABLE_QDRANT_RAG=true`
-- **Secrets**: `QDRANT_URL`, `QDRANT_API_KEY`
+| Provider | Role | Timeout |
+|----------|------|---------|
+| **Gemini** | OCR processing for images and PDFs | 120 seconds |
+| **Qdrant** | Vector embeddings storage | 30 seconds per chunk |
+| **OpenAI** | File Search fallback | Standard API timeout |
 
-### 3. OpenAI File Search (Fallback)
-- **Função**: Backup quando Gemini/Qdrant não disponíveis
-- **Configuração**: Ativado automaticamente se outros provedores falharem
-- **Secrets**: `OPENAI_API_KEY`
-
-## Fluxo de Ingestão
+### 2. Ingestion Flow
 
 ```
-Documento Upload
-      │
-      ▼
-┌─────────────────┐
-│  hybridIngestion│
-│    Service      │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    ▼         ▼
-┌───────┐ ┌───────┐
-│Gemini │ │Qdrant │
-│ OCR   │ │Vectors│
-└───────┘ └───────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         DOCUMENT UPLOAD                                  │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  1. FILE VALIDATION                                                      │
+│     - Check file type (PDF, TXT, PNG, JPG, DOC, DOCX, etc.)             │
+│     - Check file size (max 50MB)                                         │
+│     - Validate required fields (title, source_type)                      │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  2. SAVE DOCUMENT (IMMEDIATE RESPONSE - 201)                             │
+│     - Save file to disk                                                  │
+│     - Create database record with status: "pending"                      │
+│     - Return document ID to frontend                                     │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    │                               │
+                    ▼                               ▼
+┌──────────────────────────────┐   ┌──────────────────────────────────────┐
+│  FRONTEND POLLING            │   │  BACKGROUND INGESTION                 │
+│  GET /api/admin/knowledge/   │   │  (Async - does not block response)   │
+│      {id}/status             │   │                                       │
+│  Every 2 seconds             │   │  3. OCR PROCESSING (Gemini)          │
+│                              │   │     - Extract text from images/PDFs   │
+│  Status values:              │   │     - Timeout: 120 seconds            │
+│  - pending                   │   │                                       │
+│  - processing                │   │  4. CHUNKING                          │
+│  - completed                 │   │     - Split text into chunks          │
+│  - failed                    │   │     - Apply overlap strategy          │
+│                              │   │                                       │
+└──────────────────────────────┘   │  5. EMBEDDING (Qdrant)                │
+                                   │     - Generate embeddings              │
+                                   │     - Timeout: 30s per chunk          │
+                                   │                                       │
+                                   │  6. INDEXING                          │
+                                   │     - Store in vector database         │
+                                   │     - Update document metadata         │
+                                   │                                       │
+                                   │  7. UPDATE STATUS                     │
+                                   │     - Set status: "completed"          │
+                                   │     - Or status: "failed" with error   │
+                                   └──────────────────────────────────────┘
 ```
 
-1. **Recebimento**: Arquivo enviado via `POST /api/knowledge/upload`
-2. **OCR/Extração**: Gemini extrai texto de PDFs/imagens
-3. **Chunking**: Texto dividido em segmentos de ~1000 caracteres
-4. **Embedding**: Gemini gera embeddings para cada chunk
-5. **Indexação**: Chunks inseridos no Qdrant com metadados
-
-## Fluxo de Query
+## Ingestion Status Flow
 
 ```
-Query do Usuário
-      │
-      ▼
-┌─────────────────┐
-│  hybridRag      │
-│    Service      │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    ▼         ▼
-┌───────┐ ┌───────┐
-│Qdrant │ │Gemini │
-│Search │ │Context│
-└───┬───┘ └───┬───┘
-    │         │
-    └────┬────┘
-         ▼
-   ┌───────────┐
-   │   Fusão   │
-   │  RRF/Score│
-   └─────┬─────┘
-         ▼
-   Resposta Final
+pending → processing → completed
+              ↓
+            failed
 ```
 
-1. **Query**: Recebida via `POST /api/hybrid-rag/query`
-2. **Embedding**: Query convertida em vetor
-3. **Busca Paralela**: Qdrant + Gemini buscam contextos
-4. **Fusão RRF**: Resultados combinados por Reciprocal Rank Fusion
-5. **Resposta**: Contexto enriquecido retornado ao TitiNauta
+### Status Definitions
 
-## Endpoints
+| Status | Description |
+|--------|-------------|
+| `pending` | Document saved, waiting to start processing |
+| `processing` | OCR and embedding in progress |
+| `completed` | Successfully indexed in RAG providers |
+| `failed` | Error during processing (check `ingestion_error`) |
 
-### Públicos (requer autenticação JWT)
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/hybrid-rag/health` | Status dos provedores |
-| GET | `/api/hybrid-rag/status` | Estatísticas detalhadas |
-| POST | `/api/hybrid-rag/query` | Busca híbrida |
-| POST | `/api/hybrid-rag/ingest` | Ingestão manual |
+## API Endpoints
 
-### Internos (requer role owner/admin)
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| GET | `/api/rag/hybrid/health` | Health check interno |
-| GET | `/api/rag/hybrid/status` | Status interno |
-| POST | `/api/rag/hybrid/query` | Query interno |
-
-### Externos (requer API Key)
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| POST | `/api/rag/external/hybrid/query` | Query via n8n/WhatsApp |
-
-## Variáveis de Ambiente
-
-```env
-# Controle de provedores
-ENABLE_GEMINI_RAG=true
-ENABLE_QDRANT_RAG=true
-RAG_PRIMARY_PROVIDER=gemini
-
-# Gemini
-GEMINI_API_KEY=your_key
-
-# Qdrant
-QDRANT_URL=https://your-cluster.qdrant.io
-QDRANT_API_KEY=your_key
-
-# OpenAI (fallback)
-OPENAI_API_KEY=your_key
+### Upload Document
 ```
+POST /api/admin/knowledge/upload
+Content-Type: multipart/form-data
 
-## Timeouts Configurados
+Fields:
+- file: File (required)
+- title: string (required)
+- source_type: string (required)
+- knowledge_category: string (required)
+- description: string (optional)
+- age_range: string (optional)
+- domain: string (optional)
+- tags: string (optional, comma-separated)
 
-| Operação | Timeout | Arquivo |
-|----------|---------|---------|
-| Gemini OCR | 120s | `hybridIngestionService.js` |
-| Gemini Embedding | 30s | `hybridIngestionService.js` |
-| Total Ingestão | 600s | `hybridIngestionService.js` |
-| Query Qdrant | 30s | `qdrantService.js` |
-
-## Arquivos Principais
-
-```
-educare-backend/src/
-├── services/
-│   ├── hybridIngestionService.js  # Ingestão multi-provedor
-│   ├── hybridRagService.js        # Query híbrida
-│   ├── qdrantService.js           # Client Qdrant
-│   ├── geminiFileSearchService.js # Client Gemini
-│   └── fileSearchService.js       # Client OpenAI (fallback)
-├── controllers/
-│   ├── hybridRagController.js     # Controller de query
-│   └── knowledgeController.js     # Upload/delete docs
-└── routes/
-    ├── hybridRagRoutes.js         # Rotas públicas
-    └── ragRoutes.js               # Rotas internas
-```
-
-## Categorias de Conhecimento
-
-O sistema segmenta documentos em três knowledge bases:
-
-- **baby**: Desenvolvimento infantil (0-312 semanas)
-- **mother**: Saúde materna e gestação
-- **professional**: Protocolos e guidelines médicos
-
-## Métricas e Monitoramento
-
-O endpoint `/api/hybrid-rag/status` retorna:
-
-```json
+Response (201):
 {
   "success": true,
+  "message": "Documento salvo com sucesso. Indexação em andamento.",
   "data": {
-    "gemini": {
-      "configured": true,
-      "enabled": true,
-      "stats": { "files_count": 42 }
-    },
-    "qdrant": {
-      "configured": true,
-      "enabled": true,
-      "stats": {
-        "vectors_count": 1250,
-        "points_count": 1250,
-        "status": "green"
-      }
-    }
+    "id": "uuid",
+    "title": "Document Title",
+    "ingestion_status": "pending",
+    "category": "baby"
   }
 }
 ```
 
-## Tratamento de Erros
+### Check Ingestion Status
+```
+GET /api/admin/knowledge/{id}/status
+Authorization: Bearer {token}
 
-- **Timeout de ingestão**: Retorna erro HTTP 504 com detalhes
-- **Provedor indisponível**: Sistema continua com provedores restantes
-- **Todos falharam**: Fallback para OpenAI File Search
-- **Sem provedores**: Documento salvo localmente (sem indexação)
+Response:
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "title": "Document Title",
+    "ingestion_status": "processing",
+    "rag_providers": [],
+    "gemini_file_id": null,
+    "qdrant_document_id": null,
+    "ingestion_started_at": "2024-12-14T10:00:00.000Z",
+    "ingestion_completed_at": null,
+    "ingestion_time_ms": null,
+    "ingestion_error": null
+  }
+}
+```
+
+## Timeout Configuration
+
+| Operation | Timeout | Location |
+|-----------|---------|----------|
+| Gemini OCR | 120 seconds | `hybridIngestionService.js` |
+| Gemini Embedding | 30 seconds per chunk | `hybridIngestionService.js` |
+| Total Ingestion | 600 seconds | `hybridIngestionService.js` |
+| Frontend Polling | 2 seconds interval | `KnowledgeBaseManagement.tsx` |
+
+## Frontend Polling Mechanism
+
+The frontend implements a polling mechanism to track ingestion progress:
+
+1. After successful upload (201 response), start polling
+2. Poll `GET /api/admin/knowledge/{id}/status` every 2 seconds
+3. Update UI with current step (uploading → saving → processing → indexing → completed)
+4. Stop polling when status is `completed` or `failed`
+5. Show success/error toast and refresh document list
+
+## Troubleshooting
+
+### Document stays in "processing" state
+- Check backend logs for errors
+- Verify Gemini/Qdrant API keys are configured
+- Check for timeout errors (large files may exceed limits)
+
+### Document fails with timeout error
+- Reduce file size (max 50MB)
+- For large PDFs, consider splitting into smaller documents
+- Check network connectivity to API providers
+
+### No RAG providers available
+- Verify environment variables:
+  - `GEMINI_API_KEY`
+  - `QDRANT_URL`
+  - `QDRANT_API_KEY`
+  - `OPENAI_API_KEY`
+- Check `hybridIngestionService.getActiveProviders()` output
+
+## Knowledge Categories
+
+| Category | Description | Target KB |
+|----------|-------------|-----------|
+| `baby` | Baby development (0-24 months) | `kb_baby` |
+| `mother` | Maternal health | `kb_mother` |
+| `professional` | Professional/specialist content | `kb_professional` |
+
+## File Types Supported
+
+- PDF (text and scanned)
+- TXT (plain text)
+- DOC/DOCX (Microsoft Word)
+- PNG, JPG, JPEG, WEBP (images with OCR)
+- CSV, JSON, MD (structured data)
+
+## Security Considerations
+
+- All endpoints require JWT authentication
+- Owner role required for document management
+- Files are validated for type and size before processing
+- API keys are stored as environment secrets
