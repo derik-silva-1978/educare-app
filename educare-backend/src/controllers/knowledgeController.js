@@ -25,6 +25,132 @@ const ALLOWED_MIME_TYPES = [
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
+// Status de ingestão possíveis
+const INGESTION_STATUS = {
+  PENDING: 'pending',
+  PROCESSING: 'processing',
+  COMPLETED: 'completed',
+  FAILED: 'failed'
+};
+
+// Função para processar ingestão em background (não bloqueia resposta HTTP)
+async function processIngestionInBackground(documentId, finalPath, originalFilename, metadata, category, requestId) {
+  const startTime = Date.now();
+  
+  try {
+    console.log(`[Knowledge:${requestId}] [BG] Iniciando ingestão em background para doc ${documentId}`);
+    
+    // Atualiza status para "processing"
+    await KnowledgeDocument.update(
+      { 
+        metadata: { 
+          ...(await KnowledgeDocument.findByPk(documentId))?.metadata,
+          ingestion_status: INGESTION_STATUS.PROCESSING,
+          ingestion_started_at: new Date().toISOString()
+        } 
+      },
+      { where: { id: documentId } }
+    );
+    
+    const activeProviders = hybridIngestionService.getActiveProviders();
+    let hybridProviders = [];
+    let geminiFileId = null;
+    let qdrantDocumentId = null;
+    let fileSearchError = null;
+    
+    if (activeProviders.length > 0) {
+      console.log(`[Knowledge:${requestId}] [BG] Provedores ativos: [${activeProviders.join(', ')}]`);
+      
+      const ingestionResult = await hybridIngestionService.ingestDocument(
+        finalPath,
+        originalFilename,
+        metadata
+      );
+
+      console.log(`[Knowledge:${requestId}] [BG] Resultado da ingestão:`, JSON.stringify(ingestionResult, null, 2));
+      
+      if (ingestionResult.success) {
+        hybridProviders = ingestionResult.providers;
+        
+        if (ingestionResult.gemini?.success) {
+          geminiFileId = ingestionResult.gemini.gemini_file_id;
+        }
+        
+        if (ingestionResult.qdrant?.success) {
+          qdrantDocumentId = metadata.document_id;
+        }
+        
+        console.log(`[Knowledge:${requestId}] [BG] ✓ Ingestão OK: providers=[${hybridProviders.join(', ')}] (${ingestionResult.ingestion_time_ms}ms)`);
+      } else {
+        fileSearchError = 'Nenhum provedor RAG conseguiu indexar o documento';
+        console.warn(`[Knowledge:${requestId}] [BG] ⚠ Falha na ingestão híbrida`);
+      }
+    } else if (fileSearchService.isConfigured()) {
+      try {
+        console.log(`[Knowledge:${requestId}] [BG] Fallback para OpenAI File Search`);
+        const uploadResult = await fileSearchService.uploadDocumentToFileSearch(
+          finalPath,
+          originalFilename,
+          { title: metadata.title, source_type: metadata.source_type, age_range: metadata.age_range, domain: metadata.domain }
+        );
+
+        if (uploadResult.success) {
+          hybridProviders = ['openai'];
+          console.log(`[Knowledge:${requestId}] [BG] ✓ Documento indexado no OpenAI: ${uploadResult.file_search_id}`);
+        } else {
+          fileSearchError = uploadResult.error;
+        }
+      } catch (fileSearchErr) {
+        fileSearchError = fileSearchErr.message || 'Erro desconhecido no File Search';
+        console.error(`[Knowledge:${requestId}] [BG] ✗ Exceção ao indexar: ${fileSearchError}`);
+      }
+    } else {
+      console.warn(`[Knowledge:${requestId}] [BG] Nenhum provedor RAG configurado`);
+    }
+    
+    // Atualiza documento com resultado final
+    const processingTime = Date.now() - startTime;
+    const finalStatus = hybridProviders.length > 0 ? INGESTION_STATUS.COMPLETED : INGESTION_STATUS.FAILED;
+    
+    await KnowledgeDocument.update(
+      {
+        file_search_id: geminiFileId || null,
+        metadata: {
+          ingestion_status: finalStatus,
+          ingestion_completed_at: new Date().toISOString(),
+          ingestion_time_ms: processingTime,
+          rag_providers: hybridProviders,
+          gemini_file_id: geminiFileId,
+          qdrant_document_id: qdrantDocumentId,
+          file_search_error: fileSearchError
+        }
+      },
+      { where: { id: documentId } }
+    );
+    
+    console.log(`[Knowledge:${requestId}] [BG] ✓ Ingestão finalizada: status=${finalStatus}, providers=[${hybridProviders.join(', ')}] (${processingTime}ms)`);
+    
+  } catch (error) {
+    console.error(`[Knowledge:${requestId}] [BG] ✗ Erro fatal na ingestão:`, error);
+    
+    // Atualiza status para falha
+    try {
+      await KnowledgeDocument.update(
+        {
+          metadata: {
+            ingestion_status: INGESTION_STATUS.FAILED,
+            ingestion_error: error.message,
+            ingestion_completed_at: new Date().toISOString()
+          }
+        },
+        { where: { id: documentId } }
+      );
+    } catch (updateError) {
+      console.error(`[Knowledge:${requestId}] [BG] Erro ao atualizar status de falha:`, updateError);
+    }
+  }
+}
+
 exports.uploadDocument = async (req, res) => {
   const requestId = Date.now().toString(36);
   console.log(`[Knowledge:${requestId}] ========== INÍCIO UPLOAD ==========`);
@@ -71,96 +197,22 @@ exports.uploadDocument = async (req, res) => {
     }
 
     const timestamp = Date.now();
-    const ext = path.extname(req.file.originalname);
     const safeFilename = `${timestamp}_${req.file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
     const finalPath = path.join(UPLOAD_DIR, safeFilename);
 
     fs.renameSync(req.file.path, finalPath);
 
-    let fileSearchId = null;
-    let geminiFileId = null;
-    let qdrantDocumentId = null;
-    let fileSearchError = null;
-    let hybridProviders = [];
-
     const documentId = uuidv4();
     const category = knowledge_category || inferCategory(req.body);
-
-    const activeProviders = hybridIngestionService.getActiveProviders();
-    console.log(`[Knowledge:${requestId}] Provedores ativos: [${activeProviders.join(', ')}]`);
-    
-    if (activeProviders.length > 0) {
-      try {
-        console.log(`[Knowledge:${requestId}] Iniciando ingestão híbrida...`);
-        const ingestionResult = await hybridIngestionService.ingestDocument(
-          finalPath,
-          req.file.originalname,
-          { 
-            document_id: documentId,
-            title, 
-            description,
-            source_type, 
-            age_range, 
-            domain,
-            knowledge_category: category,
-            mime_type: req.file.mimetype
-          }
-        );
-
-        console.log(`[Knowledge:${requestId}] Resultado da ingestão:`, JSON.stringify(ingestionResult, null, 2));
-        
-        if (ingestionResult.success) {
-          hybridProviders = ingestionResult.providers;
-          
-          if (ingestionResult.gemini?.success) {
-            geminiFileId = ingestionResult.gemini.gemini_file_id;
-          }
-          
-          if (ingestionResult.qdrant?.success) {
-            qdrantDocumentId = documentId;
-          }
-          
-          console.log(`[Knowledge:${requestId}] ✓ Ingestão OK: providers=[${hybridProviders.join(', ')}] (${ingestionResult.ingestion_time_ms}ms)`);
-        } else {
-          fileSearchError = 'Nenhum provedor RAG conseguiu indexar o documento';
-          console.warn(`[Knowledge] ⚠ Falha na ingestão híbrida`);
-        }
-      } catch (ingestionErr) {
-        fileSearchError = ingestionErr.message || 'Erro desconhecido na ingestão';
-        console.error(`[Knowledge] ✗ Exceção na ingestão: ${fileSearchError}`);
-      }
-    } else if (fileSearchService.isConfigured()) {
-      try {
-        console.log(`[Knowledge] Fallback para OpenAI File Search: ${req.file.originalname}`);
-        const uploadResult = await fileSearchService.uploadDocumentToFileSearch(
-          finalPath,
-          req.file.originalname,
-          { title, source_type, age_range, domain }
-        );
-
-        if (uploadResult.success) {
-          fileSearchId = uploadResult.file_search_id;
-          hybridProviders = ['openai'];
-          console.log(`[Knowledge] ✓ Documento indexado no OpenAI: ${fileSearchId}`);
-        } else {
-          fileSearchError = uploadResult.error;
-        }
-      } catch (fileSearchErr) {
-        fileSearchError = fileSearchErr.message || 'Erro desconhecido no File Search';
-        console.error(`[Knowledge] ✗ Exceção ao indexar: ${fileSearchError}`);
-      }
-    } else {
-      console.warn('[Knowledge] Nenhum provedor RAG configurado, documento salvo apenas localmente');
-    }
-
     const parsedTags = typeof tags === 'string' ? tags.split(',').map(t => t.trim()) : (tags || []);
 
-    // Legacy data (always written for backward compatibility)
+    // Cria o documento IMEDIATAMENTE com status "pending"
     const legacyData = {
+      id: documentId,
       title,
       description: description || null,
       source_type,
-      file_search_id: fileSearchId || geminiFileId,
+      file_search_id: null,
       file_path: finalPath,
       original_filename: req.file.originalname,
       file_size: req.file.size,
@@ -172,10 +224,8 @@ exports.uploadDocument = async (req, res) => {
       created_by: req.user.id,
       metadata: {
         upload_timestamp: timestamp,
-        file_search_error: fileSearchError,
-        gemini_file_id: geminiFileId,
-        qdrant_document_id: qdrantDocumentId,
-        rag_providers: hybridProviders
+        ingestion_status: INGESTION_STATUS.PENDING,
+        rag_providers: []
       }
     };
 
@@ -188,7 +238,7 @@ exports.uploadDocument = async (req, res) => {
         content: '',
         description: description || null,
         source_type,
-        file_search_id: fileSearchId || geminiFileId,
+        file_search_id: null,
         file_path: finalPath,
         original_filename: req.file.originalname,
         file_size: req.file.size,
@@ -198,14 +248,11 @@ exports.uploadDocument = async (req, res) => {
         created_by: req.user.id,
         metadata: {
           upload_timestamp: timestamp,
-          file_search_error: fileSearchError,
-          gemini_file_id: geminiFileId,
-          qdrant_document_id: qdrantDocumentId,
-          rag_providers: hybridProviders
+          ingestion_status: INGESTION_STATUS.PENDING,
+          rag_providers: []
         }
       };
 
-      // Add category-specific fields
       if (category === 'baby') {
         segmentedData.age_range = age_range || null;
         segmentedData.domain = domain || null;
@@ -231,25 +278,36 @@ exports.uploadDocument = async (req, res) => {
       });
     }
 
-    console.log(`[Knowledge] Documento criado por ${req.user.email}: ${result.data.legacy.id} - ${title} (categoria: ${category || 'legado'})`);
+    console.log(`[Knowledge:${requestId}] Documento criado: ${documentId} - ${title} (categoria: ${category || 'legado'})`);
 
-    console.log(`[Knowledge:${requestId}] ========== FIM UPLOAD (sucesso) ==========`);
+    // Inicia ingestão em BACKGROUND (não bloqueia resposta)
+    const ingestionMetadata = {
+      document_id: documentId,
+      title,
+      description,
+      source_type,
+      age_range,
+      domain,
+      knowledge_category: category,
+      mime_type: req.file.mimetype
+    };
+
+    // Dispara processamento assíncrono SEM await
+    processIngestionInBackground(documentId, finalPath, req.file.originalname, ingestionMetadata, category, requestId)
+      .catch(err => console.error(`[Knowledge:${requestId}] Erro no processamento background:`, err));
+
+    console.log(`[Knowledge:${requestId}] ========== RESPOSTA IMEDIATA (ingestão em background) ==========`);
     
     return res.status(201).json({
       success: true,
-      message: 'Documento de conhecimento cadastrado com sucesso',
+      message: 'Documento salvo com sucesso. Indexação em andamento.',
       data: {
-        id: result.data.legacy.id,
-        title: result.data.legacy.title,
-        file_search_id: result.data.legacy.file_search_id,
-        file_path: result.data.legacy.file_path,
-        indexed: hybridProviders.length > 0 || !!fileSearchId,
-        rag_providers: hybridProviders,
-        gemini_file_id: geminiFileId,
-        qdrant_document_id: qdrantDocumentId,
+        id: documentId,
+        title: title,
+        file_path: finalPath,
+        ingestion_status: INGESTION_STATUS.PENDING,
         category: category || 'legado',
-        segmented_id: result.data.segmented ? result.data.segmented.id : null,
-        warning: fileSearchError ? `Arquivo salvo mas não indexado: ${fileSearchError}` : null
+        segmented_id: result.data.segmented ? result.data.segmented.id : null
       }
     });
   } catch (error) {
@@ -308,6 +366,46 @@ const inferCategory = (body) => {
     return 'baby';
   }
   return null;
+};
+
+exports.getIngestionStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const document = await KnowledgeDocument.findByPk(id);
+
+    if (!document) {
+      return res.status(404).json({
+        success: false,
+        error: 'Documento não encontrado'
+      });
+    }
+
+    const metadata = document.metadata || {};
+    const status = metadata.ingestion_status || 'unknown';
+    
+    return res.json({
+      success: true,
+      data: {
+        id: document.id,
+        title: document.title,
+        ingestion_status: status,
+        rag_providers: metadata.rag_providers || [],
+        gemini_file_id: metadata.gemini_file_id || null,
+        qdrant_document_id: metadata.qdrant_document_id || null,
+        ingestion_started_at: metadata.ingestion_started_at || null,
+        ingestion_completed_at: metadata.ingestion_completed_at || null,
+        ingestion_time_ms: metadata.ingestion_time_ms || null,
+        ingestion_error: metadata.ingestion_error || metadata.file_search_error || null
+      }
+    });
+  } catch (error) {
+    console.error('[Knowledge] Erro ao obter status de ingestão:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao obter status de ingestão'
+    });
+  }
 };
 
 exports.listDocuments = async (req, res) => {

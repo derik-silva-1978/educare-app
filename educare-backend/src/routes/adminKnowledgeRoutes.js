@@ -30,6 +30,8 @@ router.get('/', verifyToken, isOwner, knowledgeController.listDocuments);
 
 router.get('/:id', verifyToken, isOwner, knowledgeController.getDocument);
 
+router.get('/:id/status', verifyToken, isOwner, knowledgeController.getIngestionStatus);
+
 router.put('/:id', verifyToken, isOwner, knowledgeController.updateDocument);
 
 router.delete('/:id', verifyToken, isOwner, knowledgeController.deleteDocument);
