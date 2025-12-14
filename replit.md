@@ -58,6 +58,11 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
   - Total ingestion timeout: 600 seconds (10 min) per upload
   - Proper error handling for timeout scenarios
   - File: `educare-backend/src/services/hybridIngestionService.js`
+- **Vite Proxy Configuration** (Dec 14): Fixed upload endpoint not connecting to backend by adding proxy in `vite.config.ts`:
+  - Configured `/api` proxy to `http://localhost:3001` 
+  - Enables frontend on port 5000 to communicate with backend on port 3001
+  - Fixed "upload stuck on first stage" issue
+  - File: `vite.config.ts`
 
 ### Development Notes
 - **OpenAI SDK v6 Breaking Changes**: 

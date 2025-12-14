@@ -155,7 +155,31 @@ The frontend implements a polling mechanism to track ingestion progress:
 4. Stop polling when status is `completed` or `failed`
 5. Show success/error toast and refresh document list
 
+## Frontend-Backend Communication
+
+The frontend (port 5000) communicates with the backend (port 3001) via a Vite proxy configured in `vite.config.ts`:
+
+```typescript
+server: {
+  proxy: {
+    '/api': {
+      target: 'http://localhost:3001',
+      changeOrigin: true,
+      secure: false,
+    },
+  },
+},
+```
+
+This ensures all API requests from the frontend are correctly routed to the backend.
+
 ## Troubleshooting
+
+### Upload stuck on first stage ("Enviando arquivo...")
+- Ensure Vite proxy is configured in `vite.config.ts`
+- Verify backend is running on port 3001
+- Check browser console for network errors
+- Verify authentication token is valid
 
 ### Document stays in "processing" state
 - Check backend logs for errors
