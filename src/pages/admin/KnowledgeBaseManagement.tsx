@@ -412,6 +412,10 @@ const KnowledgeBaseManagement: React.FC = () => {
       formDataToSend.append('tags', formData.tags);
 
       setUploadProgress(30);
+      console.log('[KB Upload] Iniciando upload para /api/admin/knowledge/upload');
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
 
       const response = await fetch('/api/admin/knowledge/upload', {
         method: 'POST',
@@ -419,8 +423,11 @@ const KnowledgeBaseManagement: React.FC = () => {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: formDataToSend,
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+      console.log('[KB Upload] Resposta recebida:', response.status);
       setUploadProgress(50);
 
       const result = await response.json();
