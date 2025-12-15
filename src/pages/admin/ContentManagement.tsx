@@ -420,6 +420,49 @@ const ContentManagement: React.FC = () => {
                 />
               </div>
 
+              {/* Card Preview */}
+              {formData.title && (
+                <div className="space-y-2 pt-4 border-t">
+                  <Label className="text-base font-semibold">Preview do Card</Label>
+                  <div className="border rounded-lg overflow-hidden bg-white shadow-sm max-w-sm">
+                    {formData.image_url && (
+                      <div className="h-32 bg-gray-100 overflow-hidden">
+                        <img 
+                          src={formData.image_url} 
+                          alt="Preview" 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://placehold.co/400x200?text=Imagem';
+                          }}
+                        />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className={typeLabels[formData.type]?.color}>
+                          {typeLabels[formData.type]?.label}
+                        </Badge>
+                        {formData.category && (
+                          <span className="text-xs text-gray-500">{formData.category}</span>
+                        )}
+                      </div>
+                      <h4 className="font-semibold text-gray-900 line-clamp-2">{formData.title}</h4>
+                      {formData.summary && (
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{formData.summary}</p>
+                      )}
+                      {formData.duration && (
+                        <p className="text-xs text-gray-500 mt-2">Duração: {formData.duration}</p>
+                      )}
+                      {formData.cta_text && (
+                        <button className="mt-3 text-sm text-blue-600 font-medium hover:underline">
+                          {formData.cta_text} →
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex justify-end gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={handleCloseDialog}>
                   Cancelar
@@ -508,54 +551,72 @@ const ContentManagement: React.FC = () => {
                       </TableCell>
                       <TableCell>{item.sort_order}</TableCell>
                       <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEdit(item)}>
-                              <Pencil className="h-4 w-4 mr-2" />
-                              Editar
-                            </DropdownMenuItem>
-                            {item.status === 'draft' && (
-                              <DropdownMenuItem 
-                                onClick={() => statusMutation.mutate({ id: item.id, status: 'published' })}
-                              >
-                                <Eye className="h-4 w-4 mr-2" />
-                                Publicar
-                              </DropdownMenuItem>
-                            )}
-                            {item.status === 'published' && (
-                              <DropdownMenuItem 
-                                onClick={() => statusMutation.mutate({ id: item.id, status: 'draft' })}
-                              >
-                                <EyeOff className="h-4 w-4 mr-2" />
-                                Despublicar
-                              </DropdownMenuItem>
-                            )}
-                            {item.status !== 'archived' && (
-                              <DropdownMenuItem 
-                                onClick={() => statusMutation.mutate({ id: item.id, status: 'archived' })}
-                              >
-                                <Archive className="h-4 w-4 mr-2" />
-                                Arquivar
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem 
-                              onClick={() => {
-                                if (confirm('Tem certeza que deseja excluir este conteúdo?')) {
-                                  deleteMutation.mutate(item.id);
-                                }
-                              }}
-                              className="text-red-600"
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(item)}
+                            title="Editar"
+                          >
+                            <Pencil className="h-4 w-4 text-blue-600" />
+                          </Button>
+                          {item.status === 'draft' && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => statusMutation.mutate({ id: item.id, status: 'published' })}
+                              title="Publicar"
                             >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                              <Eye className="h-4 w-4 text-green-600" />
+                            </Button>
+                          )}
+                          {item.status === 'published' && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => statusMutation.mutate({ id: item.id, status: 'draft' })}
+                              title="Despublicar"
+                            >
+                              <EyeOff className="h-4 w-4 text-orange-600" />
+                            </Button>
+                          )}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {item.status !== 'archived' && (
+                                <DropdownMenuItem 
+                                  onClick={() => statusMutation.mutate({ id: item.id, status: 'archived' })}
+                                >
+                                  <Archive className="h-4 w-4 mr-2" />
+                                  Arquivar
+                                </DropdownMenuItem>
+                              )}
+                              {item.status === 'archived' && (
+                                <DropdownMenuItem 
+                                  onClick={() => statusMutation.mutate({ id: item.id, status: 'draft' })}
+                                >
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Restaurar para Rascunho
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem 
+                                onClick={() => {
+                                  if (confirm('Tem certeza que deseja excluir este conteúdo?')) {
+                                    deleteMutation.mutate(item.id);
+                                  }
+                                }}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Excluir
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );

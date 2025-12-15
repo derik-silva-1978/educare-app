@@ -1,5 +1,6 @@
 const geminiFileSearchService = require('./geminiFileSearchService');
 const qdrantService = require('./qdrantService');
+const ragMetricsService = require('./ragMetricsService');
 const { v4: uuidv4 } = require('uuid');
 
 const ENABLE_GEMINI = process.env.ENABLE_GEMINI_RAG !== 'false';
@@ -266,6 +267,18 @@ async function ingestDocument(filePath, fileName, metadata = {}) {
   results.ingestion_time_ms = Date.now() - startTime;
 
   console.log(`[HybridIngestion] ✓ Concluído: ${fileName} → providers: [${results.providers.join(', ')}], chunks: ${results.chunks_indexed} (${results.ingestion_time_ms}ms)`);
+
+  ragMetricsService.recordIngestion({
+    filename: fileName,
+    title: metadata.title || fileName,
+    knowledge_category: metadata.knowledge_category,
+    success: results.success,
+    ingestion_time_ms: results.ingestion_time_ms,
+    chunks_indexed: results.chunks_indexed,
+    providers: results.providers,
+    file_size: metadata.file_size || 0,
+    error: results.success ? null : (results.qdrant?.error || results.gemini?.error || 'Falha desconhecida')
+  });
 
   return results;
 }

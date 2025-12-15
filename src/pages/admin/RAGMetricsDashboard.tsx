@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Activity, TrendingUp, BarChart3, AlertCircle, Shield, AlertTriangle } from 'lucide-react';
+import { Activity, TrendingUp, BarChart3, AlertCircle, Shield, AlertTriangle, Upload, FileText, CheckCircle, XCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ragService from '@/services/api/ragService';
@@ -22,6 +22,7 @@ const RAGMetricsDashboard: React.FC = () => {
   const [healthCheck, setHealthCheck] = useState<any>(null);
   const [guardrailsMetrics, setGuardrailsMetrics] = useState<any>(null);
   const [guardrailsHealth, setGuardrailsHealth] = useState<any>(null);
+  const [ingestionStats, setIngestionStats] = useState<any>(null);
 
   useEffect(() => {
     loadDashboardData();
@@ -30,12 +31,13 @@ const RAGMetricsDashboard: React.FC = () => {
   const loadDashboardData = async () => {
     setIsLoading(true);
     try {
-      const [metricsData, moduleData, healthData, guardrailsData, guardrailsHealthData] = await Promise.all([
+      const [metricsData, moduleData, healthData, guardrailsData, guardrailsHealthData, ingestionData] = await Promise.all([
         ragService.getAggregateMetrics().catch(() => null),
         ragService.getModuleStats().catch(() => null),
         ragService.getHealthCheck().catch(() => null),
         guardrailsService.getMetrics().catch(() => null),
         guardrailsService.getHealth().catch(() => null),
+        ragService.getIngestionStats().catch(() => null),
       ]);
 
       setMetrics(metricsData);
@@ -43,6 +45,7 @@ const RAGMetricsDashboard: React.FC = () => {
       setHealthCheck(healthData);
       setGuardrailsMetrics(guardrailsData);
       setGuardrailsHealth(guardrailsHealthData);
+      setIngestionStats(ingestionData);
     } catch (error) {
       console.error('Erro ao carregar dashboard:', error);
       toast({
@@ -98,8 +101,12 @@ const RAGMetricsDashboard: React.FC = () => {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="ingestions" className="flex items-center gap-1">
+              <Upload className="h-3 w-3" />
+              Ingestões
+            </TabsTrigger>
             <TabsTrigger value="modules">Módulos</TabsTrigger>
             <TabsTrigger value="guardrails" className="flex items-center gap-1">
               <Shield className="h-3 w-3" />
@@ -165,6 +172,134 @@ const RAGMetricsDashboard: React.FC = () => {
                 </Card>
               </div>
             )}
+          </TabsContent>
+
+          {/* Ingestions Tab */}
+          <TabsContent value="ingestions" className="space-y-6">
+            {/* Ingestion Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">Total de Uploads</p>
+                    <p className="text-3xl font-bold text-gray-900 mt-2">
+                      {ingestionStats?.data?.total_uploads || 0}
+                    </p>
+                  </div>
+                  <Upload className="w-12 h-12 text-blue-500" />
+                </div>
+              </Card>
+
+              <Card className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">Uploads com Sucesso</p>
+                    <p className="text-3xl font-bold text-green-600 mt-2">
+                      {ingestionStats?.data?.successful_uploads || 0}
+                    </p>
+                  </div>
+                  <CheckCircle className="w-12 h-12 text-green-500" />
+                </div>
+              </Card>
+
+              <Card className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">Uploads com Falha</p>
+                    <p className="text-3xl font-bold text-red-600 mt-2">
+                      {ingestionStats?.data?.failed_uploads || 0}
+                    </p>
+                  </div>
+                  <XCircle className="w-12 h-12 text-red-500" />
+                </div>
+              </Card>
+
+              <Card className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 font-medium">Chunks Indexados</p>
+                    <p className="text-3xl font-bold text-purple-600 mt-2">
+                      {ingestionStats?.data?.total_chunks_indexed || 0}
+                    </p>
+                  </div>
+                  <FileText className="w-12 h-12 text-purple-500" />
+                </div>
+              </Card>
+            </div>
+
+            {/* Providers Usage */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Uso de Provedores</h3>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <p className="text-2xl font-bold text-blue-600">
+                    {ingestionStats?.data?.providers_used?.gemini || 0}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-1">Gemini</p>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600">
+                    {ingestionStats?.data?.providers_used?.qdrant || 0}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-1">Qdrant</p>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <p className="text-2xl font-bold text-purple-600">
+                    {ingestionStats?.data?.providers_used?.openai || 0}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-1">OpenAI</p>
+                </div>
+              </div>
+              {ingestionStats?.data?.last_upload && (
+                <p className="text-sm text-gray-500 mt-4">
+                  Último upload: {new Date(ingestionStats.data.last_upload).toLocaleString('pt-BR')}
+                </p>
+              )}
+            </Card>
+
+            {/* Recent Ingestions */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Ingestões Recentes</h3>
+              {ingestionStats?.recent_ingestions && ingestionStats.recent_ingestions.length > 0 ? (
+                <div className="space-y-3">
+                  {ingestionStats.recent_ingestions.map((ingestion: any, index: number) => (
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg border ${
+                        ingestion.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {ingestion.success ? (
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <XCircle className="h-4 w-4 text-red-600" />
+                          )}
+                          <span className="font-medium text-gray-900">{ingestion.title || ingestion.filename}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          {new Date(ingestion.timestamp).toLocaleString('pt-BR')}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                        <span>Categoria: {ingestion.knowledge_category}</span>
+                        <span>Chunks: {ingestion.chunks_indexed}</span>
+                        <span>Tempo: {ingestion.ingestion_time_ms}ms</span>
+                        {ingestion.providers_used?.length > 0 && (
+                          <span>Provedores: {ingestion.providers_used.join(', ')}</span>
+                        )}
+                      </div>
+                      {ingestion.error && (
+                        <p className="text-sm text-red-600 mt-1">Erro: {ingestion.error}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-8">Nenhuma ingestão registrada ainda</p>
+              )}
+            </Card>
           </TabsContent>
 
           {/* Modules Tab */}

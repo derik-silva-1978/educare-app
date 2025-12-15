@@ -25,6 +25,20 @@ const metricsStorage = {
     baby: { queries: 0, empty_results: 0, avg_score: 0, total_score: 0, strict_mode_queries: 0 },
     mother: { queries: 0, empty_results: 0, avg_score: 0, total_score: 0, strict_mode_queries: 0 },
     professional: { queries: 0, empty_results: 0, avg_score: 0, total_score: 0, strict_mode_queries: 0 }
+  },
+  // Métricas de ingestão de documentos
+  ingestions: [],
+  ingestionStats: {
+    total_uploads: 0,
+    successful_uploads: 0,
+    failed_uploads: 0,
+    total_chunks_indexed: 0,
+    providers_used: {
+      gemini: 0,
+      qdrant: 0,
+      openai: 0
+    },
+    last_upload: null
   }
 };
 
@@ -420,6 +434,68 @@ function getShutdownReadiness(moduleType = null) {
   };
 }
 
+const MAX_STORED_INGESTIONS = 100;
+
+/**
+ * Registra uma ingestão de documento no RAG
+ */
+function recordIngestion(data) {
+  try {
+    const record = {
+      timestamp: new Date().toISOString(),
+      filename: data.filename || 'unknown',
+      title: data.title || data.filename,
+      knowledge_category: data.knowledge_category || 'general',
+      success: data.success || false,
+      ingestion_time_ms: data.ingestion_time_ms || 0,
+      chunks_indexed: data.chunks_indexed || 0,
+      providers_used: data.providers || [],
+      file_size: data.file_size || 0,
+      error: data.error || null
+    };
+
+    metricsStorage.ingestions.push(record);
+
+    if (metricsStorage.ingestions.length > MAX_STORED_INGESTIONS) {
+      metricsStorage.ingestions = metricsStorage.ingestions.slice(-MAX_STORED_INGESTIONS);
+    }
+
+    const stats = metricsStorage.ingestionStats;
+    stats.total_uploads++;
+    if (record.success) {
+      stats.successful_uploads++;
+      stats.total_chunks_indexed += record.chunks_indexed;
+    } else {
+      stats.failed_uploads++;
+    }
+    
+    record.providers_used.forEach(p => {
+      if (stats.providers_used[p] !== undefined) {
+        stats.providers_used[p]++;
+      }
+    });
+    
+    stats.last_upload = record.timestamp;
+
+    console.log(`[RAGMetrics] Ingestão registrada: ${record.filename}, sucesso: ${record.success}, chunks: ${record.chunks_indexed}`);
+    return { success: true, record };
+  } catch (error) {
+    console.error('[RAGMetrics] Erro ao registrar ingestão:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Retorna estatísticas de ingestão
+ */
+function getIngestionStats() {
+  return {
+    success: true,
+    data: metricsStorage.ingestionStats,
+    recent_ingestions: metricsStorage.ingestions.slice(-10).reverse()
+  };
+}
+
 /**
  * Limpa métricas (para testes)
  */
@@ -444,6 +520,15 @@ function reset() {
     mother: { queries: 0, empty_results: 0, avg_score: 0, total_score: 0, strict_mode_queries: 0 },
     professional: { queries: 0, empty_results: 0, avg_score: 0, total_score: 0, strict_mode_queries: 0 }
   };
+  metricsStorage.ingestions = [];
+  metricsStorage.ingestionStats = {
+    total_uploads: 0,
+    successful_uploads: 0,
+    failed_uploads: 0,
+    total_chunks_indexed: 0,
+    providers_used: { gemini: 0, qdrant: 0, openai: 0 },
+    last_upload: null
+  };
   console.log('[RAGMetrics] Métricas resetadas');
   return { success: true };
 }
@@ -456,5 +541,7 @@ module.exports = {
   getKnowledgeBaseStats,
   getHealthCheck,
   getShutdownReadiness,
+  recordIngestion,
+  getIngestionStats,
   reset
 };

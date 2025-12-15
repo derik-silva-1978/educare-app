@@ -128,6 +128,35 @@ router.get('/rag/knowledge-bases', verifyToken, (req, res) => {
 
 /**
  * @swagger
+ * /api/metrics/rag/ingestions:
+ *   get:
+ *     summary: Retorna estatísticas de ingestão de documentos
+ *     tags: [Métricas RAG]
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Estatísticas de ingestão
+ */
+router.get('/rag/ingestions', verifyToken, (req, res) => {
+  try {
+    const result = ragMetricsService.getIngestionStats();
+    return res.json({
+      success: true,
+      data: result.data,
+      recent_ingestions: result.recent_ingestions
+    });
+  } catch (error) {
+    console.error('[Metrics] Erro ao obter stats de ingestão:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao obter estatísticas de ingestão'
+    });
+  }
+});
+
+/**
+ * @swagger
  * /api/metrics/rag/health:
  *   get:
  *     summary: Retorna health check do RAG

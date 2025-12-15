@@ -389,6 +389,71 @@ export async function getHealthCheck(): Promise<{
   }
 }
 
+export interface IngestionStats {
+  total_uploads: number;
+  successful_uploads: number;
+  failed_uploads: number;
+  total_chunks_indexed: number;
+  providers_used: {
+    gemini: number;
+    qdrant: number;
+    openai: number;
+  };
+  last_upload: string | null;
+}
+
+export interface IngestionRecord {
+  timestamp: string;
+  filename: string;
+  title: string;
+  knowledge_category: string;
+  success: boolean;
+  ingestion_time_ms: number;
+  chunks_indexed: number;
+  providers_used: string[];
+  file_size: number;
+  error: string | null;
+}
+
+/**
+ * Obtém estatísticas de ingestão de documentos
+ */
+export async function getIngestionStats(): Promise<{
+  success: boolean;
+  data: IngestionStats;
+  recent_ingestions: IngestionRecord[];
+}> {
+  try {
+    const response = await httpClient.get<{
+      success: boolean;
+      data: IngestionStats;
+      recent_ingestions: IngestionRecord[];
+    }>('/metrics/rag/ingestions', {
+      requiresAuth: true,
+    });
+
+    if (!response.success) {
+      throw new Error('Erro ao obter estatísticas de ingestão');
+    }
+
+    return {
+      success: true,
+      data: response.data?.data || {
+        total_uploads: 0,
+        successful_uploads: 0,
+        failed_uploads: 0,
+        total_chunks_indexed: 0,
+        providers_used: { gemini: 0, qdrant: 0, openai: 0 },
+        last_upload: null
+      },
+      recent_ingestions: response.data?.recent_ingestions || []
+    };
+  } catch (error) {
+    console.error('[RAGService] Erro ao obter ingestion stats:', error);
+    throw error;
+  }
+}
+
 export default {
   askQuestion,
   submitFeedback,
@@ -399,4 +464,5 @@ export default {
   getQualityAnalysis,
   getImprovementSuggestions,
   getHealthCheck,
+  getIngestionStats,
 };
