@@ -78,6 +78,45 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 - **Messaging**: WhatsApp (via Evolution API)
 - **Payment Gateway**: Stripe
 - **AI/ML**: OpenAI API (EXCLUSIVE for File Search and LLM, specifically gpt-4o-mini)
+- **Vector Database**: Qdrant Cloud (via secrets `QDRANT_URL`, `QDRANT_API_KEY`)
+- **OCR/Embeddings**: Google Gemini (gemini-2.5-flash for OCR, text-embedding-004 for embeddings)
 - **Cloud Provider**: Digital Ocean
 - **UI Libraries**: Radix UI, Tailwind CSS (via shadcn/ui)
 - **Frontend State Management**: `@tanstack/react-query`
+
+## RAG Architecture (Hybrid System)
+
+### Storage Components
+| Component | Provider | Purpose |
+|-----------|----------|---------|
+| Vector Store | Qdrant Cloud | Semantic search with 768-dim embeddings |
+| Metadata | PostgreSQL | Document metadata and knowledge bases |
+| File Search | OpenAI Files | Assistant-based retrieval |
+
+### Collection: `educare_knowledge`
+- **Dimensão**: 768 (Gemini text-embedding-004)
+- **Métrica**: Cosine Similarity
+- **Índices**: knowledge_category, source_type, domain
+
+### Ingestion Pipeline
+```
+Upload → Gemini OCR (2.5-flash) → Chunking (1000 chars) → Gemini Embedding → Qdrant Upsert
+                                                                           ↓
+                                                                    OpenAI File Search
+```
+
+### Timeouts
+- OCR: 120s | Embedding: 30s/chunk | Total: 600s
+
+### Testing Endpoints
+- `GET /api/rag/hybrid/status` - Verifica provedores
+- `GET /api/rag/hybrid/health` - Health check
+- `POST /api/rag/hybrid/query` - Query híbrida
+
+### Cost Estimates (per operation)
+- **Ingestão (10 páginas)**: ~$0.0015
+- **Query RAG**: ~$0.001
+
+### Documentation
+- **Completa**: `docs/RAG_ARCHITECTURE_COMPLETE.md`
+- **Backend Docs**: `educare-backend/docs/`
