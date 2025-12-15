@@ -109,6 +109,7 @@ const NewsCarousel: React.FC = () => {
                   <Button 
                     variant="link" 
                     className="p-0 h-auto text-xs text-primary hover:text-primary/80"
+                    onClick={() => handleNewsClick(item.id)}
                   >
                     {item.cta_text || 'Ler mais'} <ArrowRight className="h-3 w-3 ml-1" />
                   </Button>
