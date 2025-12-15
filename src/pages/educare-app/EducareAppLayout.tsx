@@ -89,7 +89,8 @@ const EducareAppLayout: React.FC = () => {
       '/educare-app/titinauta',
       '/educare-app/activities',
       '/educare-app/communication',
-      '/educare-app/settings'
+      '/educare-app/settings',
+      '/educare-app/news'
     ];
     
     const isAllowedPath = allowedPaths.some(path => location.pathname.startsWith(path));
