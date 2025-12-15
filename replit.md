@@ -47,6 +47,20 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 
 ## Recent Changes (December 2025)
 
+### Content Management Editor Improvements (Dec 15)
+- **Rich Text Editor**: Implemented professional blog editor with:
+  - Text formatting (Bold, Italic, Underline)
+  - Headings, Lists (ordered/unordered), Blockquotes
+  - Link insertion dialog with URL support
+  - Emoji picker (32 common emojis)
+  - Table insertion with configurable rows/columns
+  - Code blocks and preformatted text
+  - Character and word count
+  - Clear formatting button
+  - File: `src/components/editor/RichTextEditor.tsx`
+  - Integrated in: `src/pages/admin/ContentManagement.tsx`
+- **Navigation Fix** (Dec 15): Added `/educare-app/news` to allowed paths in `EducareAppLayout.tsx` for Owner/Admin users - fixed redirect issue when clicking news links
+
 ### RAG System Fixes
 - **OpenAI SDK v6+ Compatibility**: Updated `runs.retrieve`, `runs.cancel` to use new syntax `(runId, { thread_id })` and `assistants.delete()` method
 - **Knowledge Base Ingestion**: Aligned frontend form to send required fields (`title`, `source_type`, `knowledge_category`) for successful document uploads

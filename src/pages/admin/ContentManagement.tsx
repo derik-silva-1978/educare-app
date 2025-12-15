@@ -50,6 +50,7 @@ import {
   Newspaper
 } from 'lucide-react';
 import { httpClient } from '@/services/api/httpClient';
+import RichTextEditor from '@/components/editor/RichTextEditor';
 
 interface ContentItem {
   id: string;
@@ -315,12 +316,11 @@ const ContentManagement: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Descrição</Label>
-                <Textarea
+                <Label>Descrição (Rich Text Editor)</Label>
+                <RichTextEditor
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Descrição completa"
-                  rows={3}
+                  onChange={(value) => setFormData({ ...formData, description: value })}
+                  placeholder="Escreva a descrição completa com formatação, links, emojis..."
                 />
               </div>
 
