@@ -350,10 +350,82 @@ const updateContentStatus = async (req, res) => {
   }
 };
 
+const getPublicContentById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const content = await ContentItem.findOne({
+      where: {
+        id,
+        status: 'published',
+        [Op.or]: [
+          { publish_date: null },
+          { publish_date: { [Op.lte]: new Date() } }
+        ]
+      },
+      include: [{
+        model: User,
+        as: 'creator',
+        attributes: ['id', 'name']
+      }]
+    });
+
+    if (!content) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conteúdo não encontrado ou não publicado'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: content
+    });
+  } catch (error) {
+    console.error('Error fetching public content by id:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao buscar conteúdo',
+      error: error.message
+    });
+  }
+};
+
+const incrementViewCount = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const content = await ContentItem.findByPk(id);
+
+    if (!content) {
+      return res.status(404).json({
+        success: false,
+        message: 'Conteúdo não encontrado'
+      });
+    }
+
+    await content.increment('view_count');
+
+    res.json({
+      success: true,
+      message: 'Visualização registrada'
+    });
+  } catch (error) {
+    console.error('Error incrementing view count:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao registrar visualização',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getPublishedContent,
   getAllContent,
   getContentById,
+  getPublicContentById,
+  incrementViewCount,
   createContent,
   updateContent,
   deleteContent,

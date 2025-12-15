@@ -58,6 +58,7 @@ import LojaPage from "./pages/educare-app/LojaPage";
 import SupportPage from "./pages/educare-app/SupportPage";
 import MaterialApoioPage from "./pages/educare-app/MaterialApoioPage";
 import WelcomeHub from "./pages/educare-app/WelcomeHub";
+import NewsDetail from "./pages/educare-app/NewsDetail";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -117,6 +118,7 @@ const App = () => (
                 <Route path="titinauta-journey/:childId" element={<TitiNautaJourney />} />
                 <Route path="activities" element={<EducareActivitiesPage />} />
                 <Route path="material-apoio" element={<MaterialApoioPage />} />
+                <Route path="news/:id" element={<NewsDetail />} />
                 <Route path="settings" element={<SettingsLayout />}>
                   <Route index element={<EducareSettingsPage />} />
                   <Route path="change-password" element={<ChangePasswordPage />} />

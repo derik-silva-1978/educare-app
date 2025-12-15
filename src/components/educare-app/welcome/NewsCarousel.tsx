@@ -1,16 +1,23 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, Newspaper, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getNewsContent, ContentItem } from '@/services/contentService';
 
 const NewsCarousel: React.FC = () => {
+  const navigate = useNavigate();
+  
   const { data: news, isLoading } = useQuery({
     queryKey: ['welcome-news'],
     queryFn: getNewsContent,
     staleTime: 5 * 60 * 1000,
   });
+
+  const handleNewsClick = (newsId: string) => {
+    navigate(`/educare-app/news/${newsId}`);
+  };
 
   return (
     <Card>
@@ -74,6 +81,7 @@ const NewsCarousel: React.FC = () => {
               return (
               <div
                 key={item.id}
+                onClick={() => handleNewsClick(item.id)}
                 className="group cursor-pointer rounded-xl overflow-hidden border bg-card hover:shadow-lg transition-all duration-300"
               >
                 <div className="relative h-36 overflow-hidden">

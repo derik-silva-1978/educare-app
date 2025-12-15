@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { GraduationCap, Clock, ArrowRight, Loader2 } from 'lucide-react';
+import { GraduationCap, Clock, ArrowRight, Loader2, Construction } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { getCourseContent, ContentItem } from '@/services/contentService';
@@ -30,7 +30,13 @@ const AcademyCourses: React.FC = () => {
   });
 
   return (
-    <Card>
+    <Card className="relative">
+      <div className="absolute top-3 right-3 z-10">
+        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700 flex items-center gap-1.5">
+          <Construction className="h-3 w-3" />
+          Em Desenvolvimento
+        </Badge>
+      </div>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
@@ -41,6 +47,7 @@ const AcademyCourses: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={() => navigate('/educare-app/academia')}
+            className="mr-28"
           >
             Ver todos
             <ArrowRight className="h-4 w-4 ml-1" />

@@ -5,6 +5,10 @@ const { verifyToken, isAdminOrOwner } = require('../middlewares/auth');
 
 router.get('/public', contentController.getPublishedContent);
 
+router.get('/:id/public', contentController.getPublicContentById);
+
+router.post('/:id/view', contentController.incrementViewCount);
+
 router.get('/', verifyToken, isAdminOrOwner, contentController.getAllContent);
 
 router.get('/:id', verifyToken, contentController.getContentById);
