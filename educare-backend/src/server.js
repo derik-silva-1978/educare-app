@@ -184,6 +184,10 @@ app.use('/api/development-reports', developmentReportRoutes);
 const n8nRoutes = require('./routes/n8nRoutes');
 app.use('/api/n8n', n8nRoutes);
 
+// Cloud file integration routes (Google Drive, OneDrive)
+const cloudRoutes = require('./routes/cloudRoutes');
+app.use('/api/cloud', cloudRoutes);
+
 // Rotas de health check (sem prefixo /api para acesso direto)
 app.use('/health', healthRoutes);
 

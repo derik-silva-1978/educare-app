@@ -4,7 +4,8 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Upload, Trash2, RefreshCw, CheckCircle, AlertCircle, FileText, X, Loader2, Database, Search, Filter, Zap, Brain, Cloud } from 'lucide-react';
+import { Upload, Trash2, RefreshCw, CheckCircle, AlertCircle, FileText, X, Loader2, Database, Search, Filter, Zap, Brain, Cloud, ExternalLink } from 'lucide-react';
+import CloudFileSelector from '@/components/knowledge-base/CloudFileSelector';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -129,6 +130,7 @@ const KnowledgeBaseManagement: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [documents, setDocuments] = useState<KBDocument[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [cloudFile, setCloudFile] = useState<{ name: string; url: string; size: number; source: 'google-drive' | 'onedrive' } | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -360,6 +362,7 @@ const KnowledgeBaseManagement: React.FC = () => {
     }
 
     setSelectedFile(file);
+    setCloudFile(null); // Limpar arquivo de nuvem quando selecionar arquivo local
     
     if (!formData.title) {
       const titleFromFile = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
@@ -372,7 +375,7 @@ const KnowledgeBaseManagement: React.FC = () => {
   };
 
   const validateForm = (): string | null => {
-    if (!selectedFile) return 'Selecione um arquivo para enviar';
+    if (!selectedFile && !cloudFile) return 'Selecione um arquivo para enviar';
     if (!formData.title.trim()) return 'O título é obrigatório';
     if (!formData.source_type) return 'Selecione o tipo de fonte';
     if (!formData.knowledge_category) return 'Selecione a categoria da base de conhecimento';
@@ -402,7 +405,52 @@ const KnowledgeBaseManagement: React.FC = () => {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('file', selectedFile!);
+      
+      // Se for arquivo da nuvem, baixar primeiro
+      if (cloudFile) {
+        setUploadProgress(15);
+        console.log('[KB Upload] Baixando arquivo da nuvem:', cloudFile.source);
+        
+        const downloadEndpoint = cloudFile.source === 'google-drive' 
+          ? '/api/cloud/google-drive/download'
+          : '/api/cloud/onedrive/download';
+        
+        const downloadBody = cloudFile.source === 'google-drive'
+          ? { fileId: cloudFile.url.match(/id=([^&]+)/)?.[1] || cloudFile.url, fileName: cloudFile.name }
+          : { url: cloudFile.url, fileName: cloudFile.name };
+        
+        const downloadResponse = await fetch(downloadEndpoint, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('educare_auth_token')}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(downloadBody),
+        });
+        
+        if (!downloadResponse.ok) {
+          const errorData = await downloadResponse.json();
+          throw new Error(errorData.error || 'Erro ao baixar arquivo da nuvem');
+        }
+        
+        const downloadData = await downloadResponse.json();
+        
+        // Converter base64 para File
+        const byteCharacters = atob(downloadData.content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray]);
+        const file = new File([blob], cloudFile.name, { type: 'application/octet-stream' });
+        
+        formDataToSend.append('file', file);
+        formDataToSend.append('cloud_source', cloudFile.source);
+      } else {
+        formDataToSend.append('file', selectedFile!);
+      }
+      
       formDataToSend.append('title', formData.title.trim());
       formDataToSend.append('description', formData.description.trim());
       formDataToSend.append('source_type', formData.source_type);
@@ -437,6 +485,7 @@ const KnowledgeBaseManagement: React.FC = () => {
         
         if (documentId) {
           setSelectedFile(null);
+          setCloudFile(null);
           setFormData({
             title: '',
             description: '',
@@ -459,6 +508,7 @@ const KnowledgeBaseManagement: React.FC = () => {
           });
           
           setSelectedFile(null);
+          setCloudFile(null);
           setFormData({
             title: '',
             description: '',
@@ -663,7 +713,22 @@ const KnowledgeBaseManagement: React.FC = () => {
               {/* Left Column */}
               <div className="space-y-5">
                 <div>
-                  <Label htmlFor="file-input" className="text-base font-semibold">Upload de Arquivo *</Label>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label htmlFor="file-input" className="text-base font-semibold">Upload de Arquivo *</Label>
+                    <CloudFileSelector 
+                      onFileSelect={(file) => {
+                        setCloudFile(file);
+                        setSelectedFile(null);
+                        if (!formData.title) {
+                          setFormData(prev => ({ ...prev, title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') }));
+                        }
+                        toast({
+                          title: '✓ Arquivo selecionado',
+                          description: `${file.name} (${file.source === 'google-drive' ? 'Google Drive' : 'OneDrive'})`,
+                        });
+                      }}
+                    />
+                  </div>
                   <div 
                     onDragEnter={handleDrag}
                     onDragLeave={handleDrag}
@@ -691,6 +756,23 @@ const KnowledgeBaseManagement: React.FC = () => {
                   <p className="text-xs text-gray-500 mt-2">
                     PDF, TXT, CSV, JSON, MD, DOC, DOCX, PNG, JPG - Máximo 50MB
                   </p>
+                  {cloudFile && (
+                    <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-between border border-green-200 dark:border-green-900">
+                      <div className="flex items-center gap-2">
+                        <Cloud className="h-4 w-4 text-green-600" />
+                        <span className="text-sm text-green-700 dark:text-green-300 font-medium">
+                          ✓ {cloudFile.name} ({cloudFile.source === 'google-drive' ? 'Google Drive' : 'OneDrive'})
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCloudFile(null)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                   {selectedFile && (
                     <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between border border-blue-200 dark:border-blue-900">
                       <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">

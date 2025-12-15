@@ -47,6 +47,15 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 
 ## Recent Changes (December 2025)
 
+### Cloud Storage Integration for Knowledge Base (Dec 15)
+- **Google Drive & OneDrive Support**: Added ability to upload files from cloud storage to Knowledge Base
+  - Frontend component: `src/components/knowledge-base/CloudFileSelector.tsx`
+  - Backend routes: `educare-backend/src/routes/cloudRoutes.js`
+  - Backend controller: `educare-backend/src/controllers/cloudController.js`
+  - Integrated in: `src/pages/admin/KnowledgeBaseManagement.tsx`
+- **Flow**: Select cloud file → Download via backend → Convert to File → Upload to RAG pipeline
+- **Middleware**: Uses `verifyToken` and `isAdminOrOwner` from `../middlewares/auth`
+
 ### Content Management Editor Improvements (Dec 15)
 - **Rich Text Editor**: Implemented professional blog editor with:
   - Text formatting (Bold, Italic, Underline)
