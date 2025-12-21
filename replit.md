@@ -47,6 +47,17 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 
 ## Recent Changes (December 2025)
 
+### Design System & Brand Identity Documentation (Dec 21)
+- **Complete Design System PRD**: Created comprehensive design documentation
+  - File: `docs/DESIGN_SYSTEM.md` - Full brand identity, color palette, typography, components
+  - File: `docs/COLOR_SWATCHES_REFERENCE.md` - Quick reference for copy-paste values and templates
+- **Color Palette**: Complete system with light/dark modes
+  - Primary: Blue (#2563EB), Purple (#7C3AED), Green/Teal (#0D9488)
+  - Charts, forms, states all documented
+- **Typography System**: Complete scale from H1 to body text with Tailwind classes
+- **Component Guidelines**: Ready-to-use templates for buttons, cards, forms, badges
+- **Usage Guides**: For content creators to maintain brand consistency
+
 ### Cloud Storage Integration for Knowledge Base (Dec 15)
 - **Google Drive & OneDrive Support**: Added ability to upload files from cloud storage to Knowledge Base
   - Frontend component: `src/components/knowledge-base/CloudFileSelector.tsx`
