@@ -1,0 +1,1574 @@
+{
+  "name": "Educare+ Chat: Master System v4.1 (Dual-Source: Evolution + Chatwoot)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat-educare-v4",
+        "responseMode": "onReceived",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "id": "webhook-unified",
+      "name": "Webhook (Unified Entry)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "notes": "Ponto de entrada unificado - recebe mensagens do Evolution API OU Chatwoot"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Source Detector v4.0\n// Detecta se a mensagem vem do Chatwoot ou Evolution API\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const body = item.json.body || item.json || {};\n  \n  // Detectar Chatwoot: possui campo 'event' e 'conversation'\n  const isChatwoot = !!(body.event && body.conversation);\n  \n  // Detectar Evolution: possui campo 'data.key.remoteJid' ou 'body.key.remoteJid'\n  const data = body.data || body;\n  const isEvolution = !!(data.key?.remoteJid);\n  \n  let source = 'unknown';\n  if (isChatwoot) source = 'chatwoot';\n  else if (isEvolution) source = 'evolution';\n  \n  results.push({\n    json: {\n      source,\n      raw_body: body,\n      is_chatwoot: isChatwoot,\n      is_evolution: isEvolution\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "source-detector",
+      "name": "Source Detector",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "notes": "Identifica se a mensagem vem do Chatwoot ou Evolution API"
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.source }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "chatwoot",
+              "output": 0
+            },
+            {
+              "value2": "evolution",
+              "output": 1
+            }
+          ]
+        },
+        "fallbackOutput": -1
+      },
+      "id": "router-source",
+      "name": "Router: Source Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        440,
+        300
+      ],
+      "notes": "Roteia para extrator específico baseado na fonte"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Chatwoot Extractor v4.1\n// Extrai dados normalizados do webhook Chatwoot\n// FIXED: Busca attachments em body.attachments[] E conversation.messages[].attachments[]\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const body = item.json.raw_body || {};\n  const event = body.event || '';\n  const messageType = body.message_type || '';\n  \n  // Filtrar: processar apenas mensagens incoming\n  // message_created com message_type = 'incoming' são msgs do usuário\n  // message_type = 'outgoing' são msgs enviadas pelo agente (ignorar)\n  if (event !== 'message_created' || messageType === 'outgoing') {\n    results.push({ json: { skip: true, reason: 'not_incoming_message' } });\n    continue;\n  }\n  \n  const conversation = body.conversation || {};\n  const meta = conversation.meta || {};\n  const sender = meta.sender || {};\n  const messages = conversation.messages || [];\n  const latestMessage = messages[messages.length - 1] || {};\n  \n  // Attachments: buscar em body.attachments[] OU conversation.messages[].attachments[]\n  let attachments = body.attachments || [];\n  if (attachments.length === 0 && latestMessage.attachments) {\n    attachments = latestMessage.attachments;\n  }\n  \n  // Extrair telefone (formatos: +559891628206 ou 559891628206@s.whatsapp.net)\n  let phone = sender.phone_number || sender.identifier || '';\n  phone = phone.replace(/\\D/g, '').replace('@s.whatsapp.net', '');\n  if (phone.startsWith('+')) phone = phone.substring(1);\n  \n  // Extrair conteúdo da mensagem\n  let message = body.content || latestMessage.content || '';\n  \n  // Detectar áudio nos attachments (busca em ambos os locais)\n  let is_audio = false;\n  let media_url = null;\n  const audioAttachment = attachments.find(a => a.file_type === 'audio');\n  if (audioAttachment) {\n    is_audio = true;\n    media_url = audioAttachment.data_url;\n  }\n  \n  // Detectar imagem/documento\n  let media_type = 'text';\n  const imageAttachment = attachments.find(a => a.file_type === 'image');\n  const docAttachment = attachments.find(a => a.file_type === 'file' || a.file_type === 'document');\n  if (is_audio) media_type = 'audio';\n  else if (imageAttachment) {\n    media_type = 'image';\n    media_url = imageAttachment.data_url;\n  } else if (docAttachment) {\n    media_type = 'document';\n    media_url = docAttachment.data_url;\n  }\n  \n  results.push({\n    json: {\n      source: 'chatwoot',\n      phone,\n      message: message || '',\n      is_audio: is_audio.toString(),\n      media_url,\n      media_type,\n      conversation_id: conversation.id,\n      inbox_id: body.inbox?.id || conversation.inbox_id,\n      account_id: body.account?.id,\n      contact_id: sender.id,\n      sender_name: sender.name || '',\n      raw: body\n    }\n  });\n}\n\nreturn results.length ? results : [{ json: { skip: true } }];"
+      },
+      "id": "chatwoot-extract",
+      "name": "Chatwoot Extractor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        160
+      ],
+      "notes": "Extrai phone, message, audio de webhooks Chatwoot"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Evolution API Extractor v4.0 (baseado no Smart Extraction v3)\n// Suporte a Texto, Botões e Detecção de Áudio\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const body = item.json.raw_body || {};\n  const data = body.data || body;\n  const key = data.key || {};\n  const msg = data.message || {};\n  \n  // 1. Filtro de Segurança (Ignora status e msg própria)\n  if (key.fromMe || key.remoteJid?.includes('status')) {\n    results.push({ json: { skip: true, reason: 'from_me_or_status' } });\n    continue;\n  }\n\n  const phone = key.remoteJid?.replace(/\\D/g, '').replace('@s.whatsapp.net', '') || '';\n  \n  // 2. Detectar tipo de mídia\n  let is_audio = false;\n  let media_url = null;\n  let message = '';\n  let media_type = 'text';\n  \n  if (msg.audioMessage) {\n    is_audio = true;\n    media_url = msg.audioMessage.url || data.mediaUrl;\n    media_type = 'audio';\n  } else if (msg.imageMessage) {\n    media_url = msg.imageMessage.url || data.mediaUrl;\n    message = msg.imageMessage.caption || '';\n    media_type = 'image';\n  } else if (msg.documentMessage) {\n    media_url = msg.documentMessage.url || data.mediaUrl;\n    message = msg.documentMessage.caption || '';\n    media_type = 'document';\n  } else if (msg.conversation) {\n    message = msg.conversation;\n  } else if (msg.extendedTextMessage) {\n    message = msg.extendedTextMessage.text;\n  } else if (msg.buttonsResponseMessage) {\n    message = msg.buttonsResponseMessage.selectedButtonId;\n  } else if (msg.listResponseMessage) {\n    message = msg.listResponseMessage.singleSelectReply?.selectedRowId || '';\n  }\n\n  results.push({\n    json: {\n      source: 'evolution',\n      phone,\n      message,\n      is_audio: is_audio.toString(),\n      media_url,\n      media_type,\n      conversation_id: null,\n      inbox_id: null,\n      account_id: null,\n      contact_id: null,\n      sender_name: '',\n      raw: data\n    }\n  });\n}\n\nreturn results.length ? results : [{ json: { skip: true } }];"
+      },
+      "id": "evolution-extract",
+      "name": "Evolution Extractor",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        440
+      ],
+      "notes": "Extrai phone, message, audio de webhooks Evolution API"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "mergeByFields": {
+          "values": []
+        },
+        "options": {}
+      },
+      "id": "merge-sources",
+      "name": "Merge: Unified Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        880,
+        300
+      ],
+      "notes": "Unifica fluxos Chatwoot e Evolution em estrutura comum"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "skip",
+              "leftValue": "={{ $json.skip }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "gate-skip",
+      "name": "Gate: Not Skipped?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        300
+      ],
+      "notes": "Filtra mensagens que devem ser ignoradas (skip=true)"
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.is_audio }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "true",
+              "output": 0
+            },
+            {
+              "value2": "false",
+              "output": 1
+            }
+          ]
+        }
+      },
+      "id": "router-input",
+      "name": "Router: Input Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1320,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "fileUrl": "={{ $json.media_url }}",
+        "options": {
+          "language": "pt"
+        }
+      },
+      "id": "whisper",
+      "name": "AI: Whisper Transcribe",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        100
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Normaliza o áudio transcrito para texto\nconst item = $input.item;\nreturn [{\n  json: {\n    ...item.json,\n    message: item.json.text || item.json.message, \n    is_audio_transcribed: true\n  }\n}];"
+      },
+      "id": "normalize-audio",
+      "name": "Normalize Audio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1760,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/users/check",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $json.phone }}"
+            },
+            {
+              "name": "api_key",
+              "value": "={{ $vars.EDUCARE_API_KEY }}"
+            }
+          ]
+        }
+      },
+      "id": "api-check-user",
+      "name": "API: Check User",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1980,
+        240
+      ],
+      "notes": "Verifica se usuário existe e status da assinatura"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "exists",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "id": "gate-exists",
+      "name": "Gate: User Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "active",
+              "leftValue": "={{ $json.subscription_status }}",
+              "rightValue": "active",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "trialing",
+              "leftValue": "={{ $json.subscription_status }}",
+              "rightValue": "trialing",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        }
+      },
+      "id": "gate-sub",
+      "name": "Gate: Active Sub?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Motor Temporal: Define a semana da criança\nconst item = $input.item;\nconst child = item.json.child || {};\n\nif (!child.dob) {\n  return [{ json: { \n    ...item.json,\n    error: 'no_dob', \n    target_flow: 'onboarding', \n    response_text: 'Por favor, cadastre seu bebê no app Educare+ primeiro.' \n  } }];\n}\n\nconst dob = new Date(child.dob);\nconst diff = Math.abs(new Date() - dob);\nconst currentWeek = Math.floor(Math.ceil(diff / (1000 * 60 * 60 * 24)) / 7);\n\nreturn [{ \n  json: { \n    ...item.json, \n    current_week: currentWeek, \n    child_id: child.id, \n    child_name: child.name \n  } \n}];"
+      },
+      "id": "time-engine",
+      "name": "Engine: Calc Weeks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        80
+      ],
+      "notes": "Calcula a semana de vida do bebê baseado na data de nascimento"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Classifique a intenção do usuário em uma das categorias abaixo (Responda APENAS a palavra-chave):\n\n1. 'menu_nav': Navegação numérica (1, 2, 3), 'voltar', 'menu'.\n2. 'biometrics': Registrar peso ou altura (Ex: '8kg', 'Mede 60cm').\n3. 'sleep': Registrar sono (Ex: 'Dormiu', 'Acordou', 'soneca').\n4. 'vaccine': Dúvidas ou registro de vacinas.\n5. 'appointment': Marcar ou consultar médico/exames.\n6. 'question': Dúvidas gerais (Nutrição, Saúde, Comportamento, RAG)."
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.message }}"
+            }
+          ]
+        }
+      },
+      "id": "ai-intent",
+      "name": "AI Intent Classifier",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        2860,
+        80
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.message.content.trim().toLowerCase() }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "menu_nav",
+              "output": 0
+            },
+            {
+              "value2": "biometrics",
+              "output": 1
+            },
+            {
+              "value2": "sleep",
+              "output": 2
+            },
+            {
+              "value2": "vaccine",
+              "output": 3
+            },
+            {
+              "value2": "question",
+              "output": 4
+            },
+            {
+              "value2": "appointment",
+              "output": 5
+            }
+          ]
+        },
+        "fallbackOutput": 4
+      },
+      "id": "router-intent",
+      "name": "Router: Intent Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        3080,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $('Merge: Unified Data').item.json.message }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "1",
+              "output": 0
+            },
+            {
+              "value2": "2",
+              "output": 1
+            },
+            {
+              "value2": "3",
+              "output": 2
+            },
+            {
+              "value2": "4",
+              "output": 3
+            },
+            {
+              "value2": "5",
+              "output": 4
+            }
+          ]
+        },
+        "fallbackOutput": 0
+      },
+      "id": "router-menu",
+      "name": "Router: Menu Options",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        3340,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/biometrics/update",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{ $vars.EDUCARE_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"child_id\": \"{{ $('Engine: Calc Weeks').item.json.child_id }}\",\n  \"raw_text\": \"{{ $('Merge: Unified Data').item.json.message }}\"\n}"
+      },
+      "id": "api-bio",
+      "name": "API: Biometrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3340,
+        0
+      ],
+      "notes": "Registra peso/altura com NLP parsing"
+    },
+    {
+      "parameters": {
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/sleep/log",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{ $vars.EDUCARE_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"child_id\": \"{{ $('Engine: Calc Weeks').item.json.child_id }}\",\n  \"raw_text\": \"{{ $('Merge: Unified Data').item.json.message }}\"\n}"
+      },
+      "id": "api-sleep",
+      "name": "API: Sleep Log",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3340,
+        80
+      ],
+      "notes": "Registra sono com NLP parsing"
+    },
+    {
+      "parameters": {
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/vaccines/check",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "age_weeks",
+              "value": "={{ $('Engine: Calc Weeks').item.json.current_week }}"
+            },
+            {
+              "name": "child_id",
+              "value": "={{ $('Engine: Calc Weeks').item.json.child_id }}"
+            },
+            {
+              "name": "api_key",
+              "value": "={{ $vars.EDUCARE_API_KEY }}"
+            }
+          ]
+        }
+      },
+      "id": "api-vac",
+      "name": "API: Vaccines",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3340,
+        160
+      ],
+      "notes": "Verifica calendário vacinal SBP"
+    },
+    {
+      "parameters": {
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/rag/ask",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{ $vars.EDUCARE_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"question\": \"{{ $('Merge: Unified Data').item.json.message }}\",\n  \"context\": {\n    \"week\": {{ $('Engine: Calc Weeks').item.json.current_week }},\n    \"child_name\": \"{{ $('Engine: Calc Weeks').item.json.child_name }}\",\n    \"child_id\": \"{{ $('Engine: Calc Weeks').item.json.child_id }}\"\n  }\n}"
+      },
+      "id": "api-rag",
+      "name": "API: RAG (TitiNauta)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3340,
+        320
+      ],
+      "notes": "Perguntas gerais via RAG com contexto do bebê"
+    },
+    {
+      "parameters": {
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/appointments/create",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "={{ $vars.EDUCARE_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"child_id\": \"{{ $('Engine: Calc Weeks').item.json.child_id }}\",\n  \"raw_text\": \"{{ $('Merge: Unified Data').item.json.message }}\"\n}"
+      },
+      "id": "api-appt",
+      "name": "API: Appointments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3340,
+        400
+      ],
+      "notes": "Agenda consultas com NLP parsing"
+    },
+    {
+      "parameters": {
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/content/child",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "week",
+              "value": "={{ $('Engine: Calc Weeks').item.json.current_week }}"
+            },
+            {
+              "name": "api_key",
+              "value": "={{ $vars.EDUCARE_API_KEY }}"
+            }
+          ]
+        }
+      },
+      "id": "api-content-child",
+      "name": "API: Child Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3580,
+        -320
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/content/mother",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "week",
+              "value": "={{ $('Engine: Calc Weeks').item.json.current_week }}"
+            },
+            {
+              "name": "api_key",
+              "value": "={{ $vars.EDUCARE_API_KEY }}"
+            }
+          ]
+        }
+      },
+      "id": "api-content-mother",
+      "name": "API: Mother Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3580,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Prepara resposta unificada para roteamento de saída\nconst item = $input.item;\nconst source = item.json.source || $('Merge: Unified Data').item.json.source || 'evolution';\nconst responseText = item.json.response_text || item.json.answer || item.json.message || 'Mensagem recebida!';\nconst mediaType = item.json.media_type || 'text';\n\nreturn [{\n  json: {\n    ...item.json,\n    source,\n    response_text: responseText,\n    media_type: mediaType,\n    phone: $('Merge: Unified Data').item.json.phone,\n    conversation_id: $('Merge: Unified Data').item.json.conversation_id,\n    inbox_id: $('Merge: Unified Data').item.json.inbox_id,\n    account_id: $('Merge: Unified Data').item.json.account_id\n  }\n}];"
+      },
+      "id": "prepare-response",
+      "name": "Prepare Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3580,
+        160
+      ],
+      "notes": "Prepara dados unificados para resposta"
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.source }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "chatwoot",
+              "output": 0
+            },
+            {
+              "value2": "evolution",
+              "output": 1
+            }
+          ]
+        },
+        "fallbackOutput": 1
+      },
+      "id": "router-response-source",
+      "name": "Router: Response Source",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        3800,
+        160
+      ],
+      "notes": "Roteia resposta para Chatwoot ou Evolution API"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.CHATWOOT_API_URL }}/api/v1/accounts/{{ $json.account_id }}/conversations/{{ $json.conversation_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "={{ $vars.CHATWOOT_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"{{ $json.response_text }}\",\n  \"message_type\": \"outgoing\",\n  \"private\": false\n}"
+      },
+      "id": "chatwoot-send-text",
+      "name": "Chatwoot: Send Text",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4060,
+        60
+      ],
+      "notes": "Envia resposta de texto via Chatwoot API"
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.media_type || 'text' }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "text",
+              "output": 0
+            },
+            {
+              "value2": "image",
+              "output": 1
+            },
+            {
+              "value2": "audio",
+              "output": 2
+            },
+            {
+              "value2": "document",
+              "output": 3
+            }
+          ]
+        },
+        "fallbackOutput": 0
+      },
+      "id": "router-output-evo",
+      "name": "Router: Evo Output Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        4060,
+        260
+      ],
+      "notes": "Roteia resposta Evolution baseado no tipo de mídia"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendText/{{ $vars.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $vars.EVOLUTION_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.phone }}\",\n  \"text\": \"{{ $json.response_text }}\"\n}"
+      },
+      "id": "evo-send-text",
+      "name": "Evo: Send Text",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4320,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendMedia/{{ $vars.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $vars.EVOLUTION_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.phone }}\",\n  \"mediatype\": \"image\",\n  \"mimetype\": \"image/jpeg\",\n  \"caption\": \"{{ $json.response_text }}\",\n  \"media\": \"{{ $json.media_url }}\"\n}"
+      },
+      "id": "evo-send-image",
+      "name": "Evo: Send Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4320,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendWhatsAppAudio/{{ $vars.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $vars.EVOLUTION_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.phone }}\",\n  \"audio\": \"{{ $json.media_url }}\"\n}"
+      },
+      "id": "evo-send-audio",
+      "name": "Evo: Send Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4320,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendMedia/{{ $vars.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $vars.EVOLUTION_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.phone }}\",\n  \"mediatype\": \"document\",\n  \"mimetype\": \"application/pdf\",\n  \"caption\": \"{{ $json.response_text }}\",\n  \"media\": \"{{ $json.media_url }}\"\n}"
+      },
+      "id": "evo-send-document",
+      "name": "Evo: Send Document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4320,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Prepara mensagem de usuário não encontrado\nconst item = $input.item;\nconst source = item.json.source || $('Merge: Unified Data').item.json.source || 'evolution';\n\nreturn [{\n  json: {\n    ...item.json,\n    source,\n    response_text: 'Olá! 👋 Não encontramos seu cadastro. Acesse o app Educare+ para criar sua conta e cadastrar seu bebê. Assim poderei te ajudar melhor! 🌟',\n    phone: $('Merge: Unified Data').item.json.phone,\n    conversation_id: $('Merge: Unified Data').item.json.conversation_id,\n    inbox_id: $('Merge: Unified Data').item.json.inbox_id,\n    account_id: $('Merge: Unified Data').item.json.account_id\n  }\n}];"
+      },
+      "id": "prepare-no-user",
+      "name": "Prepare: No User Msg",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.source }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "chatwoot",
+              "output": 0
+            },
+            {
+              "value2": "evolution",
+              "output": 1
+            }
+          ]
+        },
+        "fallbackOutput": 1
+      },
+      "id": "router-nouser-source",
+      "name": "Router: NoUser Source",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        2640,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.CHATWOOT_API_URL }}/api/v1/accounts/{{ $json.account_id }}/conversations/{{ $json.conversation_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "={{ $vars.CHATWOOT_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"{{ $json.response_text }}\",\n  \"message_type\": \"outgoing\",\n  \"private\": false\n}"
+      },
+      "id": "chatwoot-no-user",
+      "name": "Chatwoot: No User",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2900,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendText/{{ $vars.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $vars.EVOLUTION_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.phone }}\",\n  \"text\": \"{{ $json.response_text }}\"\n}"
+      },
+      "id": "evo-no-user",
+      "name": "Evo: No User Found",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2900,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Prepara mensagem de assinatura inativa\nconst item = $input.item;\nconst source = item.json.source || $('Merge: Unified Data').item.json.source || 'evolution';\nconst checkoutUrl = item.json.stripe_checkout_url || 'https://educareapp.com.br/assinar';\n\nreturn [{\n  json: {\n    ...item.json,\n    source,\n    response_text: `Olá! Sua assinatura está inativa. 😔\\n\\nPara continuar usando o Educare+, renove sua assinatura em:\\n${checkoutUrl}`,\n    phone: $('Merge: Unified Data').item.json.phone,\n    conversation_id: $('Merge: Unified Data').item.json.conversation_id,\n    inbox_id: $('Merge: Unified Data').item.json.inbox_id,\n    account_id: $('Merge: Unified Data').item.json.account_id\n  }\n}];"
+      },
+      "id": "prepare-inactive",
+      "name": "Prepare: Inactive Msg",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.source }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "chatwoot",
+              "output": 0
+            },
+            {
+              "value2": "evolution",
+              "output": 1
+            }
+          ]
+        },
+        "fallbackOutput": 1
+      },
+      "id": "router-inactive-source",
+      "name": "Router: Inactive Source",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        2860,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.CHATWOOT_API_URL }}/api/v1/accounts/{{ $json.account_id }}/conversations/{{ $json.conversation_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "={{ $vars.CHATWOOT_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"{{ $json.response_text }}\",\n  \"message_type\": \"outgoing\",\n  \"private\": false\n}"
+      },
+      "id": "chatwoot-inactive",
+      "name": "Chatwoot: Inactive Sub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3100,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendText/{{ $vars.EVOLUTION_INSTANCE }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $vars.EVOLUTION_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.phone }}\",\n  \"text\": \"{{ $json.response_text }}\"\n}"
+      },
+      "id": "evo-inactive",
+      "name": "Evo: Inactive Sub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3100,
+        560
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook (Unified Entry)": {
+      "main": [
+        [
+          {
+            "node": "Source Detector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Source Detector": {
+      "main": [
+        [
+          {
+            "node": "Router: Source Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router: Source Type": {
+      "main": [
+        [
+          {
+            "node": "Chatwoot Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evolution Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chatwoot Extractor": {
+      "main": [
+        [
+          {
+            "node": "Merge: Unified Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evolution Extractor": {
+      "main": [
+        [
+          {
+            "node": "Merge: Unified Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge: Unified Data": {
+      "main": [
+        [
+          {
+            "node": "Gate: Not Skipped?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gate: Not Skipped?": {
+      "main": [
+        [
+          {
+            "node": "Router: Input Type",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Router: Input Type": {
+      "main": [
+        [
+          {
+            "node": "AI: Whisper Transcribe",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API: Check User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI: Whisper Transcribe": {
+      "main": [
+        [
+          {
+            "node": "Normalize Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Audio": {
+      "main": [
+        [
+          {
+            "node": "API: Check User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API: Check User": {
+      "main": [
+        [
+          {
+            "node": "Gate: User Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gate: User Exists?": {
+      "main": [
+        [
+          {
+            "node": "Gate: Active Sub?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare: No User Msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gate: Active Sub?": {
+      "main": [
+        [
+          {
+            "node": "Engine: Calc Weeks",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare: Inactive Msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare: No User Msg": {
+      "main": [
+        [
+          {
+            "node": "Router: NoUser Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router: NoUser Source": {
+      "main": [
+        [
+          {
+            "node": "Chatwoot: No User",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evo: No User Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare: Inactive Msg": {
+      "main": [
+        [
+          {
+            "node": "Router: Inactive Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router: Inactive Source": {
+      "main": [
+        [
+          {
+            "node": "Chatwoot: Inactive Sub",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evo: Inactive Sub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Engine: Calc Weeks": {
+      "main": [
+        [
+          {
+            "node": "AI Intent Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Intent Classifier": {
+      "main": [
+        [
+          {
+            "node": "Router: Intent Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router: Intent Switch": {
+      "main": [
+        [
+          {
+            "node": "Router: Menu Options",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API: Biometrics",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API: Sleep Log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API: Vaccines",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API: RAG (TitiNauta)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API: Appointments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router: Menu Options": {
+      "main": [
+        [
+          {
+            "node": "API: Child Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API: Mother Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API: Vaccines",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API: RAG (TitiNauta)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "API: RAG (TitiNauta)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API: Biometrics": {
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API: Sleep Log": {
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API: Vaccines": {
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API: RAG (TitiNauta)": {
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API: Appointments": {
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API: Child Content": {
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API: Mother Content": {
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Response": {
+      "main": [
+        [
+          {
+            "node": "Router: Response Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router: Response Source": {
+      "main": [
+        [
+          {
+            "node": "Chatwoot: Send Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Router: Evo Output Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router: Evo Output Type": {
+      "main": [
+        [
+          {
+            "node": "Evo: Send Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evo: Send Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evo: Send Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evo: Send Document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "educare-production"
+  },
+  "pinData": {},
+  "tags": [
+    {
+      "name": "Educare+"
+    },
+    {
+      "name": "WhatsApp"
+    },
+    {
+      "name": "Chatwoot"
+    },
+    {
+      "name": "Evolution API"
+    },
+    {
+      "name": "v4.0"
+    }
+  ],
+  "triggerCount": 1,
+  "notes": "## Educare+ Chat v4.0 - Dual Source (Evolution API + Chatwoot)\n\n### Novidades v4.0:\n- Suporte a **duas fontes** de mensagens: Evolution API e Chatwoot\n- **Detecção automática** da fonte via Source Detector\n- **Extratores separados** para cada plataforma\n- **Resposta inteligente** que roteia de volta para a origem correta\n\n### Variáveis Necessárias:\n- EDUCARE_API_URL: URL do backend Educare\n- EDUCARE_API_KEY: Chave API do Educare\n- EVOLUTION_API_URL: URL da Evolution API\n- EVOLUTION_API_KEY: API Key da Evolution\n- EVOLUTION_INSTANCE: Nome da instância Evolution\n- CHATWOOT_API_URL: URL do Chatwoot (ex: https://chatwoot.educareapp.com.br)\n- CHATWOOT_API_KEY: Access Token do Chatwoot\n\n### Compatibilidade:\n- n8n versão 1.123.5+\n- Webhook v2, Code v2, Switch v3, HTTP Request v4.2\n\n### Fluxo:\n1. Webhook recebe mensagem (Evolution ou Chatwoot)\n2. Source Detector identifica origem\n3. Extrator específico processa payload\n4. Merge unifica em estrutura comum\n5. Fluxo de processamento (user check, intent, APIs)\n6. Router de resposta envia para origem correta"
+}

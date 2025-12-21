@@ -391,4 +391,196 @@ Use **Twilio Sandbox** - gratuito e fácil de configurar.
 
 ---
 
-*Documentação Educare+ - Dezembro 2025*
+## Integração Chatwoot (Nova - v4.0)
+
+### Visão Geral
+
+O Chatwoot permite gerenciar conversas do WhatsApp com interface de atendimento, histórico unificado e automações.
+
+**Configuração Atual:**
+- **Chatwoot URL:** `https://chatwoot.educareapp.com.br`
+- **Account ID:** `2` (Educare+ Tech)
+- **Inbox:** `Educare+ MyChat` (ID: 1)
+- **Channel:** API conectada ao Evolution API
+
+### Fluxo de Dados
+
+```
+WhatsApp → Evolution API → Chatwoot → Webhook n8n
+                                          ↓
+                                    Educare+ API
+                                          ↓
+                               Chatwoot API (resposta)
+                                          ↓
+                               Evolution API → WhatsApp
+```
+
+### Estrutura do Webhook Chatwoot
+
+```json
+{
+  "event": "message_created",
+  "message_type": "incoming",
+  "account": { "id": 2, "name": "Educare+ Tech" },
+  "inbox": { "id": 1, "name": "Educare+ MyChat" },
+  "conversation": {
+    "id": 3,
+    "messages": [...],
+    "meta": {
+      "sender": {
+        "id": 2,
+        "name": "Nome do Contato",
+        "phone_number": "+559891628206",
+        "identifier": "559891628206@s.whatsapp.net"
+      }
+    }
+  },
+  "content": "Texto da mensagem",
+  "attachments": [
+    {
+      "file_type": "audio",
+      "data_url": "https://chatwoot.../file.oga"
+    }
+  ],
+  "sender": { "id": 2, "name": "Nome", "email": "...", "type": "user" }
+}
+```
+
+### Eventos Suportados
+
+| Evento | Descrição | Processado |
+|--------|-----------|------------|
+| `message_created` | Nova mensagem | Sim (apenas incoming) |
+| `message_updated` | Mensagem editada | Não |
+| `conversation_created` | Nova conversa | Não |
+| `conversation_status_changed` | Status alterado | Não |
+
+### Configurar Webhook no Chatwoot
+
+1. Acesse **Settings > Integrations > Webhooks**
+2. Clique em **Add New Webhook**
+3. Configure:
+   - **URL:** `https://webhook.educareapp.com.br/webhook/chat-educare-v4`
+   - **Events:** Marque `message_created`
+4. Salve
+
+### API de Resposta Chatwoot
+
+Para enviar mensagens de volta ao WhatsApp via Chatwoot:
+
+```http
+POST /api/v1/accounts/{account_id}/conversations/{conversation_id}/messages
+Headers:
+  api_access_token: {CHATWOOT_API_KEY}
+  Content-Type: application/json
+
+Body:
+{
+  "content": "Mensagem de resposta",
+  "message_type": "outgoing",
+  "private": false
+}
+```
+
+### Variáveis n8n para Chatwoot
+
+```
+CHATWOOT_API_URL=https://chatwoot.educareapp.com.br
+CHATWOOT_API_KEY=seu_access_token_aqui
+```
+
+### Diferenças Evolution vs Chatwoot
+
+| Aspecto | Evolution API | Chatwoot |
+|---------|--------------|----------|
+| Formato telefone | `559891628206@s.whatsapp.net` | `+559891628206` ou identifier |
+| Mensagem | `message.conversation` | `content` |
+| Áudio | `message.audioMessage.url` | `attachments[].data_url` |
+| Tipo msg | Implícito | `message_type: incoming/outgoing` |
+| Histórico | Não | `conversation.messages[]` |
+
+### Vantagens do Chatwoot
+
+1. **Interface de atendimento** - Visualize todas as conversas
+2. **Histórico completo** - Mensagens persistem no Chatwoot
+3. **Multi-agente** - Vários atendentes podem responder
+4. **Labels e Tags** - Organize conversas por categoria
+5. **Automações** - Regras de auto-assign, respostas automáticas
+6. **Relatórios** - Métricas de atendimento
+
+---
+
+## Arquitetura Dual-Source (v4.0)
+
+O workflow n8n v4.0 suporta **ambas as fontes simultaneamente**:
+
+### Fluxo Unificado
+
+```
+┌─────────────────┐     ┌─────────────────┐
+│  Evolution API  │     │    Chatwoot     │
+└────────┬────────┘     └────────┬────────┘
+         │                       │
+         └───────────┬───────────┘
+                     ▼
+          ┌─────────────────────┐
+          │  Webhook Unificado  │
+          │  /chat-educare-v4   │
+          └──────────┬──────────┘
+                     ▼
+          ┌─────────────────────┐
+          │   Source Detector   │
+          │ (Chatwoot/Evolution)│
+          └──────────┬──────────┘
+                     ▼
+    ┌────────────────┴────────────────┐
+    ▼                                 ▼
+┌──────────────┐              ┌──────────────┐
+│   Chatwoot   │              │   Evolution  │
+│   Extractor  │              │   Extractor  │
+└──────┬───────┘              └───────┬──────┘
+       │                              │
+       └──────────────┬───────────────┘
+                      ▼
+            ┌─────────────────┐
+            │  Merge: Unified │
+            │     Data        │
+            └────────┬────────┘
+                     ▼
+           [Processamento Normal]
+                     ▼
+            ┌─────────────────┐
+            │  Router: Source │
+            └────────┬────────┘
+                     ▼
+    ┌────────────────┴────────────────┐
+    ▼                                 ▼
+┌──────────────┐              ┌──────────────┐
+│   Chatwoot   │              │   Evolution  │
+│   Response   │              │   Response   │
+└──────────────┘              └──────────────┘
+```
+
+### Estrutura Unificada
+
+Após a extração, ambos os extratores produzem a mesma estrutura:
+
+```javascript
+{
+  source: 'chatwoot' | 'evolution',
+  phone: '559891628206',
+  message: 'Texto da mensagem',
+  is_audio: 'true' | 'false',
+  media_url: 'https://...',
+  media_type: 'text' | 'audio' | 'image' | 'document',
+  conversation_id: 3,      // Chatwoot only
+  inbox_id: 1,             // Chatwoot only
+  account_id: 2,           // Chatwoot only
+  contact_id: 2,           // Chatwoot only
+  sender_name: 'Nome'      // Chatwoot only
+}
+```
+
+---
+
+*Documentação Educare+ - Dezembro 2025 - v4.0*

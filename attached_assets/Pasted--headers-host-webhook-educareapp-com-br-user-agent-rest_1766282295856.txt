@@ -1,0 +1,164 @@
+[
+  {
+    "headers": {
+      "host": "webhook.educareapp.com.br",
+      "user-agent": "rest-client/2.1.0 (linux-musl x86_64) ruby/3.3.3p89",
+      "content-length": "3310",
+      "accept": "application/json",
+      "accept-encoding": "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+      "content-type": "application/json",
+      "x-forwarded-for": "172.18.0.1",
+      "x-forwarded-host": "webhook.educareapp.com.br",
+      "x-forwarded-port": "443",
+      "x-forwarded-proto": "https",
+      "x-forwarded-server": "594e0b156d57",
+      "x-real-ip": "172.18.0.1"
+    },
+    "params": {},
+    "query": {},
+    "body": {
+      "account": {
+        "id": 2,
+        "name": "Educare+ Tech"
+      },
+      "additional_attributes": {},
+      "content_attributes": {},
+      "content_type": "text",
+      "content": null,
+      "conversation": {
+        "additional_attributes": {},
+        "can_reply": true,
+        "channel": "Channel::Api",
+        "contact_inbox": {
+          "id": 5,
+          "contact_id": 2,
+          "inbox_id": 1,
+          "source_id": "6780e3c5-b15d-47d2-83ed-0098d5be014a",
+          "created_at": "2025-12-19T03:03:01.027Z",
+          "updated_at": "2025-12-19T03:03:01.027Z",
+          "hmac_verified": false,
+          "pubsub_token": "H1idFLYkFEH1hdAGf9hidN5u"
+        },
+        "id": 3,
+        "inbox_id": 1,
+        "messages": [
+          {
+            "id": 66,
+            "content": null,
+            "account_id": 2,
+            "inbox_id": 1,
+            "conversation_id": 3,
+            "message_type": 1,
+            "created_at": 1766278408,
+            "updated_at": "2025-12-21T00:53:28.654Z",
+            "private": false,
+            "status": "sent",
+            "source_id": "WAID:3EB0808DD6D9883AECCF21",
+            "content_type": "text",
+            "content_attributes": {},
+            "sender_type": "User",
+            "sender_id": 2,
+            "external_source_ids": {},
+            "additional_attributes": {},
+            "processed_message_content": null,
+            "sentiment": {},
+            "conversation": {
+              "assignee_id": null,
+              "unread_count": 2,
+              "last_activity_at": 1766278408,
+              "contact_inbox": {
+                "source_id": "6780e3c5-b15d-47d2-83ed-0098d5be014a"
+              }
+            },
+            "attachments": [
+              {
+                "id": 13,
+                "message_id": 66,
+                "file_type": "audio",
+                "account_id": 2,
+                "extension": null,
+                "data_url": "https://chatwoot.educareapp.com.br/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBGZz09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--534261a8fb35283cd8bc25c80049a3a3bc7caa03/njjcun.oga",
+                "thumb_url": "",
+                "file_size": 1172785,
+                "width": null,
+                "height": null
+              }
+            ],
+            "sender": {
+              "id": 2,
+              "name": "Derik Silva",
+              "available_name": "Derik Silva",
+              "avatar_url": "",
+              "type": "user",
+              "availability_status": null,
+              "thumbnail": ""
+            }
+          }
+        ],
+        "labels": [],
+        "meta": {
+          "sender": {
+            "additional_attributes": {},
+            "custom_attributes": {},
+            "email": null,
+            "id": 2,
+            "identifier": "559891628206@s.whatsapp.net",
+            "name": "Derik Silva",
+            "phone_number": "+559891628206",
+            "thumbnail": "https://chatwoot.educareapp.com.br/rails/active_storage/representations/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBDQT09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--4d8c064b200bb9cb8d6da28213c3e5e9b5297b33/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaDdCem9MWm05eWJXRjBTU0lJYW5CbkJqb0dSVlE2RTNKbGMybDZaVjkwYjE5bWFXeHNXd2RwQWZvdyIsImV4cCI6bnVsbCwicHVyIjoidmFyaWF0aW9uIn19--9c07097634a8682f2e76e491a5a535526e2323e7/465662401_376575665538846_8659577507880365176_n.jpg",
+            "blocked": false,
+            "type": "contact"
+          },
+          "assignee": null,
+          "team": null,
+          "hmac_verified": false
+        },
+        "status": "open",
+        "custom_attributes": {},
+        "snoozed_until": null,
+        "unread_count": 2,
+        "first_reply_created_at": "2025-12-19T03:03:02.898Z",
+        "priority": null,
+        "waiting_since": 0,
+        "agent_last_seen_at": 1766278024,
+        "contact_last_seen_at": 0,
+        "last_activity_at": 1766278408,
+        "timestamp": 1766278408,
+        "created_at": 1766113381,
+        "updated_at": 1766278408.660606
+      },
+      "created_at": "2025-12-21T00:53:28.654Z",
+      "id": 66,
+      "inbox": {
+        "id": 1,
+        "name": "Educare+ MyChat"
+      },
+      "message_type": "outgoing",
+      "private": false,
+      "sender": {
+        "id": 2,
+        "name": "Derik Silva",
+        "email": "derik@educaremais.com.br",
+        "type": "user"
+      },
+      "source_id": "WAID:3EB0808DD6D9883AECCF21",
+      "attachments": [
+        {
+          "id": 13,
+          "message_id": 66,
+          "file_type": "audio",
+          "account_id": 2,
+          "extension": null,
+          "data_url": "https://chatwoot.educareapp.com.br/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBGZz09IiwiZXhwIjpudWxsLCJwdXIiOiJibG9iX2lkIn19--534261a8fb35283cd8bc25c80049a3a3bc7caa03/njjcun.oga",
+          "thumb_url": "",
+          "file_size": 1172785,
+          "width": null,
+          "height": null
+        }
+      ],
+      "event": "message_created"
+    },
+    "webhookUrl": "https://webhook.educareapp.com.br/webhook/chat",
+    "executionMode": "production"
+  }
+]

@@ -47,6 +47,19 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 
 ## Recent Changes (December 2025)
 
+### n8n Workflow v4.1 Dual-Source Integration (Dec 21)
+- **Complete Dual-Source Support**: Evolution API + Chatwoot in single workflow
+  - File: `educare-backend/docs/n8n-workflow-template-v4.json`
+  - Source Detector: Identifies webhook origin (Chatwoot vs Evolution)
+  - Dual Extractors: Separate processing for each platform
+  - Chatwoot Extractor v4.1: Fixed attachment extraction from `conversation.messages[].attachments[]`
+  - Unified Data Structure: Common format for processing
+  - Smart Response Routing: Sends replies back to correct source
+  - Chatwoot API integration for message responses
+- **Documentation Updates**:
+  - `educare-backend/docs/WHATSAPP_INTEGRATION.md` - Added Chatwoot section
+  - `educare-backend/docs/N8N_VARIABLES_CONFIG.md` - Added Chatwoot variables
+
 ### Design System & Brand Identity Documentation (Dec 21)
 - **Complete Design System PRD**: Created comprehensive design documentation
   - File: `docs/DESIGN_SYSTEM.md` - Full brand identity, color palette, typography, components
