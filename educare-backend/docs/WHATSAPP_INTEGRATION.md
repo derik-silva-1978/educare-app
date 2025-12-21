@@ -17,7 +17,7 @@ A integração WhatsApp permite que usuários do Educare+ respondam às pergunta
 - **API Key Evolution:** `eff3ea025256694c10422fd0fc5ff169`
 - **Instance Name:** `evolution`
 - **n8n Server:** `https://n8n.educareapp.com.br`
-- **Webhook n8n:** `https://webhook.educareapp.com.br/whatsapp-educare`
+- **Webhook n8n:** `https://n8n.educareapp.com.br/webhook-test/chat`
 - **Backend Educare:** `https://[SEU-REPLIT].replit.dev:3001`
 - **Status:** ✅ Pronto para Deploy
 
@@ -460,7 +460,7 @@ WhatsApp → Evolution API → Chatwoot → Webhook n8n
 1. Acesse **Settings > Integrations > Webhooks**
 2. Clique em **Add New Webhook**
 3. Configure:
-   - **URL:** `https://webhook.educareapp.com.br/webhook/chat-educare-v4`
+   - **URL:** `https://n8n.educareapp.com.br/webhook-test/chat`
    - **Events:** Marque `message_created`
 4. Salve
 
