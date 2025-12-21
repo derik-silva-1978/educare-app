@@ -11,7 +11,7 @@
 Domínio: n8n.educareapp.com.br
 URL Base: https://n8n.educareapp.com.br/
 Protocolo: HTTPS
-Webhook Base URL: https://webhook.educareapp.com.br/
+Webhook Base URL: https://webhook.educareapp.com.br/webhook/
 Host: n8n.educareapp.com.br
 ```
 
@@ -66,7 +66,7 @@ A Evolution API pode ser apontada para diferentes webhooks. Precisamos confirmar
 
 ### Webhook para Evolution enviar mensagens:
 ```
-https://webhook.educareapp.com.br/whatsapp-educare
+https://webhook.educareapp.com.br/webhook/webhook/chat
 ```
 
 Esse webhook será **criado no n8n** quando importarmos o workflow.
@@ -98,7 +98,7 @@ curl -X GET "https://api.educareapp.com.br/instance/fetchInstances" \
 
 ### Teste 4: Webhook n8n receptor
 ```bash
-curl -X POST "https://webhook.educareapp.com.br/whatsapp-educare" \
+curl -X POST "https://webhook.educareapp.com.br/webhook/webhook/chat" \
   -H "Content-Type: application/json" \
   -d '{"test": true}'
 # Esperado: Webhook receberá no n8n (ainda não criado, mas URL must be accessible)
@@ -170,14 +170,14 @@ curl -X POST "https://api.educareapp.com.br/webhook/set" \
   -H "Content-Type: application/json" \
   -d {
     "global": true,
-    "webhook": "https://webhook.educareapp.com.br/whatsapp-educare",
+    "webhook": "https://webhook.educareapp.com.br/webhook/webhook/chat",
     "events": ["MESSAGES_UPSERT"]
   }
 ```
 
 **Ou manualmente no painel Evolution** (se tiver UI):
 1. Settings → Webhooks
-2. Adicione: `https://webhook.educareapp.com.br/whatsapp-educare`
+2. Adicione: `https://webhook.educareapp.com.br/webhook/webhook/chat`
 3. Eventos: `MESSAGES_UPSERT` (mínimo)
 4. Salve
 
@@ -217,7 +217,7 @@ No n8n:
 **Solução:**
 ```bash
 # Teste a URL
-curl -I https://webhook.educareapp.com.br/whatsapp-educare
+curl -I https://webhook.educareapp.com.br/webhook/webhook/chat
 
 # Se retornar 404/502:
 # 1. Verifique se webhook.educareapp.com.br está configurado no DNS
@@ -254,7 +254,7 @@ curl -X GET "https://api.educareapp.com.br/instance/fetchInstances" \
 2. n8n → Workflow → Webhook Node → "Listen for Test Event" ativo
 3. Teste webhook manualmente:
    ```bash
-   curl -X POST "https://webhook.educareapp.com.br/whatsapp-educare" \
+   curl -X POST "https://webhook.educareapp.com.br/webhook/webhook/chat" \
      -H "Content-Type: application/json" \
      -d '{"test": "message"}'
    ```

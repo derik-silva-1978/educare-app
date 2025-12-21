@@ -47,7 +47,7 @@ EVOLUTION_API_KEY=eff3ea025256694c10422fd0fc5ff169
 EVOLUTION_INSTANCE_NAME=evolution
 
 # n8n Webhook
-N8N_WEBHOOK_URL=https://webhook.educareapp.com.br/whatsapp-educare
+N8N_WEBHOOK_URL=https://webhook.educareapp.com.br/webhook/chat
 
 # OpenAI (Integrado no Backend)
 OPENAI_API_KEY=sk-... (gerenciado pelo backend)

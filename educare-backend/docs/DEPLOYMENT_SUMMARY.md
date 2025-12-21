@@ -56,7 +56,7 @@ curl -X POST "https://api.educareapp.com.br/webhook/set" \
   -H "Content-Type: application/json" \
   -d '{
     "global": true,
-    "webhook": "https://n8n.educareapp.com.br/webhook-test/chat",
+    "webhook": "https://webhook.educareapp.com.br/webhook/chat",
     "events": ["MESSAGES_UPSERT"]
   }'
 ```

@@ -3,7 +3,7 @@
 **Status:** ✅ Ready for Production  
 **Last Updated:** December 10, 2025  
 **n8n Server:** https://n8n.educareapp.com.br
-**Webhook URL:** https://webhook.educareapp.com.br/whatsapp-educare
+**Webhook URL:** https://webhook.educareapp.com.br/webhook/chat
 **Evolution API:** https://api.educareapp.com.br
 
 ---
@@ -37,7 +37,7 @@ No n8n, vá em **Settings → Variables** e adicione:
 ✅ Webhook já está pré-configurado:
 - **Path:** `whatsapp-educare`
 - **Method:** POST
-- **Full URL:** `https://webhook.educareapp.com.br/whatsapp-educare`
+- **Full URL:** `https://webhook.educareapp.com.br/webhook/chat`
 - **Response:** onReceived
 
 Nenhuma configuração adicional de webhook é necessária - o template já inclui isso.

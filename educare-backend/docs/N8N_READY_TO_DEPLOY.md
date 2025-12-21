@@ -77,7 +77,7 @@ curl -X POST "https://api.educareapp.com.br/webhook/set/evolution" \
   -d '{
     "webhook": {
       "enabled": true,
-      "url": "https://n8n.educareapp.com.br/webhook-test/chat",
+      "url": "https://webhook.educareapp.com.br/webhook/chat",
       "webhookByEvents": true,
       "events": ["MESSAGES_UPSERT"]
     }
@@ -89,7 +89,7 @@ curl -X POST "https://api.educareapp.com.br/webhook/set/evolution" \
 {
   "webhook": {
     "enabled": true,
-    "url": "https://n8n.educareapp.com.br/webhook-test/chat"
+    "url": "https://webhook.educareapp.com.br/webhook/chat"
   }
 }
 ```
@@ -183,7 +183,7 @@ WhatsApp: User receives response
 1. Verifique se Evolution API está configurada corretamente
 2. Teste o webhook:
    ```bash
-   curl -X POST "https://n8n.educareapp.com.br/webhook-test/chat" \
+   curl -X POST "https://webhook.educareapp.com.br/webhook/chat" \
      -H "Content-Type: application/json" \
      -d '{"test": true}'
    ```

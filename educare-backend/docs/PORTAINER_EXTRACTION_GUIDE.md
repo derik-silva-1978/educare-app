@@ -44,7 +44,7 @@ https://api.educareapp.com.br
 
 #### **Webhook (n8n para Evolution):**
 ```
-https://webhook.educareapp.com.br/whatsapp-educare
+https://webhook.educareapp.com.br/webhook/chat
 ```
 
 **Status:** ✅ Todas confirmadas e testadas

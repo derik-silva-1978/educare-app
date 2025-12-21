@@ -146,7 +146,7 @@ curl -X POST "https://api.educareapp.com.br/webhook/set/evolution" \
   -H "apikey: eff3ea025256694c10422fd0fc5ff169" \
   -H "Content-Type: application/json" \
   -d '{
-    "url": "https://n8n.educareapp.com.br/webhook/whatsapp-educare-v3",
+    "url": "https://webhook.educareapp.com.br/webhook/chat",
     "webhook_by_events": true,
     "events": ["MESSAGES_UPSERT"]
   }'
