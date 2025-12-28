@@ -18,6 +18,7 @@ const staticResourceItems = [
     description: 'Documento oficial com marcos e orientações do Ministério da Saúde.',
     type: 'PDF',
     icon: FileText,
+    status: 'coming_soon' as const,
   },
   {
     id: '2',
@@ -25,6 +26,7 @@ const staticResourceItems = [
     description: 'Manual para aplicação da escala de triagem do desenvolvimento.',
     type: 'PDF',
     icon: FileText,
+    status: 'coming_soon' as const,
   },
   {
     id: '3',
@@ -32,6 +34,7 @@ const staticResourceItems = [
     description: 'Fluxograma de acompanhamento e encaminhamento.',
     type: 'PDF',
     icon: FileText,
+    status: 'coming_soon' as const,
   },
 ];
 
@@ -234,17 +237,31 @@ const ProfessionalResourcesHub: React.FC = () => {
             {staticResourceItems.map((item) => {
               const Icon = item.icon;
               return (
-                <Card key={item.id} className="hover:shadow-md transition-shadow">
+                <Card key={item.id} className="hover:shadow-md transition-shadow relative overflow-hidden">
+                  {item.status === 'coming_soon' && (
+                    <div className="absolute top-3 right-3">
+                      <Badge variant="secondary" className="bg-amber-100 text-amber-700 border-amber-300">
+                        Em Desenvolvimento
+                      </Badge>
+                    </div>
+                  )}
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-4">
-                      <div className="p-3 rounded-lg bg-gray-100 text-gray-600">
+                      <div className={`p-3 rounded-lg ${item.status === 'coming_soon' ? 'bg-gray-100 text-gray-400' : 'bg-blue-100 text-blue-600'}`}>
                         <Icon className="h-6 w-6" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold mb-1">{item.title}</h3>
+                        <h3 className={`font-semibold mb-1 ${item.status === 'coming_soon' ? 'text-muted-foreground' : ''}`}>
+                          {item.title}
+                        </h3>
                         <p className="text-sm text-muted-foreground">
                           {item.description}
                         </p>
+                        {item.status === 'coming_soon' && (
+                          <p className="text-xs text-amber-600 mt-2">
+                            Este recurso estará disponível em breve.
+                          </p>
+                        )}
                       </div>
                       <Badge variant="outline">{item.type}</Badge>
                     </div>
