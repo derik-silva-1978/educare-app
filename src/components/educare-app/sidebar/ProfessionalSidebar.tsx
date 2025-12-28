@@ -71,7 +71,7 @@ const ProfessionalSidebar: React.FC = () => {
       <nav className="flex-1 p-4 space-y-1">
         <NavItem to="/educare-app/dashboard" icon={Home} label="Dashboard" />
         <NavItem to="/educare-app/professional/dashboard" icon={Users} label="Pacientes" />
-        <NavItem to="/educare-app/titinauta-journey" icon={Bot} label="Jornada TitiNauta" notification={true} />
+        <NavItem to="/educare-app/jornada-desenvolvimento" icon={Bot} label="Jornada do Desenvolvimento" notification={true} />
         <NavItem to="/smart-pei/students" icon={Users} label="Alunos" />
         <NavItem to="/smart-pei/assessments" icon={ClipboardList} label="Avaliações" />
         <NavItem to="/smart-pei/activities" icon={Calendar} label="Atividades" />
