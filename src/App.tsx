@@ -179,9 +179,6 @@ const App = () => (
                 <Route path="admin/trainings" element={<TrainingsAdmin />} />
                 <Route path="owner/trainings" element={<TrainingsAdmin />} />
                 
-                {/* Trainings for users */}
-                <Route path="trainings" element={<TrainingsPage />} />
-                
                 {/* Professional Routes - Gestão de Crianças */}
                 <Route path="professional/children" element={
                   <ProfessionalOnlyGuard>
@@ -200,6 +197,9 @@ const App = () => (
               
               {/* Loja Educare+ */}
               <Route path="/educare-app/loja" element={<LojaPage />} />
+              
+              {/* Trainings - Public Access */}
+              <Route path="/educare-app/trainings" element={<TrainingsPage />} />
               
               {/* Suporte */}
               <Route path="/educare-app/support" element={<SupportPage />} />

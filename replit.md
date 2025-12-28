@@ -28,7 +28,7 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 - **Baby Health Dashboard**: Real-time health monitoring for babies, including growth charts, sleep patterns, vaccine checklists, and daily summaries, visible only to parents.
 - **Dynamic Contextual FAQ**: A query-based FAQ system with dynamic ranking and contextual suggestions based on a child's development week (0-312 weeks).
 - **Professional Portal**: Dedicated portal for healthcare professionals with TitiNauta Specialist chat (kb_professional), Resources Hub (CMS-powered news/trainings), and ChildIndicatorsPanel for viewing real developmental milestones via GET /api/milestones/child/:childId with TeamMember access verification.
-- **Training Content System (Phase 2 - In Progress)**: Sequelize models ready for video-based training platform (ContentVideo, TrainingModule, TrainingLesson, UserContentProgress, ContentPricing, UserEnrollment). Vimeo integration and Stripe checkout pending implementation.
+- **Training Content System (Phase 2 - Complete)**: Full video-based training platform with 6 Sequelize models (ContentVideo, TrainingModule, TrainingLesson, UserContentProgress, ContentPricing, UserEnrollment). Public access to course browsing via `/educare-app/trainings` with optional authentication support. Admin/Owner management at `/educare-app/admin/trainings` and `/educare-app/owner/trainings`. Vimeo integration ready (awaiting VIMEO_ACCESS_TOKEN). Stripe one-time payment checkout implemented for paid courses.
 
 ### System Design Choices
 - **Scalability**: Designed for cloud deployment on Digital Ocean using multiple droplets, PostgreSQL, and Redis.
