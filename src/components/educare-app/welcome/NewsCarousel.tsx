@@ -6,12 +6,22 @@ import { ArrowRight, Newspaper, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getNewsContent, ContentItem } from '@/services/contentService';
 
-const NewsCarousel: React.FC = () => {
+interface NewsCarouselProps {
+  audienceFilter?: 'parents' | 'professionals';
+}
+
+const NewsCarousel: React.FC<NewsCarouselProps> = ({ audienceFilter }) => {
   const navigate = useNavigate();
   
   const { data: news, isLoading } = useQuery({
-    queryKey: ['welcome-news'],
-    queryFn: getNewsContent,
+    queryKey: ['welcome-news', audienceFilter],
+    queryFn: async () => {
+      const items = await getNewsContent();
+      if (!audienceFilter) return items;
+      return items.filter((item: ContentItem) => 
+        item.target_audience === 'all' || item.target_audience === audienceFilter
+      );
+    },
     staleTime: 5 * 60 * 1000,
   });
 

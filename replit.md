@@ -12,7 +12,11 @@ Educare+ is a digital platform designed to support early childhood development a
 ## System Architecture
 
 ### UI/UX Decisions
-The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui` (Radix UI + Tailwind CSS) for a professional and WCAG-compliant interface. Key components include a `WelcomeHub` (default authenticated landing page with dynamic content carousels and a sticky IconToolbar) and a `Dashboard` (focused on user metrics and baby health data visualization for parents). Content is dynamically loaded and diversified with fallback images.
+The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui` (Radix UI + Tailwind CSS) for a professional and WCAG-compliant interface. Key components include:
+- **WelcomeHub**: Default authenticated landing page for parents with dynamic content carousels (News, Training), sticky IconToolbar, and audience-filtered content
+- **ProfessionalWelcomeHub**: Similar to WelcomeHub but tailored for healthcare professionals with filtered content showing only professional-targeted and general content
+- **Dashboard**: User metrics and baby health data visualization for parents
+Content is dynamically loaded and diversified with fallback images. Audience filtering ensures parents and professionals see relevant content.
 
 ### Technical Implementations
 - **Frontend**: React hooks, `@tanstack/react-query`, React Router, and `react-hook-form` with Zod for validation. Authentication uses a custom JWT-based context provider.
@@ -23,11 +27,16 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 - **Authentication**: JWT-based with comprehensive role-based access control (Owner, Admin, Professional, Parent).
 - **Knowledge Base Management**: Owner panel for managing documents across segmented KBs, supporting cloud storage uploads (Google Drive, OneDrive).
 - **RAG Metrics & Monitoring**: Dashboard for owners displaying performance metrics and health checks.
-- **Content Management**: Admin/Owner system for creating, editing, and publishing dynamic content for the WelcomeHub, featuring a rich text editor with extensive formatting options.
+- **Content Management**: Enhanced admin/Owner system for creating, editing, and publishing dynamic content for WelcomeHub and ProfessionalWelcomeHub. Supports audience targeting with dropdown selector (All/Parents/Professionals), featuring a rich text editor with extensive formatting options, and visual audience badges in content table.
 - **TitiNauta AI Assistant**: A masculine AI assistant with a multimodal chat interface, integrated RAG system, quick topic access, context-aware greetings, and a dedicated "Jornada do Desenvolvimento" experience.
 - **Baby Health Dashboard**: Real-time health monitoring for babies, including growth charts, sleep patterns, vaccine checklists, and daily summaries, visible only to parents.
 - **Dynamic Contextual FAQ**: A query-based FAQ system with dynamic ranking and contextual suggestions based on a child's development week (0-312 weeks).
-- **Professional Portal**: Dedicated portal for healthcare professionals with TitiNauta Specialist chat (kb_professional), Resources Hub (CMS-powered news/trainings), and ChildIndicatorsPanel for viewing real developmental milestones via GET /api/milestones/child/:childId with TeamMember access verification.
+- **Professional Portal**: Comprehensive portal for healthcare professionals including:
+  - **ProfessionalWelcomeHub**: Landing page with audience-filtered news and trainings
+  - **Dashboard**: Quick-access cards and professional metrics
+  - **TitiNauta Specialist**: Chat with kb_professional RAG system
+  - **Resources Hub**: CMS-powered news and trainings for professionals
+  - **ChildAnalysis**: Real development milestone tracking with charts, PDF export, and timeline view via GET /api/milestones/child/:childId with TeamMember access verification
 - **Training Content System (Phase 2 - Complete)**: Full video-based training platform with 6 Sequelize models (ContentVideo, TrainingModule, TrainingLesson, UserContentProgress, ContentPricing, UserEnrollment). Public access to course browsing via `/educare-app/trainings` with optional authentication support. Admin/Owner management at `/educare-app/admin/trainings` and `/educare-app/owner/trainings`. Vimeo integration ready (awaiting VIMEO_ACCESS_TOKEN). Stripe one-time payment checkout implemented for paid courses.
 
 ### System Design Choices

@@ -7,12 +7,22 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { getTrainingContent, ContentItem } from '@/services/contentService';
 
-const TrainingSection: React.FC = () => {
+interface TrainingSectionProps {
+  audienceFilter?: 'parents' | 'professionals';
+}
+
+const TrainingSection: React.FC<TrainingSectionProps> = ({ audienceFilter }) => {
   const navigate = useNavigate();
   
   const { data: trainings, isLoading } = useQuery({
-    queryKey: ['welcome-trainings'],
-    queryFn: getTrainingContent,
+    queryKey: ['welcome-trainings', audienceFilter],
+    queryFn: async () => {
+      const items = await getTrainingContent();
+      if (!audienceFilter) return items;
+      return items.filter((item: ContentItem) => 
+        item.target_audience === 'all' || item.target_audience === audienceFilter
+      );
+    },
     staleTime: 5 * 60 * 1000,
   });
 

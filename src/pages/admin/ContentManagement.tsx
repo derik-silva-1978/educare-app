@@ -524,6 +524,7 @@ const ContentManagement: React.FC = () => {
                   <TableHead>Tipo</TableHead>
                   <TableHead>Título</TableHead>
                   <TableHead>Categoria</TableHead>
+                  <TableHead>Público-alvo</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Ordem</TableHead>
                   <TableHead className="w-[100px]">Ações</TableHead>
@@ -544,6 +545,17 @@ const ContentManagement: React.FC = () => {
                         {item.title}
                       </TableCell>
                       <TableCell>{item.category || '-'}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={
+                          item.target_audience === 'all' ? 'bg-blue-50 text-blue-700 border-blue-300' :
+                          item.target_audience === 'parents' ? 'bg-green-50 text-green-700 border-green-300' :
+                          'bg-purple-50 text-purple-700 border-purple-300'
+                        }>
+                          {item.target_audience === 'all' ? 'Todos' :
+                           item.target_audience === 'parents' ? 'Pais' :
+                           'Profissionais'}
+                        </Badge>
+                      </TableCell>
                       <TableCell>
                         <Badge className={statusLabels[item.status]?.color}>
                           {statusLabels[item.status]?.label}
