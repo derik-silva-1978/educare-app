@@ -23,7 +23,8 @@ import {
   Database,
   FileText,
   Sparkles,
-  BookOpen
+  BookOpen,
+  LayoutDashboard
 } from 'lucide-react';
 import {
   Sidebar,
@@ -223,7 +224,7 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
     ];
   }
 
-  // Adicionar itens específicos para profissional - Simplificado mas funcional
+  // Adicionar itens específicos para profissional - 5 módulos principais
   if (userRole === 'professional') {
     return [
       {
@@ -232,9 +233,14 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         icon: Home,
       },
       {
-        title: "TitiNauta Especialista",
-        url: "/educare-app/professional/titinauta",
-        icon: Bot,
+        title: "Dashboard",
+        url: "/educare-app/professional/dashboard",
+        icon: LayoutDashboard,
+      },
+      {
+        title: "Gestão das Crianças",
+        url: "/educare-app/professional/children",
+        icon: UsersRound,
       },
       {
         title: "Qualificação Profissional",

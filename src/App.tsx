@@ -34,6 +34,7 @@ import AprendizadoLanding from "./pages/educare-app/AprendizadoLanding";
 import WhatsAppJourneyBotPage from "./pages/WhatsAppJourneyBotPage";
 import ProfessionalWelcomeHub from "./pages/educare-app/professional/ProfessionalWelcomeHub";
 import QualificacaoProfissional from "./pages/educare-app/professional/QualificacaoProfissional";
+import ProfessionalChildrenManagement from "./pages/educare-app/professional/ProfessionalChildrenManagement";
 
 // Admin Pages
 import OwnerDashboard from "./pages/admin/OwnerDashboard";
@@ -195,7 +196,7 @@ const App = () => (
                 {/* Professional Routes - Gestão de Crianças */}
                 <Route path="professional/children" element={
                   <ProfessionalOnlyGuard>
-                    <GlobalChildrenManagementPage />
+                    <ProfessionalChildrenManagement />
                   </ProfessionalOnlyGuard>
                 } />
                 <Route path="super-admin/dashboard" element={<SuperAdminDashboard />} />

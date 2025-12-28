@@ -89,38 +89,65 @@ const TrainingCard: React.FC<{ item: ContentItem }> = ({ item }) => {
   const Icon = item.type === 'course' ? GraduationCap : Video;
   
   return (
-    <Card className="hover:shadow-md transition-shadow border-l-4 border-l-primary">
-      <CardContent className="pt-6">
-        <div className="flex items-start gap-4">
-          <div className="p-3 rounded-lg bg-primary/10 text-primary">
-            <Icon className="h-6 w-6" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold mb-1 text-foreground">{item.title}</h3>
-            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-              {item.summary || item.description}
-            </p>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              {item.duration && (
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {item.duration}
-                </span>
-              )}
-              {item.level && (
-                <Badge variant="outline" className="text-xs font-medium">
-                  {item.level}
-                </Badge>
+    <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-primary overflow-hidden group">
+      <CardContent className="p-0">
+        <div className="flex flex-col sm:flex-row">
+          {item.image_url && (
+            <div className="w-full sm:w-48 h-32 sm:h-auto overflow-hidden bg-muted">
+              <img 
+                src={item.image_url} 
+                alt={item.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+          )}
+          <div className="flex-1 p-5">
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 text-primary shrink-0">
+                <Icon className="h-6 w-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-lg mb-2 text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                  {item.summary || item.description}
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  {item.duration && (
+                    <span className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full">
+                      <Clock className="h-3.5 w-3.5" />
+                      {item.duration}
+                    </span>
+                  )}
+                  {item.level && (
+                    <Badge variant="secondary" className="font-medium">
+                      {item.level}
+                    </Badge>
+                  )}
+                  {item.category && (
+                    <Badge variant="outline" className="font-medium">
+                      {item.category}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 pt-4 border-t flex justify-end">
+              {item.cta_url ? (
+                <Button variant="default" size="sm" className="font-semibold shadow-sm" asChild>
+                  <a href={item.cta_url} target="_blank" rel="noopener noreferrer">
+                    {item.cta_text || 'Acessar Curso'}
+                    <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                  </a>
+                </Button>
+              ) : (
+                <Button variant="secondary" size="sm" className="font-semibold" disabled>
+                  Em breve
+                </Button>
               )}
             </div>
           </div>
-          {item.cta_url && (
-            <Button variant="default" size="sm" className="font-medium" asChild>
-              <a href={item.cta_url} target="_blank" rel="noopener noreferrer">
-                Acessar
-              </a>
-            </Button>
-          )}
         </div>
       </CardContent>
     </Card>

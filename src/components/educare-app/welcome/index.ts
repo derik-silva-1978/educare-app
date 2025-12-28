@@ -1,5 +1,6 @@
 export { default as IconToolbar } from './IconToolbar';
 export { default as WelcomeHero } from './WelcomeHero';
+export { default as ProfessionalWelcomeHero } from './ProfessionalWelcomeHero';
 export { default as NewsCarousel } from './NewsCarousel';
 export { default as TrainingSection } from './TrainingSection';
 export { default as AcademyCourses } from './AcademyCourses';

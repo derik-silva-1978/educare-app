@@ -32,12 +32,13 @@ Content is dynamically loaded and diversified with fallback images. Audience fil
 - **Baby Health Dashboard**: Real-time health monitoring for babies, including growth charts, sleep patterns, vaccine checklists, and daily summaries, visible only to parents.
 - **Dynamic Contextual FAQ**: A query-based FAQ system with dynamic ranking and contextual suggestions based on a child's development week (0-312 weeks).
 - **Professional Portal**: Comprehensive portal for healthcare professionals including:
-  - **Boas Vindas (ProfessionalWelcomeHub)**: Landing page with "Gestão das Crianças" section showing only assigned children with indicators panel, plus quick-access cards for TitiNauta and Qualificação
-  - **Gestão das Crianças**: Tabs for assigned children, invitations, chat invites, and active chats - children are assigned by Owner/Admin only
-  - **TitiNauta Especialista**: Chat with kb_professional RAG system
-  - **Qualificação Profissional**: Unified module with 4 tabs (Material de Apoio, Artigos, Treinamentos, Cursos) replacing redundant resource pages
+  - **Boas Vindas (ProfessionalWelcomeHub)**: Same UI/UX as parent WelcomeHub with dynamic content carousels (News, Training) filtered for professionals, controlled by Owner/Admin through Content Management
+  - **Dashboard**: Simplified dashboard with KPIs (children count, pending invites, active chats), quick actions, and recent activity summary
+  - **Gestão das Crianças**: Dedicated module at /professional/children with tabs for assigned children, invitations, chat invites, and active chats - children are assigned by Owner/Admin only
+  - **TitiNauta Especialista**: Accessible via IconToolbar in top bar (not in sidebar), provides chat with kb_professional RAG system
+  - **Qualificação Profissional**: Unified module with 4 tabs (Material de Apoio, Artigos, Treinamentos, Cursos) with enhanced course card styling including image support, duration badges, and level indicators
   - **ChildAnalysis**: Real development milestone tracking with charts, PDF export, and timeline view via GET /api/milestones/child/:childId with TeamMember access verification
-  - **Simplified Navigation**: Sidebar reduced to 4 items (Boas Vindas, TitiNauta, Qualificação, Configurações)
+  - **Simplified Navigation**: Sidebar with 5 items (Boas Vindas, Dashboard, Gestão das Crianças, Qualificação, Configurações)
 - **Training Content System (Phase 2 - Complete)**: Full video-based training platform with 6 Sequelize models (ContentVideo, TrainingModule, TrainingLesson, UserContentProgress, ContentPricing, UserEnrollment). Public access to course browsing via `/educare-app/trainings` with optional authentication support. Admin/Owner management at `/educare-app/admin/trainings` and `/educare-app/owner/trainings`. Vimeo integration ready (awaiting VIMEO_ACCESS_TOKEN). Stripe one-time payment checkout implemented for paid courses.
 
 ### System Design Choices
