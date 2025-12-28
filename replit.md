@@ -1,7 +1,7 @@
 # Educare+ Platform
 
 ## Overview
-Educare+ is a digital platform designed to support early childhood development and maternal health monitoring. Its primary purpose is to connect parents, caregivers, educators, and healthcare professionals, facilitating collaborative care through interactive assessments, personalized guidance, and advanced communication tools. The platform incorporates an AI-powered assistant (TitiNauta), integrates with WhatsApp for remote engagement, and features a multi-level SaaS subscription model. The business vision is to become a leading solution in early childhood development and maternal health, leveraging AI and seamless communication to empower stakeholders and improve outcomes.
+Educare+ is a digital platform designed to support early childhood development and maternal health monitoring. It connects parents, caregivers, educators, and healthcare professionals to facilitate collaborative care through interactive assessments, personalized guidance, and advanced communication tools. The platform features an AI-powered assistant (TitiNauta), integrates with WhatsApp for remote engagement, and uses a multi-level SaaS subscription model. The vision is to become a leading solution in early childhood development and maternal health by leveraging AI and seamless communication to empower stakeholders and improve outcomes.
 
 ## User Preferences
 - Preferred communication style: Simple, everyday language.
@@ -17,27 +17,16 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 ### Technical Implementations
 - **Frontend**: React hooks, `@tanstack/react-query`, React Router, and `react-hook-form` with Zod for validation. Authentication uses a custom JWT-based context provider.
 - **Backend**: Node.js with Express.js, Sequelize ORM, and a layered MVC architecture. Authentication is JWT-based with access/refresh tokens and Row-Level Security (RLS). APIs are RESTful.
-- **AI/RAG Architecture**: A sophisticated, segmented Retrieval-Augmented Generation (RAG) system with an 11-phase architecture. This includes:
-    - **Segmented Knowledge Bases**: `kb_baby`, `kb_mother`, `kb_professional`.
-    - **Dual Ingestion & Routing**: Intelligent categorization and `dual-write` for KBs.
-    - **Enterprise Optimizations**: Neural re-ranking, confidence scoring with human escalation, intelligent chunking, data augmentation, context safety, and KB versioning.
-    - **Robustness**: Timeout management for file operations, detailed logging, and a feedback-driven auto-improvement system.
-    - **Legacy Management**: Controlled transition from legacy RAG with feature flags and rollback capabilities.
+- **AI/RAG Architecture**: A sophisticated, segmented Retrieval-Augmented Generation (RAG) system with an 11-phase architecture, including segmented knowledge bases (`kb_baby`, `kb_mother`, `kb_professional`), dual ingestion and routing, enterprise optimizations (neural re-ranking, confidence scoring, intelligent chunking, data augmentation, context safety, KB versioning), and robustness features.
 
 ### Feature Specifications
 - **Authentication**: JWT-based with comprehensive role-based access control (Owner, Admin, Professional, Parent).
-- **Knowledge Base Management**: Owner panel for managing documents across segmented KBs.
+- **Knowledge Base Management**: Owner panel for managing documents across segmented KBs, supporting cloud storage uploads (Google Drive, OneDrive).
 - **RAG Metrics & Monitoring**: Dashboard for owners displaying performance metrics and health checks.
-- **Content Management**: Admin/Owner system for creating, editing, and publishing dynamic content for the WelcomeHub.
-- **TitiNauta AI Assistant**: A masculine AI assistant with a multimodal chat interface, integrated RAG system, and quick topic access. Features include:
-    - **TitiNautaQuickAccess**: Dashboard card with quick topic icons (Desenvolvimento, Jornada do Bebê, Jornada da Mãe, Vacinas, Sono)
-    - **TitiNautaAssistant**: Dedicated chat page at `/educare-app/titinauta` with topic query parameter support
-    - **Context-aware greetings**: Topic-specific initial messages based on selected theme
-    - **Jornada do Desenvolvimento**: Separate journey experience at `/educare-app/jornada-desenvolvimento`
-- **External API**: 15 endpoints for integration with external systems like WhatsApp via n8n, secured by an API Key.
-- **Subscription Management**: Stripe integration for SaaS subscriptions.
-- **Baby Health Dashboard**: Real-time health monitoring for babies, including growth charts, sleep patterns, vaccine checklists (Brazilian SBP calendar), and daily summaries, visible only to parents.
-- **Dynamic Contextual FAQ**: A query-based FAQ system with dynamic ranking and contextual suggestions based on a child's development week (0-312 weeks), pre-populated with 77 seed FAQs.
+- **Content Management**: Admin/Owner system for creating, editing, and publishing dynamic content for the WelcomeHub, featuring a rich text editor with extensive formatting options.
+- **TitiNauta AI Assistant**: A masculine AI assistant with a multimodal chat interface, integrated RAG system, quick topic access, context-aware greetings, and a dedicated "Jornada do Desenvolvimento" experience.
+- **Baby Health Dashboard**: Real-time health monitoring for babies, including growth charts, sleep patterns, vaccine checklists, and daily summaries, visible only to parents.
+- **Dynamic Contextual FAQ**: A query-based FAQ system with dynamic ranking and contextual suggestions based on a child's development week (0-312 weeks).
 
 ### System Design Choices
 - **Scalability**: Designed for cloud deployment on Digital Ocean using multiple droplets, PostgreSQL, and Redis.
@@ -45,154 +34,15 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 - **Observability**: Extensive metrics and logging for RAG performance and system health.
 - **Controlled Rollout**: Feature flags enable safe, phased rollouts and easy rollback.
 
-## Recent Changes (December 2025)
-
-### Jornada do Desenvolvimento Hub (Dec 28)
-- **Menu Rename**: Changed sidebar from "Jornada TitiNauta" to "Jornada do Desenvolvimento"
-  - File: `src/components/educare-app/sidebar/ParentSidebar.tsx`
-- **New Hub Page**: Created choice page with 2 options
-  - File: `src/pages/educare-app/DevelopmentJourneyHub.tsx`
-  - Card 1: Educare+ Ch@t (WhatsApp) - Available ✅
-    - Shows 3-step flow: Open WhatsApp → TitiNauta asks questions → Get tips + activities
-    - Example snippet and CTA button to open WhatsApp
-  - Card 2: App Web - Em desenvolvimento
-    - Modal on click explaining web version is in progress
-    - CTA redirects to WhatsApp
-- **WhatsApp Integration**: 
-  - Phone: +55 91 99201-8206 (configured in DevelopmentJourneyHub.tsx)
-  - URL: `https://wa.me/5591992018206?text=Olá! Quero iniciar a Jornada do Desenvolvimento...`
-  - Logo: `public/assets/images/educare-chat-logo.png`
-  - Message URL-encoded for seamless link
-- **Route Updates**: 
-  - `/jornada-desenvolvimento` → DevelopmentJourneyHub (choice page)
-  - `/titinauta-journey` → TitiNautaJourney (actual journey, unchanged)
-  - File: `src/App.tsx` (updated imports and routes)
-- **Design**: Responsive cards (1 col mobile, 2 col desktop), WCAG-compliant, dark mode support
-
-### n8n API Reference Documentation (Dec 28)
-- **Complete API Reference**: Created comprehensive guide for all 8 n8n endpoints
-  - File: `educare-backend/docs/N8N_API_REFERENCE.md`
-  - URL Base: `https://1d35ed6a-d635-41d2-8d11-7db8db84ce29-00-28ylqytrll200.picard.replit.dev:3001`
-  - Includes: JSON configs, cURL examples, request/response formats
-  - Query parameters: week (not age_weeks) for content endpoints
-
-### n8n Workflow v4.1 Dual-Source Integration (Dec 21)
-- **Complete Dual-Source Support**: Evolution API + Chatwoot in single workflow
-  - File: `educare-backend/docs/n8n-workflow-template-v4.json`
-  - Source Detector: Identifies webhook origin (Chatwoot vs Evolution)
-  - Dual Extractors: Separate processing for each platform
-  - Chatwoot Extractor v4.1: Fixed attachment extraction from `conversation.messages[].attachments[]`
-  - Unified Data Structure: Common format for processing
-  - Smart Response Routing: Sends replies back to correct source
-  - Chatwoot API integration for message responses
-- **Documentation Updates**:
-  - `educare-backend/docs/WHATSAPP_INTEGRATION.md` - Added Chatwoot section
-  - `educare-backend/docs/N8N_VARIABLES_CONFIG.md` - Added Chatwoot variables
-
-### Design System & Brand Identity Documentation (Dec 21)
-- **Complete Design System PRD**: Created comprehensive design documentation
-  - File: `docs/DESIGN_SYSTEM.md` - Full brand identity, color palette, typography, components
-  - File: `docs/COLOR_SWATCHES_REFERENCE.md` - Quick reference for copy-paste values and templates
-- **Color Palette**: Complete system with light/dark modes
-  - Primary: Blue (#2563EB), Purple (#7C3AED), Green/Teal (#0D9488)
-  - Charts, forms, states all documented
-- **Typography System**: Complete scale from H1 to body text with Tailwind classes
-- **Component Guidelines**: Ready-to-use templates for buttons, cards, forms, badges
-- **Usage Guides**: For content creators to maintain brand consistency
-
-### Cloud Storage Integration for Knowledge Base (Dec 15)
-- **Google Drive & OneDrive Support**: Added ability to upload files from cloud storage to Knowledge Base
-  - Frontend component: `src/components/knowledge-base/CloudFileSelector.tsx`
-  - Backend routes: `educare-backend/src/routes/cloudRoutes.js`
-  - Backend controller: `educare-backend/src/controllers/cloudController.js`
-  - Integrated in: `src/pages/admin/KnowledgeBaseManagement.tsx`
-- **Flow**: Select cloud file → Download via backend → Convert to File → Upload to RAG pipeline
-- **Middleware**: Uses `verifyToken` and `isAdminOrOwner` from `../middlewares/auth`
-
-### Content Management Editor Improvements (Dec 15)
-- **Rich Text Editor**: Implemented professional blog editor with:
-  - Text formatting (Bold, Italic, Underline)
-  - Headings, Lists (ordered/unordered), Blockquotes
-  - Link insertion dialog with URL support
-  - Emoji picker (32 common emojis)
-  - Table insertion with configurable rows/columns
-  - Code blocks and preformatted text
-  - Character and word count
-  - Clear formatting button
-  - File: `src/components/editor/RichTextEditor.tsx`
-  - Integrated in: `src/pages/admin/ContentManagement.tsx`
-- **Navigation Fix** (Dec 15): Added `/educare-app/news` to allowed paths in `EducareAppLayout.tsx` for Owner/Admin users - fixed redirect issue when clicking news links
-
-### RAG System Fixes
-- **OpenAI SDK v6+ Compatibility**: Updated `runs.retrieve`, `runs.cancel` to use new syntax `(runId, { thread_id })` and `assistants.delete()` method
-- **Knowledge Base Ingestion**: Aligned frontend form to send required fields (`title`, `source_type`, `knowledge_category`) for successful document uploads
-- **Error Handling**: Backend returns HTTP 400 for validation errors, HTTP 503 for database connection issues (instead of generic 500)
-- **File Search**: End-to-end document indexing and RAG queries working with OpenAI File Search
-- **Hybrid Ingestion Timeouts** (Dec 12): Fixed infinite loading issue in document uploads by adding:
-  - Gemini OCR timeout: 120 seconds (2 min) per document
-  - Gemini Embedding timeout: 30 seconds per chunk
-  - Total ingestion timeout: 600 seconds (10 min) per upload
-  - Proper error handling for timeout scenarios
-  - File: `educare-backend/src/services/hybridIngestionService.js`
-- **Vite Proxy Configuration** (Dec 14): Fixed upload endpoint not connecting to backend by adding proxy in `vite.config.ts`:
-  - Configured `/api` proxy to `http://localhost:3001` 
-  - Enables frontend on port 5000 to communicate with backend on port 3001
-  - Fixed "upload stuck on first stage" issue
-  - File: `vite.config.ts`
-
-### Development Notes
-- **OpenAI SDK v6 Breaking Changes**: 
-  - `runs.retrieve(runId, { thread_id: threadId })` instead of `runs.retrieve(threadId, runId)`
-  - `runs.cancel(runId, { thread_id: threadId })` instead of `runs.cancel(threadId, runId)`
-  - `assistants.delete(assistantId)` instead of `assistants.del(assistantId)`
-- **Database User Limitation**: User `educareapp` lacks FK constraint rights - use `constraints: false` in Sequelize associations
-
 ## External Dependencies
 
-- **Database**: PostgreSQL (external server)
+- **Database**: PostgreSQL
 - **Automation Platform**: n8n Workflow (for WhatsApp ingestion, AI processing, context management, and response delivery)
 - **Messaging**: WhatsApp (via Evolution API)
 - **Payment Gateway**: Stripe
-- **AI/ML**: OpenAI API (EXCLUSIVE for File Search and LLM, specifically gpt-4o-mini)
-- **Vector Database**: Qdrant Cloud (via secrets `QDRANT_URL`, `QDRANT_API_KEY`)
+- **AI/ML**: OpenAI API (for File Search and LLM, specifically gpt-4o-mini)
+- **Vector Database**: Qdrant Cloud
 - **OCR/Embeddings**: Google Gemini (gemini-2.5-flash for OCR, text-embedding-004 for embeddings)
 - **Cloud Provider**: Digital Ocean
 - **UI Libraries**: Radix UI, Tailwind CSS (via shadcn/ui)
 - **Frontend State Management**: `@tanstack/react-query`
-
-## RAG Architecture (Hybrid System)
-
-### Storage Components
-| Component | Provider | Purpose |
-|-----------|----------|---------|
-| Vector Store | Qdrant Cloud | Semantic search with 768-dim embeddings |
-| Metadata | PostgreSQL | Document metadata and knowledge bases |
-| File Search | OpenAI Files | Assistant-based retrieval |
-
-### Collection: `educare_knowledge`
-- **Dimensão**: 768 (Gemini text-embedding-004)
-- **Métrica**: Cosine Similarity
-- **Índices**: knowledge_category, source_type, domain
-
-### Ingestion Pipeline
-```
-Upload → Gemini OCR (2.5-flash) → Chunking (1000 chars) → Gemini Embedding → Qdrant Upsert
-                                                                           ↓
-                                                                    OpenAI File Search
-```
-
-### Timeouts
-- OCR: 120s | Embedding: 30s/chunk | Total: 600s
-
-### Testing Endpoints
-- `GET /api/rag/hybrid/status` - Verifica provedores
-- `GET /api/rag/hybrid/health` - Health check
-- `POST /api/rag/hybrid/query` - Query híbrida
-
-### Cost Estimates (per operation)
-- **Ingestão (10 páginas)**: ~$0.0015
-- **Query RAG**: ~$0.001
-
-### Documentation
-- **Completa**: `docs/RAG_ARCHITECTURE_COMPLETE.md`
-- **Backend Docs**: `educare-backend/docs/`
