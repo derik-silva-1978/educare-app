@@ -15,8 +15,7 @@ import { ProfessionalChatInterface } from '@/components/educare-app/chat/Profess
 import ChildIndicatorsPanel from '@/components/educare-app/professional/ChildIndicatorsPanel';
 import { 
   Users, UserPlus, ClipboardList, FileText, 
-  Clock, CheckCircle, XCircle, Loader2, MessageCircle, Mail, RefreshCw, BarChart2,
-  Sparkles, BookOpen, GraduationCap, ArrowRight
+  Clock, CheckCircle, XCircle, Loader2, MessageCircle, Mail, RefreshCw, BarChart2
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -126,64 +125,6 @@ const ProfessionalDashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="group hover:shadow-md transition-all cursor-pointer border-l-4 border-l-purple-500" onClick={() => navigate('/educare-app/professional/titinauta')}>
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-lg bg-purple-100 text-purple-600 group-hover:bg-purple-200 transition-colors">
-                  <Sparkles className="h-6 w-6" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">TitiNauta Especialista</h3>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Assistente com conhecimento especializado
-                  </p>
-                  <div className="flex items-center text-purple-600 text-sm font-medium">
-                    Acessar <ArrowRight className="h-4 w-4 ml-1" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="group hover:shadow-md transition-all cursor-pointer border-l-4 border-l-blue-500" onClick={() => navigate('/educare-app/professional/resources')}>
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-lg bg-blue-100 text-blue-600 group-hover:bg-blue-200 transition-colors">
-                  <BookOpen className="h-6 w-6" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Recursos e Qualificação</h3>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Materiais, notícias e conteúdos
-                  </p>
-                  <div className="flex items-center text-blue-600 text-sm font-medium">
-                    Acessar <ArrowRight className="h-4 w-4 ml-1" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="group hover:shadow-md transition-all cursor-pointer border-l-4 border-l-green-500" onClick={() => navigate('/educare-app/trainings')}>
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-lg bg-green-100 text-green-600 group-hover:bg-green-200 transition-colors">
-                  <GraduationCap className="h-6 w-6" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Treinamentos</h3>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Cursos e capacitações
-                  </p>
-                  <div className="flex items-center text-green-600 text-sm font-medium">
-                    Acessar <ArrowRight className="h-4 w-4 ml-1" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto">

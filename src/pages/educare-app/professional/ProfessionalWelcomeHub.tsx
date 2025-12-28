@@ -19,7 +19,7 @@ const ProfessionalWelcomeHub: React.FC = () => {
       <div className="min-h-[calc(100vh-4rem)] bg-background">
         <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
           <div className="container mx-auto px-4 py-3 max-w-6xl flex justify-end">
-            <IconToolbar messageCount={messageCount} />
+            <IconToolbar messageCount={messageCount} isProfessional={true} />
           </div>
         </div>
 

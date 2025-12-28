@@ -7,9 +7,79 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   BookOpen, Video, FileText, GraduationCap, 
-  ExternalLink, Clock, Newspaper, Loader2
+  ExternalLink, Clock, Newspaper, Loader2, Play, Lock
 } from 'lucide-react';
 import { useContentItems, ContentItem } from '@/hooks/useContentItems';
+
+interface MockCourse {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  level: 'Iniciante' | 'Intermediário' | 'Avançado';
+  modules: number;
+  lessons: number;
+  instructor: string;
+  image_url: string;
+  vimeo_showcase_id?: string;
+  status: 'available' | 'coming_soon' | 'locked';
+  price?: number;
+}
+
+const mockCourses: MockCourse[] = [
+  {
+    id: 'course-1',
+    title: 'Desenvolvimento Infantil nos Primeiros 1000 Dias',
+    description: 'Curso completo sobre os marcos do desenvolvimento e intervenção precoce. Aborda aspectos motores, cognitivos, linguísticos e socioemocionais.',
+    duration: '8 horas',
+    level: 'Intermediário',
+    modules: 6,
+    lessons: 24,
+    instructor: 'Dra. Maria Silva',
+    image_url: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&h=250&fit=crop',
+    vimeo_showcase_id: 'showcase_123456',
+    status: 'available',
+  },
+  {
+    id: 'course-2',
+    title: 'Avaliação do Desenvolvimento Neuropsicomotor',
+    description: 'Aprenda a aplicar escalas e protocolos de avaliação do desenvolvimento. Inclui Denver II, AIMS e Bayley.',
+    duration: '12 horas',
+    level: 'Avançado',
+    modules: 8,
+    lessons: 32,
+    instructor: 'Dr. Pedro Santos',
+    image_url: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=250&fit=crop',
+    vimeo_showcase_id: 'showcase_234567',
+    status: 'coming_soon',
+  },
+  {
+    id: 'course-3',
+    title: 'Estimulação Sensorial e Motora',
+    description: 'Técnicas práticas de estimulação para bebês e crianças pequenas. Atividades baseadas em evidências científicas.',
+    duration: '6 horas',
+    level: 'Iniciante',
+    modules: 4,
+    lessons: 16,
+    instructor: 'Dra. Ana Costa',
+    image_url: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=400&h=250&fit=crop',
+    vimeo_showcase_id: 'showcase_345678',
+    status: 'coming_soon',
+  },
+  {
+    id: 'course-4',
+    title: 'Comunicação com Famílias: Abordagem Centrada na Família',
+    description: 'Desenvolva habilidades de comunicação empática e orientação familiar. Estratégias para engajar cuidadores no processo terapêutico.',
+    duration: '4 horas',
+    level: 'Iniciante',
+    modules: 3,
+    lessons: 12,
+    instructor: 'Dra. Carla Mendes',
+    image_url: 'https://images.unsplash.com/photo-1491013516836-7db643ee125a?w=400&h=250&fit=crop',
+    vimeo_showcase_id: 'showcase_456789',
+    status: 'available',
+  },
+];
 
 const staticResourceItems = [
   {
@@ -356,31 +426,92 @@ const QualificacaoProfissional: React.FC = () => {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <GraduationCap className="h-5 w-5 text-primary" />
-                  Cursos
+                  Cursos Profissionais
                 </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Cursos especializados em desenvolvimento infantil com vídeo-aulas via Vimeo
+                </p>
               </CardHeader>
             </Card>
-            {courseLoading ? (
-              <LoadingSkeleton />
-            ) : courseItems.length > 0 ? (
-              courseItems.map((item) => (
-                <TrainingCard key={item.id} item={item} />
-              ))
-            ) : (
-              <Card className="border-dashed">
-                <CardContent className="py-12">
-                  <div className="text-center">
-                    <GraduationCap className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                    <p className="text-muted-foreground font-medium">
-                      Nenhum curso disponível no momento.
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Os cursos são gerenciados pelo administrador.
-                    </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {mockCourses.map((course) => (
+                <Card key={course.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
+                  <div className="relative">
+                    <div className="aspect-video overflow-hidden bg-muted">
+                      <img 
+                        src={course.image_url} 
+                        alt={course.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    {course.status === 'coming_soon' && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-sm px-4 py-1.5">
+                          Em Breve
+                        </Badge>
+                      </div>
+                    )}
+                    {course.status === 'locked' && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                        <Lock className="h-10 w-10 text-white/80" />
+                      </div>
+                    )}
+                    {course.status === 'available' && (
+                      <div className="absolute bottom-3 right-3">
+                        <Button size="sm" className="bg-primary/90 hover:bg-primary shadow-lg gap-1.5">
+                          <Play className="h-3.5 w-3.5" />
+                          Assistir
+                        </Button>
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      <Badge 
+                        className={`font-medium ${
+                          course.level === 'Iniciante' ? 'bg-green-600' : 
+                          course.level === 'Intermediário' ? 'bg-blue-600' : 'bg-purple-600'
+                        } text-white`}
+                      >
+                        {course.level}
+                      </Badge>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                  <CardContent className="p-5">
+                    <h3 className="font-bold text-lg mb-2 text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                      {course.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {course.description}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-4">
+                      <span className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1 rounded-full">
+                        <Clock className="h-3.5 w-3.5" />
+                        {course.duration}
+                      </span>
+                      <span className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1 rounded-full">
+                        <Video className="h-3.5 w-3.5" />
+                        {course.lessons} aulas
+                      </span>
+                      <span className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1 rounded-full">
+                        <BookOpen className="h-3.5 w-3.5" />
+                        {course.modules} módulos
+                      </span>
+                    </div>
+                    <div className="pt-4 border-t flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">
+                        <span className="font-medium text-foreground">{course.instructor}</span>
+                      </p>
+                      {course.vimeo_showcase_id && (
+                        <Badge variant="outline" className="text-xs gap-1">
+                          <Video className="h-3 w-3" />
+                          Vimeo
+                        </Badge>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </TabsContent>
         </Tabs>
       </div>

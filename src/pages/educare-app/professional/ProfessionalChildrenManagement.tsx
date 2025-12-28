@@ -15,7 +15,7 @@ import { IconToolbar } from '@/components/educare-app/welcome';
 import { 
   Users, UserPlus, Clock, CheckCircle, XCircle, Loader2, 
   MessageCircle, Mail, RefreshCw, BarChart2, ClipboardList,
-  Baby, ArrowLeft
+  Baby, ArrowLeft, Calendar, Activity
 } from 'lucide-react';
 
 interface SelectedChild {
@@ -23,6 +23,33 @@ interface SelectedChild {
   name: string;
   birthDate: string;
 }
+
+const calculateAge = (birthDate: string): string => {
+  if (!birthDate) return 'Idade não informada';
+  const birth = new Date(birthDate);
+  const today = new Date();
+  const diffMs = today.getTime() - birth.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 30) {
+    return `${diffDays} dias`;
+  } else if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30);
+    return `${months} ${months === 1 ? 'mês' : 'meses'}`;
+  } else {
+    const years = Math.floor(diffDays / 365);
+    const remainingMonths = Math.floor((diffDays % 365) / 30);
+    if (remainingMonths > 0) {
+      return `${years} ${years === 1 ? 'ano' : 'anos'} e ${remainingMonths} ${remainingMonths === 1 ? 'mês' : 'meses'}`;
+    }
+    return `${years} ${years === 1 ? 'ano' : 'anos'}`;
+  }
+};
+
+const formatBirthDate = (birthDate: string): string => {
+  if (!birthDate) return 'Não informada';
+  return new Date(birthDate).toLocaleDateString('pt-BR');
+};
 
 const ProfessionalChildrenManagement: React.FC = () => {
   const navigate = useNavigate();
@@ -70,7 +97,7 @@ const ProfessionalChildrenManagement: React.FC = () => {
               <ArrowLeft className="h-4 w-4" />
               Voltar
             </Button>
-            <IconToolbar messageCount={messageCount} />
+            <IconToolbar messageCount={messageCount} isProfessional={true} />
           </div>
         </div>
 
@@ -166,27 +193,46 @@ const ProfessionalChildrenManagement: React.FC = () => {
                   ) : assignedChildren.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {assignedChildren.map((child) => (
-                        <Card key={child.childId} className="overflow-hidden hover:shadow-md transition-shadow">
-                          <CardHeader className="bg-primary/5 pb-2">
-                            <CardTitle className="text-md font-medium flex items-center gap-2">
-                              <Baby className="h-4 w-4 text-primary" />
-                              {child.childName}
-                            </CardTitle>
-                            <CardDescription>
+                        <Card key={child.childId} className="overflow-hidden hover:shadow-lg transition-all">
+                          <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 pb-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary/20 rounded-full">
+                                  <Baby className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                  <CardTitle className="text-lg font-semibold text-foreground">
+                                    {child.childName}
+                                  </CardTitle>
+                                  <p className="text-sm text-muted-foreground">
+                                    {calculateAge(child.birthDate)}
+                                  </p>
+                                </div>
+                              </div>
                               <Badge className="bg-green-600 hover:bg-green-700 text-white font-medium">
-                                Acompanhamento Ativo
+                                Ativo
                               </Badge>
-                            </CardDescription>
+                            </div>
                           </CardHeader>
                           <CardContent className="pt-4">
                             <div className="space-y-3">
-                              <div className="flex justify-between items-center text-sm">
-                                <span className="text-muted-foreground">Associado em:</span>
-                                <span className="font-medium">
-                                  {new Date(child.createdAt).toLocaleDateString('pt-BR')}
-                                </span>
+                              <div className="grid grid-cols-2 gap-3 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <p className="text-xs text-muted-foreground">Nascimento</p>
+                                    <p className="font-medium">{formatBirthDate(child.birthDate)}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Activity className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <p className="text-xs text-muted-foreground">Acompanhando desde</p>
+                                    <p className="font-medium">{new Date(child.createdAt).toLocaleDateString('pt-BR')}</p>
+                                  </div>
+                                </div>
                               </div>
-                              <div className="flex flex-wrap gap-2 pt-2 border-t">
+                              <div className="flex flex-wrap gap-2 pt-3 border-t">
                                 <Button 
                                   variant="default" 
                                   size="sm"

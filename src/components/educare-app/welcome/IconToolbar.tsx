@@ -29,10 +29,12 @@ import RAGProgressBar from '@/components/educare-app/RAGProgressBar';
 
 interface IconToolbarProps {
   messageCount?: number;
+  isProfessional?: boolean;
 }
 
 const IconToolbar: React.FC<IconToolbarProps> = ({
   messageCount = 0,
+  isProfessional = false,
 }) => {
   const { resolvedTheme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -51,8 +53,15 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
   const [donationEmail, setDonationEmail] = useState('');
   const [isProcessingDonation, setIsProcessingDonation] = useState(false);
   
+  const getInitialMessage = () => {
+    if (isProfessional) {
+      return 'Olá! Sou o TitiNauta Especialista, seu assistente de IA para profissionais de saúde. Posso ajudar com protocolos clínicos, orientações de acompanhamento, marcos de desenvolvimento e práticas baseadas em evidências para a primeira infância.';
+    }
+    return 'Olá! Sou o TitiNauta, o assistente de IA do Educare+. Posso responder suas dúvidas sobre desenvolvimento infantil, estimulação, marcos de desenvolvimento e muito mais!';
+  };
+
   const [chatMessages, setChatMessages] = useState<Array<{role: 'assistant' | 'user', content: string}>>([
-    { role: 'assistant', content: 'Olá! Sou o TitiNauta, o assistente de IA do Educare+. Posso responder suas dúvidas sobre desenvolvimento infantil, estimulação, marcos de desenvolvimento e muito mais!' }
+    { role: 'assistant', content: getInitialMessage() }
   ]);
   const [chatInput, setChatInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -139,15 +148,16 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
     setRagError('');
     
     try {
+      const moduleType = isProfessional ? 'professional' : 'baby';
       const response = await ragService.askQuestion(userMessage, undefined, {
-        module_type: 'baby',
+        module_type: moduleType,
         onProgress: (status) => setRagStatus(status)
       });
 
       if (response.success) {
         setChatMessages(prev => [...prev, { role: 'assistant', content: response.answer }]);
       } else {
-        throw new Error('Falha ao obter resposta do TitiNauta');
+        throw new Error(isProfessional ? 'Falha ao obter resposta do TitiNauta Especialista' : 'Falha ao obter resposta do TitiNauta');
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Erro ao processar pergunta. Tente novamente.';
@@ -215,15 +225,15 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
           <Coffee className="h-5 w-5 text-amber-700" />
         </Button>
 
-        {/* 5. Onboarding Chat */}
+        {/* 5. TitiNauta Chat (Especialista for professionals) */}
         <Button
           variant="ghost"
           size="icon"
           className="h-9 w-9"
-          title="Assistente de boas-vindas"
+          title={isProfessional ? "TitiNauta Especialista" : "TitiNauta - Assistente"}
           onClick={() => setShowOnboardingChat(true)}
         >
-          <Bot className="h-5 w-5 text-purple-500" />
+          <Bot className={`h-5 w-5 ${isProfessional ? 'text-indigo-600' : 'text-purple-500'}`} />
         </Button>
 
         {/* 6. Profile with Photo */}
@@ -407,11 +417,13 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
         <DialogContent className="sm:max-w-lg h-[600px] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-purple-500" />
-              TitiNauta - Assistente de IA
+              <Bot className={`h-5 w-5 ${isProfessional ? 'text-indigo-600' : 'text-purple-500'}`} />
+              {isProfessional ? 'TitiNauta Especialista' : 'TitiNauta - Assistente de IA'}
             </DialogTitle>
             <DialogDescription>
-              Pergunte sobre desenvolvimento infantil, estimulação e marcos de desenvolvimento
+              {isProfessional 
+                ? 'Consulte sobre protocolos clínicos, marcos de desenvolvimento e práticas baseadas em evidências'
+                : 'Pergunte sobre desenvolvimento infantil, estimulação e marcos de desenvolvimento'}
             </DialogDescription>
           </DialogHeader>
           
