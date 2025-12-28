@@ -223,18 +223,13 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
     ];
   }
 
-  // Adicionar itens específicos para profissional
+  // Adicionar itens específicos para profissional - Simplificado mas funcional
   if (userRole === 'professional') {
     return [
       {
-        title: "Dashboard",
-        url: "/educare-app/professional/dashboard",
+        title: "Boas Vindas",
+        url: "/educare-app/professional/welcome",
         icon: Home,
-      },
-      {
-        title: "Minhas Crianças",
-        url: "/educare-app/professional/children",
-        icon: Baby,
       },
       {
         title: "TitiNauta Especialista",
@@ -242,13 +237,8 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         icon: Bot,
       },
       {
-        title: "Recursos e Qualificação",
-        url: "/educare-app/professional/resources",
-        icon: BookOpen,
-      },
-      {
-        title: "Treinamentos",
-        url: "/educare-app/trainings",
+        title: "Qualificação Profissional",
+        url: "/educare-app/professional/qualificacao",
         icon: GraduationCap,
       },
       {

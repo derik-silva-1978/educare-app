@@ -33,6 +33,7 @@ import EducareAppLayout from "./pages/educare-app/EducareAppLayout";
 import AprendizadoLanding from "./pages/educare-app/AprendizadoLanding";
 import WhatsAppJourneyBotPage from "./pages/WhatsAppJourneyBotPage";
 import ProfessionalWelcomeHub from "./pages/educare-app/professional/ProfessionalWelcomeHub";
+import QualificacaoProfissional from "./pages/educare-app/professional/QualificacaoProfissional";
 
 // Admin Pages
 import OwnerDashboard from "./pages/admin/OwnerDashboard";
@@ -154,6 +155,11 @@ const App = () => (
                 <Route path="professional/resources" element={
                   <ProfessionalOnlyGuard>
                     <ProfessionalResourcesHub />
+                  </ProfessionalOnlyGuard>
+                } />
+                <Route path="professional/qualificacao" element={
+                  <ProfessionalOnlyGuard>
+                    <QualificacaoProfissional />
                   </ProfessionalOnlyGuard>
                 } />
                 <Route path="trainings" element={<TrainingsPage />} />

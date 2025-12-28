@@ -32,11 +32,12 @@ Content is dynamically loaded and diversified with fallback images. Audience fil
 - **Baby Health Dashboard**: Real-time health monitoring for babies, including growth charts, sleep patterns, vaccine checklists, and daily summaries, visible only to parents.
 - **Dynamic Contextual FAQ**: A query-based FAQ system with dynamic ranking and contextual suggestions based on a child's development week (0-312 weeks).
 - **Professional Portal**: Comprehensive portal for healthcare professionals including:
-  - **ProfessionalWelcomeHub**: Landing page with audience-filtered news and trainings
-  - **Dashboard**: Quick-access cards and professional metrics
-  - **TitiNauta Specialist**: Chat with kb_professional RAG system
-  - **Resources Hub**: CMS-powered news and trainings for professionals
+  - **Boas Vindas (ProfessionalWelcomeHub)**: Landing page with "Gestão das Crianças" section showing only assigned children with indicators panel, plus quick-access cards for TitiNauta and Qualificação
+  - **Gestão das Crianças**: Tabs for assigned children, invitations, chat invites, and active chats - children are assigned by Owner/Admin only
+  - **TitiNauta Especialista**: Chat with kb_professional RAG system
+  - **Qualificação Profissional**: Unified module with 4 tabs (Material de Apoio, Artigos, Treinamentos, Cursos) replacing redundant resource pages
   - **ChildAnalysis**: Real development milestone tracking with charts, PDF export, and timeline view via GET /api/milestones/child/:childId with TeamMember access verification
+  - **Simplified Navigation**: Sidebar reduced to 4 items (Boas Vindas, TitiNauta, Qualificação, Configurações)
 - **Training Content System (Phase 2 - Complete)**: Full video-based training platform with 6 Sequelize models (ContentVideo, TrainingModule, TrainingLesson, UserContentProgress, ContentPricing, UserEnrollment). Public access to course browsing via `/educare-app/trainings` with optional authentication support. Admin/Owner management at `/educare-app/admin/trainings` and `/educare-app/owner/trainings`. Vimeo integration ready (awaiting VIMEO_ACCESS_TOKEN). Stripe one-time payment checkout implemented for paid courses.
 
 ### System Design Choices
