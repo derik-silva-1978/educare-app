@@ -1,63 +1,57 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useNavigate } from 'react-router-dom';
 import { useProfessionalChildren } from '@/hooks/useProfessionalChildren';
-import { useProfessionalTeamChats } from '@/hooks/useProfessionalTeamChats';
 import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 import { useTeamInvites } from '@/hooks/useTeamInvites';
-import { ProfessionalTeamChat } from '@/components/educare-app/chat/ProfessionalTeamChat';
-import { ProfessionalChatInterface } from '@/components/educare-app/chat/ProfessionalChatInterface';
-import ChildIndicatorsPanel from '@/components/educare-app/professional/ChildIndicatorsPanel';
+import { useContentItems } from '@/hooks/useContentItems';
 import { 
-  Users, UserPlus, ClipboardList, FileText, 
-  Clock, CheckCircle, XCircle, Loader2, MessageCircle, Mail, RefreshCw, BarChart2
+  Users, UserPlus, Clock, ArrowRight, Baby, GraduationCap, Calendar, Activity, TrendingUp
 } from 'lucide-react';
-import { toast } from 'sonner';
 
-interface SelectedChild {
-  id: string;
-  name: string;
-  birthDate: string;
-}
+const calculateAge = (birthDate: string): string => {
+  const birth = new Date(birthDate);
+  const now = new Date();
+  const diffMs = now.getTime() - birth.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffDays < 30) {
+    return `${diffDays} dias`;
+  } else if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30);
+    return `${months} ${months === 1 ? 'mês' : 'meses'}`;
+  } else {
+    const years = Math.floor(diffDays / 365);
+    const remainingMonths = Math.floor((diffDays % 365) / 30);
+    if (remainingMonths > 0) {
+      return `${years} ${years === 1 ? 'ano' : 'anos'} e ${remainingMonths} ${remainingMonths === 1 ? 'mês' : 'meses'}`;
+    }
+    return `${years} ${years === 1 ? 'ano' : 'anos'}`;
+  }
+};
 
 const ProfessionalDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('assigned');
-  const [selectedChild, setSelectedChild] = useState<SelectedChild | null>(null);
-  const [showIndicatorsSheet, setShowIndicatorsSheet] = useState(false);
   
-  // Hook para convites de chat
-  const {
-    receivedInvites,
-    pendingCount: chatInvitesPendingCount,
-    isLoading: chatInvitesLoading,
-    error: chatInvitesError,
-    acceptInvite: acceptChatInvite,
-    declineInvite: declineChatInvite,
-    refresh: refreshChatInvites
-  } = useTeamInvites();
-
+  const { pendingCount: chatInvitesPendingCount } = useTeamInvites();
   const { childrenAccess, isLoading } = useProfessionalChildren();
-  const { teamChats, isLoading: teamChatsLoading, hasTeamChats } = useProfessionalTeamChats();
   const { user } = useAuth();
+  
+  const { items: qualificationItems, isLoading: qualificationLoading } = useContentItems({ 
+    audience: 'professionals' 
+  });
+  
+  const totalQualificationContent = qualificationItems.filter(
+    item => item.type === 'training' || item.type === 'course'
+  ).length;
   
   const assignedChildren = childrenAccess.filter(child => child.status === 'approved');
   const pendingInvitations = childrenAccess.filter(child => child.status === 'pending');
 
-  // Automaticamente ativar a aba "Chats Ativos" quando há chats disponíveis
-  React.useEffect(() => {
-    if (hasTeamChats && !teamChatsLoading && activeTab === 'assigned' && assignedChildren.length === 0) {
-      console.log('🔄 Ativando automaticamente a aba "Chats Ativos" pois há chats disponíveis');
-      setActiveTab('active-chats');
-    }
-  }, [hasTeamChats, teamChatsLoading, activeTab, assignedChildren.length]);
-
-
+  const recentChildren = assignedChildren.slice(0, 3);
   
   return (
     <>
@@ -66,354 +60,220 @@ const ProfessionalDashboard: React.FC = () => {
       </Helmet>
       
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Dashboard Profissional</h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Bem-vindo, {user?.name || 'Profissional'}
+            </p>
+          </div>
           <Button onClick={() => navigate('/educare-app/settings')} variant="outline">
-            Atualizar Perfil
+            Configurações
           </Button>
         </div>
-        
-        <Card className="bg-gradient-to-br from-blue-50 to-indigo-50">
-          <CardContent className="pt-6">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-indigo-900">Bem-vindo, {user?.name || 'Profissional'}</h2>
-              <p className="text-indigo-700">
-                Como profissional, você pode acessar dados de crianças cujos responsáveis te convidaram para acompanhamento.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="bg-blue-100 p-2 rounded-full mb-2">
-                      <Users className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <h3 className="font-medium">Crianças</h3>
-                    <span className="text-2xl font-bold text-blue-600">{assignedChildren.length}</span>
-                    <p className="text-xs text-slate-600 mt-1">Sob seu acompanhamento</p>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="bg-amber-100 p-2 rounded-full mb-2">
-                      <Clock className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <h3 className="font-medium">Convites</h3>
-                    <span className="text-2xl font-bold text-amber-600">{pendingInvitations.length}</span>
-                    <p className="text-xs text-slate-600 mt-1">Aguardando resposta</p>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="bg-green-100 p-2 rounded-full mb-2">
-                      <Mail className="h-5 w-5 text-green-600" />
-                    </div>
-                    <h3 className="font-medium">Convites de Chat</h3>
-                    <span className="text-2xl font-bold text-green-600">{chatInvitesPendingCount}</span>
-                    <p className="text-xs text-slate-600 mt-1">Pendentes</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </CardContent>
-        </Card>
 
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto">
-            <TabsTrigger value="assigned" className="text-xs sm:text-sm py-2">Crianças</TabsTrigger>
-            <TabsTrigger value="invitations" className="text-xs sm:text-sm py-2">Convites</TabsTrigger>
-            <TabsTrigger value="chat-invites" className="text-xs sm:text-sm py-2">Chat Convites</TabsTrigger>
-            <TabsTrigger value="active-chats" className="text-xs sm:text-sm py-2">Chats Ativos</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="assigned" className="space-y-4 mt-4">
-            {isLoading ? (
-              <div className="flex justify-center items-center h-40">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : assignedChildren.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {assignedChildren.map((child) => (
-                  <Card key={child.childId} className="overflow-hidden">
-                    <CardHeader className="bg-blue-50 pb-2">
-                      <CardTitle className="text-md font-medium">{child.childName}</CardTitle>
-                      <CardDescription>
-                        <Badge className="bg-green-600">Acompanhamento Ativo</Badge>
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Associado em:</span>
-                          <span className="text-sm text-muted-foreground">
-                            {new Date(child.createdAt).toLocaleDateString('pt-BR')}
-                          </span>
-                        </div>
-                        <div className="space-x-2 flex justify-end flex-wrap gap-2">
-                          <Button 
-                            variant="default" 
-                            size="sm"
-                            onClick={() => {
-                              setSelectedChild({
-                                id: child.childId,
-                                name: child.childName,
-                                birthDate: child.birthDate
-                              });
-                              setShowIndicatorsSheet(true);
-                            }}
-                          >
-                            <BarChart2 className="h-4 w-4 mr-1" />
-                            Indicadores
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => navigate(`/educare-app/professional/child/${child.childId}/analysis`)}
-                          >
-                            <ClipboardList className="h-4 w-4 mr-1" />
-                            Análises
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => navigate(`/educare-app/professional/child/${child.childId}/messages`)}
-                          >
-                            <MessageCircle className="h-4 w-4 mr-1" />
-                            Mensagens
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <Users className="h-12 w-12 mx-auto text-slate-400 mb-2" />
-                  <h3 className="text-lg font-medium mb-2">Nenhuma criança atribuída</h3>
-                  <p className="text-sm text-slate-500 mb-6">
-                    Você ainda não foi adicionado ao acompanhamento de nenhuma criança.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="invitations" className="space-y-4 mt-4">
-            {isLoading ? (
-              <div className="flex justify-center items-center h-40">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : pendingInvitations.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {pendingInvitations.map((invite) => (
-                  <Card key={invite.childId}>
-                    <CardHeader className="bg-amber-50 pb-2">
-                      <CardTitle className="text-md font-medium">{invite.childName}</CardTitle>
-                      <CardDescription>
-                        <Badge className="bg-amber-500">Convite Pendente</Badge>
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm">Recebido em:</span>
-                          <span className="text-sm text-muted-foreground">
-                            {new Date(invite.createdAt).toLocaleDateString('pt-BR')}
-                          </span>
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            className="border-green-600 text-green-600 hover:bg-green-50"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Aceitar
-                          </Button>
-                          <Button 
-                            size="sm"
-                            variant="outline" 
-                            className="border-red-600 text-red-600 hover:bg-red-50"
-                          >
-                            <XCircle className="h-4 w-4 mr-1" />
-                            Recusar
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <UserPlus className="h-12 w-12 mx-auto text-slate-400 mb-2" />
-                  <h3 className="text-lg font-medium mb-2">Nenhum convite pendente</h3>
-                  <p className="text-sm text-slate-500">
-                    Você não possui convites pendentes de responsáveis.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="chat-invites" className="space-y-4 mt-4">
-            {chatInvitesLoading ? (
-              <div className="flex justify-center items-center h-40">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            ) : receivedInvites.length > 0 ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Convites de Chat Recebidos</h3>
-                  <Button 
-                    onClick={refreshChatInvites} 
-                    variant="outline" 
-                    size="sm"
-                    disabled={chatInvitesLoading}
-                  >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${chatInvitesLoading ? 'animate-spin' : ''}`} />
-                    Atualizar
-                  </Button>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm font-medium">Crianças Ativas</p>
+                  <p className="text-3xl font-bold mt-1">{assignedChildren.length}</p>
                 </div>
-                
-                {receivedInvites.map((invite) => (
-                  <Card key={invite.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <MessageCircle className="h-5 w-5 text-blue-600" />
-                            <h4 className="font-medium">{invite.team_name}</h4>
-                            <Badge 
-                              variant={invite.status === 'invited' ? 'secondary' : 'default'}
-                              className="text-xs"
-                            >
-                              {invite.status === 'invited' ? 'Pendente' : 
-                                invite.status === 'active' ? 'Aceito' : 'Recusado'}
-                            </Badge>
-                          </div>
-                          
-                          <p className="text-sm text-slate-600 mb-2">
-                            <strong>Convidado por:</strong> {invite.invited_by_name}
-                          </p>
-                          
-                          {invite.team_description && (
-                            <p className="text-sm text-slate-600 mb-3 p-2 bg-slate-50 rounded">
-                              <strong>Descrição:</strong> {invite.team_description}
-                            </p>
-                          )}
-                          
-                          <p className="text-xs text-slate-500">
-                            Enviado em {new Date(invite.created_at).toLocaleDateString('pt-BR', {
-                              day: '2-digit',
-                              month: '2-digit', 
-                              year: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
+                <div className="p-3 bg-white/20 rounded-full">
+                  <Baby className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white border-0">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-amber-100 text-sm font-medium">Convites Pendentes</p>
+                  <p className="text-3xl font-bold mt-1">{pendingInvitations.length}</p>
+                </div>
+                <div className="p-3 bg-white/20 rounded-full">
+                  <UserPlus className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-100 text-sm font-medium">Convites de Equipe</p>
+                  <p className="text-3xl font-bold mt-1">{chatInvitesPendingCount}</p>
+                </div>
+                <div className="p-3 bg-white/20 rounded-full">
+                  <Users className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white border-0">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-indigo-100 text-sm font-medium">Qualificação</p>
+                  <p className="text-3xl font-bold mt-1">{totalQualificationContent}</p>
+                  <p className="text-xs text-indigo-100 mt-0.5">Conteúdos disponíveis</p>
+                </div>
+                <div className="p-3 bg-white/20 rounded-full">
+                  <GraduationCap className="h-6 w-6" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Baby className="h-5 w-5 text-primary" />
+                  Crianças em Acompanhamento
+                </CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="gap-1 text-primary"
+                  onClick={() => navigate('/educare-app/professional/children')}
+                >
+                  Ver Todas
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+              <CardDescription>Suas crianças mais recentes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+              ) : recentChildren.length > 0 ? (
+                <div className="space-y-3">
+                  {recentChildren.map((child) => (
+                    <div
+                      key={child.childId}
+                      className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => navigate('/educare-app/professional/children')}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-full">
+                          <Baby className="h-4 w-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-foreground">{child.childName}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {calculateAge(child.birthDate)}
                           </p>
                         </div>
-                        
-                        {invite.status === 'invited' && (
-                          <div className="flex gap-2 ml-4">
-                            <Button
-                              onClick={() => acceptChatInvite(invite.id)}
-                              size="sm"
-                              className="bg-green-600 hover:bg-green-700"
-                              disabled={chatInvitesLoading}
-                            >
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              Aceitar
-                            </Button>
-                            <Button
-                              onClick={() => declineChatInvite(invite.id)}
-                              size="sm"
-                              variant="outline"
-                              className="border-red-600 text-red-600 hover:bg-red-50"
-                              disabled={chatInvitesLoading}
-                            >
-                              <XCircle className="h-4 w-4 mr-1" />
-                              Recusar
-                            </Button>
-                          </div>
-                        )}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <Mail className="h-12 w-12 mx-auto text-slate-400 mb-2" />
-                  <h3 className="text-lg font-medium mb-2">Nenhum convite de chat</h3>
-                  <p className="text-sm text-slate-500">
-                    Você não possui convites de chat pendentes.
+                      <Badge variant="secondary" className="bg-green-100 text-green-700">
+                        Ativo
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+                  <p className="text-muted-foreground">Nenhuma criança atribuída ainda</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    As crianças serão adicionadas quando os responsáveis enviarem convites
                   </p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="active-chats" className="space-y-4 mt-4">
-            {teamChatsLoading ? (
-              <div className="flex justify-center items-center h-40">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : hasTeamChats ? (
-              <ProfessionalChatInterface teamChats={teamChats} />
-            ) : (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <MessageCircle className="h-12 w-12 mx-auto text-slate-400 mb-2" />
-                  <h3 className="text-lg font-medium mb-2">Nenhum chat ativo</h3>
-                  <p className="text-sm text-slate-500">
-                    Você ainda não participa de nenhum grupo de chat. Aceite os convites na aba "Convites de Chat" para começar a participar das conversas da equipe terapêutica.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-      <Sheet open={showIndicatorsSheet} onOpenChange={setShowIndicatorsSheet}>
-        <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
-              <BarChart2 className="h-5 w-5 text-blue-600" />
-              Indicadores de Desenvolvimento
-            </SheetTitle>
-            <SheetDescription>
-              Acompanhe os marcos e o progresso da criança
-            </SheetDescription>
-          </SheetHeader>
-          
-          <div className="mt-6">
-            {selectedChild && (
-              <ChildIndicatorsPanel
-                child={{
-                  id: selectedChild.id,
-                  name: selectedChild.name,
-                  birthDate: selectedChild.birthDate,
-                }}
-                onClose={() => setShowIndicatorsSheet(false)}
-              />
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-primary" />
+                  Acesso Rápido
+                </CardTitle>
+              </div>
+              <CardDescription>Navegue para os módulos principais</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start gap-3 h-auto py-4"
+                  onClick={() => navigate('/educare-app/professional/children')}
+                >
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Baby className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium">Gestão das Crianças</p>
+                    <p className="text-sm text-muted-foreground">Convites, acompanhamento e comunicação</p>
+                  </div>
+                </Button>
+
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start gap-3 h-auto py-4"
+                  onClick={() => navigate('/educare-app/professional/qualificacao')}
+                >
+                  <div className="p-2 bg-indigo-100 rounded-lg">
+                    <GraduationCap className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium">Qualificação Profissional</p>
+                    <p className="text-sm text-muted-foreground">Cursos, treinamentos e materiais</p>
+                  </div>
+                </Button>
+
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start gap-3 h-auto py-4"
+                  onClick={() => navigate('/educare-app/professional/welcome')}
+                >
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <TrendingUp className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium">Central de Conteúdos</p>
+                    <p className="text-sm text-muted-foreground">Notícias e atualizações para profissionais</p>
+                  </div>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {pendingInvitations.length > 0 && (
+          <Card className="border-amber-200 bg-amber-50/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Clock className="h-5 w-5 text-amber-600" />
+                Convites Pendentes
+              </CardTitle>
+              <CardDescription>
+                Você tem {pendingInvitations.length} convite(s) aguardando resposta
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                onClick={() => navigate('/educare-app/professional/children')}
+                className="bg-amber-600 hover:bg-amber-700 gap-2"
+              >
+                Gerenciar Convites
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </>
   );
 };
