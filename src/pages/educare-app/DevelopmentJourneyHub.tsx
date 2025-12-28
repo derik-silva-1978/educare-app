@@ -10,8 +10,8 @@ const DevelopmentJourneyHub: React.FC = () => {
   const { children } = useCustomChildren();
   const [showWebDevModal, setShowWebDevModal] = useState(false);
 
-  // Configuração do WhatsApp
-  const WHATSAPP_PHONE = "5511999999999"; // Substitua pelo número real
+  // Configuração do WhatsApp - Número oficial: +55 91 99201-8206
+  const WHATSAPP_PHONE = "5591992018206";
   const WHATSAPP_MESSAGE = "Olá! Quero iniciar a Jornada do Desenvolvimento no Educare+ Ch@t.";
   const WHATSAPP_URL = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
 
@@ -45,6 +45,15 @@ const DevelopmentJourneyHub: React.FC = () => {
         {/* Card 1 - WhatsApp */}
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div className="p-8">
+            {/* Logo Educare+ Ch@t */}
+            <div className="flex justify-center mb-6">
+              <img 
+                src="/assets/images/educare-chat-logo.png" 
+                alt="Educare+ Ch@t" 
+                className="h-24 w-auto object-contain"
+              />
+            </div>
+            
             {/* Header com Badge */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">

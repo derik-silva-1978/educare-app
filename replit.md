@@ -59,7 +59,9 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
     - Modal on click explaining web version is in progress
     - CTA redirects to WhatsApp
 - **WhatsApp Integration**: 
-  - URL: `https://wa.me/5511999999999?text=Olá! Quero iniciar a Jornada do Desenvolvimento...` (update phone in DevelopmentJourneyHub.tsx)
+  - Phone: +55 91 99201-8206 (configured in DevelopmentJourneyHub.tsx)
+  - URL: `https://wa.me/5591992018206?text=Olá! Quero iniciar a Jornada do Desenvolvimento...`
+  - Logo: `public/assets/images/educare-chat-logo.png`
   - Message URL-encoded for seamless link
 - **Route Updates**: 
   - `/jornada-desenvolvimento` → DevelopmentJourneyHub (choice page)
