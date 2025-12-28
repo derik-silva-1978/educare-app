@@ -84,16 +84,21 @@ const ChildAnalysis: React.FC = () => {
   const handleExportPDF = async () => {
     try {
       const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
       const element = printRef.current;
       if (!element) return;
 
       const canvas = await html2canvas(element, { scale: 2 });
       const imgData = canvas.toDataURL('image/png');
       
-      const link = document.createElement('a');
-      link.download = `analise-${data?.child.name || 'crianca'}-${new Date().toISOString().split('T')[0]}.png`;
-      link.href = imgData;
-      link.click();
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`analise-${data?.child.name || 'crianca'}-${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (err) {
       console.error('Erro ao exportar:', err);
     }
