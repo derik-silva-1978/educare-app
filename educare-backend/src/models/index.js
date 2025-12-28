@@ -43,6 +43,14 @@ const MilestoneCandidateScore = require('./MilestoneCandidateScore');
 // Modelos de Relatórios de Desenvolvimento
 const ChildDevelopmentReport = require('./ChildDevelopmentReport');
 
+// Modelos de Treinamentos (FASE 2)
+const ContentVideo = require('./ContentVideo');
+const TrainingModule = require('./TrainingModule');
+const TrainingLesson = require('./TrainingLesson');
+const UserContentProgress = require('./UserContentProgress');
+const ContentPricing = require('./ContentPricing');
+const UserEnrollment = require('./UserEnrollment');
+
 // Modelos do RAG
 const KnowledgeDocument = require('./KnowledgeDocument');
 const KbBaby = require('./KbBaby');
@@ -310,6 +318,48 @@ ChildDevelopmentReport.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 JourneyBotSession.hasOne(ChildDevelopmentReport, { foreignKey: 'session_id', as: 'report', constraints: false });
 ChildDevelopmentReport.belongsTo(JourneyBotSession, { foreignKey: 'session_id', as: 'session', constraints: false });
 
+// === ASSOCIAÇÕES DE TREINAMENTOS (FASE 2) ===
+
+// ContentItem <-> ContentVideo (1:N)
+ContentItem.hasMany(ContentVideo, { foreignKey: 'content_id', as: 'videos' });
+ContentVideo.belongsTo(ContentItem, { foreignKey: 'content_id', as: 'content' });
+
+// ContentItem <-> TrainingModule (1:N)
+ContentItem.hasMany(TrainingModule, { foreignKey: 'training_id', as: 'modules' });
+TrainingModule.belongsTo(ContentItem, { foreignKey: 'training_id', as: 'training' });
+
+// TrainingModule <-> TrainingLesson (1:N)
+TrainingModule.hasMany(TrainingLesson, { foreignKey: 'module_id', as: 'lessons' });
+TrainingLesson.belongsTo(TrainingModule, { foreignKey: 'module_id', as: 'module' });
+
+// ContentVideo <-> TrainingLesson (1:N)
+ContentVideo.hasMany(TrainingLesson, { foreignKey: 'video_id', as: 'lessons' });
+TrainingLesson.belongsTo(ContentVideo, { foreignKey: 'video_id', as: 'video' });
+
+// User <-> UserContentProgress (1:N)
+User.hasMany(UserContentProgress, { foreignKey: 'user_id', as: 'contentProgress' });
+UserContentProgress.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// ContentItem <-> UserContentProgress (1:N)
+ContentItem.hasMany(UserContentProgress, { foreignKey: 'content_id', as: 'userProgress' });
+UserContentProgress.belongsTo(ContentItem, { foreignKey: 'content_id', as: 'content' });
+
+// TrainingLesson <-> UserContentProgress (1:N)
+TrainingLesson.hasMany(UserContentProgress, { foreignKey: 'lesson_id', as: 'userProgress' });
+UserContentProgress.belongsTo(TrainingLesson, { foreignKey: 'lesson_id', as: 'lesson' });
+
+// ContentItem <-> ContentPricing (1:1)
+ContentItem.hasOne(ContentPricing, { foreignKey: 'content_id', as: 'pricing' });
+ContentPricing.belongsTo(ContentItem, { foreignKey: 'content_id', as: 'content' });
+
+// User <-> UserEnrollment (1:N)
+User.hasMany(UserEnrollment, { foreignKey: 'user_id', as: 'enrollments' });
+UserEnrollment.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// ContentItem <-> UserEnrollment (1:N)
+ContentItem.hasMany(UserEnrollment, { foreignKey: 'content_id', as: 'enrollments' });
+UserEnrollment.belongsTo(ContentItem, { foreignKey: 'content_id', as: 'content' });
+
 // Exportação dos modelos
 module.exports = {
   sequelize,
@@ -363,5 +413,12 @@ module.exports = {
   MilestoneMapping,
   MilestoneCandidateScore,
   // Modelos de Relatórios de Desenvolvimento
-  ChildDevelopmentReport
+  ChildDevelopmentReport,
+  // Modelos de Treinamentos (FASE 2)
+  ContentVideo,
+  TrainingModule,
+  TrainingLesson,
+  UserContentProgress,
+  ContentPricing,
+  UserEnrollment
 };

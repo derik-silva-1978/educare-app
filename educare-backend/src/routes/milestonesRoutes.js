@@ -13,6 +13,9 @@ const milestonesController = require('../controllers/milestonesController');
 // Gráfico de marcos para dashboard
 router.get('/dashboard/milestones-chart', verifyToken, milestonesController.getMilestonesChart);
 
+// Marcos de uma criança específica (profissionais e pais)
+router.get('/child/:childId', verifyToken, milestonesController.getChildMilestones);
+
 // === ROTAS DE CURADORIA (Owner/Admin/Curator) ===
 
 // Listar marcos oficiais

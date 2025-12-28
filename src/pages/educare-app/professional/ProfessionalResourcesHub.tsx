@@ -4,85 +4,30 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   BookOpen, Video, FileText, GraduationCap, 
-  ExternalLink, Clock, Star, TrendingUp 
+  ExternalLink, Clock, Star, TrendingUp, Loader2
 } from 'lucide-react';
+import { useContentItems, ContentItem } from '@/hooks/useContentItems';
 
-const newsItems = [
+const staticResourceItems = [
   {
-    id: 1,
-    title: 'Novas Diretrizes para Triagem do Desenvolvimento',
-    description: 'Sociedade Brasileira de Pediatria atualiza recomendações para acompanhamento nos primeiros anos.',
-    category: 'Diretrizes',
-    date: '27/12/2025',
-    readTime: '8 min',
-    featured: true,
-  },
-  {
-    id: 2,
-    title: 'Impacto das Telas no Desenvolvimento Infantil',
-    description: 'Estudo recente analisa efeitos do tempo de tela em crianças de 0 a 3 anos.',
-    category: 'Pesquisa',
-    date: '25/12/2025',
-    readTime: '6 min',
-    featured: false,
-  },
-  {
-    id: 3,
-    title: 'Marcos de Linguagem: O Que Esperar em Cada Fase',
-    description: 'Guia prático para profissionais sobre desenvolvimento da linguagem.',
-    category: 'Artigo',
-    date: '22/12/2025',
-    readTime: '10 min',
-    featured: false,
-  },
-];
-
-const trainingItems = [
-  {
-    id: 1,
-    title: 'Intervenção Precoce: Fundamentos e Práticas',
-    type: 'Curso Online',
-    duration: '12 horas',
-    level: 'Intermediário',
-    icon: GraduationCap,
-  },
-  {
-    id: 2,
-    title: 'Avaliação do Desenvolvimento Motor',
-    type: 'Workshop',
-    duration: '4 horas',
-    level: 'Básico',
-    icon: Video,
-  },
-  {
-    id: 3,
-    title: 'Orientação Familiar em Contexto Clínico',
-    type: 'Webinar',
-    duration: '2 horas',
-    level: 'Todos',
-    icon: Video,
-  },
-];
-
-const resourceItems = [
-  {
-    id: 1,
+    id: '1',
     title: 'Caderneta da Criança - MS',
     description: 'Documento oficial com marcos e orientações do Ministério da Saúde.',
     type: 'PDF',
     icon: FileText,
   },
   {
-    id: 2,
+    id: '2',
     title: 'Escala Denver II - Guia de Aplicação',
     description: 'Manual para aplicação da escala de triagem do desenvolvimento.',
     type: 'PDF',
     icon: FileText,
   },
   {
-    id: 3,
+    id: '3',
     title: 'Protocolo de Vigilância do Desenvolvimento',
     description: 'Fluxograma de acompanhamento e encaminhamento.',
     type: 'PDF',
@@ -90,7 +35,135 @@ const resourceItems = [
   },
 ];
 
+const formatDate = (dateString: string | null): string => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('pt-BR');
+};
+
+const ContentCard: React.FC<{ item: ContentItem; featured?: boolean }> = ({ item, featured }) => {
+  return (
+    <Card className={featured ? 'border-blue-200 bg-blue-50/50' : ''}>
+      <CardContent className="pt-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <Badge variant={featured ? 'default' : 'secondary'}>
+                {item.category || item.type}
+              </Badge>
+              {item.duration && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {item.duration}
+                </span>
+              )}
+            </div>
+            <h3 className="font-semibold mb-1">{item.title}</h3>
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {item.summary || item.description}
+            </p>
+            {item.publish_date && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Publicado em {formatDate(item.publish_date)}
+              </p>
+            )}
+          </div>
+          {item.cta_url && (
+            <Button variant="outline" size="sm" className="shrink-0" asChild>
+              <a href={item.cta_url} target="_blank" rel="noopener noreferrer">
+                {item.cta_text || 'Ler mais'}
+                <ExternalLink className="h-3 w-3 ml-1" />
+              </a>
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const TrainingCard: React.FC<{ item: ContentItem }> = ({ item }) => {
+  const Icon = item.type === 'course' ? GraduationCap : Video;
+  
+  return (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="pt-6">
+        <div className="flex items-start gap-4">
+          <div className="p-3 rounded-lg bg-blue-100 text-blue-600">
+            <Icon className="h-6 w-6" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold mb-1">{item.title}</h3>
+            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+              {item.summary || item.description}
+            </p>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              {item.duration && (
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {item.duration}
+                </span>
+              )}
+              {item.level && (
+                <Badge variant="outline" className="text-xs">
+                  {item.level}
+                </Badge>
+              )}
+            </div>
+          </div>
+          {item.cta_url && (
+            <Button variant="default" size="sm" asChild>
+              <a href={item.cta_url} target="_blank" rel="noopener noreferrer">
+                Acessar
+              </a>
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const LoadingSkeleton: React.FC = () => (
+  <div className="space-y-4">
+    {[1, 2, 3].map((i) => (
+      <Card key={i}>
+        <CardContent className="pt-6">
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-20" />
+              <Skeleton className="h-5 w-16" />
+            </div>
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+);
+
 const ProfessionalResourcesHub: React.FC = () => {
+  const { items: newsItems, isLoading: newsLoading } = useContentItems({ 
+    type: 'news', 
+    audience: 'professionals',
+    limit: 10 
+  });
+  
+  const { items: trainingItems, isLoading: trainingLoading } = useContentItems({ 
+    type: 'training',
+    audience: 'professionals',
+    limit: 10 
+  });
+  
+  const { items: courseItems, isLoading: courseLoading } = useContentItems({ 
+    type: 'course',
+    audience: 'professionals',
+    limit: 10 
+  });
+
+  const allTrainings = [...trainingItems, ...courseItems];
+
   return (
     <>
       <Helmet>
@@ -116,120 +189,69 @@ const ProfessionalResourcesHub: React.FC = () => {
           </TabsList>
 
           <TabsContent value="news" className="space-y-4">
-            {newsItems.map((item) => (
-              <Card key={item.id} className={item.featured ? 'border-blue-200 bg-blue-50/50' : ''}>
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant={item.featured ? 'default' : 'secondary'}>
-                          {item.category}
-                        </Badge>
-                        {item.featured && (
-                          <Badge variant="outline" className="text-amber-600 border-amber-300">
-                            <Star className="h-3 w-3 mr-1" />
-                            Destaque
-                          </Badge>
-                        )}
-                      </div>
-                      <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
-                      <p className="text-muted-foreground text-sm mb-3">{item.description}</p>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>{item.date}</span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {item.readTime}
-                        </span>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </div>
+            {newsLoading ? (
+              <LoadingSkeleton />
+            ) : newsItems.length > 0 ? (
+              newsItems.map((item, index) => (
+                <ContentCard key={item.id} item={item} featured={index === 0} />
+              ))
+            ) : (
+              <Card>
+                <CardContent className="py-8">
+                  <p className="text-center text-muted-foreground">
+                    Nenhuma notícia disponível no momento.
+                  </p>
+                  <p className="text-center text-sm text-muted-foreground mt-2">
+                    As notícias são gerenciadas pelo administrador do sistema.
+                  </p>
                 </CardContent>
               </Card>
-            ))}
+            )}
           </TabsContent>
 
           <TabsContent value="training" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {trainingItems.map((item) => (
-                <Card key={item.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <item.icon className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <Badge variant="outline" className="text-xs">{item.type}</Badge>
-                      </div>
-                    </div>
-                    <CardTitle className="text-base mt-3">{item.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {item.duration}
-                      </span>
-                      <Badge variant="secondary">{item.level}</Badge>
-                    </div>
-                    <Button className="w-full" variant="outline">
-                      Acessar
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-blue-100 rounded-full">
-                    <TrendingUp className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold">Trilha de Capacitação Educare+</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Complete cursos e ganhe certificados para sua carreira profissional.
-                    </p>
-                  </div>
-                  <Badge className="bg-blue-600">Em breve</Badge>
-                </div>
-              </CardContent>
-            </Card>
+            {(trainingLoading || courseLoading) ? (
+              <LoadingSkeleton />
+            ) : allTrainings.length > 0 ? (
+              allTrainings.map((item) => (
+                <TrainingCard key={item.id} item={item} />
+              ))
+            ) : (
+              <Card>
+                <CardContent className="py-8">
+                  <p className="text-center text-muted-foreground">
+                    Nenhum treinamento disponível no momento.
+                  </p>
+                  <p className="text-center text-sm text-muted-foreground mt-2">
+                    Os treinamentos e cursos são gerenciados pelo administrador.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="resources" className="space-y-4">
-            {resourceItems.map((item) => (
-              <Card key={item.id} className="hover:shadow-sm transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-slate-100 rounded-lg">
-                      <item.icon className="h-5 w-5 text-slate-600" />
+            {staticResourceItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Card key={item.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-gray-100 text-gray-600">
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold mb-1">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {item.description}
+                        </p>
+                      </div>
+                      <Badge variant="outline">{item.type}</Badge>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-medium">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      <FileText className="h-4 w-4 mr-2" />
-                      {item.type}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-
-            <Card className="border-dashed">
-              <CardContent className="pt-6 text-center">
-                <p className="text-muted-foreground text-sm">
-                  Mais materiais serão adicionados em breve. 
-                  <br />
-                  Tem sugestões? Entre em contato conosco.
-                </p>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </TabsContent>
         </Tabs>
       </div>

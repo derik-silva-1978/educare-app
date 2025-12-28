@@ -905,6 +905,121 @@ Retorne APENAS um JSON válido no formato: {"score": <número 0-5>, "reason": "<
   }
 };
 
+/**
+ * GET /api/milestones/child/:childId
+ * Retorna marcos do desenvolvimento para uma criança específica (profissionais)
+ * Verifica acesso do profissional via TeamMember
+ */
+const getChildMilestones = async (req, res) => {
+  try {
+    const { childId } = req.params;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+
+    const { Child, Profile, TeamMember, Team, User } = require('../models');
+
+    // Buscar a criança
+    const child = await Child.findByPk(childId, {
+      include: [{ model: Profile, attributes: ['userId'] }]
+    });
+
+    if (!child) {
+      return res.status(404).json({ success: false, error: 'Criança não encontrada' });
+    }
+
+    // Verificar permissão
+    let hasAccess = false;
+    
+    // Admin/Owner tem acesso total
+    if (userRole === 'admin' || userRole === 'owner') {
+      hasAccess = true;
+    }
+    // Pai/responsável tem acesso
+    else if (child.Profile && child.Profile.userId === userId) {
+      hasAccess = true;
+    }
+    // Profissional via TeamMember
+    else {
+      const teamMemberships = await TeamMember.findAll({
+        where: { userId, status: 'active' },
+        include: [{
+          model: Team,
+          as: 'team',
+          where: { ownerId: child.Profile.userId }
+        }]
+      });
+      hasAccess = teamMemberships.length > 0;
+    }
+
+    if (!hasAccess) {
+      return res.status(403).json({ success: false, error: 'Acesso negado a esta criança' });
+    }
+
+    // Calcular idade em meses
+    const birthDate = new Date(child.birthDate);
+    const now = new Date();
+    const ageInMonths = Math.floor((now - birthDate) / (1000 * 60 * 60 * 24 * 30.44));
+
+    // Buscar marcos oficiais apropriados para a idade
+    const milestones = await OfficialMilestone.findAll({
+      where: {
+        is_active: true,
+        target_month: { [Op.lte]: ageInMonths + 3 } // Marcos até 3 meses à frente
+      },
+      order: [['target_month', 'ASC'], ['category', 'ASC'], ['order_index', 'ASC']]
+    });
+
+    // Organizar por categoria com status baseado na idade
+    const milestonesWithStatus = milestones.map(m => {
+      let status = 'pending';
+      if (m.target_month <= ageInMonths - 2) {
+        status = 'achieved'; // Marco deveria já estar atingido
+      } else if (m.target_month <= ageInMonths) {
+        status = 'in_progress'; // Marco na janela atual
+      }
+      
+      return {
+        id: m.id,
+        title: m.title,
+        description: m.description,
+        category: m.category,
+        targetMonth: m.target_month,
+        status,
+        source: m.source
+      };
+    });
+
+    // Agrupar por categoria
+    const byCategory = milestonesWithStatus.reduce((acc, m) => {
+      if (!acc[m.category]) acc[m.category] = [];
+      acc[m.category].push(m);
+      return acc;
+    }, {});
+
+    return res.status(200).json({
+      success: true,
+      child: {
+        id: child.id,
+        name: `${child.firstName} ${child.lastName}`,
+        birthDate: child.birthDate,
+        ageInMonths
+      },
+      milestones: milestonesWithStatus,
+      byCategory,
+      summary: {
+        total: milestonesWithStatus.length,
+        achieved: milestonesWithStatus.filter(m => m.status === 'achieved').length,
+        inProgress: milestonesWithStatus.filter(m => m.status === 'in_progress').length,
+        pending: milestonesWithStatus.filter(m => m.status === 'pending').length
+      }
+    });
+
+  } catch (error) {
+    console.error('Erro ao buscar marcos da criança:', error);
+    return res.status(500).json({ success: false, error: 'Erro ao buscar marcos' });
+  }
+};
+
 module.exports = {
   seedOfficialMilestones,
   autoLinkMilestones,
@@ -916,5 +1031,6 @@ module.exports = {
   getCurationStats,
   getCurationView,
   createMapping,
-  runAIMatching
+  runAIMatching,
+  getChildMilestones
 };
