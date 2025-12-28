@@ -18,22 +18,27 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
 
-type AnalysisDomain = 'motor' | 'cognitivo' | 'linguagem' | 'social' | 'emocional' | 'sensorial';
-
-const domainConfig: Record<AnalysisDomain, { icon: React.ElementType; color: string; bgColor: string; label: string }> = {
+const domainConfig: Record<string, { icon: React.ElementType; color: string; bgColor: string; label: string }> = {
   motor: { icon: Activity, color: 'text-blue-600', bgColor: 'bg-blue-100', label: 'Motor' },
   cognitivo: { icon: Brain, color: 'text-purple-600', bgColor: 'bg-purple-100', label: 'Cognitivo' },
+  cognitive: { icon: Brain, color: 'text-purple-600', bgColor: 'bg-purple-100', label: 'Cognitivo' },
   linguagem: { icon: MessageSquare, color: 'text-green-600', bgColor: 'bg-green-100', label: 'Linguagem' },
+  comunicacao: { icon: MessageSquare, color: 'text-green-600', bgColor: 'bg-green-100', label: 'Comunicação' },
+  language: { icon: MessageSquare, color: 'text-green-600', bgColor: 'bg-green-100', label: 'Linguagem' },
   social: { icon: Users, color: 'text-orange-600', bgColor: 'bg-orange-100', label: 'Social' },
   emocional: { icon: Heart, color: 'text-red-600', bgColor: 'bg-red-100', label: 'Emocional' },
+  socioemocional: { icon: Heart, color: 'text-pink-600', bgColor: 'bg-pink-100', label: 'Socioemocional' },
   sensorial: { icon: Eye, color: 'text-teal-600', bgColor: 'bg-teal-100', label: 'Sensorial' }
 };
+
+const defaultDomainConfig = { icon: Brain, color: 'text-gray-600', bgColor: 'bg-gray-100', label: 'Outro' };
+const getDomainConfig = (category: string) => domainConfig[category.toLowerCase()] || { ...defaultDomainConfig, label: category.charAt(0).toUpperCase() + category.slice(1) };
 
 interface Milestone {
   id: string;
   title: string;
   description?: string;
-  category: AnalysisDomain;
+  category: string;
   targetMonth: number;
   status: 'achieved' | 'in_progress' | 'pending';
   source: string;
@@ -98,10 +103,11 @@ const ChildAnalysis: React.FC = () => {
     if (!data?.byCategory) return [];
     
     return Object.entries(data.byCategory).map(([category, milestones]) => {
+      const config = getDomainConfig(category);
       const achieved = milestones.filter(m => m.status === 'achieved').length;
       const total = milestones.length;
       return {
-        category: domainConfig[category as AnalysisDomain]?.label || category,
+        category: config.label,
         achieved,
         inProgress: milestones.filter(m => m.status === 'in_progress').length,
         pending: milestones.filter(m => m.status === 'pending').length,
@@ -114,10 +120,11 @@ const ChildAnalysis: React.FC = () => {
     if (!data?.byCategory) return [];
     
     return Object.entries(data.byCategory).map(([category, milestones]) => {
+      const config = getDomainConfig(category);
       const achieved = milestones.filter(m => m.status === 'achieved').length;
       const total = milestones.length;
       return {
-        domain: domainConfig[category as AnalysisDomain]?.label || category,
+        domain: config.label,
         value: total > 0 ? Math.round((achieved / total) * 100) : 0,
         fullMark: 100
       };
@@ -318,8 +325,8 @@ const ChildAnalysis: React.FC = () => {
 
           <TabsContent value="by-domain" className="space-y-4 mt-6">
             {Object.entries(byCategory).map(([category, categoryMilestones]) => {
-              const config = domainConfig[category as AnalysisDomain];
-              const Icon = config?.icon || Brain;
+              const config = getDomainConfig(category);
+              const Icon = config.icon;
               const achieved = categoryMilestones.filter(m => m.status === 'achieved').length;
               const total = categoryMilestones.length;
               const percentage = total > 0 ? Math.round((achieved / total) * 100) : 0;
@@ -329,11 +336,11 @@ const ChildAnalysis: React.FC = () => {
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${config?.bgColor || 'bg-gray-100'}`}>
-                          <Icon className={`h-5 w-5 ${config?.color || 'text-gray-600'}`} />
+                        <div className={`p-2 rounded-lg ${config.bgColor}`}>
+                          <Icon className={`h-5 w-5 ${config.color}`} />
                         </div>
                         <div>
-                          <CardTitle className="text-lg">{config?.label || category}</CardTitle>
+                          <CardTitle className="text-lg">{config.label}</CardTitle>
                           <CardDescription>{achieved} de {total} marcos atingidos</CardDescription>
                         </div>
                       </div>
@@ -400,7 +407,7 @@ const ChildAnalysis: React.FC = () => {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                           {monthMilestones.map(milestone => {
-                            const config = domainConfig[milestone.category];
+                            const config = getDomainConfig(milestone.category);
                             return (
                               <div 
                                 key={milestone.id}
@@ -416,8 +423,8 @@ const ChildAnalysis: React.FC = () => {
                                   <Calendar className="h-4 w-4 text-slate-400 flex-shrink-0" />
                                 )}
                                 <span className="truncate flex-1">{milestone.title}</span>
-                                <Badge variant="outline" className={`text-xs ${config?.color}`}>
-                                  {config?.label?.charAt(0) || 'M'}
+                                <Badge variant="outline" className={`text-xs ${config.color}`}>
+                                  {config.label.charAt(0)}
                                 </Badge>
                               </div>
                             );

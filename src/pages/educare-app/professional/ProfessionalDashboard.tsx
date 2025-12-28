@@ -186,11 +186,11 @@ const ProfessionalDashboard: React.FC = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="assigned">Crianças Atribuídas</TabsTrigger>
-            <TabsTrigger value="invitations">Convites</TabsTrigger>
-            <TabsTrigger value="chat-invites">Convites de Chat</TabsTrigger>
-            <TabsTrigger value="active-chats">Chats Ativos</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 h-auto">
+            <TabsTrigger value="assigned" className="text-xs sm:text-sm py-2">Crianças</TabsTrigger>
+            <TabsTrigger value="invitations" className="text-xs sm:text-sm py-2">Convites</TabsTrigger>
+            <TabsTrigger value="chat-invites" className="text-xs sm:text-sm py-2">Chat Convites</TabsTrigger>
+            <TabsTrigger value="active-chats" className="text-xs sm:text-sm py-2">Chats Ativos</TabsTrigger>
           </TabsList>
           
           <TabsContent value="assigned" className="space-y-4 mt-4">

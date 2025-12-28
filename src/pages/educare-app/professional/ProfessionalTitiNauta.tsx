@@ -125,16 +125,17 @@ const ProfessionalTitiNauta: React.FC = () => {
               <CardTitle className="text-lg">Tópicos Rápidos</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                 {quickTopics.map((topic) => (
                   <Button
                     key={topic.id}
                     variant="outline"
-                    className="h-auto py-4 px-4 flex flex-col items-center gap-2 hover:bg-purple-50 hover:border-purple-300"
+                    className="h-auto py-3 sm:py-4 px-2 sm:px-4 flex flex-col items-center gap-1 sm:gap-2 hover:bg-purple-50 hover:border-purple-300 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
                     onClick={() => handleQuickTopic(topic.query)}
+                    aria-label={`Perguntar sobre ${topic.label}`}
                   >
-                    <topic.icon className="h-5 w-5 text-purple-600" />
-                    <span className="text-xs text-center">{topic.label}</span>
+                    <topic.icon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" aria-hidden="true" />
+                    <span className="text-xs text-center leading-tight">{topic.label}</span>
                   </Button>
                 ))}
               </div>
@@ -142,7 +143,7 @@ const ProfessionalTitiNauta: React.FC = () => {
           </Card>
         )}
 
-        <Card className="flex flex-col h-[500px]">
+        <Card className="flex flex-col h-[400px] sm:h-[500px]">
           <CardHeader className="border-b py-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">Conversa</CardTitle>
