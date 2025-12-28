@@ -62,8 +62,8 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
       icon: Baby,
     },
     {
-      title: "Jornada TitiNauta",
-      url: "/educare-app/titinauta-journey",
+      title: "Jornada do Desenvolvimento",
+      url: "/educare-app/jornada-desenvolvimento",
       icon: Bot,
     },
     {

@@ -60,7 +60,6 @@ const EducareAppLayout: React.FC = () => {
     const allowedPaths = [
       '/educare-app/professional/dashboard',
       '/educare-app/jornada-desenvolvimento',
-      '/educare-app/titinauta-journey',
       '/educare-app/settings'
     ];
     
@@ -87,7 +86,6 @@ const EducareAppLayout: React.FC = () => {
       '/educare-app/child/',
       '/educare-app/journey-bot',
       '/educare-app/jornada-desenvolvimento',
-      '/educare-app/titinauta-journey',
       '/educare-app/titinauta',
       '/educare-app/activities',
       '/educare-app/communication',

@@ -52,7 +52,6 @@ import FAQAnalyticsDashboard from "./pages/admin/FAQAnalyticsDashboard";
 import MilestonesCuration from "./pages/admin/MilestonesCuration";
 import CommunicationPage from "./pages/educare-app/CommunicationPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
-import TitiNautaJourney from "./pages/educare-app/TitiNautaJourney";
 import DevelopmentJourneyHub from "./pages/educare-app/DevelopmentJourneyHub";
 import TitiNautaAssistant from "./pages/educare-app/TitiNautaAssistant";
 import LojaPage from "./pages/educare-app/LojaPage";
@@ -115,8 +114,6 @@ const App = () => (
                 <Route path="child/:id/edit" element={<ChildForm />} />
                 <Route path="communication" element={<CommunicationPage />} />
                 <Route path="journey-bot-whatsapp/:childId" element={<WhatsAppJourneyBotPage />} />
-                <Route path="titinauta-journey" element={<TitiNautaJourney />} />
-                <Route path="titinauta-journey/:childId" element={<TitiNautaJourney />} />
                 <Route path="activities" element={<EducareActivitiesPage />} />
                 <Route path="material-apoio" element={<MaterialApoioPage />} />
                 <Route path="news/:id" element={<NewsDetail />} />
