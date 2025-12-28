@@ -7,6 +7,7 @@ import { httpClient } from '@/services/api/httpClient';
 export type ProfessionalChildAccess = {
   childId: string;
   childName: string;
+  birthDate: string;
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
 }
@@ -33,6 +34,7 @@ export function useProfessionalChildren(childId?: string) {
           return {
             childId: child.id,
             childName: `${child.firstName} ${child.lastName}`,
+            birthDate: child.birthDate || new Date().toISOString(),
             status: child.status as 'pending' | 'approved' | 'rejected',
             createdAt: child.createdAt
           };

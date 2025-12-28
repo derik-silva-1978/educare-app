@@ -5,13 +5,12 @@ import { cn } from '@/lib/utils';
 import { 
   Home, 
   Users, 
-  ClipboardList, 
-  FileText, 
   Settings,
   MessageCircle,
-  Calendar,
-  BarChart,
-  Bot
+  Bot,
+  BookOpen,
+  Sparkles,
+  Baby
 } from 'lucide-react';
 import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 
@@ -69,13 +68,11 @@ const ProfessionalSidebar: React.FC = () => {
       
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        <NavItem to="/educare-app/dashboard" icon={Home} label="Dashboard" />
-        <NavItem to="/educare-app/professional/dashboard" icon={Users} label="Pacientes" />
-        <NavItem to="/educare-app/jornada-desenvolvimento" icon={Bot} label="Jornada do Desenvolvimento" notification={true} />
-        <NavItem to="/smart-pei/students" icon={Users} label="Alunos" />
-        <NavItem to="/smart-pei/assessments" icon={ClipboardList} label="Avaliações" />
-        <NavItem to="/smart-pei/activities" icon={Calendar} label="Atividades" />
-        <NavItem to="/smart-pei/reports" icon={BarChart} label="Relatórios" />
+        <NavItem to="/educare-app/dashboard" icon={Home} label="Início" />
+        <NavItem to="/educare-app/professional/dashboard" icon={Users} label="Meus Pacientes" />
+        <NavItem to="/educare-app/professional/titinauta" icon={Sparkles} label="TitiNauta Especialista" />
+        <NavItem to="/educare-app/professional/resources" icon={BookOpen} label="Recursos e Qualificação" />
+        <NavItem to="/educare-app/jornada-desenvolvimento" icon={Baby} label="Jornada do Desenvolvimento" />
         <NavItem to="/educare-app/messages" icon={MessageCircle} label="Mensagens" />
         <NavItem to="/educare-app/settings" icon={Settings} label="Configurações" />
       </nav>

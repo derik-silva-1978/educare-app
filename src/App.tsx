@@ -27,6 +27,8 @@ import SettingsLayout from "./pages/educare-app/settings/SettingsLayout";
 import ChangePasswordPage from "./pages/educare-app/settings/ChangePasswordPage";
 import ProfessionalDashboard from "./pages/educare-app/professional/ProfessionalDashboard";
 import ChildAnalysis from "./pages/educare-app/professional/ChildAnalysis";
+import ProfessionalTitiNauta from "./pages/educare-app/professional/ProfessionalTitiNauta";
+import ProfessionalResourcesHub from "./pages/educare-app/professional/ProfessionalResourcesHub";
 import EducareAppLayout from "./pages/educare-app/EducareAppLayout";
 import AprendizadoLanding from "./pages/educare-app/AprendizadoLanding";
 import WhatsAppJourneyBotPage from "./pages/WhatsAppJourneyBotPage";
@@ -134,6 +136,16 @@ const App = () => (
                 <Route path="professional/analysis/:childId" element={
                   <ProfessionalOnlyGuard>
                     <ChildAnalysis />
+                  </ProfessionalOnlyGuard>
+                } />
+                <Route path="professional/titinauta" element={
+                  <ProfessionalOnlyGuard>
+                    <ProfessionalTitiNauta />
+                  </ProfessionalOnlyGuard>
+                } />
+                <Route path="professional/resources" element={
+                  <ProfessionalOnlyGuard>
+                    <ProfessionalResourcesHub />
                   </ProfessionalOnlyGuard>
                 } />
                 

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useNavigate } from 'react-router-dom';
 import { useProfessionalChildren } from '@/hooks/useProfessionalChildren';
 import { useProfessionalTeamChats } from '@/hooks/useProfessionalTeamChats';
@@ -11,15 +12,24 @@ import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 import { useTeamInvites } from '@/hooks/useTeamInvites';
 import { ProfessionalTeamChat } from '@/components/educare-app/chat/ProfessionalTeamChat';
 import { ProfessionalChatInterface } from '@/components/educare-app/chat/ProfessionalChatInterface';
+import ChildIndicatorsPanel from '@/components/educare-app/professional/ChildIndicatorsPanel';
 import { 
   Users, UserPlus, ClipboardList, FileText, 
-  Clock, CheckCircle, XCircle, Loader2, MessageCircle, Mail, RefreshCw 
+  Clock, CheckCircle, XCircle, Loader2, MessageCircle, Mail, RefreshCw, BarChart2 
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+interface SelectedChild {
+  id: string;
+  name: string;
+  birthDate: string;
+}
 
 const ProfessionalDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('assigned');
+  const [selectedChild, setSelectedChild] = useState<SelectedChild | null>(null);
+  const [showIndicatorsSheet, setShowIndicatorsSheet] = useState(false);
   
   // Hook para convites de chat
   const {
@@ -146,7 +156,22 @@ const ProfessionalDashboard: React.FC = () => {
                             {new Date(child.createdAt).toLocaleDateString('pt-BR')}
                           </span>
                         </div>
-                        <div className="space-x-2 flex justify-end">
+                        <div className="space-x-2 flex justify-end flex-wrap gap-2">
+                          <Button 
+                            variant="default" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedChild({
+                                id: child.childId,
+                                name: child.childName,
+                                birthDate: child.birthDate
+                              });
+                              setShowIndicatorsSheet(true);
+                            }}
+                          >
+                            <BarChart2 className="h-4 w-4 mr-1" />
+                            Indicadores
+                          </Button>
                           <Button 
                             variant="outline" 
                             size="sm"
@@ -361,6 +386,33 @@ const ProfessionalDashboard: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <Sheet open={showIndicatorsSheet} onOpenChange={setShowIndicatorsSheet}>
+        <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <BarChart2 className="h-5 w-5 text-blue-600" />
+              Indicadores de Desenvolvimento
+            </SheetTitle>
+            <SheetDescription>
+              Acompanhe os marcos e o progresso da criança
+            </SheetDescription>
+          </SheetHeader>
+          
+          <div className="mt-6">
+            {selectedChild && (
+              <ChildIndicatorsPanel
+                child={{
+                  id: selectedChild.id,
+                  name: selectedChild.name,
+                  birthDate: selectedChild.birthDate,
+                }}
+                onClose={() => setShowIndicatorsSheet(false)}
+              />
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 };
