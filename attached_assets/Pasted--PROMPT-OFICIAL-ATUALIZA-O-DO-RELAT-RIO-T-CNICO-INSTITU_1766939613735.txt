@@ -1,0 +1,206 @@
+# PROMPT OFICIAL — ATUALIZAÇÃO DO RELATÓRIO TÉCNICO INSTITUCIONAL
+## Educare App / Educare+ (Documento FAPEMA)
+
+## MISSÃO
+Você é um(a) **Arquiteto(a) de Software Sênior, Auditor Técnico de Produto Digital e Analista Institucional**, com experiência em relatórios para **agências de fomento público (ex.: FAPEMA)**.
+
+Sua missão é **ATUALIZAR PROFUNDAMENTE** o arquivo existente:
+
+RELATORIO_TECNICO_EDUCARE_APP_FAPEMA.md
+
+O objetivo é torná-lo:
+- Mais **robusto**
+- Mais **fiel à fase atual de desenvolvimento**
+- Mais **baseado em evidências reais do repositório**
+- Adequado para **avaliação técnica institucional**
+- Com **no mínimo 300 linhas em Markdown**
+
+⚠️ NÃO criar um novo documento do zero.  
+⚠️ NÃO manter texto excessivamente aspiracional sem lastro técnico.
+
+---
+
+## REGRA CRÍTICA — EXCLUSÃO TOTAL DO SMART PEI
+- Ignore completamente qualquer referência a:
+  - Smart PEI
+  - PEI (Plano Educacional Individualizado)
+  - Titibot quando associado ao Smart PEI
+- Se encontrar referências em código, comentários ou documentos:
+  - Desconsidere
+  - Não mencione
+  - Não contextualize
+
+Este relatório é **EXCLUSIVO do Educare App / Educare+**.
+
+---
+
+## PRINCÍPIO DE FIDELIDADE TÉCNICA
+Cada funcionalidade descrita deve ser classificada explicitamente como:
+- Implementada
+- Parcialmente implementada
+- Planejada / Roadmap
+
+Sempre que possível, inclua evidências técnicas no formato:
+Evidências técnicas:
+- /caminho/do/arquivo.ext
+- /pasta/modulo/
+- schema, rota, componente, comentário ou TODO relevante
+
+Se não houver evidência clara, declare:
+- “Evidência insuficiente no repositório”
+- ou “Funcionalidade planejada (não implementada)”
+
+---
+
+## PROCEDIMENTO OBRIGATÓRIO
+
+### Etapa 1 — Leitura e Diagnóstico
+- Leia integralmente o arquivo RELATORIO_TECNICO_EDUCARE_APP_FAPEMA.md atual
+- Identifique:
+  - Trechos genéricos
+  - Excesso de visão futura
+  - Lacunas técnicas
+  - Funcionalidades citadas sem evidência no código
+
+### Etapa 2 — Varredura do Repositório
+Analise todo o repositório, incluindo:
+- Código frontend
+- Código backend
+- Pastas de conteúdo (JSON, CSV, MD)
+- Configurações
+- Integrações
+- Automações
+- Variáveis de ambiente
+- Comentários e TODOs
+
+Mapeie claramente:
+- O que já funciona
+- O que está parcialmente implementado
+- O que é apenas estrutura preparada
+
+---
+
+## SEÇÕES QUE DEVEM SER APROFUNDADAS (OBRIGATÓRIO)
+
+Você deve **reavaliar, expandir e reescrever** (quando necessário) as seções abaixo, alinhando o texto ao estado real do código:
+
+### 1. WelcomeHub / Hub Inicial
+- Papel real como ponto de entrada da aplicação
+- Fluxos existentes:
+  - Jornadas
+  - WhatsApp (Educare+ Ch@t)
+  - Web App
+- Diferenciar:
+  - UI funcional
+  - Navegação simples
+  - Fluxos ainda conceituais
+
+### 2. Gestão de Conteúdo
+- Onde o conteúdo vive hoje (JSON, CSV, banco, código)
+- Estrutura real de:
+  - Jornadas
+  - Quizzes
+  - Cards
+- Se existe ou não:
+  - CMS
+  - Painel de edição
+  - Ingestão dinâmica
+
+Remover qualquer afirmação de CMS avançado se não houver evidência no repositório.
+
+### 3. Gestão de Planos e Assinaturas
+- Descrever com precisão:
+  - Verificação de plano
+  - Status ativo/inativo
+  - Bloqueio/liberação de funcionalidades
+- Confirmar:
+  - Stripe, Asaas ou ambos
+- Diferenciar:
+  - Monetização operacional
+  - Monetização em preparação
+
+### 4. Knowledge Base / Base de Conhecimento
+- O que constitui a base hoje:
+  - Marcos
+  - Conteúdos
+  - Textos de apoio
+- Se é:
+  - Estática
+  - Semiestruturada
+  - Preparada para RAG (sem afirmar RAG ativo se não existir)
+
+### 5. Marcos do Desenvolvimento Infantil
+Esta deve ser uma das seções mais extensas.
+- Estrutura real dos marcos nos arquivos
+- Organização por:
+  - Idade
+  - Semana
+  - Domínio (motor, cognitivo, linguagem, social)
+- Uso prático:
+  - Quizzes
+  - Feedback
+  - Orientações
+  - Alertas (se existirem)
+
+Conectar explicitamente:
+marco → regra → conteúdo → experiência do usuário
+
+---
+
+## AJUSTE DE TOM DO DOCUMENTO
+Durante a atualização:
+- Reduzir termos como:
+  - “robusto”
+  - “avançado”
+  - “completo”
+  quando não houver evidência clara
+- Preferir:
+  - “estrutura inicial”
+  - “módulo em evolução”
+  - “funcionalidade parcialmente implementada”
+
+Isso aumenta a credibilidade institucional do relatório.
+
+---
+
+## ESTRUTURA FINAL OBRIGATÓRIA DO DOCUMENTO
+O documento final deve conter, no mínimo, as seguintes seções (mantendo e expandindo as atuais):
+
+1. Visão Geral do Projeto  
+2. Arquitetura Geral  
+3. Stack Tecnológica e Infraestrutura  
+4. Organização do Repositório  
+5. WelcomeHub e Fluxos Iniciais  
+6. Jornada do Desenvolvimento (Core)  
+7. Marcos do Desenvolvimento Infantil  
+8. Sistema de Avaliação e Gamificação  
+9. Assistente Conversacional (Titinauta)  
+10. Knowledge Base  
+11. Gestão de Conteúdo  
+12. Gestão de Planos e Assinaturas  
+13. Automação e Integrações  
+14. Experiência do Usuário (UX)  
+15. Segurança, Privacidade e LGPD  
+16. Limitações Atuais  
+17. Roadmap Técnico Realista  
+18. Considerações Finais
+
+---
+
+## REQUISITOS FINAIS
+- Mínimo de 300 linhas em Markdown
+- Linguagem: Português (Brasil)
+- Tom: técnico-institucional
+- Sem emojis
+- Sem links inventados
+- Sem mencionar Smart PEI em hipótese alguma
+
+---
+
+## OUTPUT
+Retorne **apenas o conteúdo final atualizado** do arquivo:
+
+RELATORIO_TECNICO_EDUCARE_APP_FAPEMA.md
+
+Não explique o processo.
+Não inclua comentários fora do documento.
