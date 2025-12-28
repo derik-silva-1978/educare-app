@@ -1,0 +1,59 @@
+# Replit Prompt — Jornada do Desenvolvimento (WhatsApp + Web App em desenvolvimento)
+
+Objetivo:
+- Substituir "Jornada TitiNauta" por "Jornada do Desenvolvimento".
+- Ao clicar, mostrar uma página com 2 opções:
+  1) WhatsApp (Educare+ Ch@t) = disponível + explicar rapidamente como funciona.
+  2) Web App = "Em desenvolvimento" (sem acesso ainda) + CTA para WhatsApp.
+
+Regras:
+- KISS: mudanças mínimas.
+- Manter paleta, tipografia e layout atual (cards/botões).
+- Replit já conhece a versão WhatsApp: reaproveitar o padrão/rota/link existente no projeto.
+
+Implementação:
+1) Sidebar/Menu
+- Renomear item: "Jornada TitiNauta" -> "Jornada do Desenvolvimento".
+- Manter rota antiga funcionando, mas redirecionar para a nova tela de escolha.
+
+2) Página do módulo (tela de escolha)
+- Título: "Jornada do Desenvolvimento"
+- Subtítulo: "Escolha como você quer acessar agora."
+
+Layout: 2 cards lado a lado (ou empilhados no mobile)
+
+CARD 1 — Educare+ Ch@t (WhatsApp) [Primário / Recomendado]
+- Header: "Educare+ Ch@t" + badge "Disponível"
+- Texto curto: "Acompanhe o desenvolvimento do bebê direto no WhatsApp, com perguntas e dicas práticas."
+- Seção "Como funciona" (simples, 3 passos):
+  1. "Você toca em **Abrir no WhatsApp**"
+  2. "O TitiNauta faz 3 perguntas rápidas para entender a idade/fase"
+  3. "Você recebe dicas + atividades e pode continuar a jornada quando quiser"
+- Exemplo pequeno (1 bloco):
+  - "Exemplo: 'Hoje vamos observar o contato visual. Quer tentar uma atividade de 2 minutos?'"
+- CTA botão primário: "Abrir no WhatsApp"
+- Ação do CTA:
+  - Usar a URL já existente no projeto para WhatsApp (config/const/env).
+  - Se não existir, criar constante:
+    - WHATSAPP_JOURNEY_URL = "https://wa.me/<NUMERO>?text=<MENSAGEM_URL_ENCODED>"
+  - Mensagem sugerida:
+    - "Olá! Quero iniciar a Jornada do Desenvolvimento no Educare+ Ch@t."
+
+CARD 2 — App Web [Secundário]
+- Header: "App Web" + badge "Em desenvolvimento"
+- Texto curto: "Estamos finalizando a versão web. Enquanto isso, use o WhatsApp."
+- Botão secundário: "Em desenvolvimento"
+- Ação:
+  - Ao clicar, abrir modal (ou aviso inline) com:
+    - Título: "Versão Web em Construção"
+    - Texto: "Estamos trabalhando para trazer uma experiência completa no navegador. Por enquanto, a jornada está disponível no WhatsApp."
+    - CTA no modal: "Ir para WhatsApp" (mesmo link do card 1)
+
+3) Usabilidade / Acessibilidade
+- Botões grandes, área clicável ampla.
+- Mobile: cards empilhados, CTA sempre visível.
+- Sem textos longos (máx. 3 passos + 1 exemplo).
+
+4) Entrega
+- Commit com: renomeação do menu + nova tela + link WhatsApp via constante/env.
+- Documentar em comentário no código onde alterar número/mensagem do WhatsApp.

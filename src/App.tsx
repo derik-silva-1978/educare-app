@@ -53,6 +53,7 @@ import MilestonesCuration from "./pages/admin/MilestonesCuration";
 import CommunicationPage from "./pages/educare-app/CommunicationPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import TitiNautaJourney from "./pages/educare-app/TitiNautaJourney";
+import DevelopmentJourneyHub from "./pages/educare-app/DevelopmentJourneyHub";
 import TitiNautaAssistant from "./pages/educare-app/TitiNautaAssistant";
 import LojaPage from "./pages/educare-app/LojaPage";
 import SupportPage from "./pages/educare-app/SupportPage";
@@ -107,7 +108,7 @@ const App = () => (
                 {/* Dashboard - User metrics and health data */}
                 <Route path="dashboard" element={<EducareAppDashboard />} />
                 <Route path="titinauta" element={<TitiNautaAssistant />} />
-                <Route path="jornada-desenvolvimento" element={<TitiNautaJourney />} />
+                <Route path="jornada-desenvolvimento" element={<DevelopmentJourneyHub />} />
                 <Route path="children" element={<ChildrenManagement />} />
                 <Route path="child/:id" element={<ChildProfile />} />
                 <Route path="child/new" element={<ChildForm />} />

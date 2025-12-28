@@ -47,6 +47,33 @@ The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui`
 
 ## Recent Changes (December 2025)
 
+### Jornada do Desenvolvimento Hub (Dec 28)
+- **Menu Rename**: Changed sidebar from "Jornada TitiNauta" to "Jornada do Desenvolvimento"
+  - File: `src/components/educare-app/sidebar/ParentSidebar.tsx`
+- **New Hub Page**: Created choice page with 2 options
+  - File: `src/pages/educare-app/DevelopmentJourneyHub.tsx`
+  - Card 1: Educare+ Ch@t (WhatsApp) - Available ✅
+    - Shows 3-step flow: Open WhatsApp → TitiNauta asks questions → Get tips + activities
+    - Example snippet and CTA button to open WhatsApp
+  - Card 2: App Web - Em desenvolvimento
+    - Modal on click explaining web version is in progress
+    - CTA redirects to WhatsApp
+- **WhatsApp Integration**: 
+  - URL: `https://wa.me/5511999999999?text=Olá! Quero iniciar a Jornada do Desenvolvimento...` (update phone in DevelopmentJourneyHub.tsx)
+  - Message URL-encoded for seamless link
+- **Route Updates**: 
+  - `/jornada-desenvolvimento` → DevelopmentJourneyHub (choice page)
+  - `/titinauta-journey` → TitiNautaJourney (actual journey, unchanged)
+  - File: `src/App.tsx` (updated imports and routes)
+- **Design**: Responsive cards (1 col mobile, 2 col desktop), WCAG-compliant, dark mode support
+
+### n8n API Reference Documentation (Dec 28)
+- **Complete API Reference**: Created comprehensive guide for all 8 n8n endpoints
+  - File: `educare-backend/docs/N8N_API_REFERENCE.md`
+  - URL Base: `https://1d35ed6a-d635-41d2-8d11-7db8db84ce29-00-28ylqytrll200.picard.replit.dev:3001`
+  - Includes: JSON configs, cURL examples, request/response formats
+  - Query parameters: week (not age_weeks) for content endpoints
+
 ### n8n Workflow v4.1 Dual-Source Integration (Dec 21)
 - **Complete Dual-Source Support**: Evolution API + Chatwoot in single workflow
   - File: `educare-backend/docs/n8n-workflow-template-v4.json`

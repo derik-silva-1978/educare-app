@@ -93,9 +93,9 @@ const ParentSidebar: React.FC = () => {
         <NavItem to="/educare-app/dashboard" icon={Home} label="Dashboard" />
         <NavItem to="/educare-app/children" icon={Baby} label="Crianças" />
         <NavItem 
-          to="/educare-app/titinauta-journey" 
+          to="/educare-app/jornada-desenvolvimento" 
           icon={Bot} 
-          label="Jornada TitiNauta" 
+          label="Jornada do Desenvolvimento" 
           notification={hasTitiNautaContent} 
         />
         <NavItem to="/educare-app/activities" icon={Calendar} label="Atividades" />
