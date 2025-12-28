@@ -188,6 +188,14 @@ app.use('/api/n8n', n8nRoutes);
 const cloudRoutes = require('./routes/cloudRoutes');
 app.use('/api/cloud', cloudRoutes);
 
+// Training content routes (FASE 2)
+const trainingRoutes = require('./routes/trainingRoutes');
+app.use('/api/trainings', trainingRoutes);
+
+// Vimeo integration routes (FASE 2)
+const vimeoRoutes = require('./routes/vimeoRoutes');
+app.use('/api/vimeo', vimeoRoutes);
+
 // Rotas de health check (sem prefixo /api para acesso direto)
 app.use('/health', healthRoutes);
 

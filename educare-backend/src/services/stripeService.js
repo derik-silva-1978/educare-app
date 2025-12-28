@@ -55,6 +55,11 @@ class StripeService {
     });
   }
 
+  async getCheckoutSession(sessionId) {
+    const stripe = await getUncachableStripeClient();
+    return await stripe.checkout.sessions.retrieve(sessionId);
+  }
+
   async createCustomerPortalSession(customerId, returnUrl) {
     const stripe = await getUncachableStripeClient();
     return await stripe.billingPortal.sessions.create({

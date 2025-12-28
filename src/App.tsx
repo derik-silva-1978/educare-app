@@ -61,6 +61,8 @@ import SupportPage from "./pages/educare-app/SupportPage";
 import MaterialApoioPage from "./pages/educare-app/MaterialApoioPage";
 import WelcomeHub from "./pages/educare-app/WelcomeHub";
 import NewsDetail from "./pages/educare-app/NewsDetail";
+import TrainingsPage from "./pages/educare-app/TrainingsPage";
+import TrainingsAdmin from "./pages/educare-app/TrainingsAdmin";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -174,6 +176,11 @@ const App = () => (
                 <Route path="owner/milestones-curation" element={<MilestonesCuration />} />
                 <Route path="admin/milestones-curation" element={<MilestonesCuration />} />
                 <Route path="admin/content-management" element={<ContentManagement />} />
+                <Route path="admin/trainings" element={<TrainingsAdmin />} />
+                <Route path="owner/trainings" element={<TrainingsAdmin />} />
+                
+                {/* Trainings for users */}
+                <Route path="trainings" element={<TrainingsPage />} />
                 
                 {/* Professional Routes - Gestão de Crianças */}
                 <Route path="professional/children" element={

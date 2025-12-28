@@ -57,6 +57,52 @@ exports.verifyToken = async (req, res, next) => {
   }
 };
 
+// Middleware opcional - popula req.user se token válido, mas não bloqueia
+exports.optionalAuth = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader) {
+      req.user = null;
+      return next();
+    }
+    
+    const parts = authHeader.split(' ');
+    
+    if (parts.length !== 2 || !/^Bearer$/i.test(parts[0])) {
+      req.user = null;
+      return next();
+    }
+    
+    const token = parts[1];
+    
+    jwt.verify(token, authConfig.secret, async (err, decoded) => {
+      if (err) {
+        req.user = null;
+        return next();
+      }
+      
+      const user = await User.findByPk(decoded.id);
+      
+      if (!user || user.status !== 'active') {
+        req.user = null;
+        return next();
+      }
+      
+      req.user = {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      };
+      
+      return next();
+    });
+  } catch (error) {
+    req.user = null;
+    return next();
+  }
+};
+
 // Middleware para verificar se o usuário é admin
 exports.isAdmin = (req, res, next) => {
   if (req.user.role !== 'admin' && req.user.role !== 'owner') {
