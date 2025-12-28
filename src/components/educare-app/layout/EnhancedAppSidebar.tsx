@@ -22,7 +22,8 @@ import {
   BarChart3,
   Database,
   FileText,
-  Sparkles
+  Sparkles,
+  BookOpen
 } from 'lucide-react';
 import {
   Sidebar,
@@ -226,14 +227,29 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
   if (userRole === 'professional') {
     return [
       {
-        title: "Dashboard Profissional",
+        title: "Dashboard",
         url: "/educare-app/professional/dashboard",
-        icon: GraduationCap,
+        icon: Home,
       },
       {
-        title: "Gestão de Crianças",
+        title: "Minhas Crianças",
         url: "/educare-app/professional/children",
-        icon: UsersRound,
+        icon: Baby,
+      },
+      {
+        title: "TitiNauta Especialista",
+        url: "/educare-app/professional/titinauta",
+        icon: Bot,
+      },
+      {
+        title: "Recursos e Qualificação",
+        url: "/educare-app/professional/resources",
+        icon: BookOpen,
+      },
+      {
+        title: "Treinamentos",
+        url: "/educare-app/trainings",
+        icon: GraduationCap,
       },
       {
         title: "Configurações",

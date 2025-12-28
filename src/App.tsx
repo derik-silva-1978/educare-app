@@ -135,7 +135,7 @@ const App = () => (
                     <ProfessionalDashboard />
                   </ProfessionalOnlyGuard>
                 } />
-                <Route path="professional/analysis/:childId" element={
+                <Route path="professional/child/:childId/analysis" element={
                   <ProfessionalOnlyGuard>
                     <ChildAnalysis />
                   </ProfessionalOnlyGuard>
@@ -150,6 +150,7 @@ const App = () => (
                     <ProfessionalResourcesHub />
                   </ProfessionalOnlyGuard>
                 } />
+                <Route path="trainings" element={<TrainingsPage />} />
                 
                 {/* Admin Routes */}
                 <Route path="admin/dashboard" element={<AdminDashboard />} />

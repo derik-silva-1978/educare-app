@@ -58,9 +58,10 @@ const EducareAppLayout: React.FC = () => {
   if (user.role === 'professional') {
     console.log('👨‍⚕️ EDUCAREAPPLAYOUT: Usuário é professional');
     const allowedPaths = [
-      '/educare-app/professional/dashboard',
+      '/educare-app/professional/',
       '/educare-app/jornada-desenvolvimento',
-      '/educare-app/settings'
+      '/educare-app/settings',
+      '/educare-app/trainings'
     ];
     
     const isAllowedPath = allowedPaths.some(path => location.pathname.startsWith(path));
