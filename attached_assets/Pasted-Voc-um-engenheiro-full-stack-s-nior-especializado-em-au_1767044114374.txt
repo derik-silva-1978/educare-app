@@ -1,0 +1,87 @@
+Você é um engenheiro full-stack sênior especializado em auditoria de compatibilidade Frontend ⇄ Postgres (schema-driven). 
+Seu objetivo é diagnosticar se o FRONTEND do módulo “Gestão de Perguntas” possui campos e mapeamentos suficientes para preencher 100% das tabelas/colunas necessárias no Postgres externo, incluindo constraints (NOT NULL), defaults, enums/check constraints e foreign keys.
+
+CONTEXTO
+- Existe uma tela “Gestão de Perguntas da Jornada” com: filtros, exportar CSV, importar CSV (31 campos), e botão “Nova Pergunta”.
+- Suspeita: o frontend está incompleto e não preenche todas as colunas/tabelas do banco externo.
+- Banco: Postgres externo (não é o banco embutido do frontend), usado como fonte oficial.
+
+O QUE VOCÊ DEVE FAZER (SEM PEDIR PERGUNTAS SE CONSEGUIR EXTRAIR DO REPO)
+1) INVENTÁRIO DO POSTGRES (FONTE DE VERDADE)
+   a) Identifique como o app acessa o Postgres (env vars, config, SDK, ORM).
+   b) Liste TODAS as tabelas relacionadas ao “módulo de perguntas” (diretas e relacionadas):
+      - perguntas / questions
+      - opções / options / answers
+      - feedbacks
+      - atividades
+      - gamificação
+      - metadados / semana / jornada / domínio
+      - tabelas de junção (N:N)
+   c) Gere introspecção do schema (colunas, tipos, NOT NULL, DEFAULT, PK, FK, UNIQUE, CHECK).
+      - Se não houver acesso ao banco no ambiente, use migrations/schema.sql/Prisma schema/Drizzle/Knex etc. como fonte alternativa.
+   d) Resultado: “Schema Canon” com: tabela, coluna, tipo SQL, not null, default, constraints, fk.
+
+2) INVENTÁRIO DO FRONTEND (FONTE DE INPUT)
+   a) Localize as telas/componentes do módulo:
+      - listagem
+      - create/edit (“Nova Pergunta”)
+      - importador CSV
+   b) Liste TODOS os campos de input (visíveis e hidden/autofill) do create/edit:
+      - nome do campo (state/form key)
+      - tipo (string/number/boolean/array/object)
+      - validação (required, min/max, enum)
+      - origem (input do usuário ou auto preenchido)
+   c) Resultado: “Frontend Field List”.
+
+3) INVENTÁRIO DO PAYLOAD E DO MAPEAMENTO
+   a) Descubra o endpoint/chamada de rede que salva/edita pergunta (POST/PUT).
+   b) Capture/mostre exemplo do payload mínimo e completo.
+   c) Trace o caminho:
+      Frontend field → payload JSON → DTO/backend → query/insert → coluna no Postgres
+   d) Resultado: “Mapping Trace”.
+
+4) MATRIZ DE COBERTURA (OBJETIVO PRINCIPAL)
+   Construa uma matriz que responda: “cada coluna necessária no Postgres é preenchida de alguma forma?”
+   Para cada tabela.coluna do Schema Canon, preencha:
+   - tabela.coluna
+   - tipo SQL / constraints (NOT NULL/DEFAULT/CHECK/FK)
+   - origem (frontend input? hidden? backend default? trigger? computed?)
+   - campo no payload (sim/não)
+   - regra de preenchimento (ex.: derivado de idade_min/idade_max; mapeado de category; etc.)
+   - status de cobertura:
+       ✅ Coberto (preenchido sempre)
+       ⚠️ Parcial (às vezes fica null, depende de fluxo)
+       ❌ Descoberto (não existe input/mapeamento/default)
+   - evidência no código (arquivo + trecho/linha)
+
+5) TESTE PRÁTICO PARA PROVAR (NÃO FICAR NO ACHISMO)
+   a) Simule um INSERT/UPDATE real (em ambiente dev/test) com:
+      - payload mínimo
+      - payload completo
+   b) Confirme no Postgres:
+      - se gravou em todas as tabelas esperadas
+      - se colunas NOT NULL ficaram preenchidas
+      - se FKs apontam para registros válidos
+   c) Se houver falha silenciosa, encontre onde o erro está sendo engolido (try/catch, toast genérico, etc.)
+
+6) RELATÓRIO FINAL (FORMATO FIXO)
+   Entregue exatamente assim:
+   I. Resumo executivo (diagnóstico: “cobre 100%?” sim/não)
+   II. Tabelas envolvidas (lista)
+   III. Matriz de cobertura (obrigatória)
+   IV. Lista de gaps críticos (impacto alto) e gaps médios
+   V. Recomendações de correção:
+      - frontend (quais campos adicionar/ajustar)
+      - backend/mapper (quais bindings corrigir)
+      - banco (somente se realmente necessário)
+   VI. Checklist de validação pós-correção
+
+REGRAS IMPORTANTES
+- Não presuma nomes de tabelas/colunas: encontre no repo ou introspecione.
+- Dê prioridade a colunas NOT NULL e FKs: se não forem preenchidas, não é “100% compatível”.
+- Verifique divergência camelCase vs snake_case.
+- Cuidado com JSON/JSONB, arrays (text[]), enums (CHECK constraints), defaults anulados por null.
+- Se o sistema usa importação CSV, avalie esse fluxo separadamente do “Nova Pergunta”.
+
+SAÍDA EXTRA (SE POSSÍVEL)
+- Gere um arquivo CSV/Markdown da matriz de cobertura para eu colar numa planilha.
