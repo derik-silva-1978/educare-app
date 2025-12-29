@@ -126,7 +126,11 @@ export async function askQuestion(
     if (response.success && response.data) {
       console.log('[RAGService] Sucesso com JWT auth');
       options.onProgress?.('generating');
-      return response.data;
+      // Garante que o campo success está presente na resposta
+      return {
+        ...response.data,
+        success: true
+      };
     }
 
     // Se não teve sucesso mas não é erro de auth, lança erro
@@ -153,7 +157,11 @@ export async function askQuestion(
     if (externalResponse.success && externalResponse.data) {
       console.log('[RAGService] Sucesso com rota externa');
       options.onProgress?.('generating');
-      return externalResponse.data;
+      // Garante que o campo success está presente na resposta
+      return {
+        ...externalResponse.data,
+        success: true
+      };
     }
 
     throw new Error(externalResponse.error || 'Erro ao obter resposta do RAG');
