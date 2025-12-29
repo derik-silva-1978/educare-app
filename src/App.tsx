@@ -2,8 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { CustomDevTools, DevToolsDemo } from "@/components/dev";
-import { devToolsConfig } from "@/config/devtools.config";
+import { DevToolsDemo } from "@/components/dev";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from "@/providers/CustomAuthProvider";
@@ -230,14 +229,7 @@ const App = () => (
           </TooltipProvider>
         </AuthProvider>
       </HelmetProvider>
-        {/* Renderizar DevTools apenas em ambiente de desenvolvimento */}
-        {process.env.NODE_ENV === 'development' && devToolsConfig.enabled && (
-          <CustomDevTools 
-            initialIsOpen={devToolsConfig.reactQuery.initialIsOpen} 
-            position={devToolsConfig.reactQuery.position} 
-            buttonPosition={devToolsConfig.reactQuery.buttonPosition} 
-          />
-        )}
+        {/* DevTools removidos para produção - usar /dev/tools se necessário */}
       </ThemeProvider>
     </QueryClientProvider>
   </GoogleOAuthProvider>
