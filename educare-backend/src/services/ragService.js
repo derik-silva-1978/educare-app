@@ -204,7 +204,13 @@ async function retrieveFromFileSearch(question, fileSearchIds) {
       };
     }
 
-    const validFileIds = fileSearchIds.filter(id => id && id.trim() !== '');
+    const validFileIds = fileSearchIds
+      .filter(id => id && id.trim() !== '')
+      .map(id => {
+        // Garante que file_id tenha no máximo 64 caracteres (limite do OpenAI)
+        const trimmed = id.trim();
+        return trimmed.length > 64 ? trimmed.slice(-64) : trimmed;
+      });
     
     if (validFileIds.length === 0) {
       return {

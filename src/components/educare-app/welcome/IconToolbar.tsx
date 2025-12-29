@@ -421,13 +421,13 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
 
       {/* TitiNauta AI Chat Sheet (lateral) */}
       <Sheet open={showOnboardingChat} onOpenChange={setShowOnboardingChat}>
-        <SheetContent side="right" className="w-full sm:max-w-md flex flex-col h-full p-0">
-          <SheetHeader className="px-4 py-3 border-b bg-gradient-to-r from-indigo-500/10 to-purple-500/10">
-            <SheetTitle className="flex items-center gap-2">
-              <Bot className={`h-5 w-5 ${isProfessional ? 'text-indigo-600' : 'text-purple-500'}`} />
+        <SheetContent side="right" className={`w-full sm:max-w-md flex flex-col h-full p-0 ${isProfessional ? 'bg-white dark:bg-slate-950' : 'bg-white dark:bg-slate-950'}`}>
+          <SheetHeader className={`px-4 py-3 border-b ${isProfessional ? 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800' : 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800'}`}>
+            <SheetTitle className={`flex items-center gap-2 ${isProfessional ? 'text-indigo-900 dark:text-indigo-100' : 'text-purple-900 dark:text-purple-100'}`}>
+              <Bot className={`h-5 w-5 ${isProfessional ? 'text-indigo-600 dark:text-indigo-400' : 'text-purple-600 dark:text-purple-400'}`} />
               {isProfessional ? 'TitiNauta Especialista' : 'TitiNauta - Assistente de IA'}
             </SheetTitle>
-            <SheetDescription className="text-xs">
+            <SheetDescription className={`text-xs ${isProfessional ? 'text-indigo-700 dark:text-indigo-300' : 'text-purple-700 dark:text-purple-300'}`}>
               {isProfessional 
                 ? 'Protocolos clínicos, marcos de desenvolvimento e práticas baseadas em evidências'
                 : 'Desenvolvimento infantil, estimulação e marcos de desenvolvimento'}
@@ -435,13 +435,13 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
           </SheetHeader>
           
           {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto space-y-3 p-4">
+          <div className="flex-1 overflow-y-auto space-y-3 p-4 bg-white dark:bg-slate-950">
             {chatMessages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'assistant' ? 'justify-start' : 'justify-end'}`}>
                 <div className={`max-w-[85%] rounded-lg p-3 ${
                   msg.role === 'assistant'
                     ? isProfessional 
-                      ? 'bg-indigo-100 dark:bg-indigo-900/30 text-foreground'
+                      ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-50'
                       : 'bg-purple-100 dark:bg-purple-900/30 text-foreground'
                     : 'bg-primary text-primary-foreground'
                 }`}>
