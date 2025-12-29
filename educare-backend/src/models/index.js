@@ -57,6 +57,9 @@ const KbBaby = require('./KbBaby');
 const KbMother = require('./KbMother');
 const KbProfessional = require('./KbProfessional');
 
+// Modelo de Prompts dos Assistentes
+const AssistantPrompt = require('./AssistantPrompt');
+
 // Importação dos modelos da Jornada 2.0
 const JourneyV2 = require('./JourneyV2');
 const JourneyV2Week = require('./JourneyV2Week');
@@ -360,6 +363,12 @@ UserEnrollment.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 ContentItem.hasMany(UserEnrollment, { foreignKey: 'content_id', as: 'enrollments' });
 UserEnrollment.belongsTo(ContentItem, { foreignKey: 'content_id', as: 'content' });
 
+// AssistantPrompt <-> User (created_by, updated_by)
+User.hasMany(AssistantPrompt, { foreignKey: 'created_by', as: 'createdPrompts' });
+AssistantPrompt.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
+User.hasMany(AssistantPrompt, { foreignKey: 'updated_by', as: 'updatedPrompts' });
+AssistantPrompt.belongsTo(User, { foreignKey: 'updated_by', as: 'updater' });
+
 // Exportação dos modelos
 module.exports = {
   sequelize,
@@ -420,5 +429,7 @@ module.exports = {
   TrainingLesson,
   UserContentProgress,
   ContentPricing,
-  UserEnrollment
+  UserEnrollment,
+  // Modelo de Prompts dos Assistentes
+  AssistantPrompt
 };

@@ -188,6 +188,10 @@ app.use('/api/n8n', n8nRoutes);
 const cloudRoutes = require('./routes/cloudRoutes');
 app.use('/api/cloud', cloudRoutes);
 
+// Assistant Prompt Management routes (Owner only)
+const assistantPromptRoutes = require('./routes/assistantPromptRoutes');
+app.use('/api/assistant-prompts', assistantPromptRoutes);
+
 // Training content routes (FASE 2)
 const trainingRoutes = require('./routes/trainingRoutes');
 app.use('/api/trainings', trainingRoutes);
