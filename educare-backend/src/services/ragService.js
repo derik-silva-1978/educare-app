@@ -22,7 +22,11 @@ const ragFeedbackService = require('./ragFeedbackService');
 // FASE 12: Prompt Management Service
 const promptService = require('./promptService');
 
+// FASE 12: LLM Configuration Service
+const llmConfigService = require('./llmConfigService');
+
 let openaiInstance = null;
+let geminiInstance = null;
 
 function getOpenAI() {
   if (!openaiInstance && process.env.OPENAI_API_KEY) {
@@ -31,6 +35,18 @@ function getOpenAI() {
     });
   }
   return openaiInstance;
+}
+
+function getGemini() {
+  if (!geminiInstance && process.env.GEMINI_API_KEY) {
+    try {
+      const { GoogleGenerativeAI } = require('@google/generative-ai');
+      geminiInstance = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    } catch (error) {
+      console.warn('[RAG] Google Generative AI SDK não disponível:', error.message);
+    }
+  }
+  return geminiInstance;
 }
 
 const DEFAULT_SYSTEM_PROMPT = `Você é TitiNauta, a assistente oficial do Educare App, especializada em desenvolvimento infantil (0-6 anos).
@@ -410,32 +426,80 @@ function buildLLMPrompt(question, retrievedChunks, childContext = null, customSy
   };
 }
 
+async function callOpenAI(systemPrompt, userMessage, options = {}) {
+  const openai = getOpenAI();
+  if (!openai) {
+    return {
+      success: false,
+      error: 'OpenAI não configurado'
+    };
+  }
+
+  const response = await openai.chat.completions.create({
+    model: options.model || 'gpt-4o-mini',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userMessage }
+    ],
+    temperature: options.temperature ?? 0.7,
+    max_tokens: options.max_tokens ?? 1500
+  });
+
+  return {
+    success: true,
+    content: response.choices[0].message.content,
+    usage: response.usage,
+    model: response.model,
+    provider: 'openai'
+  };
+}
+
+async function callGemini(systemPrompt, userMessage, options = {}) {
+  const gemini = getGemini();
+  if (!gemini) {
+    return {
+      success: false,
+      error: 'Google Gemini não configurado'
+    };
+  }
+
+  const model = gemini.getGenerativeModel({ 
+    model: options.model || 'gemini-2.0-flash',
+    generationConfig: {
+      temperature: options.temperature ?? 0.7,
+      maxOutputTokens: options.max_tokens ?? 1500
+    },
+    systemInstruction: systemPrompt
+  });
+
+  const result = await model.generateContent(userMessage);
+  const response = await result.response;
+  const text = response.text();
+
+  return {
+    success: true,
+    content: text,
+    usage: {
+      prompt_tokens: response.usageMetadata?.promptTokenCount || 0,
+      completion_tokens: response.usageMetadata?.candidatesTokenCount || 0,
+      total_tokens: response.usageMetadata?.totalTokenCount || 0
+    },
+    model: options.model || 'gemini-2.0-flash',
+    provider: 'gemini'
+  };
+}
+
 async function callLLM(systemPrompt, userMessage, options = {}) {
   try {
-    const openai = getOpenAI();
-    if (!openai) {
-      return {
-        success: false,
-        error: 'OpenAI não configurado'
-      };
+    const provider = options.provider || 'openai';
+    
+    console.log(`[RAG] Chamando LLM: provider=${provider}, model=${options.model || 'default'}`);
+    
+    if (provider === 'gemini') {
+      return await callGemini(systemPrompt, userMessage, options);
     }
-
-    const response = await openai.chat.completions.create({
-      model: options.model || 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userMessage }
-      ],
-      temperature: options.temperature || 0.7,
-      max_tokens: options.max_tokens || 1500
-    });
-
-    return {
-      success: true,
-      content: response.choices[0].message.content,
-      usage: response.usage,
-      model: response.model
-    };
+    
+    return await callOpenAI(systemPrompt, userMessage, options);
   } catch (error) {
     console.error('[RAG] Erro ao chamar LLM:', error);
     return {
@@ -628,13 +692,33 @@ async function ask(question, options = {}) {
       customSystemPrompt
     );
 
+    // FASE 12: Carregar configuração de LLM do banco de dados
+    let llmConfig = null;
+    let llmConfigMetadata = null;
+    
+    try {
+      llmConfig = await llmConfigService.getConfig(filters.module_type);
+      if (llmConfig && llmConfig.provider) {
+        llmConfigMetadata = {
+          provider: llmConfig.provider,
+          model: llmConfig.model_name,
+          temperature: llmConfig.temperature,
+          max_tokens: llmConfig.max_tokens
+        };
+        console.log(`[RAG] Usando LLM config: ${llmConfig.provider}/${llmConfig.model_name}`);
+      }
+    } catch (configError) {
+      console.warn('[RAG] Erro ao carregar LLM config (usando default):', configError.message);
+    }
+
     const llmResult = await callLLM(
       promptData.systemPrompt,
       promptData.userMessage,
       {
-        model: options.model,
-        temperature: options.temperature,
-        max_tokens: options.max_tokens
+        provider: llmConfig?.provider || options.provider || 'openai',
+        model: llmConfig?.model_name || options.model || 'gpt-4o-mini',
+        temperature: llmConfig?.temperature ?? options.temperature ?? 0.7,
+        max_tokens: llmConfig?.max_tokens ?? options.max_tokens ?? 1500
       }
     );
 
@@ -772,7 +856,8 @@ async function ask(question, options = {}) {
           response_audit: responseAudit?.findings?.length > 0 ? responseAudit.findings : null,
           disclaimers_added: disclaimers.length > 0
         },
-        prompt: promptMetadata
+        prompt: promptMetadata,
+        llm_config: llmConfigMetadata
       }
     };
   } catch (error) {
