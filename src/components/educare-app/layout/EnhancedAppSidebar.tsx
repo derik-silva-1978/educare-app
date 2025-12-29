@@ -158,6 +158,11 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         url: "/educare-app/owner/milestones-curation",
         icon: Baby,
       },
+      {
+        title: "Prompts dos Assistentes",
+        url: "/educare-app/owner/prompt-management",
+        icon: Bot,
+      },
       ...baseItems,
     ];
   }

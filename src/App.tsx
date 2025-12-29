@@ -54,6 +54,7 @@ import KnowledgeBaseManagement from "./pages/admin/KnowledgeBaseManagement";
 import ContentManagement from "./pages/admin/ContentManagement";
 import FAQAnalyticsDashboard from "./pages/admin/FAQAnalyticsDashboard";
 import MilestonesCuration from "./pages/admin/MilestonesCuration";
+import PromptManagement from "./pages/admin/PromptManagement";
 import CommunicationPage from "./pages/educare-app/CommunicationPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import DevelopmentJourneyHub from "./pages/educare-app/DevelopmentJourneyHub";
@@ -187,6 +188,7 @@ const App = () => (
                 <Route path="owner/content-management" element={<ContentManagement />} />
                 <Route path="owner/faq-analytics" element={<FAQAnalyticsDashboard />} />
                 <Route path="owner/milestones-curation" element={<MilestonesCuration />} />
+                <Route path="owner/prompt-management" element={<PromptManagement />} />
                 <Route path="admin/milestones-curation" element={<MilestonesCuration />} />
                 <Route path="admin/content-management" element={<ContentManagement />} />
                 <Route path="admin/trainings" element={<TrainingsAdmin />} />
