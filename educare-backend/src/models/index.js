@@ -59,6 +59,7 @@ const KbProfessional = require('./KbProfessional');
 
 // Modelo de Prompts dos Assistentes
 const AssistantPrompt = require('./AssistantPrompt');
+const AssistantLLMConfig = require('./AssistantLLMConfig');
 
 // Importação dos modelos da Jornada 2.0
 const JourneyV2 = require('./JourneyV2');
@@ -431,5 +432,6 @@ module.exports = {
   ContentPricing,
   UserEnrollment,
   // Modelo de Prompts dos Assistentes
-  AssistantPrompt
+  AssistantPrompt,
+  AssistantLLMConfig
 };

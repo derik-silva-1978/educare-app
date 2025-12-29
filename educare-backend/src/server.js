@@ -192,6 +192,10 @@ app.use('/api/cloud', cloudRoutes);
 const assistantPromptRoutes = require('./routes/assistantPromptRoutes');
 app.use('/api/assistant-prompts', assistantPromptRoutes);
 
+// LLM Configuration routes (Owner only)
+const llmConfigRoutes = require('./routes/llmConfigRoutes');
+app.use('/api/llm-configs', llmConfigRoutes);
+
 // Training content routes (FASE 2)
 const trainingRoutes = require('./routes/trainingRoutes');
 app.use('/api/trainings', trainingRoutes);
