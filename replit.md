@@ -66,6 +66,18 @@ Content is dynamically loaded and diversified with fallback images. Audience fil
   - Unified LLM calling through providerRegistry.callLLM() in ragService.js
   - Default configs seeded via `node src/scripts/seedDefaultLLMConfigs.js`
   - Environment keys: OPENAI_API_KEY, GEMINI_API_KEY, DEEPSEEK_API_KEY, GROQ_API_KEY, XAI_API_KEY, ANTHROPIC_API_KEY, TOGETHER_API_KEY, OPENROUTER_API_KEY, CUSTOM_LLM_API_KEY
+- **Journey Questions Management (Admin/Owner)**: Complete CRUD system for managing development journey quizzes via `/educare-app/admin/journey-questions`. Features include:
+  - Uses production tables: `journey_v2_quizzes`, `journey_v2_weeks`, `journey_v2` (external PostgreSQL database)
+  - 8-field schema: `week_id`, `domain`, `domain_id`, `title`, `question`, `options` (JSONB), `feedback` (JSONB), `knowledge` (JSONB)
+  - Hierarchical selectors: Journey → Week → Quiz
+  - JSONB editors for complex fields (options, feedback, knowledge)
+  - CSV import/export with JSONB field support
+  - Statistics dashboard by domain and week
+  - Backend endpoints: `/api/journey-v2/admin/quizzes` (CRUD), `/api/journey-v2/admin/journeys`, `/api/journey-v2/admin/weeks`
+  - **DEPRECATED FILES** (legacy, do not use):
+    - `adminJourneyQuestionsController.js` - Uses legacy `journey_bot_questions` table
+    - `journeyQuestionsRoutes.js` - Legacy routes
+    - `JourneyBotQuestion.js` model - Legacy 35-column flat structure
 
 ### System Design Choices
 - **Scalability**: Designed for cloud deployment on Digital Ocean using multiple droplets, PostgreSQL, and Redis.
