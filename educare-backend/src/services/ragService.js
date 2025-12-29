@@ -19,6 +19,9 @@ const contextSafetyService = require('./contextSafetyService');
 // FASE 11: Feedback Service
 const ragFeedbackService = require('./ragFeedbackService');
 
+// FASE 12: Prompt Management Service
+const promptService = require('./promptService');
+
 let openaiInstance = null;
 
 function getOpenAI() {
@@ -586,11 +589,43 @@ async function ask(question, options = {}) {
       }
     }
 
+    // FASE 12: Carregar prompt customizado do banco de dados
+    let customSystemPrompt = options.customSystemPrompt;
+    let promptMetadata = null;
+    
+    if (!customSystemPrompt) {
+      try {
+        const promptContext = {
+          childName: options.childContext?.name,
+          childAge: options.childContext?.ageInMonths || options.childContext?.age_months,
+          childWeek: options.childContext?.week,
+          userName: options.userName,
+          professionalSpecialty: options.professionalSpecialty
+        };
+        
+        const processedPrompt = await promptService.getProcessedPrompt(filters.module_type, promptContext);
+        
+        if (processedPrompt) {
+          customSystemPrompt = processedPrompt.systemPrompt;
+          promptMetadata = {
+            promptId: processedPrompt.promptId,
+            version: processedPrompt.version,
+            name: processedPrompt.name
+          };
+          console.log(`[RAG] Usando prompt customizado: ${promptMetadata.name} v${promptMetadata.version}`);
+        } else {
+          console.log(`[RAG] Nenhum prompt customizado para ${filters.module_type}, usando default`);
+        }
+      } catch (promptError) {
+        console.warn('[RAG] Erro ao carregar prompt customizado (usando default):', promptError.message);
+      }
+    }
+
     const promptData = buildLLMPrompt(
       question,
       retrievedChunks,
       options.childContext,
-      options.customSystemPrompt
+      customSystemPrompt
     );
 
     const llmResult = await callLLM(
@@ -736,7 +771,8 @@ async function ask(question, options = {}) {
           query_audit: safetyAudit?.findings?.length > 0 ? safetyAudit.findings : null,
           response_audit: responseAudit?.findings?.length > 0 ? responseAudit.findings : null,
           disclaimers_added: disclaimers.length > 0
-        }
+        },
+        prompt: promptMetadata
       }
     };
   } catch (error) {
@@ -824,5 +860,6 @@ module.exports = {
   DEFAULT_SYSTEM_PROMPT,
   LOW_CONFIDENCE_MESSAGE,
   babyContextService,
-  ragMetricsService
+  ragMetricsService,
+  promptService
 };
