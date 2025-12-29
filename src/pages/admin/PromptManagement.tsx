@@ -24,9 +24,15 @@ import {
   RefreshCw,
   Eye,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Settings2,
+  Cpu
 } from 'lucide-react';
 import { assistantPromptService, type AssistantPrompt, type CreatePromptData } from '@/services/api/assistantPromptService';
+import { llmConfigService, type LLMConfig, type LLMProviderInfo, type ProviderType } from '@/services/api/llmConfigService';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -57,6 +63,12 @@ const PromptManagement: React.FC = () => {
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [previewPrompt, setPreviewPrompt] = useState<AssistantPrompt | null>(null);
 
+  const [llmProviders, setLlmProviders] = useState<LLMProviderInfo[]>([]);
+  const [babyLLMConfig, setBabyLLMConfig] = useState<LLMConfig | null>(null);
+  const [professionalLLMConfig, setProfessionalLLMConfig] = useState<LLMConfig | null>(null);
+  const [savingLLMConfig, setSavingLLMConfig] = useState(false);
+  const [modelSettingsOpen, setModelSettingsOpen] = useState<Record<string, boolean>>({ baby: false, professional: false });
+
   const isOwner = hasRole('owner');
 
   useEffect(() => {
@@ -67,9 +79,10 @@ const PromptManagement: React.FC = () => {
     try {
       setLoading(true);
       
-      const [babyData, professionalData] = await Promise.all([
+      const [babyData, professionalData, llmConfigsData] = await Promise.all([
         assistantPromptService.getActivePromptByModule('baby'),
-        assistantPromptService.getActivePromptByModule('professional')
+        assistantPromptService.getActivePromptByModule('professional'),
+        llmConfigService.getAllConfigs().catch(() => ({ configs: [], providers: [] }))
       ]);
       
       setBabyPrompt(babyData);
@@ -85,6 +98,33 @@ const PromptManagement: React.FC = () => {
         setProfessionalName(professionalData.name);
         setProfessionalDescription(professionalData.description || '');
         setProfessionalSystemPrompt(professionalData.system_prompt);
+      }
+      
+      if (llmConfigsData.providers) {
+        setLlmProviders(llmConfigsData.providers);
+      }
+      
+      if (llmConfigsData.configs) {
+        const babyConfig = llmConfigsData.configs.find(c => c.module_type === 'baby');
+        const profConfig = llmConfigsData.configs.find(c => c.module_type === 'professional');
+        
+        setBabyLLMConfig(babyConfig || {
+          module_type: 'baby',
+          provider: 'openai',
+          model_name: 'gpt-4o-mini',
+          temperature: 0.7,
+          max_tokens: 1500,
+          is_active: true
+        });
+        
+        setProfessionalLLMConfig(profConfig || {
+          module_type: 'professional',
+          provider: 'openai',
+          model_name: 'gpt-4o-mini',
+          temperature: 0.7,
+          max_tokens: 1500,
+          is_active: true
+        });
       }
       
     } catch (error) {
@@ -209,6 +249,58 @@ const PromptManagement: React.FC = () => {
   const handlePreviewPrompt = (prompt: AssistantPrompt) => {
     setPreviewPrompt(prompt);
     setPreviewDialogOpen(true);
+  };
+
+  const handleSaveLLMConfig = async (moduleType: 'baby' | 'professional') => {
+    const config = moduleType === 'baby' ? babyLLMConfig : professionalLLMConfig;
+    
+    if (!config) {
+      toast({
+        title: 'Erro',
+        description: 'Configuração não encontrada.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    try {
+      setSavingLLMConfig(true);
+      
+      await llmConfigService.updateConfig(moduleType, {
+        provider: config.provider,
+        model_name: config.model_name,
+        temperature: config.temperature,
+        max_tokens: config.max_tokens
+      });
+      
+      toast({
+        title: 'Configuração salva',
+        description: `Modelo ${config.model_name} configurado para ${moduleType === 'baby' ? 'TitiNauta' : 'TitiNauta Especialista'}.`
+      });
+      
+    } catch (error) {
+      console.error('Erro ao salvar configuração de LLM:', error);
+      toast({
+        title: 'Erro ao salvar',
+        description: error instanceof Error ? error.message : 'Não foi possível salvar a configuração de LLM.',
+        variant: 'destructive'
+      });
+    } finally {
+      setSavingLLMConfig(false);
+    }
+  };
+
+  const updateLLMConfig = (moduleType: 'baby' | 'professional', updates: Partial<LLMConfig>) => {
+    if (moduleType === 'baby') {
+      setBabyLLMConfig(prev => prev ? { ...prev, ...updates } : null);
+    } else {
+      setProfessionalLLMConfig(prev => prev ? { ...prev, ...updates } : null);
+    }
+  };
+
+  const getModelsForProvider = (provider: ProviderType): { id: string; name: string; description: string }[] => {
+    const providerInfo = llmProviders.find(p => p.id === provider);
+    return providerInfo?.models || [];
   };
 
   if (!isOwner) {
@@ -338,6 +430,153 @@ const PromptManagement: React.FC = () => {
             Salvar Nova Versão
           </Button>
         </div>
+        
+        <Separator className="my-6" />
+        
+        <Collapsible 
+          open={modelSettingsOpen[moduleType]} 
+          onOpenChange={(open) => setModelSettingsOpen(prev => ({ ...prev, [moduleType]: open }))}
+        >
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="w-full justify-between p-4 h-auto">
+              <div className="flex items-center gap-3">
+                <Cpu className="h-5 w-5 text-blue-500" />
+                <div className="text-left">
+                  <h4 className="font-medium">Configurações do Modelo</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {(moduleType === 'baby' ? babyLLMConfig : professionalLLMConfig)?.provider === 'openai' ? 'OpenAI' : 'Google Gemini'} - {(moduleType === 'baby' ? babyLLMConfig : professionalLLMConfig)?.model_name || 'gpt-4o-mini'}
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className={`h-5 w-5 transition-transform ${modelSettingsOpen[moduleType] ? 'rotate-90' : ''}`} />
+            </Button>
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent className="pt-4 space-y-6">
+            {(() => {
+              const config = moduleType === 'baby' ? babyLLMConfig : professionalLLMConfig;
+              if (!config) return null;
+              
+              const availableModels = getModelsForProvider(config.provider);
+              const selectedProvider = llmProviders.find(p => p.id === config.provider);
+              
+              return (
+                <div className="space-y-6 bg-muted/30 rounded-lg p-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Provedor de IA</Label>
+                      <Select
+                        value={config.provider}
+                        onValueChange={(value: ProviderType) => {
+                          const newModels = getModelsForProvider(value);
+                          updateLLMConfig(moduleType, { 
+                            provider: value,
+                            model_name: newModels[0]?.id || 'gpt-4o-mini'
+                          });
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {llmProviders.map(provider => (
+                            <SelectItem 
+                              key={provider.id} 
+                              value={provider.id}
+                              disabled={!provider.available}
+                            >
+                              <div className="flex items-center gap-2">
+                                {provider.name}
+                                {!provider.available && (
+                                  <Badge variant="outline" className="text-xs">Indisponível</Badge>
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {selectedProvider && !selectedProvider.available && (
+                        <p className="text-xs text-destructive">{selectedProvider.reason}</p>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Modelo</Label>
+                      <Select
+                        value={config.model_name}
+                        onValueChange={(value) => updateLLMConfig(moduleType, { model_name: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableModels.map(model => (
+                            <SelectItem key={model.id} value={model.id}>
+                              <div className="flex flex-col">
+                                <span>{model.name}</span>
+                                <span className="text-xs text-muted-foreground">{model.description}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label>Temperatura</Label>
+                        <span className="text-sm text-muted-foreground">{config.temperature.toFixed(1)}</span>
+                      </div>
+                      <Slider
+                        value={[config.temperature]}
+                        onValueChange={([value]) => updateLLMConfig(moduleType, { temperature: value })}
+                        min={0}
+                        max={2}
+                        step={0.1}
+                        className="w-full"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Valores menores = respostas mais focadas. Valores maiores = respostas mais criativas.
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor={`${moduleType}-max-tokens`}>Máximo de Tokens</Label>
+                      <Input
+                        id={`${moduleType}-max-tokens`}
+                        type="number"
+                        value={config.max_tokens}
+                        onChange={(e) => updateLLMConfig(moduleType, { max_tokens: parseInt(e.target.value) || 1500 })}
+                        min={100}
+                        max={8000}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Limite máximo de tokens na resposta (100-8000).
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={() => handleSaveLLMConfig(moduleType)}
+                      disabled={savingLLMConfig}
+                      variant="secondary"
+                    >
+                      {savingLLMConfig ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Settings2 className="h-4 w-4 mr-2" />
+                      )}
+                      Salvar Configurações do Modelo
+                    </Button>
+                  </div>
+                </div>
+              );
+            })()}
+          </CollapsibleContent>
+        </Collapsible>
       </div>
     </div>
   );
