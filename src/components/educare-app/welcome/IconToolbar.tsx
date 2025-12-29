@@ -236,11 +236,19 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          className="h-9 w-9"
+          className={`h-9 w-9 transition-colors ${
+            isProfessional 
+              ? 'hover:bg-teal-100 dark:hover:bg-teal-900/30' 
+              : 'hover:bg-violet-100 dark:hover:bg-violet-900/30'
+          }`}
           title={isProfessional ? "TitiNauta Especialista" : "TitiNauta - Assistente"}
           onClick={() => setShowOnboardingChat(true)}
         >
-          <Bot className={`h-5 w-5 ${isProfessional ? 'text-indigo-600' : 'text-purple-500'}`} />
+          <Bot className={`h-5 w-5 ${
+            isProfessional 
+              ? 'text-teal-600 dark:text-teal-400' 
+              : 'text-violet-600 dark:text-violet-400'
+          }`} />
         </Button>
 
         {/* 6. Profile with Photo */}
@@ -419,41 +427,82 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* TitiNauta AI Chat Sheet (lateral) */}
+      {/* TitiNauta AI Chat Sheet (lateral) - Paleta suave e acolhedora */}
       <Sheet open={showOnboardingChat} onOpenChange={setShowOnboardingChat}>
-        <SheetContent side="right" className={`w-full sm:max-w-md flex flex-col h-full p-0 ${isProfessional ? 'bg-white dark:bg-slate-950' : 'bg-white dark:bg-slate-950'}`}>
-          <SheetHeader className={`px-4 py-3 border-b ${isProfessional ? 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800' : 'bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800'}`}>
-            <SheetTitle className={`flex items-center gap-2 ${isProfessional ? 'text-indigo-900 dark:text-indigo-100' : 'text-purple-900 dark:text-purple-100'}`}>
-              <Bot className={`h-5 w-5 ${isProfessional ? 'text-indigo-600 dark:text-indigo-400' : 'text-purple-600 dark:text-purple-400'}`} />
+        <SheetContent 
+          side="right" 
+          className={`w-full sm:max-w-md flex flex-col h-full p-0 ${
+            isProfessional 
+              ? 'bg-gradient-to-b from-slate-50 to-teal-50/30 dark:from-slate-950 dark:to-teal-950/20' 
+              : 'bg-gradient-to-b from-slate-50 to-violet-50/30 dark:from-slate-950 dark:to-violet-950/20'
+          }`}
+        >
+          <SheetHeader className={`px-4 py-4 border-b ${
+            isProfessional 
+              ? 'bg-gradient-to-r from-teal-100/80 to-emerald-100/60 dark:from-teal-900/30 dark:to-emerald-900/20 border-teal-200/60 dark:border-teal-700/50' 
+              : 'bg-gradient-to-r from-violet-100/80 to-fuchsia-100/60 dark:from-violet-900/30 dark:to-fuchsia-900/20 border-violet-200/60 dark:border-violet-700/50'
+          }`}>
+            <SheetTitle className={`flex items-center gap-2 ${
+              isProfessional 
+                ? 'text-teal-800 dark:text-teal-100' 
+                : 'text-violet-800 dark:text-violet-100'
+            }`}>
+              <div className={`p-1.5 rounded-lg ${
+                isProfessional 
+                  ? 'bg-teal-500/20 dark:bg-teal-500/30' 
+                  : 'bg-violet-500/20 dark:bg-violet-500/30'
+              }`}>
+                <Bot className={`h-4 w-4 ${
+                  isProfessional 
+                    ? 'text-teal-600 dark:text-teal-300' 
+                    : 'text-violet-600 dark:text-violet-300'
+                }`} />
+              </div>
               {isProfessional ? 'TitiNauta Especialista' : 'TitiNauta - Assistente de IA'}
             </SheetTitle>
-            <SheetDescription className={`text-xs ${isProfessional ? 'text-indigo-700 dark:text-indigo-300' : 'text-purple-700 dark:text-purple-300'}`}>
+            <SheetDescription className={`text-xs ${
+              isProfessional 
+                ? 'text-teal-600 dark:text-teal-300' 
+                : 'text-violet-600 dark:text-violet-300'
+            }`}>
               {isProfessional 
                 ? 'Protocolos clínicos, marcos de desenvolvimento e práticas baseadas em evidências'
                 : 'Desenvolvimento infantil, estimulação e marcos de desenvolvimento'}
             </SheetDescription>
           </SheetHeader>
           
-          {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto space-y-3 p-4 bg-white dark:bg-slate-950">
+          {/* Chat Messages - Fundo suave */}
+          <div className={`flex-1 overflow-y-auto space-y-3 p-4 ${
+            isProfessional 
+              ? 'bg-gradient-to-b from-white to-teal-50/20 dark:from-slate-950 dark:to-teal-950/10' 
+              : 'bg-gradient-to-b from-white to-violet-50/20 dark:from-slate-950 dark:to-violet-950/10'
+          }`}>
             {chatMessages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'assistant' ? 'justify-start' : 'justify-end'}`}>
-                <div className={`max-w-[85%] rounded-lg p-3 ${
+                <div className={`max-w-[85%] rounded-2xl p-3 shadow-sm ${
                   msg.role === 'assistant'
                     ? isProfessional 
-                      ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-900 dark:text-indigo-50'
-                      : 'bg-purple-100 dark:bg-purple-900/30 text-foreground'
-                    : 'bg-primary text-primary-foreground'
+                      ? 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 border border-teal-100 dark:border-teal-800/50'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 border border-violet-100 dark:border-violet-800/50'
+                    : isProfessional
+                      ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white'
+                      : 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white'
                 }`}>
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                 </div>
               </div>
             ))}
             
-            {/* Quick Suggestions - show only when chat has just started */}
+            {/* Quick Suggestions - Sugestões com estilo suave */}
             {chatMessages.length === 1 && !isChatLoading && (
-              <div className="mt-4 space-y-2">
-                <p className="text-xs text-muted-foreground font-medium">Sugestões de perguntas:</p>
+              <div className="mt-4 space-y-3">
+                <p className={`text-xs font-medium ${
+                  isProfessional 
+                    ? 'text-teal-600 dark:text-teal-400' 
+                    : 'text-violet-600 dark:text-violet-400'
+                }`}>
+                  Sugestões de perguntas:
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {(isProfessional ? [
                     'Marcos de desenvolvimento aos 6 meses',
@@ -471,7 +520,11 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                       onClick={() => {
                         setChatInput(suggestion);
                       }}
-                      className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors border"
+                      className={`text-xs px-3 py-2 rounded-xl transition-all duration-200 border shadow-sm ${
+                        isProfessional
+                          ? 'bg-white dark:bg-slate-800 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-700 hover:bg-teal-50 dark:hover:bg-teal-900/30 hover:border-teal-300 dark:hover:border-teal-600'
+                          : 'bg-white dark:bg-slate-800 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 hover:border-violet-300 dark:hover:border-violet-600'
+                      }`}
                     >
                       {suggestion}
                     </button>
@@ -482,7 +535,11 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
           </div>
 
           {/* RAG Progress Bar */}
-          <div className="px-4">
+          <div className={`px-4 py-2 ${
+            isProfessional 
+              ? 'bg-teal-50/50 dark:bg-teal-950/20' 
+              : 'bg-violet-50/50 dark:bg-violet-950/20'
+          }`}>
             <RAGProgressBar
               isLoading={isChatLoading}
               status={ragStatus}
@@ -491,21 +548,33 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
             />
           </div>
           
-          {/* Chat Input */}
-          <div className="flex gap-2 p-4 border-t bg-background">
+          {/* Chat Input - Área de entrada suave */}
+          <div className={`flex gap-2 p-4 border-t ${
+            isProfessional 
+              ? 'bg-white dark:bg-slate-900 border-teal-100 dark:border-teal-800/50' 
+              : 'bg-white dark:bg-slate-900 border-violet-100 dark:border-violet-800/50'
+          }`}>
             <Input
               placeholder="Faça uma pergunta..."
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleChatMessage()}
               disabled={isChatLoading}
-              className="flex-1"
+              className={`flex-1 rounded-xl border ${
+                isProfessional 
+                  ? 'border-teal-200 dark:border-teal-700 focus:border-teal-400 focus:ring-teal-400/30' 
+                  : 'border-violet-200 dark:border-violet-700 focus:border-violet-400 focus:ring-violet-400/30'
+              }`}
             />
             <Button
               size="sm"
               onClick={handleChatMessage}
               disabled={isChatLoading || !chatInput.trim()}
-              className={`px-3 ${isProfessional ? 'bg-indigo-600 hover:bg-indigo-700' : ''}`}
+              className={`px-4 rounded-xl transition-all ${
+                isProfessional 
+                  ? 'bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white shadow-sm' 
+                  : 'bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white shadow-sm'
+              }`}
             >
               <Send className="h-4 w-4" />
             </Button>

@@ -204,13 +204,22 @@ async function retrieveFromFileSearch(question, fileSearchIds) {
       };
     }
 
+    // Valida que os IDs são realmente IDs do OpenAI (formato: file-xxxx)
+    // IDs inválidos (como URLs de upload) são filtrados
+    const OPENAI_FILE_ID_REGEX = /^file-[A-Za-z0-9]+$/;
+    
     const validFileIds = fileSearchIds
-      .filter(id => id && id.trim() !== '')
-      .map(id => {
-        // Garante que file_id tenha no máximo 64 caracteres (limite do OpenAI)
+      .filter(id => {
+        if (!id || id.trim() === '') return false;
         const trimmed = id.trim();
-        return trimmed.length > 64 ? trimmed.slice(-64) : trimmed;
-      });
+        // Somente aceita IDs no formato correto do OpenAI
+        if (!OPENAI_FILE_ID_REGEX.test(trimmed)) {
+          console.warn(`[RAG] file_search_id inválido ignorado: ${trimmed.slice(0, 30)}...`);
+          return false;
+        }
+        return true;
+      })
+      .map(id => id.trim());
     
     if (validFileIds.length === 0) {
       return {
