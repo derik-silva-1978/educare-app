@@ -32,7 +32,7 @@ const EnhancedMetricsCards: React.FC<MetricsCardsProps> = ({
   individualMode = false
 }) => {
   const isParent = userRole === 'parent';
-  const isProfessional = userRole === 'professional';
+  const isProfessional = userRole === 'professional' || userRole === 'admin' || userRole === 'owner';
   const { selectedChildId } = useSelectedChild();
   const { metrics: childMetrics, childMetrics: childData } = useIndividualChildMetrics();
 

@@ -9,7 +9,7 @@ interface ProfessionalOnlyGuardProps {
 
 /**
  * Guard que garante que apenas usuários com role 'professional' 
- * tenham acesso ao conteúdo protegido
+ * tenham acesso ao conteúdo protegido. Owner e admin também têm acesso total.
  */
 const ProfessionalOnlyGuard: React.FC<ProfessionalOnlyGuardProps> = ({ children }) => {
   const { user, isLoading } = useAuth();
@@ -28,16 +28,12 @@ const ProfessionalOnlyGuard: React.FC<ProfessionalOnlyGuardProps> = ({ children 
     return <Navigate to="/educare-app/auth" replace />;
   }
   
-  // Se não for profissional, redireciona para dashboard apropriado
-  if (user.role !== 'professional') {
-    // Redireciona para dashboard baseado no role
-    if (user.role === 'owner') {
-      return <Navigate to="/educare-app/owner/dashboard" replace />;
-    } else if (user.role === 'admin') {
-      return <Navigate to="/educare-app/admin/dashboard" replace />;
-    } else {
-      return <Navigate to="/educare-app/dashboard" replace />;
-    }
+  // Owner e admin têm acesso total a todas as rotas professional
+  const hasAccess = user.role === 'professional' || user.role === 'admin' || user.role === 'owner';
+  
+  if (!hasAccess) {
+    // Redireciona para dashboard apropriado para outros roles
+    return <Navigate to="/educare-app/dashboard" replace />;
   }
 
   return <>{children}</>;

@@ -46,8 +46,9 @@ const DashboardSidebarNav: React.FC = () => {
   };
   
   const isAdmin = hasRole('admin');
+  const isOwner = hasRole('owner');
   const isParent = hasRole('parent');
-  const isProfessional = hasRole(['professional', 'therapist', 'teacher']);
+  const isProfessional = hasRole(['professional', 'therapist', 'teacher', 'admin', 'owner']);
   
   return (
     <nav className="flex-1 p-4 space-y-1">

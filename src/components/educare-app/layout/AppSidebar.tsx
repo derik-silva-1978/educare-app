@@ -18,7 +18,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({ className }) => {
   const [open, setOpen] = useState(false);
   
   const isParent = user?.role === 'parent';
-  const isProfessional = user?.role === 'professional' || user?.role === 'therapist' || user?.role === 'teacher';
+  const isProfessional = user?.role === 'professional' || user?.role === 'therapist' || user?.role === 'teacher' || user?.role === 'owner' || user?.role === 'admin';
   const isAdmin = user?.role === 'admin';
   
   // Determine which sidebar to render based on user role

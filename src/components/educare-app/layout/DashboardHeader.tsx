@@ -26,8 +26,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title }) => {
       <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">
         {title || (
           user?.role === 'parent' ? 'Educare+ App' : 
-          user?.role === 'professional' ? 'Educare+ Profissional' : 
-          'Educare+ Admin'
+          user?.role === 'professional' || user?.role === 'admin' || user?.role === 'owner' ? 'Educare+ Profissional' : 
+          'Educare+ App'
         )}
       </h1>
       
