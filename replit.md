@@ -47,6 +47,14 @@ Content is dynamically loaded and diversified with fallback images. Audience fil
   - 5-minute cache for production performance, with cache invalidation on updates
   - Integration with ragService.js FASE 12 for automatic prompt loading
   - Default prompts seeded via `node src/scripts/seedDefaultPrompts.js`
+- **LLM Configuration System (Owner-exclusive)**: Separate system for per-agent model selection within `/educare-app/owner/prompt-management`. Features include:
+  - AssistantLLMConfig model with module_type (PK), provider (openai/gemini), model_name, temperature, max_tokens
+  - Provider support: OpenAI (gpt-4o-mini, gpt-4o, gpt-4-turbo, gpt-3.5-turbo) and Google Gemini (gemini-2.0-flash, gemini-1.5-flash, gemini-1.5-pro)
+  - Collapsible "Model Settings" section with provider select, model dropdown, temperature slider (0-2), and max_tokens input (100-8000)
+  - Provider availability validated via environment keys (OPENAI_API_KEY, GEMINI_API_KEY)
+  - 5-minute cache for production performance, with cache invalidation on updates
+  - Provider adapters in ragService.js (callOpenAI, callGemini) with automatic fallback
+  - Default configs seeded via `node src/scripts/seedDefaultLLMConfigs.js`
 
 ### System Design Choices
 - **Scalability**: Designed for cloud deployment on Digital Ocean using multiple droplets, PostgreSQL, and Redis.
