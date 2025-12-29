@@ -17,6 +17,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 import { Textarea } from '@/components/ui/textarea';
@@ -412,64 +419,99 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* TitiNauta AI Chat Modal */}
-      <Dialog open={showOnboardingChat} onOpenChange={setShowOnboardingChat}>
-        <DialogContent className="sm:max-w-lg h-[600px] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+      {/* TitiNauta AI Chat Sheet (lateral) */}
+      <Sheet open={showOnboardingChat} onOpenChange={setShowOnboardingChat}>
+        <SheetContent side="right" className="w-full sm:max-w-md flex flex-col h-full p-0">
+          <SheetHeader className="px-4 py-3 border-b bg-gradient-to-r from-indigo-500/10 to-purple-500/10">
+            <SheetTitle className="flex items-center gap-2">
               <Bot className={`h-5 w-5 ${isProfessional ? 'text-indigo-600' : 'text-purple-500'}`} />
               {isProfessional ? 'TitiNauta Especialista' : 'TitiNauta - Assistente de IA'}
-            </DialogTitle>
-            <DialogDescription>
+            </SheetTitle>
+            <SheetDescription className="text-xs">
               {isProfessional 
-                ? 'Consulte sobre protocolos clínicos, marcos de desenvolvimento e práticas baseadas em evidências'
-                : 'Pergunte sobre desenvolvimento infantil, estimulação e marcos de desenvolvimento'}
-            </DialogDescription>
-          </DialogHeader>
+                ? 'Protocolos clínicos, marcos de desenvolvimento e práticas baseadas em evidências'
+                : 'Desenvolvimento infantil, estimulação e marcos de desenvolvimento'}
+            </SheetDescription>
+          </SheetHeader>
           
           {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto space-y-3 py-4 px-1">
+          <div className="flex-1 overflow-y-auto space-y-3 p-4">
             {chatMessages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'assistant' ? 'justify-start' : 'justify-end'}`}>
-                <div className={`max-w-xs rounded-lg p-3 ${
+                <div className={`max-w-[85%] rounded-lg p-3 ${
                   msg.role === 'assistant'
-                    ? 'bg-purple-100 dark:bg-purple-900/30 text-foreground'
+                    ? isProfessional 
+                      ? 'bg-indigo-100 dark:bg-indigo-900/30 text-foreground'
+                      : 'bg-purple-100 dark:bg-purple-900/30 text-foreground'
                     : 'bg-primary text-primary-foreground'
                 }`}>
-                  <p className="text-sm">{msg.content}</p>
+                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                 </div>
               </div>
             ))}
+            
+            {/* Quick Suggestions - show only when chat has just started */}
+            {chatMessages.length === 1 && !isChatLoading && (
+              <div className="mt-4 space-y-2">
+                <p className="text-xs text-muted-foreground font-medium">Sugestões de perguntas:</p>
+                <div className="flex flex-wrap gap-2">
+                  {(isProfessional ? [
+                    'Marcos de desenvolvimento aos 6 meses',
+                    'Sinais de alerta no desenvolvimento motor',
+                    'Protocolo de avaliação auditiva neonatal',
+                    'Estimulação para bebês prematuros'
+                  ] : [
+                    'Como estimular meu bebê de 3 meses?',
+                    'Quando meu bebê deve começar a sentar?',
+                    'Atividades para desenvolvimento motor',
+                    'Alimentação complementar: como começar?'
+                  ]).map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setChatInput(suggestion);
+                      }}
+                      className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors border"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* RAG Progress Bar */}
-          <RAGProgressBar
-            isLoading={isChatLoading}
-            status={ragStatus}
-            message="Consultando base de conhecimento..."
-            error={ragError}
-          />
+          <div className="px-4">
+            <RAGProgressBar
+              isLoading={isChatLoading}
+              status={ragStatus}
+              message="Consultando base de conhecimento..."
+              error={ragError}
+            />
+          </div>
           
           {/* Chat Input */}
-          <div className="flex gap-2 pt-4 border-t">
+          <div className="flex gap-2 p-4 border-t bg-background">
             <Input
               placeholder="Faça uma pergunta..."
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleChatMessage()}
               disabled={isChatLoading}
+              className="flex-1"
             />
             <Button
               size="sm"
               onClick={handleChatMessage}
               disabled={isChatLoading || !chatInput.trim()}
-              className="px-3"
+              className={`px-3 ${isProfessional ? 'bg-indigo-600 hover:bg-indigo-700' : ''}`}
             >
               <Send className="h-4 w-4" />
             </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </>
   );
 };

@@ -68,7 +68,7 @@ const EducareAppLayout: React.FC = () => {
     
     if (!isAllowedPath) {
       console.log('❌ EDUCAREAPPLAYOUT: Professional tentando acessar área não permitida, redirecionando...');
-      return <Navigate to="/educare-app/professional/dashboard" replace />;
+      return <Navigate to="/educare-app/professional/welcome" replace />;
     }
   }
   
