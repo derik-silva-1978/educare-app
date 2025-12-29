@@ -68,12 +68,11 @@ const ProfessionalSidebar: React.FC = () => {
       
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1">
-        <NavItem to="/educare-app/dashboard" icon={Home} label="Início" />
-        <NavItem to="/educare-app/professional/dashboard" icon={Users} label="Meus Pacientes" />
-        <NavItem to="/educare-app/professional/titinauta" icon={Sparkles} label="TitiNauta Especialista" />
-        <NavItem to="/educare-app/professional/resources" icon={BookOpen} label="Recursos e Qualificação" />
+        <NavItem to="/educare-app/professional/welcome" icon={Home} label="Boas Vindas" />
+        <NavItem to="/educare-app/professional/children" icon={Users} label="Gestão das Crianças" />
+        <NavItem to="/educare-app/professional/qualificacao" icon={BookOpen} label="Qualificação Profissional" />
         <NavItem to="/educare-app/jornada-desenvolvimento" icon={Baby} label="Jornada do Desenvolvimento" />
-        <NavItem to="/educare-app/messages" icon={MessageCircle} label="Mensagens" />
+        <NavItem to="/educare-app/communication" icon={MessageCircle} label="Comunicação" />
         <NavItem to="/educare-app/settings" icon={Settings} label="Configurações" />
       </nav>
     </div>
