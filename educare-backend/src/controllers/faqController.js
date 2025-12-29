@@ -140,6 +140,63 @@ exports.getSuggestionsByWeek = async (req, res) => {
 };
 
 /**
+ * GET /api/faqs/professional-suggestions
+ * 
+ * Retorna Top 5 perguntas mais relevantes para profissionais de saúde.
+ * Baseado nas perguntas do módulo professional com maior score.
+ */
+exports.getProfessionalSuggestions = async (req, res) => {
+  try {
+    const TARGET_COUNT = 5;
+    
+    const query = `
+      SELECT 
+        id,
+        category,
+        question_text,
+        answer_rag_context,
+        usage_count,
+        upvotes,
+        downvotes,
+        created_at,
+        updated_at,
+        (usage_count * 1.0 + upvotes * 2.0 - downvotes * 5.0) as relevance_score
+      FROM app_faqs
+      WHERE (deleted_at IS NULL)
+        AND (category = 'professional' OR category = 'system')
+      ORDER BY relevance_score DESC
+      LIMIT :limit
+    `;
+    
+    const suggestions = await sequelize.query(query, {
+      replacements: { limit: TARGET_COUNT },
+      type: sequelize.QueryTypes.SELECT
+    });
+    
+    if (suggestions.length > 0) {
+      const faqIds = suggestions.map(f => f.id);
+      await AppFaq.update(
+        { usage_count: sequelize.literal('usage_count + 1') },
+        { where: { id: faqIds } }
+      );
+    }
+    
+    return res.json({
+      success: true,
+      data: suggestions,
+      count: suggestions.length
+    });
+  } catch (error) {
+    console.error('Erro ao obter sugestões profissionais:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Erro ao obter sugestões profissionais',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+/**
  * GET /api/faqs
  * 
  * Lista todas as FAQs com paginação. Apenas admin/owner.

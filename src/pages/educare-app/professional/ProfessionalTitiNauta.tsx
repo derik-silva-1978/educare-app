@@ -7,10 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Sparkles, Send, Loader2, Baby, Stethoscope, 
-  Brain, Heart, BookOpen, AlertCircle 
+  Brain, Heart, BookOpen, AlertCircle, Mic
 } from 'lucide-react';
 import ragService from '@/services/api/ragService';
 import RAGProgressBar from '@/components/educare-app/RAGProgressBar';
+import AudioRecorder from '@/components/educare-app/professional/AudioRecorder';
+import ProfessionalSuggestedTopics from '@/components/educare-app/professional/ProfessionalSuggestedTopics';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -119,29 +121,38 @@ const ProfessionalTitiNauta: React.FC = () => {
           </Badge>
         </div>
 
-        {messages.length === 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Tópicos Rápidos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                {quickTopics.map((topic) => (
-                  <Button
-                    key={topic.id}
-                    variant="outline"
-                    className="h-auto py-3 sm:py-4 px-2 sm:px-4 flex flex-col items-center gap-1 sm:gap-2 hover:bg-purple-50 hover:border-purple-300 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                    onClick={() => handleQuickTopic(topic.query)}
-                    aria-label={`Perguntar sobre ${topic.label}`}
-                  >
-                    <topic.icon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" aria-hidden="true" />
-                    <span className="text-xs text-center leading-tight">{topic.label}</span>
-                  </Button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/20">
+          <CardHeader className="py-3">
+            <CardTitle className="text-base flex items-center gap-2 text-purple-800 dark:text-purple-200">
+              <Sparkles className="h-5 w-5 text-purple-600" />
+              Tópicos Rápidos
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="py-0 pb-3">
+            <div className="flex flex-wrap gap-2">
+              {quickTopics.map((topic) => (
+                <Button
+                  key={topic.id}
+                  variant="ghost"
+                  size="sm"
+                  className="bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 transition-all duration-200"
+                  onClick={() => handleQuickTopic(topic.query)}
+                  disabled={isLoading}
+                  aria-label={`Perguntar sobre ${topic.label}`}
+                >
+                  <topic.icon className="h-4 w-4 mr-2" aria-hidden="true" />
+                  {topic.label}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <ProfessionalSuggestedTopics 
+          onQuestionClick={(question) => {
+            setInput(question);
+          }}
+        />
 
         <Card className="flex flex-col h-[400px] sm:h-[500px]">
           <CardHeader className="border-b py-3">
@@ -157,6 +168,10 @@ const ProfessionalTitiNauta: React.FC = () => {
                 <Sparkles className="h-12 w-12 mb-4 text-purple-300" />
                 <p>Faça uma pergunta sobre desenvolvimento infantil, protocolos clínicos ou intervenções.</p>
                 <p className="text-sm mt-2">O TitiNauta usa a base de conhecimento especializada para profissionais.</p>
+                <div className="flex items-center gap-2 mt-4 text-xs text-purple-600">
+                  <Mic className="h-4 w-4" />
+                  <span>Use o microfone para fazer perguntas por voz</span>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
@@ -192,11 +207,15 @@ const ProfessionalTitiNauta: React.FC = () => {
 
           <div className="border-t p-4">
             <form onSubmit={handleSubmit} className="flex gap-2">
+              <AudioRecorder 
+                onTranscription={(text) => setInput(text)}
+                disabled={isLoading}
+              />
               <Textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Digite sua pergunta sobre desenvolvimento infantil..."
-                className="min-h-[60px] resize-none"
+                placeholder="Digite ou fale sua pergunta..."
+                className="min-h-[60px] resize-none flex-1"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();

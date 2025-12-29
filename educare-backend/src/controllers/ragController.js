@@ -167,3 +167,58 @@ exports.askMultimodal = async (req, res) => {
     });
   }
 };
+
+exports.transcribeAudio = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Nenhum arquivo de áudio enviado'
+      });
+    }
+
+    const OpenAI = require('openai');
+    const fs = require('fs');
+    const path = require('path');
+    
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+
+    const tempFilePath = req.file.path;
+    
+    console.log('[RAG] Transcrevendo arquivo de áudio:', req.file.originalname, 'Size:', req.file.size);
+
+    const transcription = await openai.audio.transcriptions.create({
+      file: fs.createReadStream(tempFilePath),
+      model: 'whisper-1',
+      language: 'pt',
+      response_format: 'text'
+    });
+
+    fs.unlink(tempFilePath, (err) => {
+      if (err) console.error('Erro ao remover arquivo temporário:', err);
+    });
+
+    console.log('[RAG] Transcrição concluída:', transcription.substring(0, 100) + '...');
+
+    return res.json({
+      success: true,
+      text: transcription,
+      duration_ms: Date.now()
+    });
+  } catch (error) {
+    console.error('[RAG] Erro na transcrição de áudio:', error);
+    
+    if (req.file && req.file.path) {
+      const fs = require('fs');
+      fs.unlink(req.file.path, () => {});
+    }
+    
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao transcrever áudio',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};

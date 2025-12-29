@@ -110,6 +110,22 @@ router.get('/suggestions',
 );
 
 /**
+ * GET /api/faqs/professional-suggestions
+ * 
+ * Retorna Top 5 perguntas mais relevantes para profissionais de saúde.
+ * 
+ * @swagger
+ * /api/faqs/professional-suggestions:
+ *   get:
+ *     tags: [FAQ]
+ *     summary: Obter sugestões de FAQs para profissionais
+ *     responses:
+ *       200:
+ *         description: Top 5 FAQs para profissionais por score de relevância
+ */
+router.get('/professional-suggestions', faqController.getProfessionalSuggestions);
+
+/**
  * GET /api/faqs
  * 
  * Lista todas as FAQs (paginado). Apenas para admin/owner.
