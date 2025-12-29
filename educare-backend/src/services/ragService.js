@@ -426,80 +426,34 @@ function buildLLMPrompt(question, retrievedChunks, childContext = null, customSy
   };
 }
 
-async function callOpenAI(systemPrompt, userMessage, options = {}) {
-  const openai = getOpenAI();
-  if (!openai) {
-    return {
-      success: false,
-      error: 'OpenAI não configurado'
-    };
-  }
-
-  const response = await openai.chat.completions.create({
-    model: options.model || 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userMessage }
-    ],
-    temperature: options.temperature ?? 0.7,
-    max_tokens: options.max_tokens ?? 1500
-  });
-
-  return {
-    success: true,
-    content: response.choices[0].message.content,
-    usage: response.usage,
-    model: response.model,
-    provider: 'openai'
-  };
-}
-
-async function callGemini(systemPrompt, userMessage, options = {}) {
-  const gemini = getGemini();
-  if (!gemini) {
-    return {
-      success: false,
-      error: 'Google Gemini não configurado'
-    };
-  }
-
-  const model = gemini.getGenerativeModel({ 
-    model: options.model || 'gemini-2.0-flash',
-    generationConfig: {
-      temperature: options.temperature ?? 0.7,
-      maxOutputTokens: options.max_tokens ?? 1500
-    },
-    systemInstruction: systemPrompt
-  });
-
-  const result = await model.generateContent(userMessage);
-  const response = await result.response;
-  const text = response.text();
-
-  return {
-    success: true,
-    content: text,
-    usage: {
-      prompt_tokens: response.usageMetadata?.promptTokenCount || 0,
-      completion_tokens: response.usageMetadata?.candidatesTokenCount || 0,
-      total_tokens: response.usageMetadata?.totalTokenCount || 0
-    },
-    model: options.model || 'gemini-2.0-flash',
-    provider: 'gemini'
-  };
-}
-
 async function callLLM(systemPrompt, userMessage, options = {}) {
   try {
-    const provider = options.provider || 'openai';
+    const { providerRegistry } = require('./llmProviderRegistry');
     
-    console.log(`[RAG] Chamando LLM: provider=${provider}, model=${options.model || 'default'}`);
+    const config = {
+      provider: options.provider || 'openai',
+      model_name: options.model || 'gpt-4o-mini',
+      temperature: options.temperature ?? 0.7,
+      max_tokens: options.max_tokens ?? 1500,
+      additional_params: options.additional_params || {}
+    };
     
-    if (provider === 'gemini') {
-      return await callGemini(systemPrompt, userMessage, options);
-    }
+    console.log(`[RAG] Chamando LLM via Provider Registry: provider=${config.provider}, model=${config.model_name}`);
     
-    return await callOpenAI(systemPrompt, userMessage, options);
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userMessage }
+    ];
+    
+    const result = await providerRegistry.callLLM(config, messages);
+    
+    return {
+      success: true,
+      content: result.content,
+      usage: result.usage,
+      model: result.model,
+      provider: result.provider
+    };
   } catch (error) {
     console.error('[RAG] Erro ao chamar LLM:', error);
     return {

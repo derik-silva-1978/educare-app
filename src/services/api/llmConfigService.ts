@@ -1,7 +1,7 @@
 import httpClient from './httpClient';
 
 export type ModuleType = 'baby' | 'mother' | 'professional';
-export type ProviderType = 'openai' | 'gemini';
+export type ProviderType = 'openai' | 'gemini' | 'deepseek' | 'groq' | 'xai' | 'anthropic' | 'together' | 'openrouter' | 'custom';
 
 export interface LLMModel {
   id: string;
@@ -13,6 +13,7 @@ export interface LLMModel {
 export interface LLMProviderInfo {
   id: ProviderType;
   name: string;
+  type: 'openai-compatible' | 'gemini' | 'anthropic';
   available: boolean;
   reason?: string;
   models: LLMModel[];
@@ -24,7 +25,11 @@ export interface LLMConfig {
   model_name: string;
   temperature: number;
   max_tokens: number;
-  additional_params?: Record<string, unknown>;
+  additional_params?: {
+    base_url?: string;
+    api_key?: string;
+    [key: string]: unknown;
+  };
   is_active: boolean;
   updated_by?: string;
   createdAt?: string;
@@ -41,7 +46,11 @@ export interface UpdateLLMConfigData {
   model_name: string;
   temperature: number;
   max_tokens: number;
-  additional_params?: Record<string, unknown>;
+  additional_params?: {
+    base_url?: string;
+    api_key?: string;
+    [key: string]: unknown;
+  };
 }
 
 class LLMConfigService {

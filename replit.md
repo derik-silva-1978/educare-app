@@ -47,14 +47,25 @@ Content is dynamically loaded and diversified with fallback images. Audience fil
   - 5-minute cache for production performance, with cache invalidation on updates
   - Integration with ragService.js FASE 12 for automatic prompt loading
   - Default prompts seeded via `node src/scripts/seedDefaultPrompts.js`
-- **LLM Configuration System (Owner-exclusive)**: Separate system for per-agent model selection within `/educare-app/owner/prompt-management`. Features include:
-  - AssistantLLMConfig model with module_type (PK), provider (openai/gemini), model_name, temperature, max_tokens
-  - Provider support: OpenAI (gpt-4o-mini, gpt-4o, gpt-4-turbo, gpt-3.5-turbo) and Google Gemini (gemini-2.0-flash, gemini-1.5-flash, gemini-1.5-pro)
-  - Collapsible "Model Settings" section with provider select, model dropdown, temperature slider (0-2), and max_tokens input (100-8000)
-  - Provider availability validated via environment keys (OPENAI_API_KEY, GEMINI_API_KEY)
+- **LLM Configuration System (Owner-exclusive)**: Extensible system for per-agent model selection within `/educare-app/owner/prompt-management`. Features include:
+  - AssistantLLMConfig model with module_type (PK), provider (VARCHAR), model_name, temperature, max_tokens, additional_params (JSONB)
+  - LLMProviderRegistry with 9 built-in providers:
+    - **OpenAI**: gpt-4o-mini, gpt-4o, gpt-4-turbo, gpt-3.5-turbo, o1-mini, o1-preview
+    - **Google Gemini**: gemini-2.0-flash, gemini-1.5-flash, gemini-1.5-pro
+    - **DeepSeek**: deepseek-chat, deepseek-reasoner (R1)
+    - **Groq**: llama-3.3-70b-versatile, llama-3.1-8b-instant, mixtral-8x7b, gemma2-9b
+    - **xAI (Grok)**: grok-beta, grok-2-1212
+    - **Anthropic (Claude)**: claude-3.5-sonnet, claude-3.5-haiku, claude-3-opus
+    - **Together AI**: Llama 3.3 70B Turbo, Qwen 2.5 72B, Mixtral 8x22B
+    - **OpenRouter**: Access to multiple providers through single API
+    - **Custom**: Any OpenAI-compatible API with configurable base_url
+  - Collapsible "Model Settings" section with provider select, model dropdown, temperature slider (0-2), max_tokens input (100-16000)
+  - Custom endpoint support for self-hosted models (additional_params.base_url)
+  - Provider availability validated dynamically via environment keys
   - 5-minute cache for production performance, with cache invalidation on updates
-  - Provider adapters in ragService.js (callOpenAI, callGemini) with automatic fallback
+  - Unified LLM calling through providerRegistry.callLLM() in ragService.js
   - Default configs seeded via `node src/scripts/seedDefaultLLMConfigs.js`
+  - Environment keys: OPENAI_API_KEY, GEMINI_API_KEY, DEEPSEEK_API_KEY, GROQ_API_KEY, XAI_API_KEY, ANTHROPIC_API_KEY, TOGETHER_API_KEY, OPENROUTER_API_KEY, CUSTOM_LLM_API_KEY
 
 ### System Design Choices
 - **Scalability**: Designed for cloud deployment on Digital Ocean using multiple droplets, PostgreSQL, and Redis.

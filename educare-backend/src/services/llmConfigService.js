@@ -4,6 +4,7 @@
  */
 
 const AssistantLLMConfig = require('../models/AssistantLLMConfig');
+const { providerRegistry } = require('./llmProviderRegistry');
 
 const configCache = {
   baby: { config: null, timestamp: 0 },
@@ -88,54 +89,11 @@ async function updateConfig(moduleType, configData, updatedBy = null) {
 }
 
 function validateProviderKey(provider) {
-  switch (provider) {
-    case 'openai':
-      return !!process.env.OPENAI_API_KEY;
-    case 'gemini':
-      return !!process.env.GEMINI_API_KEY;
-    default:
-      return false;
-  }
+  return providerRegistry.isProviderAvailable(provider);
 }
 
 function getAvailableProviders() {
-  const providers = [];
-  
-  if (process.env.OPENAI_API_KEY) {
-    providers.push({
-      id: 'openai',
-      name: 'OpenAI',
-      available: true,
-      models: AssistantLLMConfig.AVAILABLE_MODELS.openai
-    });
-  } else {
-    providers.push({
-      id: 'openai',
-      name: 'OpenAI',
-      available: false,
-      reason: 'OPENAI_API_KEY não configurada',
-      models: AssistantLLMConfig.AVAILABLE_MODELS.openai
-    });
-  }
-  
-  if (process.env.GEMINI_API_KEY) {
-    providers.push({
-      id: 'gemini',
-      name: 'Google Gemini',
-      available: true,
-      models: AssistantLLMConfig.AVAILABLE_MODELS.gemini
-    });
-  } else {
-    providers.push({
-      id: 'gemini',
-      name: 'Google Gemini',
-      available: false,
-      reason: 'GEMINI_API_KEY não configurada',
-      models: AssistantLLMConfig.AVAILABLE_MODELS.gemini
-    });
-  }
-  
-  return providers;
+  return providerRegistry.getAvailableProviders();
 }
 
 function invalidateCache(moduleType = null) {

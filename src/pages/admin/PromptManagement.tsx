@@ -444,7 +444,7 @@ const PromptManagement: React.FC = () => {
                 <div className="text-left">
                   <h4 className="font-medium">Configurações do Modelo</h4>
                   <p className="text-sm text-muted-foreground">
-                    {(moduleType === 'baby' ? babyLLMConfig : professionalLLMConfig)?.provider === 'openai' ? 'OpenAI' : 'Google Gemini'} - {(moduleType === 'baby' ? babyLLMConfig : professionalLLMConfig)?.model_name || 'gpt-4o-mini'}
+                    {llmProviders.find(p => p.id === (moduleType === 'baby' ? babyLLMConfig : professionalLLMConfig)?.provider)?.name || 'OpenAI'} - {(moduleType === 'baby' ? babyLLMConfig : professionalLLMConfig)?.model_name || 'gpt-4o-mini'}
                   </p>
                 </div>
               </div>
@@ -523,6 +523,38 @@ const PromptManagement: React.FC = () => {
                     </div>
                   </div>
                   
+                  {config.provider === 'custom' && (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor={`${moduleType}-base-url`}>URL Base da API</Label>
+                        <Input
+                          id={`${moduleType}-base-url`}
+                          value={config.additional_params?.base_url || ''}
+                          onChange={(e) => updateLLMConfig(moduleType, { 
+                            additional_params: { ...config.additional_params, base_url: e.target.value }
+                          })}
+                          placeholder="https://api.exemplo.com/v1"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          URL base para APIs compatíveis com OpenAI.
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor={`${moduleType}-custom-model`}>Nome do Modelo</Label>
+                        <Input
+                          id={`${moduleType}-custom-model`}
+                          value={config.model_name}
+                          onChange={(e) => updateLLMConfig(moduleType, { model_name: e.target.value })}
+                          placeholder="model-name"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          Nome do modelo na API customizada.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -550,10 +582,10 @@ const PromptManagement: React.FC = () => {
                         value={config.max_tokens}
                         onChange={(e) => updateLLMConfig(moduleType, { max_tokens: parseInt(e.target.value) || 1500 })}
                         min={100}
-                        max={8000}
+                        max={16000}
                       />
                       <p className="text-xs text-muted-foreground">
-                        Limite máximo de tokens na resposta (100-8000).
+                        Limite máximo de tokens na resposta (100-16000).
                       </p>
                     </div>
                   </div>
