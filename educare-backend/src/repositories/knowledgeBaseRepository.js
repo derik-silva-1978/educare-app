@@ -73,12 +73,14 @@ class KnowledgeBaseRepository {
     try {
       const where = this._buildWhereClause(filters);
       if (filters.specialty) where.specialty = filters.specialty;
+      console.log('[KnowledgeBaseRepository] queryProfessional - where:', JSON.stringify(where));
       const documents = await KbProfessional.findAll({
         where,
         attributes: ['id', 'title', 'content', 'file_search_id', 'tags', 'specialty', 'domain', 'source_type'],
         order: [['created_at', 'DESC']],
         limit: filters.limit || 10
       });
+      console.log('[KnowledgeBaseRepository] queryProfessional - encontrados:', documents.length);
       return { success: true, data: documents, count: documents.length };
     } catch (error) {
       console.error('[KnowledgeBaseRepository] queryProfessional error:', error.message);
