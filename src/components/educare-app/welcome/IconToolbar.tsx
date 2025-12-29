@@ -485,7 +485,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                       ? 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 border border-teal-100 dark:border-teal-800/50'
                       : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 border border-violet-100 dark:border-violet-800/50'
                     : isProfessional
-                      ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white'
+                      ? 'bg-gradient-to-r from-teal-700 to-emerald-700 text-white'
                       : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white'
                 }`}>
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
@@ -572,7 +572,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
               disabled={isChatLoading || !chatInput.trim()}
               className={`px-4 rounded-xl transition-all ${
                 isProfessional 
-                  ? 'bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white shadow-sm' 
+                  ? 'bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 text-white shadow-sm' 
                   : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-sm'
               }`}
             >
