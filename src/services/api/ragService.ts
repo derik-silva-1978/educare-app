@@ -106,6 +106,8 @@ export async function askQuestion(
     enable_confidence: options.enable_confidence !== false,
   };
 
+  console.log('[RAGService] Payload sendo enviado:', { module_type: payload.module_type, question: payload.question.substring(0, 30) });
+
   // Notifica início da recuperação
   options.onProgress?.('retrieving');
 

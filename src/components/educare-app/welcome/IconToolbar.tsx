@@ -156,6 +156,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
     
     try {
       const moduleType = isProfessional ? 'professional' : 'baby';
+      console.log('[IconToolbar] Enviando pergunta - isProfessional:', isProfessional, ', module_type:', moduleType);
       const response = await ragService.askQuestion(userMessage, undefined, {
         module_type: moduleType,
         onProgress: (status) => setRagStatus(status)

@@ -3,7 +3,7 @@ const { Child, Profile, User, JourneyBotResponse } = require('../models');
 
 exports.ask = async (req, res) => {
   try {
-    const { question, child_id, baby_id, age_range, domain, tags, use_file_search } = req.body;
+    const { question, child_id, baby_id, age_range, domain, tags, use_file_search, module_type } = req.body;
 
     if (!question || question.trim() === '') {
       return res.status(400).json({
@@ -13,12 +13,15 @@ exports.ask = async (req, res) => {
     }
 
     const babyId = child_id || baby_id;
+    
+    console.log('[RAG] Recebido module_type:', module_type);
 
     const result = await ragService.askWithBabyId(question, babyId, {
       age_range,
       domain,
       tags: tags ? (Array.isArray(tags) ? tags : tags.split(',').map(t => t.trim())) : null,
-      use_file_search: use_file_search !== false
+      use_file_search: use_file_search !== false,
+      module_type: module_type || 'baby'
     });
 
     if (!result.success) {
