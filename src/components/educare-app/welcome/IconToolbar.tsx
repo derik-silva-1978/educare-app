@@ -485,8 +485,8 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                       ? 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 border border-teal-100 dark:border-teal-800/50'
                       : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 border border-violet-100 dark:border-violet-800/50'
                     : isProfessional
-                      ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white'
-                      : 'bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white'
+                      ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white'
+                      : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white'
                 }`}>
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                 </div>
@@ -572,8 +572,8 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
               disabled={isChatLoading || !chatInput.trim()}
               className={`px-4 rounded-xl transition-all ${
                 isProfessional 
-                  ? 'bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white shadow-sm' 
-                  : 'bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white shadow-sm'
+                  ? 'bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white shadow-sm' 
+                  : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-sm'
               }`}
             >
               <Send className="h-4 w-4" />
