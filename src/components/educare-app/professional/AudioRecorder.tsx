@@ -4,6 +4,12 @@ import { Mic, Square, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import httpClient from '@/services/api/httpClient';
 
+interface TranscriptionResponse {
+  success: boolean;
+  text?: string;
+  error?: string;
+}
+
 interface AudioRecorderProps {
   onTranscription: (text: string) => void;
   disabled?: boolean;
@@ -85,24 +91,20 @@ const AudioRecorder: React.FC<AudioRecorderProps> = ({ onTranscription, disabled
       const extension = mimeType.includes('webm') ? 'webm' : 'mp4';
       formData.append('audio', audioBlob, `recording.${extension}`);
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/rag/transcribe`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('educare_access_token')}`
-        },
-        body: formData
-      });
+      const response = await httpClient.postFormData<TranscriptionResponse>(
+        'rag/transcribe',
+        formData,
+        { requiresAuth: true }
+      );
 
-      const data = await response.json();
-
-      if (data.success && data.text) {
-        onTranscription(data.text);
+      if (response.success && response.data?.text) {
+        onTranscription(response.data.text);
         toast({
           title: 'Transcrição concluída',
           description: 'Sua pergunta foi transcrita com sucesso.',
         });
       } else {
-        throw new Error(data.error || 'Erro na transcrição');
+        throw new Error(response.error || 'Erro na transcrição');
       }
     } catch (error) {
       console.error('Erro na transcrição:', error);

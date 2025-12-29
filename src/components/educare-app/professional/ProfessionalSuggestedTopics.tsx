@@ -65,8 +65,10 @@ const ProfessionalSuggestedTopics: React.FC<ProfessionalSuggestedTopicsProps> = 
           'faqs/professional-suggestions'
         );
         
-        if (response.success && response.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
-          const uniqueFaqs = response.data.data.filter((faq: ProfessionalFAQ, index: number, self: ProfessionalFAQ[]) => 
+        const faqs = response.data?.data || [];
+        
+        if (response.success && Array.isArray(faqs) && faqs.length > 0) {
+          const uniqueFaqs = faqs.filter((faq: ProfessionalFAQ, index: number, self: ProfessionalFAQ[]) => 
             index === self.findIndex(f => f.id === faq.id || f.question_text === faq.question_text)
           );
           setQuestions(uniqueFaqs.slice(0, 5));

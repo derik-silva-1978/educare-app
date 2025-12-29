@@ -319,6 +319,45 @@ class HttpClient {
       };
     }
   }
+
+  /**
+   * Realiza uma requisição POST com FormData (para upload de arquivos)
+   */
+  async postFormData<T = any>(
+    endpoint: string,
+    formData: FormData,
+    options: RequestOptions = { requiresAuth: true }
+  ): Promise<ApiResponse<T>> {
+    try {
+      const { requiresAuth = true } = options;
+      const headers: Record<string, string> = {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      };
+
+      if (requiresAuth) {
+        const token = getStoredAuthToken();
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+      }
+
+      const response = await fetch(this.buildUrl(endpoint), {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      return this.processResponse<T>(response);
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
+      };
+    }
+  }
 }
 
 // Exporta uma instância única do cliente HTTP

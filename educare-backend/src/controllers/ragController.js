@@ -169,6 +169,8 @@ exports.askMultimodal = async (req, res) => {
 };
 
 exports.transcribeAudio = async (req, res) => {
+  const startTime = Date.now();
+  
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -179,7 +181,6 @@ exports.transcribeAudio = async (req, res) => {
 
     const OpenAI = require('openai');
     const fs = require('fs');
-    const path = require('path');
     
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
@@ -200,12 +201,13 @@ exports.transcribeAudio = async (req, res) => {
       if (err) console.error('Erro ao remover arquivo temporário:', err);
     });
 
-    console.log('[RAG] Transcrição concluída:', transcription.substring(0, 100) + '...');
+    const processingTime = Date.now() - startTime;
+    console.log(`[RAG] Transcrição concluída em ${processingTime}ms:`, transcription.substring(0, 100) + '...');
 
     return res.json({
       success: true,
       text: transcription,
-      duration_ms: Date.now()
+      processing_time_ms: processingTime
     });
   } catch (error) {
     console.error('[RAG] Erro na transcrição de áudio:', error);
@@ -217,8 +219,7 @@ exports.transcribeAudio = async (req, res) => {
     
     return res.status(500).json({
       success: false,
-      error: 'Erro ao transcrever áudio',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: 'Erro ao transcrever áudio'
     });
   }
 };
