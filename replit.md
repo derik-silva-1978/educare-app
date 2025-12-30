@@ -1,7 +1,7 @@
 # Educare+ Platform
 
 ## Overview
-Educare+ is a digital platform designed to support early childhood development and maternal health monitoring. It connects parents, caregivers, educators, and healthcare professionals to facilitate collaborative care through interactive assessments, personalized guidance, and advanced communication tools. The platform features an AI-powered assistant (TitiNauta), integrates with WhatsApp for remote engagement, and uses a multi-level SaaS subscription model. The vision is to become a leading solution in early childhood development and maternal health by leveraging AI and seamless communication to empower stakeholders and improve outcomes.
+Educare+ is a digital platform for early childhood development and maternal health monitoring. It connects parents, caregivers, educators, and healthcare professionals to facilitate collaborative care through interactive assessments, personalized guidance, and advanced communication. The platform features an AI-powered assistant (TitiNauta) and integrates with WhatsApp for remote engagement. Its vision is to become a leading solution in its domain by leveraging AI and seamless communication to empower stakeholders and improve outcomes through a multi-level SaaS subscription model.
 
 ## User Preferences
 - Preferred communication style: Simple, everyday language.
@@ -12,62 +12,22 @@ Educare+ is a digital platform designed to support early childhood development a
 ## System Architecture
 
 ### UI/UX Decisions
-The frontend is built with React 18, TypeScript, and Vite, utilizing `shadcn/ui` (Radix UI + Tailwind CSS) for a professional and WCAG-compliant interface. Key components include:
-- **WelcomeHub**: Default authenticated landing page for parents with dynamic content carousels (News, Training), sticky IconToolbar, and audience-filtered content
-- **ProfessionalWelcomeHub**: Similar to WelcomeHub but tailored for healthcare professionals with filtered content showing only professional-targeted and general content
-- **Dashboard**: User metrics and baby health data visualization for parents
-Content is dynamically loaded and diversified with fallback images. Audience filtering ensures parents and professionals see relevant content.
+The frontend, built with React 18, TypeScript, and Vite, uses `shadcn/ui` (Radix UI + Tailwind CSS) for a professional, WCAG-compliant interface. Key components like `WelcomeHub` and `ProfessionalWelcomeHub` provide dynamic, audience-filtered content carousels and navigation.
 
 ### Technical Implementations
-- **Frontend**: React hooks, `@tanstack/react-query`, React Router, and `react-hook-form` with Zod for validation. Authentication uses a custom JWT-based context provider.
-- **Backend**: Node.js with Express.js, Sequelize ORM, and a layered MVC architecture. Authentication is JWT-based with access/refresh tokens and Row-Level Security (RLS). APIs are RESTful.
-- **AI/RAG Architecture**: A sophisticated, segmented Retrieval-Augmented Generation (RAG) system with an 11-phase architecture, including segmented knowledge bases (`kb_baby`, `kb_mother`, `kb_professional`), dual ingestion and routing, enterprise optimizations (neural re-ranking, confidence scoring, intelligent chunking, data augmentation, context safety, KB versioning), and robustness features.
-
-### Feature Specifications
+- **Frontend**: React, `@tanstack/react-query`, React Router, `react-hook-form` with Zod for validation, and a custom JWT-based authentication context.
+- **Backend**: Node.js with Express.js, Sequelize ORM, a layered MVC architecture, and JWT-based authentication with access/refresh tokens and Row-Level Security (RLS). APIs are RESTful.
+- **AI/RAG Architecture**: A sophisticated 11-phase Retrieval-Augmented Generation (RAG) system featuring segmented knowledge bases (`kb_baby`, `kb_mother`, `kb_professional`), dual ingestion/routing, neural re-ranking, confidence scoring, intelligent chunking, data augmentation, context safety, and KB versioning.
 - **Authentication**: JWT-based with comprehensive role-based access control (Owner, Admin, Professional, Parent).
-- **Knowledge Base Management**: Owner panel for managing documents across segmented KBs, supporting cloud storage uploads (Google Drive, OneDrive).
-- **RAG Metrics & Monitoring**: Dashboard for owners displaying performance metrics and health checks.
-- **Content Management**: Enhanced admin/Owner system for creating, editing, and publishing dynamic content for WelcomeHub and ProfessionalWelcomeHub. Supports audience targeting with dropdown selector (All/Parents/Professionals), featuring a rich text editor with extensive formatting options, and visual audience badges in content table.
-- **TitiNauta AI Assistant**: A masculine AI assistant with a multimodal chat interface, integrated RAG system, quick topic access, context-aware greetings, and a dedicated "Jornada do Desenvolvimento" experience.
-- **Baby Health Dashboard**: Real-time health monitoring for babies, including growth charts, sleep patterns, vaccine checklists, and daily summaries, visible only to parents.
-- **Dynamic Contextual FAQ**: A query-based FAQ system with dynamic ranking and contextual suggestions based on a child's development week (0-312 weeks).
-- **Professional Portal**: Comprehensive portal for healthcare professionals including:
-  - **Boas Vindas (ProfessionalWelcomeHub)**: Same UI/UX as parent WelcomeHub with dynamic content carousels (News, Training) filtered for professionals, controlled by Owner/Admin through Content Management
-  - **Dashboard**: Simplified dashboard with KPIs (children count, pending invites, active chats), quick actions, and recent activity summary
-  - **Gestão das Crianças**: Dedicated module at /professional/children with tabs for assigned children, invitations, chat invites, and active chats - children are assigned by Owner/Admin only
-  - **TitiNauta Especialista**: Accessible via IconToolbar in top bar (not in sidebar), provides chat with kb_professional RAG system
-  - **Qualificação Profissional**: Unified module with 4 tabs (Material de Apoio, Artigos, Treinamentos, Cursos) with enhanced course card styling including image support, duration badges, and level indicators
-  - **ChildAnalysis**: Real development milestone tracking with charts, PDF export, and timeline view via GET /api/milestones/child/:childId with TeamMember access verification
-  - **Simplified Navigation**: Sidebar with 5 items (Boas Vindas, Dashboard, Gestão das Crianças, Qualificação, Configurações)
-- **Training Content System (Phase 2 - Complete)**: Full video-based training platform with 6 Sequelize models (ContentVideo, TrainingModule, TrainingLesson, UserContentProgress, ContentPricing, UserEnrollment). Public access to course browsing via `/educare-app/trainings` with optional authentication support. Admin/Owner management at `/educare-app/admin/trainings` and `/educare-app/owner/trainings`. Vimeo integration ready (awaiting VIMEO_ACCESS_TOKEN). Stripe one-time payment checkout implemented for paid courses.
-- **Prompt Management System (Owner-exclusive)**: Complete system for customizing AI assistant behavior via `/educare-app/owner/prompt-management`. Features include:
-  - AssistantPrompt model with versioning, module_type (baby/mother/professional), and variable schemas
-  - Full 3-tab interface: TitiNauta (baby), Saúde Materna (mother), TitiNauta Especialista (professional)
-  - Version control with full history viewer and prompt activation system
-  - Dynamic variable substitution ({{child_name}}, {{child_age}}, {{current_date}}, etc.)
-  - Visual API key status panel showing 9 providers' availability (green/gray badges)
-  - 5-minute cache for production performance, with cache invalidation on updates
-  - Integration with ragService.js FASE 12 for automatic prompt loading
-  - Default prompts seeded via `node src/scripts/seedDefaultPrompts.js`
-- **LLM Configuration System (Owner-exclusive)**: Extensible system for per-agent model selection within `/educare-app/owner/prompt-management`. Features include:
-  - AssistantLLMConfig model with module_type (PK), provider (VARCHAR), model_name, temperature, max_tokens, additional_params (JSONB)
-  - LLMProviderRegistry with 9 built-in providers:
-    - **OpenAI**: gpt-4o-mini, gpt-4o, gpt-4-turbo, gpt-3.5-turbo, o1-mini, o1-preview
-    - **Google Gemini**: gemini-2.0-flash, gemini-1.5-flash, gemini-1.5-pro
-    - **DeepSeek**: deepseek-chat, deepseek-reasoner (R1)
-    - **Groq**: llama-3.3-70b-versatile, llama-3.1-8b-instant, mixtral-8x7b, gemma2-9b
-    - **xAI (Grok)**: grok-beta, grok-2-1212
-    - **Anthropic (Claude)**: claude-3.5-sonnet, claude-3.5-haiku, claude-3-opus
-    - **Together AI**: Llama 3.3 70B Turbo, Qwen 2.5 72B, Mixtral 8x22B
-    - **OpenRouter**: Access to multiple providers through single API
-    - **Custom**: Any OpenAI-compatible API with configurable base_url
-  - Collapsible "Model Settings" section with provider select, model dropdown, temperature slider (0-2), max_tokens input (100-16000)
-  - Custom endpoint support for self-hosted models (additional_params.base_url)
-  - Provider availability validated dynamically via environment keys
-  - 5-minute cache for production performance, with cache invalidation on updates
-  - Unified LLM calling through providerRegistry.callLLM() in ragService.js
-  - Default configs seeded via `node src/scripts/seedDefaultLLMConfigs.js`
-  - Environment keys: OPENAI_API_KEY, GEMINI_API_KEY, DEEPSEEK_API_KEY, GROQ_API_KEY, XAI_API_KEY, ANTHROPIC_API_KEY, TOGETHER_API_KEY, OPENROUTER_API_KEY, CUSTOM_LLM_API_KEY
+- **Knowledge Base Management**: Owner panel for managing documents across segmented KBs, supporting cloud storage uploads.
+- **Content Management**: Admin/Owner system for creating and publishing dynamic content with audience targeting, rich text editing, and visual badges.
+- **TitiNauta AI Assistant**: A masculine AI assistant with a multimodal chat interface, integrated RAG, quick topic access, context-aware greetings, and a dedicated "Jornada do Desenvolvimento" experience.
+- **Baby Health Dashboard**: Real-time health monitoring for babies (growth charts, sleep patterns, vaccine checklists), visible only to parents.
+- **Dynamic Contextual FAQ**: A query-based FAQ system with dynamic ranking and suggestions based on a child's development week.
+- **Professional Portal**: Comprehensive portal for healthcare professionals including tailored `ProfessionalWelcomeHub`, simplified dashboard, child management, a specialized `TitiNauta Especialista` (RAG access to `kb_professional`), and a professional qualification module.
+- **Training Content System**: Video-based training platform with public browsing, admin/owner management, Vimeo integration, and Stripe one-time payment checkout.
+- **Prompt Management System (Owner-exclusive)**: System for customizing AI assistant behavior with versioning, module-type specific prompts, dynamic variable substitution, visual API key status, and cache management.
+- **LLM Configuration System (Owner-exclusive)**: Extensible system for per-agent model selection, supporting 9 built-in providers (OpenAI, Google Gemini, DeepSeek, Groq, xAI, Anthropic, Together AI, OpenRouter, Custom) with configurable parameters and dynamic validation of provider availability.
 
 ### System Design Choices
 - **Scalability**: Designed for cloud deployment on Digital Ocean using multiple droplets, PostgreSQL, and Redis.
@@ -75,73 +35,14 @@ Content is dynamically loaded and diversified with fallback images. Audience fil
 - **Observability**: Extensive metrics and logging for RAG performance and system health.
 - **Controlled Rollout**: Feature flags enable safe, phased rollouts and easy rollback.
 
-## LLM Provider Integration Guide
-
-See **`docs/COMO_ADICIONAR_PROVEDORES_LLM.md`** for a comprehensive step-by-step guide on:
-- Adding new LLM providers (Claude, Llama, etc)
-- Configuring API keys
-- Registering providers in LLMProviderRegistry
-- Implementing custom provider methods
-- Testing provider availability and functionality
-
-This document includes architecture diagrams, code examples, and a complete checklist for implementation.
-
-## Recent Fixes
-
-### 2025-12-30: LLM Config Service Data Structure Fix
-**Problem**: Frontend `llmConfigService.ts` was attempting to access `response.data.data`, causing undefined errors
-- **Root Cause**: Misalignment between httpClient response unwrapping and expected data structure
-- **Solution**: Updated all 4 methods in `llmConfigService.ts` to correctly access `response.data` (httpClient already unwraps the nested data)
-- **Methods Fixed**: `getAllConfigs()`, `getConfigByModule()`, `getAvailableProviders()`, `updateConfig()`
-- **Testing**: ✅ Verified OpenAI and Gemini providers load correctly, database persistence works, cache invalidation functional
-
-
-
-### 2025-12-30: Owner/Admin Professional Portal Access (COMPLETE RESOLUTION)
-**Problem**: Owner and Admin could not view or access Professional Portal modules
-- **Root Cause 1**: Field name mismatch in `trainingController.js` (audience vs target_audience)
-- **Root Cause 2**: Sidebar returned early for owner/admin, never reaching professional module code
-- **Root Cause 3**: `EducareAppLayout.tsx` allowedPaths for owner/admin did NOT include `/educare-app/professional/`
-
-**Hierarchy Implemented**: Owner > Admin > Professional > Parent
-- Higher-level roles have complete access to all lower-level role functionalities
-
-**Solution - Backend** (educare-backend/src/controllers/trainingController.js):
-- Fixed field name mapping: `audience` → `target_audience` (4 occurrences)
-- Added role-based status filtering: Owner/Admin see both `draft` and `published`
-- Updated listTrainings, getTrainingDetails, createTraining, updateTraining
-
-**Solution - Frontend EducareAppLayout.tsx**:
-- Added `/educare-app/professional/` to allowedPaths for owner/admin (line 89)
-- Added `/educare-app/trainings` to allowedPaths for owner/admin (line 101)
-- Added comment documenting hierarchy: Owner > Admin > Professional > Parent
-
-**Solution - Frontend EnhancedAppSidebar.tsx**:
-- Added "Portal Profissional" and "Qualificação Profissional" menu items directly to Owner menu (lines 170-180)
-- Added "Portal Profissional" and "Qualificação Profissional" menu items directly to Admin menu (lines 244-254)
-- Fixed unreachable code: Changed professional condition from `professional || owner || admin` to just `professional` (line 261)
-
-**Solution - ProfessionalOnlyGuard.tsx**: Already correctly allows owner and admin (line 32)
-
-**Files Modified**:
-- `educare-backend/src/controllers/trainingController.js`
-- `src/pages/educare-app/EducareAppLayout.tsx`
-- `src/components/educare-app/layout/EnhancedAppSidebar.tsx`
-
-**Testing**: ✅ 
-- Backend: `GET /api/content/public?type=training&audience=professionals` returns 4 training items
-- Frontend: Owner and Admin now see "Portal Profissional" and "Qualificação Profissional" in sidebar
-- Navigation to `/educare-app/professional/qualificacao` works for all elevated roles
-
 ## External Dependencies
 
 - **Database**: PostgreSQL
-- **Automation Platform**: n8n Workflow (for WhatsApp ingestion, AI processing, context management, and response delivery)
+- **Automation Platform**: n8n Workflow
 - **Messaging**: WhatsApp (via Evolution API)
 - **Payment Gateway**: Stripe
-- **AI/ML**: OpenAI API (for File Search and LLM, specifically gpt-4o-mini)
+- **AI/ML**: OpenAI API (File Search, LLM), Google Gemini (OCR, Embeddings)
 - **Vector Database**: Qdrant Cloud
-- **OCR/Embeddings**: Google Gemini (gemini-2.5-flash for OCR, text-embedding-004 for embeddings)
 - **Cloud Provider**: Digital Ocean
 - **UI Libraries**: Radix UI, Tailwind CSS (via shadcn/ui)
 - **Frontend State Management**: `@tanstack/react-query`

@@ -5,6 +5,7 @@ const authConfig = require('../config/auth');
 const { validationResult } = require('express-validator');
 const https = require('https'); // Módulo nativo do Node.js para requisições HTTPS
 const { OAuth2Client } = require('google-auth-library');
+const { normalizePhoneNumber, findUserByPhone } = require('../utils/phoneUtils');
 
 /**
  * Função auxiliar para enviar dados para um webhook via HTTPS
@@ -130,33 +131,22 @@ exports.register = async (req, res) => {
 
     // Verificar se o telefone já está em uso (se fornecido)
     if (phone) {
-      console.log(`Verificando se telefone já está em uso: ${phone}`);
+      const normalizedPhone = normalizePhoneNumber(phone);
+      console.log(`Verificando se telefone já está em uso: ${phone} (normalizado: ${normalizedPhone})`);
       
-      // Verificar telefone exatamente como recebido
-      let phoneExists = await User.findOne({ where: { phone } });
-      
-      // Se não encontrar e for telefone com +, verificar sem o +
-      if (!phoneExists && phone.startsWith('+')) {
-        const phoneWithoutPlus = phone.substring(1);
-        console.log(`Verificando telefone sem o +: ${phoneWithoutPlus}`);
-        phoneExists = await User.findOne({ where: { phone: phoneWithoutPlus } });
-        
-        // Se encontrar sem o +, atualizar para incluir o +
-        if (phoneExists) {
-          console.log(`Telefone já cadastrado sem o +: ${phoneWithoutPlus}`);
-          await phoneExists.update({ phone });
-        }
-      }
+      // Verificar telefone usando função de busca inteligente
+      const phoneExists = await findUserByPhone(User, phone);
       
       if (phoneExists) {
         return res.status(400).json({ error: 'Telefone já está em uso' });
       }
     }
 
-    // Criar usuário
+    // Criar usuário com telefone normalizado
+    const phoneToSave = phone ? normalizePhoneNumber(phone) : null;
     const user = await User.create({
       email,
-      phone,
+      phone: phoneToSave,
       password: finalPassword,
       name,
       role: mappedRole || 'user',
@@ -168,7 +158,7 @@ exports.register = async (req, res) => {
       user_id: user.id,
       name: name,
       type: mappedRole === 'professional' ? 'professional' : 'parent',
-      phone: phone
+      phone: phoneToSave
     };
     
     // Se é um profissional e tem dados de perfil, incluir informações adicionais
@@ -686,9 +676,8 @@ exports.updatePassword = async (req, res) => {
       return res.status(401).json({ error: 'Senha atual incorreta' });
     }
 
-    // Atualizar senha
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await user.update({ password: hashedPassword });
+    // Atualizar senha (o hook beforeUpdate do modelo faz o hash automaticamente)
+    await user.update({ password: newPassword });
 
     return res.status(200).json({ message: 'Senha atualizada com sucesso' });
   } catch (error) {
@@ -767,24 +756,12 @@ exports.loginByPhone = async (req, res) => {
       });
     }
 
-    console.log(`Tentando login com telefone: ${phone}`);
+    // Normalizar o telefone para formato E.164
+    const normalizedPhone = normalizePhoneNumber(phone);
+    console.log(`Tentando login com telefone: ${phone} (normalizado: ${normalizedPhone})`);
     
-    // Buscar usuário pelo telefone (exatamente como recebido)
-    const user = await User.findOne({ where: { phone } });
-    
-    // Se não encontrar com o formato exato, tente buscar sem o + (compatibilidade)
-    if (!user && phone.startsWith('+')) {
-      const phoneWithoutPlus = phone.substring(1);
-      console.log(`Tentando buscar telefone sem o +: ${phoneWithoutPlus}`);
-      const userWithoutPlus = await User.findOne({ where: { phone: phoneWithoutPlus } });
-      
-      if (userWithoutPlus) {
-        console.log(`Usuário encontrado com telefone sem o +: ${phoneWithoutPlus}`);
-        // Atualizar o telefone para incluir o + para futuras buscas
-        await userWithoutPlus.update({ phone });
-        return processLoginByPhone(userWithoutPlus, phone, res);
-      }
-    }
+    // Buscar usuário usando função que verifica múltiplos formatos
+    const user = await findUserByPhone(User, phone);
 
     if (!user) {
       return res.status(404).json({ 
@@ -793,7 +770,7 @@ exports.loginByPhone = async (req, res) => {
       });
     }
     
-    return processLoginByPhone(user, phone, res);
+    return processLoginByPhone(user, normalizedPhone, res);
   } catch (error) {
     console.error('Erro ao processar login por telefone:', error);
     return res.status(500).json({ 
@@ -819,12 +796,8 @@ const processLoginByPhone = async (user, phone, res) => {
     const tempPassword = generateSecurePassword();
     console.log('Senha temporária gerada para usuário:', user.id);
     
-    // Hash da senha temporária
-    const hashedPassword = await bcrypt.hash(tempPassword, 10);
-    console.log('Hash da senha temporária gerado com sucesso');
-    
-    // Atualizar senha do usuário
-    user.password = hashedPassword;
+    // Atualizar senha do usuário (o hook beforeUpdate do modelo faz o hash automaticamente)
+    user.password = tempPassword;
     await user.save();
     console.log('Senha temporária salva no banco de dados para usuário:', user.id);
 
@@ -910,7 +883,9 @@ exports.sendPhoneVerification = async (req, res) => {
       return res.status(400).json({ error: 'Número de telefone é obrigatório' });
     }
     
-    console.log(`Tentando verificar telefone: ${phone}`);
+    // Normalizar o telefone para formato E.164
+    const normalizedPhone = normalizePhoneNumber(phone);
+    console.log(`Tentando verificar telefone: ${phone} (normalizado: ${normalizedPhone})`);
 
     // Gerar código de verificação de 6 dígitos
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -919,21 +894,8 @@ exports.sendPhoneVerification = async (req, res) => {
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + 30);
 
-    // Verificar se o telefone já está cadastrado (exatamente como recebido)
-    let user = await User.findOne({ where: { phone } });
-    
-    // Se não encontrar com o formato exato, tente buscar sem o + (compatibilidade)
-    if (!user && phone.startsWith('+')) {
-      const phoneWithoutPlus = phone.substring(1);
-      console.log(`Tentando buscar telefone sem o +: ${phoneWithoutPlus}`);
-      user = await User.findOne({ where: { phone: phoneWithoutPlus } });
-      
-      if (user) {
-        console.log(`Usuário encontrado com telefone sem o +: ${phoneWithoutPlus}`);
-        // Atualizar o telefone para incluir o + para futuras buscas
-        await user.update({ phone });
-      }
-    }
+    // Verificar se o telefone já está cadastrado usando busca inteligente
+    let user = await findUserByPhone(User, phone);
 
     if (user) {
       // Atualizar código de verificação para usuário existente
@@ -942,12 +904,14 @@ exports.sendPhoneVerification = async (req, res) => {
       await user.save();
     } else {
       // Criar usuário temporário com telefone e código de verificação
+      // (o hook beforeCreate do modelo faz o hash da senha automaticamente)
       user = await User.create({
-        phone,
+        phone: normalizedPhone,
         phone_verification_code: verificationCode,
         phone_verification_expires: expiresAt,
         status: 'pending',
-        password: await bcrypt.hash(Math.random().toString(36), 10) // Senha temporária aleatória
+        name: 'Usuário Temporário',
+        password: Math.random().toString(36).slice(-12) // Senha temporária aleatória (hash automático)
       });
     }
 
@@ -958,20 +922,20 @@ exports.sendPhoneVerification = async (req, res) => {
       return res.status(500).json({ error: 'URL do webhook não configurada' });
     }
 
-    // Enviar código via webhook
+    // Enviar código via webhook (usar telefone normalizado para garantir formato correto)
     try {
       // Preparar dados para envio
       const webhookData = {
-        phone: phone,
+        phone: normalizedPhone,
         message: `Seu código de verificação do Educare: ${verificationCode}\nVálido por 30 minutos.`
       };
       
-      console.log(`Enviando código de verificação para ${phone} via webhook POST`);
+      console.log(`Enviando código de verificação para ${normalizedPhone} via webhook POST`);
       
       // Usar a função auxiliar para enviar ao webhook
       const response = await sendToWebhook(process.env.PHONE_VERIFICATION_WEBHOOK, webhookData);
       
-      console.log(`Código de verificação enviado com sucesso para ${phone}`);
+      console.log(`Código de verificação enviado com sucesso para ${normalizedPhone}`);
       
       return res.status(200).json({
         message: 'Código de verificação enviado com sucesso',
@@ -996,23 +960,12 @@ exports.verifyPhoneCode = async (req, res) => {
       return res.status(400).json({ error: 'Telefone e código são obrigatórios' });
     }
     
-    console.log(`Verificando código para telefone: ${phone}`);
+    // Normalizar telefone e buscar usando função inteligente
+    const normalizedPhone = normalizePhoneNumber(phone);
+    console.log(`Verificando código para telefone: ${phone} (normalizado: ${normalizedPhone})`);
 
-    // Buscar usuário pelo telefone (exatamente como recebido)
-    let user = await User.findOne({ where: { phone } });
-    
-    // Se não encontrar com o formato exato, tente buscar sem o + (compatibilidade)
-    if (!user && phone.startsWith('+')) {
-      const phoneWithoutPlus = phone.substring(1);
-      console.log(`Tentando buscar telefone sem o +: ${phoneWithoutPlus}`);
-      user = await User.findOne({ where: { phone: phoneWithoutPlus } });
-      
-      if (user) {
-        console.log(`Usuário encontrado com telefone sem o +: ${phoneWithoutPlus}`);
-        // Atualizar o telefone para incluir o + para futuras buscas
-        await user.update({ phone });
-      }
-    }
+    // Buscar usuário pelo telefone usando busca inteligente
+    let user = await findUserByPhone(User, phone);
 
     if (!user) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
@@ -1131,14 +1084,13 @@ exports.googleLogin = async (req, res) => {
       await user.update({ last_login: new Date() });
       console.log(`Usuário existente logado via Google: ${email}`);
     } else {
-      // Criar novo usuário
+      // Criar novo usuário (o hook beforeCreate do modelo faz o hash automaticamente)
       const randomPassword = Math.random().toString(36).slice(-16);
-      const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
       user = await User.create({
         email,
         name: name || email.split('@')[0],
-        password: hashedPassword,
+        password: randomPassword,
         role: 'user',
         status: 'active',
         email_verified: true, // Email do Google já é verificado
