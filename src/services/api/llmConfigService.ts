@@ -55,43 +55,43 @@ export interface UpdateLLMConfigData {
 
 class LLMConfigService {
   async getAllConfigs(): Promise<LLMConfigsResponse> {
-    const response = await httpClient.get<{ data: LLMConfigsResponse }>('/llm-configs', { requiresAuth: true });
+    const response = await httpClient.get<LLMConfigsResponse>('/llm-configs', { requiresAuth: true });
     
     if (!response.success || !response.data) {
       throw new Error(response.error || 'Erro ao carregar configurações de LLM');
     }
     
-    return response.data.data;
+    return response.data;
   }
 
   async getConfigByModule(moduleType: ModuleType): Promise<{ config: LLMConfig; providers: LLMProviderInfo[] }> {
-    const response = await httpClient.get<{ data: { config: LLMConfig; providers: LLMProviderInfo[] } }>(`/llm-configs/${moduleType}`, { requiresAuth: true });
+    const response = await httpClient.get<{ config: LLMConfig; providers: LLMProviderInfo[] }>(`/llm-configs/${moduleType}`, { requiresAuth: true });
     
     if (!response.success || !response.data) {
       throw new Error(response.error || 'Erro ao carregar configuração de LLM');
     }
     
-    return response.data.data;
+    return response.data;
   }
 
   async getAvailableProviders(): Promise<LLMProviderInfo[]> {
-    const response = await httpClient.get<{ data: LLMProviderInfo[] }>('/llm-configs/providers', { requiresAuth: true });
+    const response = await httpClient.get<LLMProviderInfo[]>('/llm-configs/providers', { requiresAuth: true });
     
     if (!response.success || !response.data) {
       throw new Error(response.error || 'Erro ao carregar provedores disponíveis');
     }
     
-    return response.data.data;
+    return response.data;
   }
 
   async updateConfig(moduleType: ModuleType, data: UpdateLLMConfigData): Promise<LLMConfig> {
-    const response = await httpClient.put<{ data: LLMConfig; message: string }>(`/llm-configs/${moduleType}`, data, { requiresAuth: true });
+    const response = await httpClient.put<LLMConfig>(`/llm-configs/${moduleType}`, data, { requiresAuth: true });
     
     if (!response.success || !response.data) {
       throw new Error(response.error || 'Erro ao atualizar configuração de LLM');
     }
     
-    return response.data.data;
+    return response.data;
   }
 }
 
