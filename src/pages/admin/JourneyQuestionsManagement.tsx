@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   journeyQuestionsService, 
-  JourneyV2Quiz,
-  JourneyV2,
-  JourneyV2Week,
-  JourneyQuizzesFilters,
-  CreateJourneyQuizData 
+  JourneyQuestion, 
+  JourneyQuestionsFilters,
+  CreateJourneyQuestionData 
 } from '../../services/journeyQuestionsService';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -32,10 +30,11 @@ import {
   Dialog, 
   DialogContent, 
   DialogHeader, 
-  DialogTitle,
-  DialogFooter
+  DialogTitle, 
+  DialogTrigger 
 } from '../../components/ui/dialog';
 import { Textarea } from '../../components/ui/textarea';
+import { Switch } from '../../components/ui/switch';
 import { useToast } from '../../hooks/use-toast';
 import { 
   Plus, 
@@ -47,14 +46,10 @@ import {
   Trash2, 
   BarChart3,
   FileText,
-  Eye,
-  ChevronLeft,
-  ChevronRight,
-  Loader2
+  Eye
 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { ScrollArea } from '../../components/ui/scroll-area';
 
+// Função para definir cores dos badges por domínio
 const getCategoryBadgeColor = (domain: string | undefined): string => {
   if (!domain) return 'bg-gray-100 text-gray-800';
   
@@ -67,91 +62,64 @@ const getCategoryBadgeColor = (domain: string | undefined): string => {
     'nutrition': 'bg-orange-100 text-orange-800',
     'sensory': 'bg-indigo-100 text-indigo-800',
     'social_emotional': 'bg-red-100 text-red-800',
-    'baby_health': 'bg-teal-100 text-teal-800',
-    'saude_bebe': 'bg-teal-100 text-teal-800',
-    'saude_materna': 'bg-pink-100 text-pink-800',
-    'saude_mental': 'bg-purple-100 text-purple-800',
-    'autocuidado_materno': 'bg-rose-100 text-rose-800',
-    'comunicacao': 'bg-blue-100 text-blue-800',
-    'intimidade_conexa': 'bg-amber-100 text-amber-800',
-    'saude_mamas': 'bg-fuchsia-100 text-fuchsia-800'
+    'baby_health': 'bg-teal-100 text-teal-800'
   };
   
   return domainColors[domain] || 'bg-gray-100 text-gray-800';
 };
 
-const emptyQuizForm: CreateJourneyQuizData = {
-  week_id: '',
-  domain: '',
-  domain_id: '',
-  title: '',
-  question: '',
-  options: {},
-  feedback: {},
-  knowledge: {}
-};
-
 const JourneyQuestionsManagement: React.FC = () => {
-  const [filters, setFilters] = useState<JourneyQuizzesFilters>({
+  const [filters, setFilters] = useState<JourneyQuestionsFilters>({
     page: 1,
     limit: 20
   });
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editingQuiz, setEditingQuiz] = useState<JourneyV2Quiz | null>(null);
+  const [editingQuestion, setEditingQuestion] = useState<JourneyQuestion | null>(null);
   const [showStatsDialog, setShowStatsDialog] = useState(false);
-  const [showViewDialog, setShowViewDialog] = useState(false);
-  const [viewingQuiz, setViewingQuiz] = useState<JourneyV2Quiz | null>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
-  const [showImportDialog, setShowImportDialog] = useState(false);
-  
-  const [selectedJourneyId, setSelectedJourneyId] = useState<string>('');
-  const [formData, setFormData] = useState<CreateJourneyQuizData>(emptyQuizForm);
-  const [optionsJson, setOptionsJson] = useState('{}');
-  const [feedbackJson, setFeedbackJson] = useState('{}');
-  const [knowledgeJson, setKnowledgeJson] = useState('{}');
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: quizzesData, isLoading } = useQuery({
-    queryKey: ['journey-v2-quizzes', filters],
-    queryFn: () => journeyQuestionsService.listQuizzes(filters)
+  // Query para listar perguntas
+  const { data: questionsData, isLoading } = useQuery({
+    queryKey: ['journey-questions', filters],
+    queryFn: () => journeyQuestionsService.listQuestions(filters)
   });
 
+  // Debug dos dados recebidos
+  React.useEffect(() => {
+    if (questionsData) {
+      console.log('🔍 DEBUG: Dados recebidos na query:', questionsData);
+      console.log('🔍 DEBUG: questionsData.data.length:', questionsData?.data?.length);
+      console.log('🔍 DEBUG: questionsData.meta:', questionsData?.meta);
+    }
+  }, [questionsData]);
+
+  // Query para estatísticas
   const { data: statsData } = useQuery({
-    queryKey: ['journey-v2-quizzes-stats'],
+    queryKey: ['journey-questions-stats'],
     queryFn: () => journeyQuestionsService.getStatistics()
   });
 
-  const { data: journeysData } = useQuery({
-    queryKey: ['journey-v2-journeys'],
-    queryFn: () => journeyQuestionsService.listJourneys()
-  });
-
-  const { data: weeksData } = useQuery({
-    queryKey: ['journey-v2-weeks', selectedJourneyId],
-    queryFn: () => journeyQuestionsService.listWeeks(selectedJourneyId || undefined),
-    enabled: true
-  });
-
+  // Mutation para criar pergunta
   const createMutation = useMutation({
-    mutationFn: (data: CreateJourneyQuizData) => 
-      journeyQuestionsService.createQuiz(data),
+    mutationFn: (data: CreateJourneyQuestionData) => 
+      journeyQuestionsService.createQuestion(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['journey-v2-quizzes'] });
-      queryClient.invalidateQueries({ queryKey: ['journey-v2-quizzes-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['journey-questions'] });
+      queryClient.invalidateQueries({ queryKey: ['journey-questions-stats'] });
       setShowCreateDialog(false);
-      resetForm();
       toast({
         title: "Sucesso",
-        description: "Quiz criado com sucesso!",
+        description: "Pergunta criada com sucesso!",
       });
     },
     onError: (error: unknown) => {
       const errorMessage = error && typeof error === 'object' && 'response' in error 
-        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || "Erro ao criar quiz"
-        : "Erro ao criar quiz";
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || "Erro ao criar pergunta"
+        : "Erro ao criar pergunta";
       toast({
         title: "Erro",
         description: errorMessage,
@@ -160,24 +128,24 @@ const JourneyQuestionsManagement: React.FC = () => {
     }
   });
 
+  // Mutation para atualizar pergunta
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<CreateJourneyQuizData> }) => 
-      journeyQuestionsService.updateQuiz(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<CreateJourneyQuestionData> }) => 
+      journeyQuestionsService.updateQuestion(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['journey-v2-quizzes'] });
-      queryClient.invalidateQueries({ queryKey: ['journey-v2-quizzes-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['journey-questions'] });
+      queryClient.invalidateQueries({ queryKey: ['journey-questions-stats'] });
       setShowEditDialog(false);
-      setEditingQuiz(null);
-      resetForm();
+      setEditingQuestion(null);
       toast({
         title: "Sucesso",
-        description: "Quiz atualizado com sucesso!",
+        description: "Pergunta atualizada com sucesso!",
       });
     },
     onError: (error: unknown) => {
       const errorMessage = error && typeof error === 'object' && 'response' in error 
-        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || "Erro ao atualizar quiz"
-        : "Erro ao atualizar quiz";
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || "Erro ao atualizar pergunta"
+        : "Erro ao atualizar pergunta";
       toast({
         title: "Erro",
         description: errorMessage,
@@ -186,20 +154,21 @@ const JourneyQuestionsManagement: React.FC = () => {
     }
   });
 
+  // Mutation para excluir pergunta
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => journeyQuestionsService.deleteQuiz(id),
+    mutationFn: (id: string) => journeyQuestionsService.deleteQuestion(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['journey-v2-quizzes'] });
-      queryClient.invalidateQueries({ queryKey: ['journey-v2-quizzes-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['journey-questions'] });
+      queryClient.invalidateQueries({ queryKey: ['journey-questions-stats'] });
       toast({
         title: "Sucesso",
-        description: "Quiz excluído com sucesso!",
+        description: "Pergunta excluída com sucesso!",
       });
     },
     onError: (error: unknown) => {
       const errorMessage = error && typeof error === 'object' && 'response' in error 
-        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || "Erro ao excluir quiz"
-        : "Erro ao excluir quiz";
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || "Erro ao excluir pergunta"
+        : "Erro ao excluir pergunta";
       toast({
         title: "Erro",
         description: errorMessage,
@@ -208,94 +177,42 @@ const JourneyQuestionsManagement: React.FC = () => {
     }
   });
 
+  // Mutation para importar CSV
   const importMutation = useMutation({
     mutationFn: (file: File) => journeyQuestionsService.importFromCSV(file),
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['journey-v2-quizzes'] });
-      queryClient.invalidateQueries({ queryKey: ['journey-v2-quizzes-stats'] });
-      setShowImportDialog(false);
+      queryClient.invalidateQueries({ queryKey: ['journey-questions'] });
+      queryClient.invalidateQueries({ queryKey: ['journey-questions-stats'] });
       setImportFile(null);
       toast({
-        title: "Importação concluída",
-        description: `${result.imported} quizzes importados. ${result.errors} erros.`,
-        variant: result.errors > 0 ? "destructive" : "default"
+        title: "Importação Concluída",
+        description: `${result.imported} perguntas importadas. ${result.errors} erros encontrados.`,
       });
     },
     onError: (error: unknown) => {
+      const errorMessage = error && typeof error === 'object' && 'response' in error 
+        ? (error as { response?: { data?: { error?: string } } }).response?.data?.error || "Erro ao importar CSV"
+        : "Erro ao importar CSV";
       toast({
-        title: "Erro na importação",
-        description: "Falha ao processar o arquivo CSV",
+        title: "Erro",
+        description: errorMessage,
         variant: "destructive",
       });
     }
   });
-
-  const resetForm = () => {
-    setFormData(emptyQuizForm);
-    setSelectedJourneyId('');
-    setOptionsJson('{}');
-    setFeedbackJson('{}');
-    setKnowledgeJson('{}');
-  };
-
-  const openEditDialog = (quiz: JourneyV2Quiz) => {
-    setEditingQuiz(quiz);
-    setFormData({
-      week_id: quiz.week_id,
-      domain: quiz.domain,
-      domain_id: quiz.domain_id,
-      title: quiz.title,
-      question: quiz.question,
-      options: quiz.options,
-      feedback: quiz.feedback,
-      knowledge: quiz.knowledge
-    });
-    setSelectedJourneyId(quiz.week?.journey_id || '');
-    setOptionsJson(JSON.stringify(quiz.options || {}, null, 2));
-    setFeedbackJson(JSON.stringify(quiz.feedback || {}, null, 2));
-    setKnowledgeJson(JSON.stringify(quiz.knowledge || {}, null, 2));
-    setShowEditDialog(true);
-  };
-
-  const handleSubmit = (isEdit: boolean) => {
-    try {
-      const options = JSON.parse(optionsJson);
-      const feedback = JSON.parse(feedbackJson);
-      const knowledge = JSON.parse(knowledgeJson);
-
-      const submitData: CreateJourneyQuizData = {
-        ...formData,
-        options,
-        feedback,
-        knowledge
-      };
-
-      if (isEdit && editingQuiz) {
-        updateMutation.mutate({ id: editingQuiz.id, data: submitData });
-      } else {
-        createMutation.mutate(submitData);
-      }
-    } catch (e) {
-      toast({
-        title: "Erro de validação",
-        description: "JSON inválido nos campos options, feedback ou knowledge",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleExport = async () => {
     try {
       const blob = await journeyQuestionsService.exportToCSV();
       journeyQuestionsService.downloadCSV(blob);
       toast({
-        title: "Exportação concluída",
-        description: "Arquivo CSV baixado com sucesso!",
+        title: "Sucesso",
+        description: "Arquivo CSV exportado com sucesso!",
       });
     } catch (error) {
       toast({
         title: "Erro",
-        description: "Falha ao exportar CSV",
+        description: "Erro ao exportar arquivo CSV",
         variant: "destructive",
       });
     }
@@ -307,44 +224,116 @@ const JourneyQuestionsManagement: React.FC = () => {
     }
   };
 
-  const domainLabels = journeyQuestionsService.getDomainLabels();
-  const availableDomains = journeyQuestionsService.getAvailableDomains();
+  const handleEdit = (question: JourneyQuestion) => {
+    setEditingQuestion(question);
+    setShowEditDialog(true);
+  };
 
-  const quizzes = quizzesData?.data || [];
-  const meta = quizzesData?.meta;
-  const journeys = journeysData?.data || [];
-  const weeks = weeksData?.data || [];
-  const stats = statsData?.data;
+  const handleDelete = (id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir esta pergunta?')) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const getCategoryBadgeColor = (category: string) => {
+    const colors: Record<string, string> = {
+      motor: 'bg-blue-100 text-blue-800',
+      cognitivo: 'bg-purple-100 text-purple-800',
+      linguagem: 'bg-green-100 text-green-800',
+      social: 'bg-yellow-100 text-yellow-800',
+      emocional: 'bg-pink-100 text-pink-800',
+      sensorial: 'bg-orange-100 text-orange-800',
+      autonomia: 'bg-indigo-100 text-indigo-800',
+      brincadeira: 'bg-red-100 text-red-800'
+    };
+    return colors[category] || 'bg-gray-100 text-gray-800';
+  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Gestão de Quizzes da Jornada</h1>
+          <h1 className="text-3xl font-bold">Gestão de Perguntas da Jornada</h1>
           <p className="text-muted-foreground">
-            Gerencie as perguntas e quizzes das jornadas de desenvolvimento (tabela journey_v2_quizzes)
+            Gerencie as perguntas do TitiNauta por faixa etária e categoria
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowStatsDialog(true)}>
+          <Button
+            variant="outline"
+            onClick={() => setShowStatsDialog(true)}
+          >
             <BarChart3 className="h-4 w-4 mr-2" />
             Estatísticas
           </Button>
-          <Button variant="outline" onClick={handleExport}>
+          <Button
+            variant="outline"
+            onClick={handleExport}
+          >
             <Download className="h-4 w-4 mr-2" />
             Exportar CSV
           </Button>
-          <Button variant="outline" onClick={() => setShowImportDialog(true)}>
-            <Upload className="h-4 w-4 mr-2" />
-            Importar CSV
-          </Button>
-          <Button onClick={() => { resetForm(); setShowCreateDialog(true); }}>
+          <Button
+            onClick={() => setShowCreateDialog(true)}
+          >
             <Plus className="h-4 w-4 mr-2" />
-            Novo Quiz
+            Nova Pergunta
           </Button>
         </div>
       </div>
 
+      {/* Stats Cards */}
+      {statsData?.data && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total</p>
+                  <p className="text-2xl font-bold">{statsData.data.total}</p>
+                </div>
+                <FileText className="h-8 w-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Ativas</p>
+                  <p className="text-2xl font-bold text-green-600">{statsData.data.active}</p>
+                </div>
+                <Eye className="h-8 w-8 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Inativas</p>
+                  <p className="text-2xl font-bold text-red-600">{statsData.data.inactive}</p>
+                </div>
+                <Eye className="h-8 w-8 text-red-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Categorias</p>
+                  <p className="text-2xl font-bold">{statsData.data.byCategory.length}</p>
+                </div>
+                <Filter className="h-8 w-8 text-purple-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Filters */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -353,598 +342,797 @@ const JourneyQuestionsManagement: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por título ou pergunta..."
-                className="pl-9"
-                value={filters.search || ''}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
-              />
-            </div>
-            <Select
-              value={filters.domain || ''}
-              onValueChange={(value) => setFilters({ ...filters, domain: value || undefined, page: 1 })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Filtrar por domínio" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Todos os domínios</SelectItem>
-                {availableDomains.map((domain) => (
-                  <SelectItem key={domain} value={domain}>
-                    {domainLabels[domain] || domain}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={filters.week_id || ''}
-              onValueChange={(value) => setFilters({ ...filters, week_id: value || undefined, page: 1 })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Filtrar por semana" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Todas as semanas</SelectItem>
-                {weeks.map((week) => (
-                  <SelectItem key={week.id} value={week.id}>
-                    Semana {week.week} - {week.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button 
-              variant="outline" 
-              onClick={() => setFilters({ page: 1, limit: 20 })}
-            >
-              Limpar Filtros
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[200px]">Título</TableHead>
-                <TableHead className="w-[120px]">Domínio</TableHead>
-                <TableHead className="w-[150px]">Semana</TableHead>
-                <TableHead>Pergunta</TableHead>
-                <TableHead className="w-[120px]">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-                    <p className="mt-2 text-muted-foreground">Carregando...</p>
-                  </TableCell>
-                </TableRow>
-              ) : quizzes.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    <FileText className="h-12 w-12 mx-auto text-muted-foreground" />
-                    <p className="mt-2 text-muted-foreground">Nenhum quiz encontrado</p>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                quizzes.map((quiz) => (
-                  <TableRow key={quiz.id}>
-                    <TableCell className="font-medium">{quiz.title}</TableCell>
-                    <TableCell>
-                      <Badge className={getCategoryBadgeColor(quiz.domain)}>
-                        {domainLabels[quiz.domain] || quiz.domain}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {quiz.week ? (
-                        <span className="text-sm">
-                          Semana {quiz.week.week}
-                          <br />
-                          <span className="text-muted-foreground text-xs">
-                            {quiz.week.journey?.title}
-                          </span>
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="max-w-[300px] truncate">
-                      {quiz.question}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => { setViewingQuiz(quiz); setShowViewDialog(true); }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEditDialog(quiz)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            if (confirm('Tem certeza que deseja excluir este quiz?')) {
-                              deleteMutation.mutate(quiz.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {meta && meta.totalPages && meta.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Mostrando {quizzes.length} de {meta.total} quizzes
-          </p>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!meta.page || meta.page <= 1}
-              onClick={() => setFilters({ ...filters, page: (meta.page || 1) - 1 })}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Anterior
-            </Button>
-            <span className="flex items-center px-3 text-sm">
-              Página {meta.page} de {meta.totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!meta.page || !meta.totalPages || meta.page >= meta.totalPages}
-              onClick={() => setFilters({ ...filters, page: (meta.page || 1) + 1 })}
-            >
-              Próxima
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Criar Novo Quiz</DialogTitle>
-          </DialogHeader>
-          <ScrollArea className="flex-1 pr-4">
-            <QuizForm
-              formData={formData}
-              setFormData={setFormData}
-              selectedJourneyId={selectedJourneyId}
-              setSelectedJourneyId={setSelectedJourneyId}
-              journeys={journeys}
-              weeks={weeks}
-              domainLabels={domainLabels}
-              availableDomains={availableDomains}
-              optionsJson={optionsJson}
-              setOptionsJson={setOptionsJson}
-              feedbackJson={feedbackJson}
-              setFeedbackJson={setFeedbackJson}
-              knowledgeJson={knowledgeJson}
-              setKnowledgeJson={setKnowledgeJson}
-            />
-          </ScrollArea>
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={() => handleSubmit(false)}
-              disabled={createMutation.isPending}
-            >
-              {createMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Criar Quiz
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Editar Quiz</DialogTitle>
-          </DialogHeader>
-          <ScrollArea className="flex-1 pr-4">
-            <QuizForm
-              formData={formData}
-              setFormData={setFormData}
-              selectedJourneyId={selectedJourneyId}
-              setSelectedJourneyId={setSelectedJourneyId}
-              journeys={journeys}
-              weeks={weeks}
-              domainLabels={domainLabels}
-              availableDomains={availableDomains}
-              optionsJson={optionsJson}
-              setOptionsJson={setOptionsJson}
-              feedbackJson={feedbackJson}
-              setFeedbackJson={setFeedbackJson}
-              knowledgeJson={knowledgeJson}
-              setKnowledgeJson={setKnowledgeJson}
-            />
-          </ScrollArea>
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={() => handleSubmit(true)}
-              disabled={updateMutation.isPending}
-            >
-              {updateMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Salvar Alterações
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle>Detalhes do Quiz</DialogTitle>
-          </DialogHeader>
-          {viewingQuiz && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">Título</Label>
-                  <p className="font-medium">{viewingQuiz.title}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Domínio</Label>
-                  <p>
-                    <Badge className={getCategoryBadgeColor(viewingQuiz.domain)}>
-                      {domainLabels[viewingQuiz.domain] || viewingQuiz.domain}
-                    </Badge>
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Domain ID</Label>
-                  <p className="font-mono text-sm">{viewingQuiz.domain_id}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Semana</Label>
-                  <p>
-                    {viewingQuiz.week ? `Semana ${viewingQuiz.week.week} - ${viewingQuiz.week.title}` : '-'}
-                  </p>
-                </div>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">Pergunta</Label>
-                <p className="bg-muted p-3 rounded-md mt-1">{viewingQuiz.question}</p>
-              </div>
-              <Tabs defaultValue="options">
-                <TabsList>
-                  <TabsTrigger value="options">Options</TabsTrigger>
-                  <TabsTrigger value="feedback">Feedback</TabsTrigger>
-                  <TabsTrigger value="knowledge">Knowledge</TabsTrigger>
-                </TabsList>
-                <TabsContent value="options">
-                  <pre className="bg-muted p-3 rounded-md text-sm overflow-auto max-h-[200px]">
-                    {JSON.stringify(viewingQuiz.options, null, 2)}
-                  </pre>
-                </TabsContent>
-                <TabsContent value="feedback">
-                  <pre className="bg-muted p-3 rounded-md text-sm overflow-auto max-h-[200px]">
-                    {JSON.stringify(viewingQuiz.feedback, null, 2)}
-                  </pre>
-                </TabsContent>
-                <TabsContent value="knowledge">
-                  <pre className="bg-muted p-3 rounded-md text-sm overflow-auto max-h-[200px]">
-                    {JSON.stringify(viewingQuiz.knowledge, null, 2)}
-                  </pre>
-                </TabsContent>
-              </Tabs>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showStatsDialog} onOpenChange={setShowStatsDialog}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Estatísticas dos Quizzes</DialogTitle>
-          </DialogHeader>
-          {stats ? (
-            <div className="space-y-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <p className="text-4xl font-bold">{stats.total}</p>
-                    <p className="text-muted-foreground">Total de Quizzes</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Por Domínio</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {stats.byDomain.map((item) => (
-                      <div key={item.domain} className="flex justify-between items-center">
-                        <Badge className={getCategoryBadgeColor(item.domain)}>
-                          {domainLabels[item.domain] || item.domain}
-                        </Badge>
-                        <span className="font-medium">{item.count}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold">{stats.byWeek}</p>
-                    <p className="text-muted-foreground">Semanas com Quizzes</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin mx-auto" />
-              <p className="mt-2 text-muted-foreground">Carregando estatísticas...</p>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Importar Quizzes via CSV</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
             <div>
-              <Label>Arquivo CSV</Label>
+              <Label>Buscar</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar pergunta..."
+                  className="pl-10"
+                  value={filters.search || ''}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value, page: 1 })}
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Categoria</Label>
+              <Select
+                value={filters.category || 'all'}
+                onValueChange={(value) => 
+                  setFilters({ ...filters, category: value === 'all' ? undefined : value, page: 1 })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  {journeyQuestionsService.getAvailableCategories().map(cat => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Idade Mín. (meses)</Label>
               <Input
-                type="file"
-                accept=".csv"
-                onChange={(e) => setImportFile(e.target.files?.[0] || null)}
-                className="mt-1"
+                type="number"
+                placeholder="0"
+                value={filters.min_age_months || ''}
+                onChange={(e) => 
+                  setFilters({ 
+                    ...filters, 
+                    min_age_months: e.target.value ? parseInt(e.target.value) : undefined,
+                    page: 1 
+                  })
+                }
               />
             </div>
-            <div className="text-sm text-muted-foreground">
-              <p className="font-medium mb-2">Formato esperado:</p>
-              <ul className="list-disc list-inside space-y-1">
-                <li>week_id (obrigatório)</li>
-                <li>domain (obrigatório)</li>
-                <li>domain_id (obrigatório)</li>
-                <li>title (obrigatório)</li>
-                <li>question (obrigatório)</li>
-                <li>options (JSON)</li>
-                <li>feedback (JSON)</li>
-                <li>knowledge (JSON)</li>
-              </ul>
+            <div>
+              <Label>Idade Máx. (meses)</Label>
+              <Input
+                type="number"
+                placeholder="60"
+                value={filters.max_age_months || ''}
+                onChange={(e) => 
+                  setFilters({ 
+                    ...filters, 
+                    max_age_months: e.target.value ? parseInt(e.target.value) : undefined,
+                    page: 1 
+                  })
+                }
+              />
+            </div>
+            <div>
+              <Label>Status</Label>
+              <Select
+                value={filters.is_active === undefined ? 'all' : filters.is_active.toString()}
+                onValueChange={(value) => 
+                  setFilters({ 
+                    ...filters, 
+                    is_active: value === 'all' ? undefined : value === 'true',
+                    page: 1 
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="true">Ativo</SelectItem>
+                  <SelectItem value="false">Inativo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-end">
+              <Button
+                variant="outline"
+                onClick={() => setFilters({ page: 1, limit: 20 })}
+                className="w-full"
+              >
+                Limpar Filtros
+              </Button>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowImportDialog(false)}>
-              Cancelar
-            </Button>
-            <Button 
+        </CardContent>
+      </Card>
+
+      {/* Import Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            Importar Perguntas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <Input
+              type="file"
+              accept=".csv"
+              onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+            />
+            <Button
               onClick={handleImport}
               disabled={!importFile || importMutation.isPending}
             >
-              {importMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              Importar
+              {importMutation.isPending ? 'Importando...' : 'Importar CSV'}
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            <strong>Formato esperado (31 campos):</strong> meta_title, meta_min_months, meta_max_months, week, week_title, domain_name, domain_question, domain_feedback_1, domain_feedback_2, domain_feedback_3, gamification_welcome_title, gamification_badge_name, gamification_tips, domain_activities, domain_alert_missing, etc.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            📋 <strong>Estrutura completa:</strong> Metadados, Semana, Pergunta Principal, Feedbacks, Gamificação, Atividades e Controles
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Questions Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            Perguntas ({questionsData?.meta?.total || questionsData?.data?.length || 0})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8">Carregando perguntas...</div>
+          ) : (
+            <div className="space-y-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Pergunta</TableHead>
+                    <TableHead>Domínio</TableHead>
+                    <TableHead>Faixa Etária</TableHead>
+                    <TableHead>Semana</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {questionsData?.data?.map((question) => (
+                    <TableRow key={question.id}>
+                      <TableCell className="max-w-md">
+                        <div className="truncate" title={question.domain_question || question.meta_title}>
+                          {question.domain_question || question.meta_title || 'Sem pergunta'}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getCategoryBadgeColor(question.domain_name)}>
+                          {question.domain_name || 'Sem categoria'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {question.meta_min_months || 0}-{question.meta_max_months || 0} meses
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          Semana {question.week || 'N/A'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={question.is_active ? "default" : "secondary"}>
+                          {question.is_active ? 'Ativo' : 'Inativo'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEdit(question)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDelete(question.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {/* Pagination */}
+              {questionsData?.meta && questionsData.meta.totalPages > 1 && (
+                <div className="flex justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    disabled={questionsData.meta.page === 1}
+                    onClick={() => setFilters({ ...filters, page: questionsData.meta.page - 1 })}
+                  >
+                    Anterior
+                  </Button>
+                  <span className="flex items-center px-4">
+                    Página {questionsData.meta.page} de {questionsData.meta.totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    disabled={questionsData.meta.page === questionsData.meta.totalPages}
+                    onClick={() => setFilters({ ...filters, page: questionsData.meta.page + 1 })}
+                  >
+                    Próxima
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Create/Edit Dialog - Simplified for space */}
+      <QuestionFormDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onSubmit={(data) => createMutation.mutate(data)}
+        isLoading={createMutation.isPending}
+        title="Nova Pergunta"
+      />
+
+      <QuestionFormDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        onSubmit={(data) => editingQuestion && updateMutation.mutate({ id: editingQuestion.id, data })}
+        isLoading={updateMutation.isPending}
+        title="Editar Pergunta"
+        initialData={editingQuestion}
+      />
+
+      {/* Stats Dialog */}
+      <StatsDialog
+        open={showStatsDialog}
+        onOpenChange={setShowStatsDialog}
+        stats={statsData?.data}
+      />
     </div>
   );
 };
 
-interface QuizFormProps {
-  formData: CreateJourneyQuizData;
-  setFormData: React.Dispatch<React.SetStateAction<CreateJourneyQuizData>>;
-  selectedJourneyId: string;
-  setSelectedJourneyId: React.Dispatch<React.SetStateAction<string>>;
-  journeys: JourneyV2[];
-  weeks: JourneyV2Week[];
-  domainLabels: Record<string, string>;
-  availableDomains: string[];
-  optionsJson: string;
-  setOptionsJson: React.Dispatch<React.SetStateAction<string>>;
-  feedbackJson: string;
-  setFeedbackJson: React.Dispatch<React.SetStateAction<string>>;
-  knowledgeJson: string;
-  setKnowledgeJson: React.Dispatch<React.SetStateAction<string>>;
+// Componente auxiliar para o formulário de pergunta
+interface QuestionFormDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (data: CreateJourneyQuestionData) => void;
+  isLoading: boolean;
+  title: string;
+  initialData?: JourneyQuestion | null;
 }
 
-const QuizForm: React.FC<QuizFormProps> = ({
-  formData,
-  setFormData,
-  selectedJourneyId,
-  setSelectedJourneyId,
-  journeys,
-  weeks,
-  domainLabels,
-  availableDomains,
-  optionsJson,
-  setOptionsJson,
-  feedbackJson,
-  setFeedbackJson,
-  knowledgeJson,
-  setKnowledgeJson
+const QuestionFormDialog: React.FC<QuestionFormDialogProps> = ({
+  open,
+  onOpenChange,
+  onSubmit,
+  isLoading,
+  title,
+  initialData
 }) => {
-  const filteredWeeks = selectedJourneyId 
-    ? weeks.filter(w => w.journey_id === selectedJourneyId)
-    : weeks;
+  const [formData, setFormData] = useState<CreateJourneyQuestionData>({
+    // Metadados obrigatórios
+    meta_min_months: 0,
+    meta_max_months: 12,
+    
+    // Dados da pergunta principal (obrigatórios)
+    domain_name: '',
+    domain_question: '',
+    
+    // Campos de controle
+    order_index: 0,
+    is_active: true,
+    
+    // Campos opcionais
+    meta_title: '',
+    meta_description: '',
+    week: 1,
+    week_title: '',
+    week_description: '',
+    domain_importance: '',
+    domain_feedback_1: '',
+    domain_feedback_2: '',
+    domain_feedback_3: '',
+    domain_activities: '',
+    domain_alert_missing: '',
+    
+    // Gamificação (todos opcionais)
+    gamification_welcome_title: '',
+    gamification_welcome_message: '',
+    gamification_badge_name: '',
+    gamification_badge_description: '',
+    gamification_progress_message: '',
+    gamification_weekly_challenge_title: '',
+    gamification_weekly_challenge_description: '',
+    gamification_tips: '',
+    gamification_closing_message_title: '',
+    gamification_closing_message_message: '',
+    gamification_registro_afetivo_question: '',
+    gamification_registro_afetivo_options: '',
+    gamification_personalized_message_title: '',
+    gamification_personalized_message_message: '',
+    
+    // Campos legados (compatibilidade)
+    question_text: '',
+    question_type: 'multiple_choice',
+    min_age_months: 0,
+    max_age_months: 12,
+    category: '',
+    feedback_positive: '',
+    feedback_negative: '',
+    feedback_neutral: ''
+  });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        // Metadados do módulo
+        meta_title: initialData.meta_title,
+        meta_min_months: initialData.meta_min_months,
+        meta_max_months: initialData.meta_max_months,
+        meta_description: initialData.meta_description,
+        
+        // Dados da semana
+        week: initialData.week,
+        week_title: initialData.week_title,
+        week_description: initialData.week_description,
+        
+        // Dados da pergunta principal (obrigatórios)
+        domain_name: initialData.domain_name,
+        domain_question: initialData.domain_question,
+        domain_importance: initialData.domain_importance,
+        
+        // Feedbacks
+        domain_feedback_1: initialData.domain_feedback_1,
+        domain_feedback_2: initialData.domain_feedback_2,
+        domain_feedback_3: initialData.domain_feedback_3,
+        
+        // Atividades e alertas
+        domain_activities: initialData.domain_activities,
+        domain_alert_missing: initialData.domain_alert_missing,
+        
+        // Gamificação - Boas-vindas
+        gamification_welcome_title: initialData.gamification_welcome_title,
+        gamification_welcome_message: initialData.gamification_welcome_message,
+        
+        // Gamificação - Badge
+        gamification_badge_name: initialData.gamification_badge_name,
+        gamification_badge_description: initialData.gamification_badge_description,
+        
+        // Gamificação - Progresso
+        gamification_progress_message: initialData.gamification_progress_message,
+        
+        // Gamificação - Desafio semanal
+        gamification_weekly_challenge_title: initialData.gamification_weekly_challenge_title,
+        gamification_weekly_challenge_description: initialData.gamification_weekly_challenge_description,
+        
+        // Gamificação - Dicas
+        gamification_tips: initialData.gamification_tips,
+        
+        // Gamificação - Mensagem de encerramento
+        gamification_closing_message_title: initialData.gamification_closing_message_title,
+        gamification_closing_message_message: initialData.gamification_closing_message_message,
+        
+        // Gamificação - Registro afetivo
+        gamification_registro_afetivo_question: initialData.gamification_registro_afetivo_question,
+        gamification_registro_afetivo_options: initialData.gamification_registro_afetivo_options,
+        
+        // Gamificação - Mensagem personalizada
+        gamification_personalized_message_title: initialData.gamification_personalized_message_title,
+        gamification_personalized_message_message: initialData.gamification_personalized_message_message,
+        
+        // Campos de controle
+        order_index: initialData.order_index,
+        is_active: initialData.is_active,
+        
+        // Campos legados (compatibilidade)
+        question_text: initialData.question_text,
+        question_type: initialData.question_type,
+        min_age_months: initialData.min_age_months,
+        max_age_months: initialData.max_age_months,
+        category: initialData.category,
+        feedback_positive: initialData.feedback_positive,
+        feedback_negative: initialData.feedback_negative,
+        feedback_neutral: initialData.feedback_neutral
+      });
+    } else {
+      setFormData({
+        // Metadados do módulo
+        meta_title: '',
+        meta_min_months: 0,
+        meta_max_months: 12,
+        meta_description: '',
+        
+        // Dados da semana
+        week: 1,
+        week_title: '',
+        week_description: '',
+        
+        // Dados da pergunta principal (obrigatórios)
+        domain_name: '',
+        domain_question: '',
+        domain_importance: '',
+        
+        // Feedbacks
+        domain_feedback_1: '',
+        domain_feedback_2: '',
+        domain_feedback_3: '',
+        
+        // Atividades e alertas
+        domain_activities: '',
+        domain_alert_missing: '',
+        
+        // Gamificação - Boas-vindas
+        gamification_welcome_title: '',
+        gamification_welcome_message: '',
+        
+        // Gamificação - Badge
+        gamification_badge_name: '',
+        gamification_badge_description: '',
+        
+        // Gamificação - Progresso
+        gamification_progress_message: '',
+        
+        // Gamificação - Desafio semanal
+        gamification_weekly_challenge_title: '',
+        gamification_weekly_challenge_description: '',
+        
+        // Gamificação - Dicas
+        gamification_tips: '',
+        
+        // Gamificação - Mensagem de encerramento
+        gamification_closing_message_title: '',
+        gamification_closing_message_message: '',
+        
+        // Gamificação - Registro afetivo
+        gamification_registro_afetivo_question: '',
+        gamification_registro_afetivo_options: '',
+        
+        // Gamificação - Mensagem personalizada
+        gamification_personalized_message_title: '',
+        gamification_personalized_message_message: '',
+        
+        // Campos de controle
+        order_index: 0,
+        is_active: true,
+        
+        // Campos legados (compatibilidade)
+        question_text: '',
+        question_type: 'multiple_choice' as const,
+        min_age_months: 0,
+        max_age_months: 12,
+        category: 'motor'
+      });
+    }
+  }, [initialData, open]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
   return (
-    <div className="space-y-6 py-2">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="journey">Jornada</Label>
-          <Select
-            value={selectedJourneyId}
-            onValueChange={(value) => {
-              setSelectedJourneyId(value);
-              setFormData(prev => ({ ...prev, week_id: '' }));
-            }}
-          >
-            <SelectTrigger id="journey">
-              <SelectValue placeholder="Selecione a jornada" />
-            </SelectTrigger>
-            <SelectContent>
-              {journeys.map((journey) => (
-                <SelectItem key={journey.id} value={journey.id}>
-                  {journey.title} (Mês {journey.month})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="week_id">Semana *</Label>
-          <Select
-            value={formData.week_id}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, week_id: value }))}
-          >
-            <SelectTrigger id="week_id">
-              <SelectValue placeholder="Selecione a semana" />
-            </SelectTrigger>
-            <SelectContent>
-              {filteredWeeks.map((week) => (
-                <SelectItem key={week.id} value={week.id}>
-                  Semana {week.week} - {week.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="domain">Domínio *</Label>
-          <Select
-            value={formData.domain}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, domain: value }))}
-          >
-            <SelectTrigger id="domain">
-              <SelectValue placeholder="Selecione o domínio" />
-            </SelectTrigger>
-            <SelectContent>
-              {availableDomains.map((domain) => (
-                <SelectItem key={domain} value={domain}>
-                  {domainLabels[domain] || domain}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="domain_id">Domain ID *</Label>
-          <Input
-            id="domain_id"
-            value={formData.domain_id}
-            onChange={(e) => setFormData(prev => ({ ...prev, domain_id: e.target.value }))}
-            placeholder="ex: motor_01, cognitive_02"
-          />
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="title">Título *</Label>
-        <Input
-          id="title"
-          value={formData.title}
-          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-          placeholder="Título do quiz"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="question">Pergunta *</Label>
-        <Textarea
-          id="question"
-          value={formData.question}
-          onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
-          placeholder="Digite a pergunta do quiz"
-          rows={3}
-        />
-      </div>
-
-      <Tabs defaultValue="options" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="options">Options (JSONB)</TabsTrigger>
-          <TabsTrigger value="feedback">Feedback (JSONB)</TabsTrigger>
-          <TabsTrigger value="knowledge">Knowledge (JSONB)</TabsTrigger>
-        </TabsList>
-        <TabsContent value="options" className="mt-2">
-          <div>
-            <Label htmlFor="options" className="text-sm text-muted-foreground">
-              Opções de resposta (array ou objeto JSON)
-            </Label>
-            <Textarea
-              id="options"
-              value={optionsJson}
-              onChange={(e) => setOptionsJson(e.target.value)}
-              placeholder={'{\n  "option_1": "Sim",\n  "option_2": "Não",\n  "option_3": "Às vezes"\n}'}
-              rows={6}
-              className="font-mono text-sm"
-            />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Seção: Metadados */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Metadados do Módulo</h3>
+            <div>
+              <Label>Título do Módulo</Label>
+              <Input
+                value={formData.meta_title || ''}
+                onChange={(e) => setFormData({ ...formData, meta_title: e.target.value })}
+                placeholder="Título do módulo..."
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Idade Mín. (meses) *</Label>
+                <Input
+                  type="number"
+                  value={formData.meta_min_months}
+                  onChange={(e) => setFormData({ ...formData, meta_min_months: parseInt(e.target.value) || 0 })}
+                  min="0"
+                  required
+                />
+              </div>
+              <div>
+                <Label>Idade Máx. (meses) *</Label>
+                <Input
+                  type="number"
+                  value={formData.meta_max_months}
+                  onChange={(e) => setFormData({ ...formData, meta_max_months: parseInt(e.target.value) || 12 })}
+                  min="0"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Descrição do Módulo</Label>
+              <Textarea
+                value={formData.meta_description || ''}
+                onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
+                placeholder="Descrição do módulo..."
+              />
+            </div>
           </div>
-        </TabsContent>
-        <TabsContent value="feedback" className="mt-2">
-          <div>
-            <Label htmlFor="feedback" className="text-sm text-muted-foreground">
-              Feedbacks para cada resposta (objeto JSON)
-            </Label>
-            <Textarea
-              id="feedback"
-              value={feedbackJson}
-              onChange={(e) => setFeedbackJson(e.target.value)}
-              placeholder={'{\n  "feedback_1": "Ótimo! Continue assim.",\n  "feedback_2": "Tente fazer mais vezes.",\n  "feedback_3": "É normal nessa fase."\n}'}
-              rows={6}
-              className="font-mono text-sm"
-            />
+
+          {/* Seção: Semana */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Dados da Semana</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label>Semana</Label>
+                <Input
+                  type="number"
+                  value={formData.week || 1}
+                  onChange={(e) => setFormData({ ...formData, week: parseInt(e.target.value) || 1 })}
+                  min="1"
+                />
+              </div>
+              <div className="col-span-2">
+                <Label>Título da Semana</Label>
+                <Input
+                  value={formData.week_title || ''}
+                  onChange={(e) => setFormData({ ...formData, week_title: e.target.value })}
+                  placeholder="Título da semana..."
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Descrição da Semana</Label>
+              <Textarea
+                value={formData.week_description || ''}
+                onChange={(e) => setFormData({ ...formData, week_description: e.target.value })}
+                placeholder="Descrição da semana..."
+              />
+            </div>
           </div>
-        </TabsContent>
-        <TabsContent value="knowledge" className="mt-2">
-          <div>
-            <Label htmlFor="knowledge" className="text-sm text-muted-foreground">
-              Conhecimento adicional: atividades, gamificação, alertas (objeto JSON)
-            </Label>
-            <Textarea
-              id="knowledge"
-              value={knowledgeJson}
-              onChange={(e) => setKnowledgeJson(e.target.value)}
-              placeholder={'{\n  "activities": ["Atividade 1", "Atividade 2"],\n  "gamification_points": 10,\n  "alerts": []\n}'}
-              rows={6}
-              className="font-mono text-sm"
-            />
+
+          {/* Seção: Pergunta Principal */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Pergunta Principal</h3>
+            <div>
+              <Label>Domínio *</Label>
+              <Select
+                value={formData.domain_name}
+                onValueChange={(value) => setFormData({ ...formData, domain_name: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o domínio" />
+                </SelectTrigger>
+                <SelectContent>
+                  {journeyQuestionsService.getAvailableCategories().map((cat) => {
+                    const labels = journeyQuestionsService.getCategoryLabels();
+                    return (
+                      <SelectItem key={cat} value={cat}>
+                        {labels[cat] || cat}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Texto da Pergunta *</Label>
+              <Textarea
+                value={formData.domain_question}
+                onChange={(e) => setFormData({ ...formData, domain_question: e.target.value })}
+                placeholder="Digite a pergunta principal..."
+                required
+              />
+            </div>
+            <div>
+              <Label>Importância/Relevância</Label>
+              <Textarea
+                value={formData.domain_importance || ''}
+                onChange={(e) => setFormData({ ...formData, domain_importance: e.target.value })}
+                placeholder="Descreva a importância desta pergunta..."
+              />
+            </div>
           </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+
+          {/* Seção: Feedbacks */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Feedbacks por Resposta</h3>
+            <div>
+              <Label>Feedback 1 (Positivo)</Label>
+              <Textarea
+                value={formData.domain_feedback_1 || ''}
+                onChange={(e) => setFormData({ ...formData, domain_feedback_1: e.target.value })}
+                placeholder="Feedback para resposta positiva..."
+              />
+            </div>
+            <div>
+              <Label>Feedback 2 (Neutro)</Label>
+              <Textarea
+                value={formData.domain_feedback_2 || ''}
+                onChange={(e) => setFormData({ ...formData, domain_feedback_2: e.target.value })}
+                placeholder="Feedback para resposta neutra..."
+              />
+            </div>
+            <div>
+              <Label>Feedback 3 (Negativo)</Label>
+              <Textarea
+                value={formData.domain_feedback_3 || ''}
+                onChange={(e) => setFormData({ ...formData, domain_feedback_3: e.target.value })}
+                placeholder="Feedback para resposta negativa..."
+              />
+            </div>
+          </div>
+
+          {/* Seção: Gamificação */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Gamificação</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Nome do Badge</Label>
+                <Input
+                  value={formData.gamification_badge_name || ''}
+                  onChange={(e) => setFormData({ ...formData, gamification_badge_name: e.target.value })}
+                  placeholder="Nome do badge/conquista..."
+                />
+              </div>
+              <div>
+                <Label>Título de Boas-vindas</Label>
+                <Input
+                  value={formData.gamification_welcome_title || ''}
+                  onChange={(e) => setFormData({ ...formData, gamification_welcome_title: e.target.value })}
+                  placeholder="Título da mensagem de boas-vindas..."
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Mensagem de Boas-vindas</Label>
+              <Textarea
+                value={formData.gamification_welcome_message || ''}
+                onChange={(e) => setFormData({ ...formData, gamification_welcome_message: e.target.value })}
+                placeholder="Mensagem de boas-vindas..."
+              />
+            </div>
+            <div>
+              <Label>Dicas de Gamificação</Label>
+              <Textarea
+                value={formData.gamification_tips || ''}
+                onChange={(e) => setFormData({ ...formData, gamification_tips: e.target.value })}
+                placeholder="Dicas e sugestões..."
+              />
+            </div>
+          </div>
+
+          {/* Seção: Controles */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Controles</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Ordem</Label>
+                <Input
+                  type="number"
+                  value={formData.order_index || 0}
+                  onChange={(e) => setFormData({ ...formData, order_index: parseInt(e.target.value) || 0 })}
+                  min="0"
+                />
+              </div>
+              <div className="flex items-center space-x-2 pt-6">
+                <Switch
+                  checked={formData.is_active ?? true}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                />
+                <Label>Pergunta ativa</Label>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Salvando...' : 'Salvar'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Componente auxiliar para estatísticas
+interface CategoryStats {
+  category: string;
+  count: number;
+}
+
+interface AgeRangeStats {
+  min_age_months: number;
+  max_age_months: number;
+  count: number;
+}
+
+interface QuestionStats {
+  total: number;
+  active: number;
+  inactive: number;
+  byCategory: CategoryStats[];
+  byAgeRange: AgeRangeStats[];
+}
+
+interface StatsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  stats?: QuestionStats;
+}
+
+const StatsDialog: React.FC<StatsDialogProps> = ({ open, onOpenChange, stats }) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Estatísticas das Perguntas</DialogTitle>
+        </DialogHeader>
+        {stats && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <p className="text-2xl font-bold">{stats.total}</p>
+                  <p className="text-sm text-muted-foreground">Total</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <p className="text-2xl font-bold text-green-600">{stats.active}</p>
+                  <p className="text-sm text-muted-foreground">Ativas</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <p className="text-2xl font-bold text-red-600">{stats.inactive}</p>
+                  <p className="text-sm text-muted-foreground">Inativas</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-3">Por Categoria</h3>
+              <div className="space-y-2">
+                {stats.byCategory.map((item: CategoryStats) => (
+                  <div key={item.category} className="flex justify-between items-center">
+                    <Badge className="capitalize">
+                      {item.category}
+                    </Badge>
+                    <span className="font-medium">{item.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-3">Por Faixa Etária</h3>
+              <div className="space-y-2">
+                {stats.byAgeRange.map((item: AgeRangeStats, index: number) => (
+                  <div key={index} className="flex justify-between items-center">
+                    <span>{item.min_age_months}-{item.max_age_months} meses</span>
+                    <span className="font-medium">{item.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
 
