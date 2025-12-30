@@ -42,8 +42,10 @@ Content is dynamically loaded and diversified with fallback images. Audience fil
 - **Training Content System (Phase 2 - Complete)**: Full video-based training platform with 6 Sequelize models (ContentVideo, TrainingModule, TrainingLesson, UserContentProgress, ContentPricing, UserEnrollment). Public access to course browsing via `/educare-app/trainings` with optional authentication support. Admin/Owner management at `/educare-app/admin/trainings` and `/educare-app/owner/trainings`. Vimeo integration ready (awaiting VIMEO_ACCESS_TOKEN). Stripe one-time payment checkout implemented for paid courses.
 - **Prompt Management System (Owner-exclusive)**: Complete system for customizing AI assistant behavior via `/educare-app/owner/prompt-management`. Features include:
   - AssistantPrompt model with versioning, module_type (baby/mother/professional), and variable schemas
+  - Full 3-tab interface: TitiNauta (baby), Saúde Materna (mother), TitiNauta Especialista (professional)
   - Version control with full history viewer and prompt activation system
   - Dynamic variable substitution ({{child_name}}, {{child_age}}, {{current_date}}, etc.)
+  - Visual API key status panel showing 9 providers' availability (green/gray badges)
   - 5-minute cache for production performance, with cache invalidation on updates
   - Integration with ragService.js FASE 12 for automatic prompt loading
   - Default prompts seeded via `node src/scripts/seedDefaultPrompts.js`
