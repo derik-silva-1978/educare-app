@@ -73,6 +73,23 @@ Content is dynamically loaded and diversified with fallback images. Audience fil
 - **Observability**: Extensive metrics and logging for RAG performance and system health.
 - **Controlled Rollout**: Feature flags enable safe, phased rollouts and easy rollback.
 
+## Recent Fixes
+
+### 2025-12-30: Owner Professional Portal Products Visibility Bug
+- **Bug**: Owner profile could not see training products/courses in Professional Portal
+- **Root Cause**: Field name mismatch in `trainingController.js`:
+  - Backend model uses `target_audience` (Enum: all, parents, professionals)
+  - Controller query used `audience` (non-existent column)
+  - Status filter only showed `published`, excluding owner's `draft` products
+- **Solution** (educare-backend/src/controllers/trainingController.js):
+  1. Changed `listTrainings` query: `audience` → `target_audience` (3 occurrences)
+  2. Added role-based status filtering: Owner/Admin see both `draft` and `published`; others see only `published`
+  3. Added `status` field to response for visibility
+  4. Updated `getTrainingDetails` and `createTraining`/`updateTraining` to use `target_audience`
+- **Files Modified**: 
+  - `educare-backend/src/controllers/trainingController.js` (listTrainings, getTrainingDetails, createTraining, updateTraining)
+- **Testing**: ✅ `GET /api/trainings?audience=all` returns products for owner
+
 ## External Dependencies
 
 - **Database**: PostgreSQL

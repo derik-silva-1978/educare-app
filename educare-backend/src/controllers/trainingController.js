@@ -16,14 +16,21 @@ const listTrainings = async (req, res) => {
   try {
     const { audience = 'all', page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
+    const userRole = req.user?.role;
 
     const where = {
-      type: 'training',
-      status: 'published'
+      type: 'training'
     };
 
+    // Only published for non-authenticated users; include draft for owner/admin
+    if (userRole === 'owner' || userRole === 'admin') {
+      where.status = { [Op.in]: ['published', 'draft'] };
+    } else {
+      where.status = 'published';
+    }
+
     if (audience !== 'all') {
-      where.audience = { [Op.or]: [audience, 'all'] };
+      where.target_audience = { [Op.or]: [audience, 'all'] };
     }
 
     const { count, rows } = await ContentItem.findAndCountAll({
@@ -42,7 +49,8 @@ const listTrainings = async (req, res) => {
       title: t.title,
       description: t.description,
       thumbnailUrl: t.thumbnail_url,
-      audience: t.audience,
+      audience: t.target_audience,
+      status: t.status,
       modulesCount: t.modules?.length || 0,
       pricing: t.pricing ? {
         price: t.pricing.price_brl,
@@ -152,7 +160,7 @@ const getTrainingDetails = async (req, res) => {
         title: training.title,
         description: training.description,
         thumbnailUrl: training.thumbnail_url,
-        audience: training.audience,
+        audience: training.target_audience,
         isEnrolled,
         pricing: training.pricing ? {
           price: training.pricing.price_brl,
@@ -386,7 +394,7 @@ const createTraining = async (req, res) => {
       title,
       description,
       thumbnail_url: thumbnailUrl,
-      audience: audience || 'all',
+      target_audience: audience || 'all',
       status: 'draft',
       created_by: req.user.id
     });
@@ -458,7 +466,7 @@ const updateTraining = async (req, res) => {
       title: title || training.title,
       description: description || training.description,
       thumbnail_url: thumbnailUrl || training.thumbnail_url,
-      audience: audience || training.audience,
+      target_audience: audience || training.target_audience,
       status: status || training.status
     });
 
