@@ -75,20 +75,28 @@ Content is dynamically loaded and diversified with fallback images. Audience fil
 
 ## Recent Fixes
 
-### 2025-12-30: Owner Professional Portal Products Visibility Bug
-- **Bug**: Owner profile could not see training products/courses in Professional Portal
-- **Root Cause**: Field name mismatch in `trainingController.js`:
-  - Backend model uses `target_audience` (Enum: all, parents, professionals)
-  - Controller query used `audience` (non-existent column)
-  - Status filter only showed `published`, excluding owner's `draft` products
-- **Solution** (educare-backend/src/controllers/trainingController.js):
-  1. Changed `listTrainings` query: `audience` → `target_audience` (3 occurrences)
-  2. Added role-based status filtering: Owner/Admin see both `draft` and `published`; others see only `published`
-  3. Added `status` field to response for visibility
-  4. Updated `getTrainingDetails` and `createTraining`/`updateTraining` to use `target_audience`
-- **Files Modified**: 
-  - `educare-backend/src/controllers/trainingController.js` (listTrainings, getTrainingDetails, createTraining, updateTraining)
-- **Testing**: ✅ `GET /api/trainings?audience=all` returns products for owner
+### 2025-12-30: Owner Professional Portal Access Issues (COMPLETE RESOLUTION)
+**Problem**: Owner could not view training products or professional portal modules
+- **Root Cause 1**: Field name mismatch in `trainingController.js` (audience vs target_audience)
+- **Root Cause 2**: Sidebar filter blocked owner from accessing professional portal routes
+
+**Solution - Backend** (educare-backend/src/controllers/trainingController.js):
+- Fixed field name mapping: `audience` → `target_audience` (4 occurrences)
+- Added role-based status filtering: Owner/Admin see both `draft` and `published`
+- Updated listTrainings, getTrainingDetails, createTraining, updateTraining
+
+**Solution - Frontend** (src/components/educare-app/layout/EnhancedAppSidebar.tsx):
+- Changed role check from `userRole === 'professional'` to `userRole === 'professional' || userRole === 'owner' || userRole === 'admin'`
+- This allows owner/admin to see and access professional portal routes in sidebar
+
+**Files Modified**:
+- `educare-backend/src/controllers/trainingController.js`
+- `src/components/educare-app/layout/EnhancedAppSidebar.tsx` 
+
+**Testing**: ✅ 
+- Backend: `GET /api/content/public?type=training&audience=professionals` returns 4 training items
+- Frontend: Owner now sees "Qualificação Profissional" option in sidebar and can navigate to `/professional/qualificacao`
+- QualificacaoProfissional component successfully loads professional training modules via useContentItems hook
 
 ## External Dependencies
 

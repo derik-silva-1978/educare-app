@@ -230,7 +230,8 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
   }
 
   // Adicionar itens específicos para profissional - 5 módulos principais
-  if (userRole === 'professional') {
+  // Owner e admin também podem acessar o portal profissional
+  if (userRole === 'professional' || userRole === 'owner' || userRole === 'admin') {
     return [
       {
         title: "Boas Vindas",
