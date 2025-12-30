@@ -26,7 +26,11 @@ import {
   ChevronRight,
   Sparkles,
   Settings2,
-  Cpu
+  Cpu,
+  Heart,
+  Key,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import { assistantPromptService, type AssistantPrompt, type CreatePromptData } from '@/services/api/assistantPromptService';
 import { llmConfigService, type LLMConfig, type LLMProviderInfo, type ProviderType } from '@/services/api/llmConfigService';
@@ -42,21 +46,26 @@ const PromptManagement: React.FC = () => {
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'baby' | 'professional'>('baby');
+  const [activeTab, setActiveTab] = useState<'baby' | 'mother' | 'professional'>('baby');
   
   const [babyPrompt, setBabyPrompt] = useState<AssistantPrompt | null>(null);
+  const [motherPrompt, setMotherPrompt] = useState<AssistantPrompt | null>(null);
   const [professionalPrompt, setProfessionalPrompt] = useState<AssistantPrompt | null>(null);
   
   const [babyName, setBabyName] = useState('');
   const [babyDescription, setBabyDescription] = useState('');
   const [babySystemPrompt, setBabySystemPrompt] = useState('');
   
+  const [motherName, setMotherName] = useState('');
+  const [motherDescription, setMotherDescription] = useState('');
+  const [motherSystemPrompt, setMotherSystemPrompt] = useState('');
+  
   const [professionalName, setProfessionalName] = useState('');
   const [professionalDescription, setProfessionalDescription] = useState('');
   const [professionalSystemPrompt, setProfessionalSystemPrompt] = useState('');
   
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
-  const [historyModule, setHistoryModule] = useState<'baby' | 'professional'>('baby');
+  const [historyModule, setHistoryModule] = useState<'baby' | 'mother' | 'professional'>('baby');
   const [promptHistory, setPromptHistory] = useState<AssistantPrompt[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
@@ -65,9 +74,10 @@ const PromptManagement: React.FC = () => {
 
   const [llmProviders, setLlmProviders] = useState<LLMProviderInfo[]>([]);
   const [babyLLMConfig, setBabyLLMConfig] = useState<LLMConfig | null>(null);
+  const [motherLLMConfig, setMotherLLMConfig] = useState<LLMConfig | null>(null);
   const [professionalLLMConfig, setProfessionalLLMConfig] = useState<LLMConfig | null>(null);
   const [savingLLMConfig, setSavingLLMConfig] = useState(false);
-  const [modelSettingsOpen, setModelSettingsOpen] = useState<Record<string, boolean>>({ baby: false, professional: false });
+  const [modelSettingsOpen, setModelSettingsOpen] = useState<Record<string, boolean>>({ baby: false, mother: false, professional: false });
 
   const isOwner = hasRole('owner');
 
@@ -79,19 +89,27 @@ const PromptManagement: React.FC = () => {
     try {
       setLoading(true);
       
-      const [babyData, professionalData, llmConfigsData] = await Promise.all([
+      const [babyData, motherData, professionalData, llmConfigsData] = await Promise.all([
         assistantPromptService.getActivePromptByModule('baby'),
+        assistantPromptService.getActivePromptByModule('mother'),
         assistantPromptService.getActivePromptByModule('professional'),
         llmConfigService.getAllConfigs().catch(() => ({ configs: [], providers: [] }))
       ]);
       
       setBabyPrompt(babyData);
+      setMotherPrompt(motherData);
       setProfessionalPrompt(professionalData);
       
       if (babyData) {
         setBabyName(babyData.name);
         setBabyDescription(babyData.description || '');
         setBabySystemPrompt(babyData.system_prompt);
+      }
+      
+      if (motherData) {
+        setMotherName(motherData.name);
+        setMotherDescription(motherData.description || '');
+        setMotherSystemPrompt(motherData.system_prompt);
       }
       
       if (professionalData) {
@@ -106,10 +124,20 @@ const PromptManagement: React.FC = () => {
       
       if (llmConfigsData.configs) {
         const babyConfig = llmConfigsData.configs.find(c => c.module_type === 'baby');
+        const motherConfig = llmConfigsData.configs.find(c => c.module_type === 'mother');
         const profConfig = llmConfigsData.configs.find(c => c.module_type === 'professional');
         
         setBabyLLMConfig(babyConfig || {
           module_type: 'baby',
+          provider: 'openai',
+          model_name: 'gpt-4o-mini',
+          temperature: 0.7,
+          max_tokens: 1500,
+          is_active: true
+        });
+        
+        setMotherLLMConfig(motherConfig || {
+          module_type: 'mother',
           provider: 'openai',
           model_name: 'gpt-4o-mini',
           temperature: 0.7,
@@ -139,10 +167,10 @@ const PromptManagement: React.FC = () => {
     }
   };
 
-  const handleSavePrompt = async (moduleType: 'baby' | 'professional') => {
-    const name = moduleType === 'baby' ? babyName : professionalName;
-    const description = moduleType === 'baby' ? babyDescription : professionalDescription;
-    const systemPrompt = moduleType === 'baby' ? babySystemPrompt : professionalSystemPrompt;
+  const handleSavePrompt = async (moduleType: 'baby' | 'mother' | 'professional') => {
+    const name = moduleType === 'baby' ? babyName : moduleType === 'mother' ? motherName : professionalName;
+    const description = moduleType === 'baby' ? babyDescription : moduleType === 'mother' ? motherDescription : professionalDescription;
+    const systemPrompt = moduleType === 'baby' ? babySystemPrompt : moduleType === 'mother' ? motherSystemPrompt : professionalSystemPrompt;
     
     if (!name.trim() || !systemPrompt.trim()) {
       toast({
@@ -167,13 +195,21 @@ const PromptManagement: React.FC = () => {
       
       if (moduleType === 'baby') {
         setBabyPrompt(result);
+      } else if (moduleType === 'mother') {
+        setMotherPrompt(result);
       } else {
         setProfessionalPrompt(result);
       }
       
+      const moduleNames: Record<string, string> = {
+        baby: 'TitiNauta',
+        mother: 'TitiNauta Materna',
+        professional: 'TitiNauta Especialista'
+      };
+      
       toast({
         title: 'Prompt salvo com sucesso',
-        description: `Nova versão v${result.version} criada para ${moduleType === 'baby' ? 'TitiNauta' : 'TitiNauta Especialista'}.`
+        description: `Nova versão v${result.version} criada para ${moduleNames[moduleType]}.`
       });
       
     } catch (error) {
@@ -188,7 +224,7 @@ const PromptManagement: React.FC = () => {
     }
   };
 
-  const loadHistory = async (moduleType: 'baby' | 'professional') => {
+  const loadHistory = async (moduleType: 'baby' | 'mother' | 'professional') => {
     try {
       setLoadingHistory(true);
       setHistoryModule(moduleType);
@@ -220,6 +256,11 @@ const PromptManagement: React.FC = () => {
         setBabyName(prompt.name);
         setBabyDescription(prompt.description || '');
         setBabySystemPrompt(prompt.system_prompt);
+      } else if (prompt.module_type === 'mother') {
+        setMotherPrompt(prompt);
+        setMotherName(prompt.name);
+        setMotherDescription(prompt.description || '');
+        setMotherSystemPrompt(prompt.system_prompt);
       } else {
         setProfessionalPrompt(prompt);
         setProfessionalName(prompt.name);
@@ -251,8 +292,8 @@ const PromptManagement: React.FC = () => {
     setPreviewDialogOpen(true);
   };
 
-  const handleSaveLLMConfig = async (moduleType: 'baby' | 'professional') => {
-    const config = moduleType === 'baby' ? babyLLMConfig : professionalLLMConfig;
+  const handleSaveLLMConfig = async (moduleType: 'baby' | 'mother' | 'professional') => {
+    const config = moduleType === 'baby' ? babyLLMConfig : moduleType === 'mother' ? motherLLMConfig : professionalLLMConfig;
     
     if (!config) {
       toast({
@@ -273,9 +314,15 @@ const PromptManagement: React.FC = () => {
         max_tokens: config.max_tokens
       });
       
+      const moduleNames: Record<string, string> = {
+        baby: 'TitiNauta',
+        mother: 'TitiNauta Materna',
+        professional: 'TitiNauta Especialista'
+      };
+      
       toast({
         title: 'Configuração salva',
-        description: `Modelo ${config.model_name} configurado para ${moduleType === 'baby' ? 'TitiNauta' : 'TitiNauta Especialista'}.`
+        description: `Modelo ${config.model_name} configurado para ${moduleNames[moduleType]}.`
       });
       
     } catch (error) {
@@ -290,9 +337,11 @@ const PromptManagement: React.FC = () => {
     }
   };
 
-  const updateLLMConfig = (moduleType: 'baby' | 'professional', updates: Partial<LLMConfig>) => {
+  const updateLLMConfig = (moduleType: 'baby' | 'mother' | 'professional', updates: Partial<LLMConfig>) => {
     if (moduleType === 'baby') {
       setBabyLLMConfig(prev => prev ? { ...prev, ...updates } : null);
+    } else if (moduleType === 'mother') {
+      setMotherLLMConfig(prev => prev ? { ...prev, ...updates } : null);
     } else {
       setProfessionalLLMConfig(prev => prev ? { ...prev, ...updates } : null);
     }
@@ -316,7 +365,7 @@ const PromptManagement: React.FC = () => {
   }
 
   const renderPromptEditor = (
-    moduleType: 'baby' | 'professional',
+    moduleType: 'baby' | 'mother' | 'professional',
     name: string,
     setName: (v: string) => void,
     description: string,
@@ -324,23 +373,41 @@ const PromptManagement: React.FC = () => {
     systemPrompt: string,
     setSystemPrompt: (v: string) => void,
     currentPrompt: AssistantPrompt | null
-  ) => (
+  ) => {
+    const moduleConfig: Record<string, { icon: React.ReactNode; title: string; description: string; iconColor: string }> = {
+      baby: {
+        icon: <Bot className="h-6 w-6 text-violet-500" />,
+        title: 'TitiNauta',
+        description: 'Assistente para pais e responsáveis',
+        iconColor: 'text-violet-500'
+      },
+      mother: {
+        icon: <Heart className="h-6 w-6 text-rose-500" />,
+        title: 'TitiNauta Materna',
+        description: 'Assistente para saúde materna',
+        iconColor: 'text-rose-500'
+      },
+      professional: {
+        icon: <UserCog className="h-6 w-6 text-teal-500" />,
+        title: 'TitiNauta Especialista',
+        description: 'Assistente para profissionais de saúde',
+        iconColor: 'text-teal-500'
+      }
+    };
+    
+    const config = moduleConfig[moduleType];
+    
+    return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {moduleType === 'baby' ? (
-            <Bot className="h-6 w-6 text-violet-500" />
-          ) : (
-            <UserCog className="h-6 w-6 text-teal-500" />
-          )}
+          {config.icon}
           <div>
             <h3 className="text-lg font-semibold">
-              {moduleType === 'baby' ? 'TitiNauta' : 'TitiNauta Especialista'}
+              {config.title}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {moduleType === 'baby' 
-                ? 'Assistente para pais e responsáveis'
-                : 'Assistente para profissionais de saúde'}
+              {config.description}
             </p>
           </div>
         </div>
@@ -444,7 +511,7 @@ const PromptManagement: React.FC = () => {
                 <div className="text-left">
                   <h4 className="font-medium">Configurações do Modelo</h4>
                   <p className="text-sm text-muted-foreground">
-                    {llmProviders.find(p => p.id === (moduleType === 'baby' ? babyLLMConfig : professionalLLMConfig)?.provider)?.name || 'OpenAI'} - {(moduleType === 'baby' ? babyLLMConfig : professionalLLMConfig)?.model_name || 'gpt-4o-mini'}
+                    {llmProviders.find(p => p.id === (moduleType === 'baby' ? babyLLMConfig : moduleType === 'mother' ? motherLLMConfig : professionalLLMConfig)?.provider)?.name || 'OpenAI'} - {(moduleType === 'baby' ? babyLLMConfig : moduleType === 'mother' ? motherLLMConfig : professionalLLMConfig)?.model_name || 'gpt-4o-mini'}
                   </p>
                 </div>
               </div>
@@ -454,7 +521,7 @@ const PromptManagement: React.FC = () => {
           
           <CollapsibleContent className="pt-4 space-y-6">
             {(() => {
-              const config = moduleType === 'baby' ? babyLLMConfig : professionalLLMConfig;
+              const config = moduleType === 'baby' ? babyLLMConfig : moduleType === 'mother' ? motherLLMConfig : professionalLLMConfig;
               if (!config) return null;
               
               const availableModels = getModelsForProvider(config.provider);
@@ -612,6 +679,7 @@ const PromptManagement: React.FC = () => {
       </div>
     </div>
   );
+  };
 
   return (
     <>
@@ -631,13 +699,49 @@ const PromptManagement: React.FC = () => {
           </p>
         </div>
         
+        {llmProviders.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Key className="h-4 w-4" />
+                Status das Chaves de API
+              </CardTitle>
+              <CardDescription>
+                Provedores de IA disponíveis para uso nos assistentes
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {llmProviders.map(provider => (
+                  <Badge
+                    key={provider.id}
+                    variant={provider.available ? 'default' : 'secondary'}
+                    className={`gap-1.5 ${provider.available ? 'bg-green-600 hover:bg-green-700' : 'opacity-60'}`}
+                  >
+                    {provider.available ? (
+                      <CheckCircle className="h-3 w-3" />
+                    ) : (
+                      <XCircle className="h-3 w-3" />
+                    )}
+                    {provider.name}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
         <Card>
           <CardContent className="p-6">
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'baby' | 'professional')}>
-              <TabsList className="grid w-full grid-cols-2 mb-6">
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'baby' | 'mother' | 'professional')}>
+              <TabsList className="grid w-full grid-cols-3 mb-6">
                 <TabsTrigger value="baby" className="gap-2">
                   <Bot className="h-4 w-4" />
                   TitiNauta
+                </TabsTrigger>
+                <TabsTrigger value="mother" className="gap-2">
+                  <Heart className="h-4 w-4" />
+                  Saúde Materna
                 </TabsTrigger>
                 <TabsTrigger value="professional" className="gap-2">
                   <UserCog className="h-4 w-4" />
@@ -655,6 +759,19 @@ const PromptManagement: React.FC = () => {
                   babySystemPrompt,
                   setBabySystemPrompt,
                   babyPrompt
+                )}
+              </TabsContent>
+              
+              <TabsContent value="mother">
+                {renderPromptEditor(
+                  'mother',
+                  motherName,
+                  setMotherName,
+                  motherDescription,
+                  setMotherDescription,
+                  motherSystemPrompt,
+                  setMotherSystemPrompt,
+                  motherPrompt
                 )}
               </TabsContent>
               
@@ -717,7 +834,7 @@ const PromptManagement: React.FC = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <History className="h-5 w-5" />
-              Histórico de Versões - {historyModule === 'baby' ? 'TitiNauta' : 'TitiNauta Especialista'}
+              Histórico de Versões - {historyModule === 'baby' ? 'TitiNauta' : historyModule === 'mother' ? 'TitiNauta Materna' : 'TitiNauta Especialista'}
             </DialogTitle>
             <DialogDescription>
               Visualize e restaure versões anteriores do prompt
