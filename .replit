@@ -21,6 +21,7 @@ DB_TIMEZONE = "America/Sao_Paulo"
 ENABLE_GEMINI_RAG = "true"
 ENABLE_QDRANT_RAG = "true"
 RAG_PRIMARY_PROVIDER = "gemini"
+FRONTEND_URL = "https://1d35ed6a-d635-41d2-8d11-7db8db84ce29-00-28ylqytrll200.picard.replit.dev"
 
 [workflows]
 runButton = "Project"
