@@ -75,28 +75,41 @@ Content is dynamically loaded and diversified with fallback images. Audience fil
 
 ## Recent Fixes
 
-### 2025-12-30: Owner Professional Portal Access Issues (COMPLETE RESOLUTION)
-**Problem**: Owner could not view training products or professional portal modules
+### 2025-12-30: Owner/Admin Professional Portal Access (COMPLETE RESOLUTION)
+**Problem**: Owner and Admin could not view or access Professional Portal modules
 - **Root Cause 1**: Field name mismatch in `trainingController.js` (audience vs target_audience)
-- **Root Cause 2**: Sidebar filter blocked owner from accessing professional portal routes
+- **Root Cause 2**: Sidebar returned early for owner/admin, never reaching professional module code
+- **Root Cause 3**: `EducareAppLayout.tsx` allowedPaths for owner/admin did NOT include `/educare-app/professional/`
+
+**Hierarchy Implemented**: Owner > Admin > Professional > Parent
+- Higher-level roles have complete access to all lower-level role functionalities
 
 **Solution - Backend** (educare-backend/src/controllers/trainingController.js):
 - Fixed field name mapping: `audience` → `target_audience` (4 occurrences)
 - Added role-based status filtering: Owner/Admin see both `draft` and `published`
 - Updated listTrainings, getTrainingDetails, createTraining, updateTraining
 
-**Solution - Frontend** (src/components/educare-app/layout/EnhancedAppSidebar.tsx):
-- Changed role check from `userRole === 'professional'` to `userRole === 'professional' || userRole === 'owner' || userRole === 'admin'`
-- This allows owner/admin to see and access professional portal routes in sidebar
+**Solution - Frontend EducareAppLayout.tsx**:
+- Added `/educare-app/professional/` to allowedPaths for owner/admin (line 89)
+- Added `/educare-app/trainings` to allowedPaths for owner/admin (line 101)
+- Added comment documenting hierarchy: Owner > Admin > Professional > Parent
+
+**Solution - Frontend EnhancedAppSidebar.tsx**:
+- Added "Portal Profissional" and "Qualificação Profissional" menu items directly to Owner menu (lines 170-180)
+- Added "Portal Profissional" and "Qualificação Profissional" menu items directly to Admin menu (lines 244-254)
+- Fixed unreachable code: Changed professional condition from `professional || owner || admin` to just `professional` (line 261)
+
+**Solution - ProfessionalOnlyGuard.tsx**: Already correctly allows owner and admin (line 32)
 
 **Files Modified**:
 - `educare-backend/src/controllers/trainingController.js`
-- `src/components/educare-app/layout/EnhancedAppSidebar.tsx` 
+- `src/pages/educare-app/EducareAppLayout.tsx`
+- `src/components/educare-app/layout/EnhancedAppSidebar.tsx`
 
 **Testing**: ✅ 
 - Backend: `GET /api/content/public?type=training&audience=professionals` returns 4 training items
-- Frontend: Owner now sees "Qualificação Profissional" option in sidebar and can navigate to `/professional/qualificacao`
-- QualificacaoProfissional component successfully loads professional training modules via useContentItems hook
+- Frontend: Owner and Admin now see "Portal Profissional" and "Qualificação Profissional" in sidebar
+- Navigation to `/educare-app/professional/qualificacao` works for all elevated roles
 
 ## External Dependencies
 
