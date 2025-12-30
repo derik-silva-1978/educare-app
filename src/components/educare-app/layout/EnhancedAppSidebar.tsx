@@ -86,6 +86,7 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
   ];
 
   // Adicionar itens específicos para owner
+  // Hierarquia: Owner tem acesso COMPLETO a todas as áreas (Owner > Admin > Professional > Parent)
   if (userRole === 'owner') {
     return [
       {
@@ -163,11 +164,23 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         url: "/educare-app/owner/prompt-management",
         icon: Bot,
       },
+      {
+        title: "Portal Profissional",
+        url: "/educare-app/professional/welcome",
+        icon: BookOpen,
+        badge: "Pro",
+      },
+      {
+        title: "Qualificação Profissional",
+        url: "/educare-app/professional/qualificacao",
+        icon: GraduationCap,
+      },
       ...baseItems,
     ];
   }
 
   // Adicionar itens específicos para admin
+  // Hierarquia: Admin tem acesso a Professional Portal (Admin > Professional > Parent)
   if (userRole === 'admin') {
     return [
       {
@@ -225,13 +238,24 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         url: "/educare-app/admin/milestones-curation",
         icon: Baby,
       },
+      {
+        title: "Portal Profissional",
+        url: "/educare-app/professional/welcome",
+        icon: BookOpen,
+        badge: "Pro",
+      },
+      {
+        title: "Qualificação Profissional",
+        url: "/educare-app/professional/qualificacao",
+        icon: GraduationCap,
+      },
       ...baseItems,
     ];
   }
 
   // Adicionar itens específicos para profissional - 5 módulos principais
-  // Owner e admin também podem acessar o portal profissional
-  if (userRole === 'professional' || userRole === 'owner' || userRole === 'admin') {
+  // Nota: Owner e admin já têm seus módulos profissionais incluídos acima
+  if (userRole === 'professional') {
     return [
       {
         title: "Boas Vindas",

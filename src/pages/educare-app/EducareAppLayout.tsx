@@ -73,6 +73,8 @@ const EducareAppLayout: React.FC = () => {
   }
   
   // Allow owners and admins to access their respective areas
+  // Hierarquia: Owner > Admin > Professional > Parent
+  // Owner e Admin têm acesso COMPLETO a todas as áreas, incluindo Professional Portal
   if (user.role === 'owner' || user.role === 'admin') {
     console.log('👑 EDUCAREAPPLAYOUT: Usuário é owner/admin', {
       role: user.role,
@@ -81,6 +83,7 @@ const EducareAppLayout: React.FC = () => {
     const allowedPaths = [
       '/educare-app/owner/',
       '/educare-app/admin/',
+      '/educare-app/professional/',
       '/educare-app/welcome',
       '/educare-app/dashboard',
       '/educare-app/children',
@@ -91,7 +94,8 @@ const EducareAppLayout: React.FC = () => {
       '/educare-app/activities',
       '/educare-app/communication',
       '/educare-app/settings',
-      '/educare-app/news'
+      '/educare-app/news',
+      '/educare-app/trainings'
     ];
     
     const isAllowedPath = allowedPaths.some(path => location.pathname.startsWith(path));
