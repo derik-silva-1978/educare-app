@@ -3,68 +3,9 @@ const bcrypt = require('bcryptjs');
 const { User, Profile } = require('../models');
 const authConfig = require('../config/auth');
 const { validationResult } = require('express-validator');
-const https = require('https'); // Módulo nativo do Node.js para requisições HTTPS
 const { OAuth2Client } = require('google-auth-library');
 const { normalizePhoneNumber, findUserByPhone } = require('../utils/phoneUtils');
-
-/**
- * Função auxiliar para enviar dados para um webhook via HTTPS
- * @param {string} webhookUrl - URL do webhook
- * @param {object} data - Dados a serem enviados no formato JSON
- * @returns {Promise<object>} - Resposta do webhook
- */
-const sendToWebhook = async (webhookUrl, data) => {
-  return new Promise((resolve, reject) => {
-    try {
-      // Converter a URL do webhook em objeto URL para extrair os componentes
-      const url = new URL(webhookUrl);
-      
-      // Preparar os dados para envio
-      const postData = JSON.stringify(data);
-      
-      // Opções da requisição
-      const options = {
-        hostname: url.hostname,
-        path: url.pathname + url.search,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(postData)
-        }
-      };
-      
-      // Criar a requisição
-      const req = https.request(options, (res) => {
-        let responseData = '';
-        
-        // Coletar os dados da resposta
-        res.on('data', (chunk) => {
-          responseData += chunk;
-        });
-        
-        // Finalizar a requisição quando terminar
-        res.on('end', () => {
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve({ ok: true, status: res.statusCode, data: responseData });
-          } else {
-            reject(new Error(`Webhook retornou status ${res.statusCode}`));
-          }
-        });
-      });
-      
-      // Tratar erros de conexão
-      req.on('error', (error) => {
-        reject(error);
-      });
-      
-      // Enviar os dados
-      req.write(postData);
-      req.end();
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
+const WhatsappService = require('../services/whatsappService');
 
 // Função para gerar token JWT
 const generateToken = (userId) => {
@@ -801,43 +742,14 @@ const processLoginByPhone = async (user, phone, res) => {
     await user.save();
     console.log('Senha temporária salva no banco de dados para usuário:', user.id);
 
-    // Obter URL do webhook do .env
-    const webhookUrl = process.env.PHONE_PASSWORD_WEBHOOK;
-    
-    if (!webhookUrl) {
-      console.error('URL do webhook para senhas não configurada no .env');
-      return res.status(500).json({ 
-        error: 'Não foi possível enviar a senha temporária. Erro de configuração do servidor.',
-        success: false
-      });
-    }
-
     // Verificar se o usuário tem email associado
     const hasEmail = user.email && user.email.trim() !== '';
-    let loginMessage = '';
-    
-    if (hasEmail) {
-      // Se o usuário tem email, informar que a senha pode ser usada com ambos
-      loginMessage = `Sua senha temporária para acesso ao Educare: ${tempPassword}\nVálida por 30 minutos.\nVocê pode usar esta senha para entrar com seu email (${user.email}) ou telefone.`;
-    } else {
-      // Se não tem email, usar a mensagem padrão
-      loginMessage = `Sua senha temporária para acesso ao Educare: ${tempPassword}\nVálida por 30 minutos.`;
-    }
 
-    // Enviar senha via webhook
+    // Enviar senha via WhatsApp
     try {
-      // Preparar dados para envio
-      const webhookData = {
-        phone: phone,
-        message: loginMessage
-      };
+      console.log(`Enviando senha temporária para ${phone} via WhatsApp`);
       
-      console.log(`Enviando senha temporária para ${phone} via webhook POST`);
-      
-      // Usar a função auxiliar para enviar ao webhook
-      const response = await sendToWebhook(process.env.PHONE_PASSWORD_WEBHOOK, webhookData);
-      
-      console.log(`Senha temporária enviada com sucesso para ${phone}`);
+      const result = await WhatsappService.sendTemporaryPassword(phone, tempPassword, user.email);
       
       // Verificar a senha gerada com o hash armazenado (teste de verificação)
       const verifyPassword = await bcrypt.compare(tempPassword, user.password);
@@ -856,10 +768,10 @@ const processLoginByPhone = async (user, phone, res) => {
         expiresAt: expiresAt,
         canUseWithEmail: hasEmail,
         email: hasEmail ? user.email : null,
-        success: true // Adicionar campo success para compatibilidade com o frontend
+        success: true
       });
     } catch (error) {
-      console.error('Erro ao enviar senha via webhook:', error);
+      console.error('Erro ao enviar senha via WhatsApp:', error.message);
       return res.status(500).json({ 
         error: 'Erro ao enviar senha temporária',
         success: false
@@ -915,34 +827,18 @@ exports.sendPhoneVerification = async (req, res) => {
       });
     }
 
-    // Obter URL do webhook do .env
-    const webhookUrl = process.env.PHONE_VERIFICATION_WEBHOOK;
-    
-    if (!webhookUrl) {
-      return res.status(500).json({ error: 'URL do webhook não configurada' });
-    }
-
-    // Enviar código via webhook (usar telefone normalizado para garantir formato correto)
+    // Enviar código via WhatsApp (usar telefone normalizado para garantir formato correto)
     try {
-      // Preparar dados para envio
-      const webhookData = {
-        phone: normalizedPhone,
-        message: `Seu código de verificação do Educare: ${verificationCode}\nVálido por 30 minutos.`
-      };
+      console.log(`Enviando código de verificação para ${normalizedPhone} via WhatsApp`);
       
-      console.log(`Enviando código de verificação para ${normalizedPhone} via webhook POST`);
-      
-      // Usar a função auxiliar para enviar ao webhook
-      const response = await sendToWebhook(process.env.PHONE_VERIFICATION_WEBHOOK, webhookData);
-      
-      console.log(`Código de verificação enviado com sucesso para ${normalizedPhone}`);
+      const result = await WhatsappService.sendVerificationCode(normalizedPhone, verificationCode);
       
       return res.status(200).json({
         message: 'Código de verificação enviado com sucesso',
         expiresAt
       });
     } catch (error) {
-      console.error('Erro ao enviar código via webhook:', error);
+      console.error('Erro ao enviar código via WhatsApp:', error.message);
       return res.status(500).json({ error: 'Erro ao enviar código de verificação' });
     }
   } catch (error) {
