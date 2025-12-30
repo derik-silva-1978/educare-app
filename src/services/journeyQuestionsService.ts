@@ -104,29 +104,29 @@ class JourneyQuestionsService {
     return response;
   }
 
-  async getQuiz(id: string): Promise<{ success: boolean; data?: JourneyV2Quiz }> {
+  async getQuiz(id: string): Promise<any> {
     const response = await httpClient.get(`${this.baseUrl}/quizzes/${id}`);
-    return response;
+    return response.data || response;
   }
 
-  async createQuiz(data: CreateJourneyQuizData): Promise<{ success: boolean; data?: JourneyV2Quiz }> {
+  async createQuiz(data: CreateJourneyQuizData): Promise<any> {
     const response = await httpClient.post(`${this.baseUrl}/quizzes`, data);
-    return response;
+    return response.data || response;
   }
 
-  async updateQuiz(id: string, data: Partial<CreateJourneyQuizData>): Promise<{ success: boolean; data?: JourneyV2Quiz }> {
+  async updateQuiz(id: string, data: Partial<CreateJourneyQuizData>): Promise<any> {
     const response = await httpClient.put(`${this.baseUrl}/quizzes/${id}`, data);
-    return response;
+    return response.data || response;
   }
 
-  async deleteQuiz(id: string): Promise<{ success: boolean; message?: string }> {
+  async deleteQuiz(id: string): Promise<any> {
     const response = await httpClient.delete(`${this.baseUrl}/quizzes/${id}`);
-    return response;
+    return response.data || response;
   }
 
-  async getStatistics(): Promise<{ success: boolean; data?: JourneyQuizzesStatistics }> {
+  async getStatistics(): Promise<any> {
     const response = await httpClient.get(`${this.baseUrl}/quizzes/statistics`);
-    return response;
+    return response.data || response;
   }
 
   async importFromCSV(file: File): Promise<ImportResult> {
@@ -163,15 +163,15 @@ class JourneyQuestionsService {
     window.URL.revokeObjectURL(url);
   }
 
-  async listJourneys(): Promise<{ success: boolean; data?: JourneyV2[] }> {
+  async listJourneys(): Promise<any> {
     const response = await httpClient.get(`${this.baseUrl}/journeys`);
-    return response;
+    return response.data || response;
   }
 
-  async listWeeks(journeyId?: string): Promise<{ success: boolean; data?: JourneyV2Week[] }> {
+  async listWeeks(journeyId?: string): Promise<any> {
     const params = journeyId ? `?journey_id=${journeyId}` : '';
     const response = await httpClient.get(`${this.baseUrl}/weeks${params}`);
-    return response;
+    return response.data || response;
   }
 
   getAvailableDomains(): string[] {
