@@ -75,7 +75,27 @@ Content is dynamically loaded and diversified with fallback images. Audience fil
 - **Observability**: Extensive metrics and logging for RAG performance and system health.
 - **Controlled Rollout**: Feature flags enable safe, phased rollouts and easy rollback.
 
+## LLM Provider Integration Guide
+
+See **`docs/COMO_ADICIONAR_PROVEDORES_LLM.md`** for a comprehensive step-by-step guide on:
+- Adding new LLM providers (Claude, Llama, etc)
+- Configuring API keys
+- Registering providers in LLMProviderRegistry
+- Implementing custom provider methods
+- Testing provider availability and functionality
+
+This document includes architecture diagrams, code examples, and a complete checklist for implementation.
+
 ## Recent Fixes
+
+### 2025-12-30: LLM Config Service Data Structure Fix
+**Problem**: Frontend `llmConfigService.ts` was attempting to access `response.data.data`, causing undefined errors
+- **Root Cause**: Misalignment between httpClient response unwrapping and expected data structure
+- **Solution**: Updated all 4 methods in `llmConfigService.ts` to correctly access `response.data` (httpClient already unwraps the nested data)
+- **Methods Fixed**: `getAllConfigs()`, `getConfigByModule()`, `getAvailableProviders()`, `updateConfig()`
+- **Testing**: ✅ Verified OpenAI and Gemini providers load correctly, database persistence works, cache invalidation functional
+
+
 
 ### 2025-12-30: Owner/Admin Professional Portal Access (COMPLETE RESOLUTION)
 **Problem**: Owner and Admin could not view or access Professional Portal modules
