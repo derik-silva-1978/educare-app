@@ -13,6 +13,7 @@ import {
   sendPhoneVerification,
   verifyPhoneCode,
   loginByPhone,
+  updatePassword as updatePasswordApi,
   AuthUser,
   PhoneLoginResult
 } from '@/services/api/authService';
@@ -501,6 +502,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return false;
   };
 
+  // Método para atualizar senha
+  const handleUpdatePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+    try {
+      setIsLoading(true);
+      const result = await updatePasswordApi(currentPassword, newPassword);
+      
+      if (result.success) {
+        toast({
+          title: 'Senha atualizada',
+          description: 'Sua senha foi alterada com sucesso.',
+          variant: 'default'
+        });
+        return true;
+      } else {
+        throw new Error(result.error || 'Falha ao atualizar senha');
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar senha:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({
+        title: 'Erro ao atualizar senha',
+        description: errorMessage || 'Verifique se a senha atual está correta.',
+        variant: 'destructive'
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Valores do contexto
   const contextValue: AuthContextType = {
     user,
@@ -547,6 +578,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     handleSendPhoneVerification,
     handleVerifyPhoneCode,
     handleLoginByPhone,
+    updatePassword: handleUpdatePassword,
     error: null // Adicionando a propriedade error que estava faltando
   };
 
