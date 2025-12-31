@@ -2,80 +2,101 @@ const https = require('https');
 const http = require('http');
 
 class WhatsappService {
-  /**
-   * Enviar dados para webhook com retry logic
-   * @param {string} webhookUrl - URL do webhook
-   * @param {object} data - Dados a serem enviados
-   * @param {object} options - Opções (retries, timeout, etc)
-   */
-  static async sendToWebhook(webhookUrl, data, options = {}) {
-    const {
-      maxRetries = 3,
-      timeout = 10000,
-      backoffMultiplier = 2,
-      initialDelay = 1000
-    } = options;
-
-    let lastError = null;
-    let delay = initialDelay;
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        const response = await WhatsappService._makeRequest(webhookUrl, data, timeout);
-        
-        if (response.ok) {
-          console.log(`✓ Webhook enviado com sucesso [Tentativa ${attempt}/${maxRetries}]`);
-          console.log(`  URL: ${webhookUrl}`);
-          console.log(`  Status: ${response.status}`);
-          return response;
-        }
-      } catch (error) {
-        lastError = error;
-        console.warn(`✗ Erro ao enviar webhook [Tentativa ${attempt}/${maxRetries}]`);
-        console.warn(`  URL: ${webhookUrl}`);
-        console.warn(`  Erro: ${error.message}`);
-        
-        // Se é a última tentativa, não fazer retry
-        if (attempt === maxRetries) {
-          break;
-        }
-        
-        // Aguardar antes de tentar novamente
-        console.log(`  Tentando novamente em ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-        delay *= backoffMultiplier;
-      }
-    }
-
-    // Todas as tentativas falharam
-    const errorMessage = `Falha ao enviar webhook após ${maxRetries} tentativas: ${lastError?.message || 'Erro desconhecido'}`;
-    console.error(errorMessage);
-    throw new Error(errorMessage);
+  static get config() {
+    return {
+      apiUrl: process.env.EVOLUTION_API_URL || 'https://api.educareapp.com.br',
+      apiKey: process.env.EVOLUTION_API_KEY,
+      instanceName: process.env.EVOLUTION_INSTANCE_NAME || 'educare-chat',
+      maxRetries: 3,
+      timeout: 15000
+    };
   }
 
-  /**
-   * Fazer requisição HTTP/HTTPS
-   * @private
-   */
-  static async _makeRequest(webhookUrl, data, timeout) {
+  static async sendMessage(phone, text, options = {}) {
+    const config = WhatsappService.config;
+    
+    if (!config.apiKey) {
+      console.warn('⚠ EVOLUTION_API_KEY não configurada');
+      return WhatsappService._fallbackToWebhook(phone, text);
+    }
+
+    const cleanPhone = phone.replace(/\D/g, '');
+    
+    const url = `${config.apiUrl}/message/sendText/${config.instanceName}`;
+    const data = {
+      number: cleanPhone,
+      text: text,
+      delay: options.delay || 200
+    };
+
+    try {
+      console.log(`📱 Enviando mensagem via Evolution API para ${cleanPhone}`);
+      const response = await WhatsappService._makeEvolutionRequest(url, data);
+      
+      if (response.ok) {
+        console.log(`✓ Mensagem enviada com sucesso para ${cleanPhone}`);
+        console.log(`  ID: ${response.data?.key?.id || 'N/A'}`);
+        return {
+          success: true,
+          phone: cleanPhone,
+          messageId: response.data?.key?.id,
+          sentAt: new Date().toISOString()
+        };
+      } else {
+        throw new Error(`Evolution API retornou status ${response.status}`);
+      }
+    } catch (error) {
+      console.error(`✗ Erro ao enviar via Evolution API: ${error.message}`);
+      return WhatsappService._fallbackToWebhook(phone, text);
+    }
+  }
+
+  static async sendTemporaryPassword(phone, password, email) {
+    const cleanPhone = phone.replace(/\D/g, '');
+    
+    let message = `🔐 *Sua senha temporária Educare+*\n\n`;
+    message += `Senha: *${password}*\n\n`;
+    message += `⏰ Válida por 30 minutos.\n`;
+    
+    if (email) {
+      message += `\n📧 Você pode usar esta senha para entrar com:\n`;
+      message += `• Email: ${email}\n`;
+      message += `• Telefone: ${phone}`;
+    }
+
+    return WhatsappService.sendMessage(cleanPhone, message);
+  }
+
+  static async sendVerificationCode(phone, code) {
+    const cleanPhone = phone.replace(/\D/g, '');
+    
+    const message = `🔑 *Código de Verificação Educare+*\n\n` +
+      `Código: *${code}*\n\n` +
+      `⏰ Válido por 30 minutos.`;
+
+    return WhatsappService.sendMessage(cleanPhone, message);
+  }
+
+  static async _makeEvolutionRequest(url, data) {
+    const config = WhatsappService.config;
+    
     return new Promise((resolve, reject) => {
       try {
-        const url = new URL(webhookUrl);
-        const protocol = url.protocol === 'https:' ? https : http;
-        
+        const urlObj = new URL(url);
+        const protocol = urlObj.protocol === 'https:' ? https : http;
         const postData = JSON.stringify(data);
-        
+
         const options = {
-          hostname: url.hostname,
-          port: url.port || (url.protocol === 'https:' ? 443 : 80),
-          path: url.pathname + url.search,
+          hostname: urlObj.hostname,
+          port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
+          path: urlObj.pathname,
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Content-Length': Buffer.byteLength(postData),
-            'User-Agent': 'Educare-Backend/1.0'
+            'apikey': config.apiKey
           },
-          timeout: timeout
+          timeout: config.timeout
         };
 
         const req = protocol.request(options, (res) => {
@@ -87,11 +108,17 @@ class WhatsappService {
 
           res.on('end', () => {
             const ok = res.statusCode >= 200 && res.statusCode < 300;
+            let parsedData = null;
+            try {
+              parsedData = JSON.parse(responseData);
+            } catch (e) {
+              parsedData = responseData;
+            }
+            
             resolve({
               ok,
               status: res.statusCode,
-              data: responseData,
-              headers: res.headers
+              data: parsedData
             });
           });
         });
@@ -102,7 +129,7 @@ class WhatsappService {
 
         req.on('timeout', () => {
           req.destroy();
-          reject(new Error(`Timeout na requisição (${timeout}ms)`));
+          reject(new Error(`Timeout na requisição (${config.timeout}ms)`));
         });
 
         req.write(postData);
@@ -113,122 +140,147 @@ class WhatsappService {
     });
   }
 
-  /**
-   * Enviar senha temporária via WhatsApp
-   */
-  static async sendTemporaryPassword(phone, password, email) {
+  static async _fallbackToWebhook(phone, message) {
     const webhookUrl = process.env.PHONE_PASSWORD_WEBHOOK;
     
     if (!webhookUrl) {
-      console.warn('⚠ URL do webhook para senhas não configurada no .env');
-      console.warn('  Variável esperada: PHONE_PASSWORD_WEBHOOK');
-      throw new Error('Webhook não configurado para envio de senhas');
+      console.error('⚠ Nenhum método de envio disponível (Evolution API ou Webhook)');
+      throw new Error('Nenhum método de envio de WhatsApp configurado');
     }
 
-    const data = {
-      phone: phone,
-      message: `Sua senha temporária para Educare+ é: ${password}`,
-      password: password,
-      email: email,
-      timestamp: new Date().toISOString(),
-      type: 'temporary_password'
-    };
-
-    try {
-      console.log(`📱 Enviando senha temporária para ${phone}`);
-      const response = await WhatsappService.sendToWebhook(webhookUrl, data, {
-        maxRetries: 3,
-        timeout: 15000,
-        backoffMultiplier: 1.5,
-        initialDelay: 500
-      });
-
-      console.log(`✓ Senha temporária enviada com sucesso para ${phone}`);
-      return {
-        success: true,
-        phone: phone,
-        email: email,
-        sentAt: new Date().toISOString()
-      };
-    } catch (error) {
-      console.error(`✗ Falha ao enviar senha temporária para ${phone}`);
-      console.error(`  Erro: ${error.message}`);
-      throw error;
-    }
-  }
-
-  /**
-   * Enviar código de verificação via WhatsApp
-   */
-  static async sendVerificationCode(phone, code) {
-    const webhookUrl = process.env.PHONE_VERIFICATION_WEBHOOK;
+    console.log(`📱 Usando webhook fallback para ${phone}`);
     
-    if (!webhookUrl) {
-      console.warn('⚠ URL do webhook para verificação não configurada no .env');
-      console.warn('  Variável esperada: PHONE_VERIFICATION_WEBHOOK');
-      throw new Error('Webhook não configurado para envio de códigos');
-    }
-
-    const data = {
-      phone: phone,
-      message: `Seu código de verificação para Educare+ é: ${code}`,
-      code: code,
-      timestamp: new Date().toISOString(),
-      type: 'verification_code'
-    };
-
-    try {
-      console.log(`📱 Enviando código de verificação para ${phone}`);
-      const response = await WhatsappService.sendToWebhook(webhookUrl, data, {
-        maxRetries: 3,
-        timeout: 15000,
-        backoffMultiplier: 1.5,
-        initialDelay: 500
-      });
-
-      console.log(`✓ Código de verificação enviado com sucesso para ${phone}`);
-      return {
-        success: true,
-        phone: phone,
-        sentAt: new Date().toISOString()
-      };
-    } catch (error) {
-      console.error(`✗ Falha ao enviar código de verificação para ${phone}`);
-      console.error(`  Erro: ${error.message}`);
-      throw error;
-    }
-  }
-
-  /**
-   * Enviar mensagem customizada via WhatsApp
-   */
-  static async sendMessage(phone, message, metadata = {}) {
-    const webhookUrl = process.env.PHONE_PASSWORD_WEBHOOK;
-    
-    if (!webhookUrl) {
-      throw new Error('Webhook não configurado');
-    }
-
     const data = {
       phone: phone,
       message: message,
-      timestamp: new Date().toISOString(),
-      type: 'custom_message',
-      ...metadata
+      timestamp: new Date().toISOString()
     };
 
+    return WhatsappService._sendToWebhook(webhookUrl, data);
+  }
+
+  static async _sendToWebhook(webhookUrl, data, options = {}) {
+    const { maxRetries = 3, timeout = 10000 } = options;
+    let lastError = null;
+    let delay = 1000;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await WhatsappService._makeWebhookRequest(webhookUrl, data, timeout);
+        
+        if (response.ok) {
+          console.log(`✓ Webhook enviado com sucesso [Tentativa ${attempt}/${maxRetries}]`);
+          return { success: true, phone: data.phone, sentAt: new Date().toISOString() };
+        }
+      } catch (error) {
+        lastError = error;
+        console.warn(`✗ Erro webhook [Tentativa ${attempt}/${maxRetries}]: ${error.message}`);
+        
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 2;
+        }
+      }
+    }
+
+    throw new Error(`Falha após ${maxRetries} tentativas: ${lastError?.message}`);
+  }
+
+  static async _makeWebhookRequest(webhookUrl, data, timeout) {
+    return new Promise((resolve, reject) => {
+      try {
+        const url = new URL(webhookUrl);
+        const protocol = url.protocol === 'https:' ? https : http;
+        const postData = JSON.stringify(data);
+
+        const options = {
+          hostname: url.hostname,
+          port: url.port || (url.protocol === 'https:' ? 443 : 80),
+          path: url.pathname + url.search,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(postData)
+          },
+          timeout: timeout
+        };
+
+        const req = protocol.request(options, (res) => {
+          let responseData = '';
+          res.on('data', (chunk) => { responseData += chunk; });
+          res.on('end', () => {
+            resolve({
+              ok: res.statusCode >= 200 && res.statusCode < 300,
+              status: res.statusCode,
+              data: responseData
+            });
+          });
+        });
+
+        req.on('error', (error) => reject(error));
+        req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')); });
+        req.write(postData);
+        req.end();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  static async checkConnection() {
+    const config = WhatsappService.config;
+    
+    if (!config.apiKey) {
+      return { connected: false, error: 'API Key não configurada' };
+    }
+
     try {
-      console.log(`📱 Enviando mensagem para ${phone}`);
-      const response = await WhatsappService.sendToWebhook(webhookUrl, data);
+      const url = `${config.apiUrl}/instance/connectionState/${config.instanceName}`;
+      const response = await WhatsappService._makeGetRequest(url);
+      
+      const isOpen = response.data?.instance?.state === 'open';
       return {
-        success: true,
-        phone: phone,
-        sentAt: new Date().toISOString()
+        connected: isOpen,
+        instanceName: config.instanceName,
+        state: response.data?.instance?.state
       };
     } catch (error) {
-      console.error(`✗ Falha ao enviar mensagem para ${phone}: ${error.message}`);
-      throw error;
+      return { connected: false, error: error.message };
     }
+  }
+
+  static async _makeGetRequest(url) {
+    const config = WhatsappService.config;
+    
+    return new Promise((resolve, reject) => {
+      const urlObj = new URL(url);
+      const protocol = urlObj.protocol === 'https:' ? https : http;
+
+      const options = {
+        hostname: urlObj.hostname,
+        port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
+        path: urlObj.pathname,
+        method: 'GET',
+        headers: { 'apikey': config.apiKey },
+        timeout: 10000
+      };
+
+      const req = protocol.request(options, (res) => {
+        let data = '';
+        res.on('data', (chunk) => { data += chunk; });
+        res.on('end', () => {
+          resolve({
+            ok: res.statusCode >= 200 && res.statusCode < 300,
+            status: res.statusCode,
+            data: JSON.parse(data)
+          });
+        });
+      });
+
+      req.on('error', reject);
+      req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')); });
+      req.end();
+    });
   }
 }
 

@@ -22,6 +22,8 @@ ENABLE_GEMINI_RAG = "true"
 ENABLE_QDRANT_RAG = "true"
 RAG_PRIMARY_PROVIDER = "gemini"
 FRONTEND_URL = "https://1d35ed6a-d635-41d2-8d11-7db8db84ce29-00-28ylqytrll200.picard.replit.dev"
+EVOLUTION_API_URL = "https://api.educareapp.com.br"
+EVOLUTION_INSTANCE_NAME = "educare-chat"
 
 [workflows]
 runButton = "Project"
