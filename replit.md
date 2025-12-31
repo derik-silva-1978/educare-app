@@ -123,6 +123,40 @@ The frontend, built with React 18, TypeScript, and Vite, uses `shadcn/ui` (Radix
   - Real-time field selection counter
   - Gradient styling with purple/indigo theme
 
+### 2025-12-31: TitiNauta Child Context & Selection
+
+**1. Child Selector in TitiNauta Modal**
+- **Component**: `src/components/educare-app/welcome/IconToolbar.tsx`
+- **Behavior**: Shows child dropdown only when user has multiple children registered
+- **Features**:
+  - Child selection with age display (years and months)
+  - Context indicator showing which child is being discussed
+  - Auto-selects first child on modal open
+  - Skipped for professional users (isProfessional flag)
+
+**2. Contextual AI Responses**
+- **Implementation**: Child context prefix injected into AI questions
+- **Format**: `[Contexto: Esta pergunta é sobre {nome}, {gênero} de {idade}. Por favor, personalize a resposta considerando essa idade e o desenvolvimento esperado.]`
+- **Features**:
+  - Handles missing last_name gracefully (uses first name only)
+  - Age formatted in years/months for readability
+  - Gender-appropriate language (menino/menina/criança)
+  - childId passed to RAG service for logging
+
+**3. Dynamic FAQ Suggestions**
+- **Logic**: getAgeSuggestions(selectedChildAgeMonths) updates based on selected child
+- **Age Ranges**: 0-3, 4-6, 7-12, 13-24, 25-36, 37-48 months with age-appropriate questions
+- **Fallback**: Uses childAgeMonths prop if no child selected
+
+**4. Initial Greeting Personalization**
+- **Behavior**: TitiNauta greeting mentions selected child's name
+- **Example**: "Estou aqui para ajudar você com o desenvolvimento de Maria!"
+- **Reset**: Greeting updates when child selection changes
+
+**5. WelcomeHero Button Removal**
+- **Removed**: "Falar com TitiNauta" button from WelcomeHero component
+- **Consolidated**: TitiNauta access now only via toolbar icon (Bot icon)
+
 **2. WhatsApp Report Delivery**
 - **Endpoint**: `POST /api/development-reports/send-whatsapp`
 - **Features**:

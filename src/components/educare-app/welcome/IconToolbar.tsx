@@ -152,25 +152,30 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
   
   const [selectedChildIdLocal, setSelectedChildIdLocal] = useState<string | null>(null);
   
+  const childrenList = useMemo(() => {
+    if (isProfessional || !children || children.length === 0) return [];
+    return children;
+  }, [isProfessional, children]);
+  
   const selectedChild = useMemo(() => {
-    if (!children || children.length === 0) return null;
+    if (childrenList.length === 0) return null;
     if (selectedChildIdLocal) {
-      return children.find((c: Child) => c.id === selectedChildIdLocal) || children[0];
+      return childrenList.find((c: Child) => c.id === selectedChildIdLocal) || childrenList[0];
     }
-    return children[0];
-  }, [children, selectedChildIdLocal]);
+    return childrenList[0];
+  }, [childrenList, selectedChildIdLocal]);
   
   const selectedChildAgeMonths = useMemo(() => {
     if (!selectedChild?.birthdate) return childAgeMonths;
     const ageData = calculateAge(selectedChild.birthdate);
     return ageData.months + (ageData.years * 12);
-  }, [selectedChild, childAgeMonths]);
+  }, [selectedChild?.birthdate, childAgeMonths]);
   
   useEffect(() => {
-    if (children && children.length > 0 && !selectedChildIdLocal) {
-      setSelectedChildIdLocal(children[0].id);
+    if (childrenList.length > 0 && !selectedChildIdLocal) {
+      setSelectedChildIdLocal(childrenList[0].id);
     }
-  }, [children, selectedChildIdLocal]);
+  }, [childrenList, selectedChildIdLocal]);
   
   const getInitialMessage = () => {
     if (isProfessional) {
@@ -284,7 +289,11 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
         const ageText = ageData.years > 0 
           ? `${ageData.years} ano${ageData.years > 1 ? 's' : ''} e ${ageData.months} ${ageData.months === 1 ? 'mês' : 'meses'}`
           : `${ageData.months} ${ageData.months === 1 ? 'mês' : 'meses'}`;
-        childContext = `[Contexto: Esta pergunta é sobre ${selectedChild.first_name} ${selectedChild.last_name}, ${selectedChild.gender === 'male' ? 'menino' : selectedChild.gender === 'female' ? 'menina' : 'criança'} de ${ageText}. Por favor, personalize a resposta considerando essa idade e o desenvolvimento esperado.] `;
+        const childName = selectedChild.last_name 
+          ? `${selectedChild.first_name} ${selectedChild.last_name}` 
+          : selectedChild.first_name;
+        const genderText = selectedChild.gender === 'male' ? 'menino' : selectedChild.gender === 'female' ? 'menina' : 'criança';
+        childContext = `[Contexto: Esta pergunta é sobre ${childName}, ${genderText} de ${ageText}. Por favor, personalize a resposta considerando essa idade e o desenvolvimento esperado.] `;
       }
       
       const contextualQuestion = childContext + userMessage;
@@ -604,7 +613,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                 : 'Desenvolvimento infantil, estimulação e marcos de desenvolvimento'}
             </SheetDescription>
             
-            {!isProfessional && children && children.length > 1 && (
+            {!isProfessional && childrenList.length > 1 && (
               <div className="mt-3 pt-3 border-t border-violet-200/40 dark:border-violet-700/40">
                 <Label className="text-xs text-violet-600 dark:text-violet-300 mb-1.5 block">
                   Criança selecionada:
@@ -617,7 +626,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                     <SelectValue placeholder="Selecione uma criança" />
                   </SelectTrigger>
                   <SelectContent>
-                    {children.map((child: Child) => {
+                    {childrenList.map((child: Child) => {
                       const ageData = calculateAge(child.birthdate);
                       const ageText = ageData.years > 0 
                         ? `${ageData.years}a ${ageData.months}m`
