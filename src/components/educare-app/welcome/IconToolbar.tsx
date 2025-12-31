@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Sun, Moon, MessageCircle, MessageSquarePlus, Coffee, Bot, Camera, LogOut, Settings, HelpCircle, User, Send, Baby, ChevronDown } from 'lucide-react';
+import { Sun, Moon, MessageCircle, MessageSquarePlus, Coffee, Bot, Camera, LogOut, Settings, HelpCircle, User, Send, Baby, ChevronDown, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/providers/ThemeProvider';
 import { useNavigate } from 'react-router-dom';
@@ -127,6 +127,19 @@ const getAgeSuggestions = (ageMonths?: number): string[] => {
   }
 };
 
+const getMotherSuggestions = (): string[] => {
+  return [
+    'Como melhorar a qualidade do meu sono?',
+    'Alimentação saudável no pós-parto',
+    'Sinais de depressão pós-parto',
+    'Exercícios seguros após o parto',
+    'Como lidar com a ansiedade materna?',
+    'Quando devo fazer consultas de rotina?',
+    'Cuidados com a saúde mental da mãe',
+    'Amamentação: dicas e desafios'
+  ];
+};
+
 const IconToolbar: React.FC<IconToolbarProps> = ({
   messageCount = 0,
   isProfessional = false,
@@ -151,6 +164,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
   const [isProcessingDonation, setIsProcessingDonation] = useState(false);
   
   const [selectedChildIdLocal, setSelectedChildIdLocal] = useState<string | null>(null);
+  const [isMotherMode, setIsMotherMode] = useState(false);
   
   const childrenList = useMemo(() => {
     if (isProfessional || !children || children.length === 0) return [];
@@ -172,14 +186,17 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
   }, [selectedChild?.birthdate, childAgeMonths]);
   
   useEffect(() => {
-    if (childrenList.length > 0 && !selectedChildIdLocal) {
+    if (childrenList.length > 0 && !selectedChildIdLocal && !isMotherMode) {
       setSelectedChildIdLocal(childrenList[0].id);
     }
-  }, [childrenList, selectedChildIdLocal]);
+  }, [childrenList, selectedChildIdLocal, isMotherMode]);
   
   const getInitialMessage = () => {
     if (isProfessional) {
       return 'Olá! Sou o TitiNauta Especialista, seu assistente de IA para profissionais de saúde. Posso ajudar com protocolos clínicos, orientações de acompanhamento, marcos de desenvolvimento e práticas baseadas em evidências para a primeira infância.';
+    }
+    if (isMotherMode) {
+      return 'Olá! Sou o TitiNauta Materna, seu assistente de IA especializado em saúde materna. Estou aqui para ajudar você com orientações sobre nutrição, sono, bem-estar emocional, exercícios pós-parto e tudo que envolve sua jornada como mãe. Cuide-se, você é importante!';
     }
     if (selectedChild) {
       return `Olá! Sou o TitiNauta, o assistente de IA do Educare+. Estou aqui para ajudar você com o desenvolvimento de ${selectedChild.first_name}! Posso responder suas dúvidas sobre estimulação, marcos de desenvolvimento, alimentação e muito mais.`;
@@ -196,10 +213,10 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
   const [ragError, setRagError] = useState<string>('');
   
   useEffect(() => {
-    if (selectedChild && !isProfessional) {
+    if (!isProfessional) {
       setChatMessages([{ role: 'assistant', content: getInitialMessage() }]);
     }
-  }, [selectedChild?.id]);
+  }, [selectedChild?.id, isMotherMode]);
 
   const getInitials = (name?: string) => {
     if (!name) return 'U';
@@ -281,10 +298,10 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
     setRagError('');
     
     try {
-      const moduleType = isProfessional ? 'professional' : 'baby';
+      const moduleType = isProfessional ? 'professional' : isMotherMode ? 'mother' : 'baby';
       
-      let childContext = '';
-      if (!isProfessional && selectedChild) {
+      let contextPrefix = '';
+      if (!isProfessional && !isMotherMode && selectedChild) {
         const ageData = calculateAge(selectedChild.birthdate);
         const ageText = ageData.years > 0 
           ? `${ageData.years} ano${ageData.years > 1 ? 's' : ''} e ${ageData.months} ${ageData.months === 1 ? 'mês' : 'meses'}`
@@ -293,13 +310,16 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
           ? `${selectedChild.first_name} ${selectedChild.last_name}` 
           : selectedChild.first_name;
         const genderText = selectedChild.gender === 'male' ? 'menino' : selectedChild.gender === 'female' ? 'menina' : 'criança';
-        childContext = `[Contexto: Esta pergunta é sobre ${childName}, ${genderText} de ${ageText}. Por favor, personalize a resposta considerando essa idade e o desenvolvimento esperado.] `;
+        contextPrefix = `[Contexto: Esta pergunta é sobre ${childName}, ${genderText} de ${ageText}. Por favor, personalize a resposta considerando essa idade e o desenvolvimento esperado.] `;
+      } else if (isMotherMode) {
+        contextPrefix = '[Contexto: Esta pergunta é sobre saúde materna. Por favor, personalize a resposta com orientações de cuidados para a mãe, incluindo bem-estar físico e emocional.] ';
       }
       
-      const contextualQuestion = childContext + userMessage;
-      console.log('[IconToolbar] Enviando pergunta - isProfessional:', isProfessional, ', module_type:', moduleType, ', childContext:', !!childContext);
+      const contextualQuestion = contextPrefix + userMessage;
+      console.log('[IconToolbar] Enviando pergunta - isProfessional:', isProfessional, ', isMotherMode:', isMotherMode, ', module_type:', moduleType);
       
-      const response = await ragService.askQuestion(contextualQuestion, selectedChild?.id, {
+      const childIdForQuery = isMotherMode ? null : selectedChild?.id;
+      const response = await ragService.askQuestion(contextualQuestion, childIdForQuery, {
         module_type: moduleType,
         onProgress: (status) => setRagStatus(status)
       });
@@ -577,55 +597,86 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
           className={`w-full sm:max-w-md flex flex-col h-full p-0 ${
             isProfessional 
               ? 'bg-gradient-to-b from-slate-50 to-teal-50/30 dark:from-slate-950 dark:to-teal-950/20' 
-              : 'bg-gradient-to-b from-slate-50 to-violet-50/30 dark:from-slate-950 dark:to-violet-950/20'
+              : isMotherMode
+                ? 'bg-gradient-to-b from-slate-50 to-pink-50/30 dark:from-slate-950 dark:to-pink-950/20'
+                : 'bg-gradient-to-b from-slate-50 to-violet-50/30 dark:from-slate-950 dark:to-violet-950/20'
           }`}
         >
           <SheetHeader className={`px-4 py-4 border-b ${
             isProfessional 
               ? 'bg-gradient-to-r from-teal-100/80 to-emerald-100/60 dark:from-teal-900/30 dark:to-emerald-900/20 border-teal-200/60 dark:border-teal-700/50' 
-              : 'bg-gradient-to-r from-violet-100/80 to-fuchsia-100/60 dark:from-violet-900/30 dark:to-fuchsia-900/20 border-violet-200/60 dark:border-violet-700/50'
+              : isMotherMode
+                ? 'bg-gradient-to-r from-pink-100/80 to-rose-100/60 dark:from-pink-900/30 dark:to-rose-900/20 border-pink-200/60 dark:border-pink-700/50'
+                : 'bg-gradient-to-r from-violet-100/80 to-fuchsia-100/60 dark:from-violet-900/30 dark:to-fuchsia-900/20 border-violet-200/60 dark:border-violet-700/50'
           }`}>
             <SheetTitle className={`flex items-center gap-2 ${
               isProfessional 
                 ? 'text-teal-800 dark:text-teal-100' 
-                : 'text-violet-800 dark:text-violet-100'
+                : isMotherMode
+                  ? 'text-pink-800 dark:text-pink-100'
+                  : 'text-violet-800 dark:text-violet-100'
             }`}>
               <div className={`p-1.5 rounded-lg ${
                 isProfessional 
                   ? 'bg-teal-500/20 dark:bg-teal-500/30' 
-                  : 'bg-violet-500/20 dark:bg-violet-500/30'
+                  : isMotherMode
+                    ? 'bg-pink-500/20 dark:bg-pink-500/30'
+                    : 'bg-violet-500/20 dark:bg-violet-500/30'
               }`}>
-                <Bot className={`h-4 w-4 ${
-                  isProfessional 
-                    ? 'text-teal-600 dark:text-teal-300' 
-                    : 'text-violet-600 dark:text-violet-300'
-                }`} />
+                {isMotherMode ? (
+                  <Heart className="h-4 w-4 text-pink-600 dark:text-pink-300" />
+                ) : (
+                  <Bot className={`h-4 w-4 ${
+                    isProfessional 
+                      ? 'text-teal-600 dark:text-teal-300' 
+                      : 'text-violet-600 dark:text-violet-300'
+                  }`} />
+                )}
               </div>
-              {isProfessional ? 'TitiNauta Especialista' : 'TitiNauta - Assistente de IA'}
+              {isProfessional ? 'TitiNauta Especialista' : isMotherMode ? 'TitiNauta Materna' : 'TitiNauta - Assistente de IA'}
             </SheetTitle>
             <SheetDescription className={`text-xs ${
               isProfessional 
                 ? 'text-teal-600 dark:text-teal-300' 
-                : 'text-violet-600 dark:text-violet-300'
+                : isMotherMode
+                  ? 'text-pink-600 dark:text-pink-300'
+                  : 'text-violet-600 dark:text-violet-300'
             }`}>
               {isProfessional 
                 ? 'Protocolos clínicos, marcos de desenvolvimento e práticas baseadas em evidências'
-                : 'Desenvolvimento infantil, estimulação e marcos de desenvolvimento'}
+                : isMotherMode
+                  ? 'Nutrição, sono, bem-estar emocional e cuidados para a sua jornada materna'
+                  : 'Desenvolvimento infantil, estimulação e marcos de desenvolvimento'}
             </SheetDescription>
             
-            {!isProfessional && childrenList.length > 1 && (
-              <div className="mt-3 pt-3 border-t border-violet-200/40 dark:border-violet-700/40">
-                <Label className="text-xs text-violet-600 dark:text-violet-300 mb-1.5 block">
-                  Criança selecionada:
+            {!isProfessional && (
+              <div className={`mt-3 pt-3 border-t ${isMotherMode ? 'border-pink-200/40 dark:border-pink-700/40' : 'border-violet-200/40 dark:border-violet-700/40'}`}>
+                <Label className={`text-xs mb-1.5 block ${isMotherMode ? 'text-pink-600 dark:text-pink-300' : 'text-violet-600 dark:text-violet-300'}`}>
+                  {isMotherMode ? 'Modo:' : 'Conversar sobre:'}
                 </Label>
                 <Select
-                  value={selectedChildIdLocal || ''}
-                  onValueChange={(value) => setSelectedChildIdLocal(value)}
+                  value={isMotherMode ? 'mother' : (selectedChildIdLocal || '')}
+                  onValueChange={(value) => {
+                    if (value === 'mother') {
+                      setIsMotherMode(true);
+                      setSelectedChildIdLocal(null);
+                    } else {
+                      setIsMotherMode(false);
+                      setSelectedChildIdLocal(value);
+                    }
+                  }}
                 >
-                  <SelectTrigger className="w-full h-9 text-sm bg-white/80 dark:bg-slate-800/80 border-violet-200 dark:border-violet-700">
-                    <SelectValue placeholder="Selecione uma criança" />
+                  <SelectTrigger className={`w-full h-9 text-sm bg-white/80 dark:bg-slate-800/80 ${isMotherMode ? 'border-pink-200 dark:border-pink-700' : 'border-violet-200 dark:border-violet-700'}`}>
+                    <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="mother">
+                      <div className="flex items-center gap-2">
+                        <Heart className="h-3.5 w-3.5 text-pink-500" />
+                        <span>Minha Jornada</span>
+                        <span className="text-muted-foreground text-xs">(Saúde materna)</span>
+                      </div>
+                    </SelectItem>
                     {childrenList.map((child: Child) => {
                       const ageData = calculateAge(child.birthdate);
                       const ageText = ageData.years > 0 
@@ -646,21 +697,32 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
               </div>
             )}
             
-            {!isProfessional && selectedChild && (
+            {!isProfessional && (isMotherMode || selectedChild) && (
               <div className={`mt-2 flex items-center gap-2 text-xs px-2 py-1.5 rounded-lg ${
-                'bg-violet-100/60 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300'
+                isMotherMode 
+                  ? 'bg-pink-100/60 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
+                  : 'bg-violet-100/60 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300'
               }`}>
-                <Baby className="h-3.5 w-3.5" />
-                <span>
-                  Conversando sobre <strong>{selectedChild.first_name}</strong>
-                  {selectedChildAgeMonths !== undefined && (
-                    <span className="ml-1 opacity-75">
-                      ({selectedChildAgeMonths < 12 
-                        ? `${selectedChildAgeMonths} ${selectedChildAgeMonths === 1 ? 'mês' : 'meses'}` 
-                        : `${Math.floor(selectedChildAgeMonths / 12)}a ${selectedChildAgeMonths % 12}m`})
+                {isMotherMode ? (
+                  <>
+                    <Heart className="h-3.5 w-3.5" />
+                    <span>Conversando sobre <strong>sua saúde materna</strong></span>
+                  </>
+                ) : selectedChild && (
+                  <>
+                    <Baby className="h-3.5 w-3.5" />
+                    <span>
+                      Conversando sobre <strong>{selectedChild.first_name}</strong>
+                      {selectedChildAgeMonths !== undefined && (
+                        <span className="ml-1 opacity-75">
+                          ({selectedChildAgeMonths < 12 
+                            ? `${selectedChildAgeMonths} ${selectedChildAgeMonths === 1 ? 'mês' : 'meses'}` 
+                            : `${Math.floor(selectedChildAgeMonths / 12)}a ${selectedChildAgeMonths % 12}m`})
+                        </span>
+                      )}
                     </span>
-                  )}
-                </span>
+                  </>
+                )}
               </div>
             )}
           </SheetHeader>
@@ -669,7 +731,9 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
           <div className={`flex-1 overflow-y-auto space-y-3 p-4 ${
             isProfessional 
               ? 'bg-gradient-to-b from-white to-teal-50/20 dark:from-slate-950 dark:to-teal-950/10' 
-              : 'bg-gradient-to-b from-white to-violet-50/20 dark:from-slate-950 dark:to-violet-950/10'
+              : isMotherMode
+                ? 'bg-gradient-to-b from-white to-pink-50/20 dark:from-slate-950 dark:to-pink-950/10'
+                : 'bg-gradient-to-b from-white to-violet-50/20 dark:from-slate-950 dark:to-violet-950/10'
           }`}>
             {chatMessages.map((msg, idx) => (
               <div key={idx} className={`flex ${msg.role === 'assistant' ? 'justify-start' : 'justify-end'}`}>
@@ -677,10 +741,14 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                   msg.role === 'assistant'
                     ? isProfessional 
                       ? 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 border border-teal-100 dark:border-teal-800/50'
-                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 border border-violet-100 dark:border-violet-800/50'
+                      : isMotherMode
+                        ? 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 border border-pink-100 dark:border-pink-800/50'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 border border-violet-100 dark:border-violet-800/50'
                     : isProfessional
                       ? 'bg-gradient-to-r from-teal-700 to-emerald-700 text-white'
-                      : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white'
+                      : isMotherMode
+                        ? 'bg-gradient-to-r from-pink-600 to-rose-600 text-white'
+                        : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white'
                 }`}>
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                 </div>
@@ -693,7 +761,9 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                 <p className={`text-xs font-medium ${
                   isProfessional 
                     ? 'text-teal-600 dark:text-teal-400' 
-                    : 'text-violet-600 dark:text-violet-400'
+                    : isMotherMode
+                      ? 'text-pink-600 dark:text-pink-400'
+                      : 'text-violet-600 dark:text-violet-400'
                 }`}>
                   Sugestões de perguntas:
                 </p>
@@ -703,7 +773,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                     'Sinais de alerta no desenvolvimento motor',
                     'Protocolo de avaliação auditiva neonatal',
                     'Estimulação para bebês prematuros'
-                  ] : getAgeSuggestions(selectedChildAgeMonths)).map((suggestion, idx) => (
+                  ] : isMotherMode ? getMotherSuggestions().slice(0, 4) : getAgeSuggestions(selectedChildAgeMonths)).map((suggestion, idx) => (
                     <button
                       key={idx}
                       onClick={() => {
@@ -712,7 +782,9 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                       className={`text-xs px-3 py-2 rounded-xl transition-all duration-200 border shadow-sm ${
                         isProfessional
                           ? 'bg-white dark:bg-slate-800 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-700 hover:bg-teal-50 dark:hover:bg-teal-900/30 hover:border-teal-300 dark:hover:border-teal-600'
-                          : 'bg-white dark:bg-slate-800 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 hover:border-violet-300 dark:hover:border-violet-600'
+                          : isMotherMode
+                            ? 'bg-white dark:bg-slate-800 text-pink-700 dark:text-pink-300 border-pink-200 dark:border-pink-700 hover:bg-pink-50 dark:hover:bg-pink-900/30 hover:border-pink-300 dark:hover:border-pink-600'
+                            : 'bg-white dark:bg-slate-800 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 hover:border-violet-300 dark:hover:border-violet-600'
                       }`}
                     >
                       {suggestion}
@@ -727,7 +799,9 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
           <div className={`px-4 py-2 ${
             isProfessional 
               ? 'bg-teal-50/50 dark:bg-teal-950/20' 
-              : 'bg-violet-50/50 dark:bg-violet-950/20'
+              : isMotherMode
+                ? 'bg-pink-50/50 dark:bg-pink-950/20'
+                : 'bg-violet-50/50 dark:bg-violet-950/20'
           }`}>
             <RAGProgressBar
               isLoading={isChatLoading}
@@ -741,10 +815,12 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
           <div className={`flex gap-2 p-4 border-t ${
             isProfessional 
               ? 'bg-white dark:bg-slate-900 border-teal-100 dark:border-teal-800/50' 
-              : 'bg-white dark:bg-slate-900 border-violet-100 dark:border-violet-800/50'
+              : isMotherMode
+                ? 'bg-white dark:bg-slate-900 border-pink-100 dark:border-pink-800/50'
+                : 'bg-white dark:bg-slate-900 border-violet-100 dark:border-violet-800/50'
           }`}>
             <Input
-              placeholder="Faça uma pergunta..."
+              placeholder={isMotherMode ? "Pergunte sobre sua saúde..." : "Faça uma pergunta..."}
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleChatMessage()}
@@ -752,7 +828,9 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
               className={`flex-1 rounded-xl border ${
                 isProfessional 
                   ? 'border-teal-200 dark:border-teal-700 focus:border-teal-400 focus:ring-teal-400/30' 
-                  : 'border-violet-200 dark:border-violet-700 focus:border-violet-400 focus:ring-violet-400/30'
+                  : isMotherMode
+                    ? 'border-pink-200 dark:border-pink-700 focus:border-pink-400 focus:ring-pink-400/30'
+                    : 'border-violet-200 dark:border-violet-700 focus:border-violet-400 focus:ring-violet-400/30'
               }`}
             />
             <Button
@@ -762,7 +840,9 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
               className={`px-4 rounded-xl transition-all ${
                 isProfessional 
                   ? 'bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 text-white shadow-sm' 
-                  : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-sm'
+                  : isMotherMode
+                    ? 'bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white shadow-sm'
+                    : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-sm'
               }`}
             >
               <Send className="h-4 w-4" />
