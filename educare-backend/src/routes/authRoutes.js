@@ -221,13 +221,44 @@ router.get('/verify', authMiddleware.verifyToken, authController.verifyToken);
  *       404:
  *         description: Usuário não encontrado
  */
-// Rota para solicitar redefinição de senha
+// Rota para solicitar redefinição de senha (email)
 router.post(
   '/forgot-password',
   [
     body('email').isEmail().withMessage('Email inválido')
   ],
   authController.forgotPassword
+);
+
+/**
+ * @swagger
+ * /api/auth/forgot-password-by-phone:
+ *   post:
+ *     summary: Solicita redefinição de senha via WhatsApp
+ *     tags: [Autenticação]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - phone
+ *             properties:
+ *               phone:
+ *                 type: string
+ *                 description: Número de telefone/WhatsApp
+ *     responses:
+ *       200:
+ *         description: Instruções de redefinição enviadas via WhatsApp
+ */
+// Rota para solicitar redefinição de senha via WhatsApp
+router.post(
+  '/forgot-password-by-phone',
+  [
+    body('phone').notEmpty().withMessage('Número de telefone é obrigatório')
+  ],
+  authController.forgotPasswordByPhone
 );
 
 /**

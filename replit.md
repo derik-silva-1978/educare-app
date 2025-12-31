@@ -35,53 +35,54 @@ The frontend, built with React 18, TypeScript, and Vite, uses `shadcn/ui` (Radix
 - **Observability**: Extensive metrics and logging for RAG performance and system health.
 - **Controlled Rollout**: Feature flags enable safe, phased rollouts and easy rollback.
 
-### 2025-12-30: Authentication & WhatsApp Integration Fixes
+### 2025-12-31: WhatsApp Integration & Password Recovery Complete
 
-**1. Double Password Hashing (CRITICAL FIX)**
-- **Problem**: Temporary passwords via WhatsApp never verified correctly
-- **Cause**: authController was hashing passwords before saving, but User model hooks also hash automatically → double hashing
-- **Solution**: Removed manual `bcrypt.hash` calls; model hooks now handle all hashing
-- **Result**: Password verification now passes ("OK" in logs)
+**1. Evolution API Direct Integration**
+- **Implementation**: Replaced webhook fallback with direct Evolution API calls
+- **API**: https://api.educareapp.com.br (instance: `educare-chat`)
+- **Version**: 2.3.7 (verified)
+- **Features**:
+  - Direct message sending via `/message/sendText` endpoint
+  - Automatic retry with exponential backoff
+  - Timeout handling (10s default, 15s for sensitive messages)
+  - Fallback to webhook if Evolution API fails
+  - Detailed logging with message IDs
 
-**2. Phone Number Format Handling**
-- **Problem**: Login by phone `+5598991628206` failed even though user had `98991628206`
-- **Solution**: Created `phoneUtils.js` with intelligent multi-format lookup (searches 7 variants) and E.164 normalization
-- **Features**: 
-  - Supports formats: `98991628206`, `5598991628206`, `+5598991628206`
-  - Handles legacy 8-9 digit formats with DDD detection
-  - Automatic normalization to E.164 on save
-  - Validation function: `isValidBrazilianPhone()`
+**2. Password Recovery via WhatsApp (NEW)**
+- **Endpoint**: `POST /api/auth/forgot-password-by-phone`
+- **Flow**:
+  1. User provides phone number
+  2. System generates secure reset token (1 hour expiration)
+  3. Sends formatted WhatsApp message with reset link
+  4. User clicks link and updates password via `/api/auth/reset-password`
+- **Features**:
+  - Same security as email-based recovery (token validation, expiration)
+  - Formatted messages with emojis and formatting
+  - Fallback error handling (doesn't leak user existence)
+  - Phone number normalization applied
 
-**3. WhatsApp Integration Resilience (NEW)**
-- **Problem**: Webhook calls to Evolution API/Chatwoot lacked retry logic and timeout handling
-- **Solution**: Created `whatsappService.js` with enterprise-grade reliability:
-  - **Retry Logic**: Automatic 3 retries with exponential backoff (configurable)
-  - **Timeouts**: 10s default, 15s for passwords/verification codes
-  - **Error Handling**: Detailed logging with status codes and error messages
-  - **Protocol Support**: Both HTTP and HTTPS
-- **Methods**: 
-  - `sendTemporaryPassword()` - WhatsApp temporary password delivery
-  - `sendVerificationCode()` - Phone verification code delivery
-  - `sendMessage()` - Custom message delivery
-- **Updated**: authController now uses WhatsappService instead of direct webhook calls
+**3. Complete Authentication Flows Implemented**
+- ✅ Register: Email/Phone with normalization
+- ✅ Login: Email, Phone, or Temporary Password
+- ✅ Password Recovery: Email (`/forgot-password`) or WhatsApp (`/forgot-password-by-phone`)
+- ✅ Phone Verification: Code sent via WhatsApp
+- ✅ Temporary Password: For phone-based login
 
-**Files Created/Modified**:
-- `educare-backend/src/services/whatsappService.js` (NEW)
-- `educare-backend/src/utils/phoneUtils.js` (enhanced)
-- `educare-backend/src/controllers/authController.js` (refactored)
-- `educare-backend/.env.example` (template)
+**Files Updated**:
+- `educare-backend/src/controllers/authController.js` (added `forgotPasswordByPhone`)
+- `educare-backend/src/routes/authRoutes.js` (added `/forgot-password-by-phone`)
+- `educare-backend/src/services/whatsappService.js` (updated with Evolution API integration)
 
-**Testing**: ✅ All flows working
-- Login: email, phone (all formats)
-- Registration: Phone normalization working
-- Temporary password: Retry + hash verification passing
-- Phone verification: Sent via WhatsApp with retry
+**Testing Results**: ✅
+- Forgot password by phone: Message sent via Evolution API (ID: 3EB02D586DF61C4BEF285A)
+- Reset token generated and stored
+- Message format: Formatted with emojis, clear instructions, 1-hour expiration notice
 
 ## External Dependencies
 
 - **Database**: PostgreSQL
 - **Automation Platform**: n8n Workflow (for WhatsApp ingestion, AI processing, context management, and response delivery)
-- **Messaging**: WhatsApp (via Evolution API + Chatwoot at api.educareapp.com.br)
+- **Messaging**: WhatsApp (via Evolution API at api.educareapp.com.br, instance: educare-chat)
 - **Payment Gateway**: Stripe
 - **AI/ML**: OpenAI API (File Search, LLM), Google Gemini (OCR, Embeddings)
 - **Vector Database**: Qdrant Cloud

@@ -455,7 +455,7 @@ exports.verifyToken = async (req, res) => {
   }
 };
 
-// Solicitar redefinição de senha
+// Solicitar redefinição de senha (email)
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -533,6 +533,80 @@ exports.forgotPassword = async (req, res) => {
     });
   } catch (error) {
     console.error('Erro ao solicitar redefinição de senha:', error);
+    return res.status(500).json({ 
+      error: 'Erro ao processar solicitação de redefinição de senha',
+      success: false
+    });
+  }
+};
+
+// Solicitar redefinição de senha (WhatsApp)
+exports.forgotPasswordByPhone = async (req, res) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({ 
+        error: 'Número de telefone é obrigatório',
+        success: false
+      });
+    }
+    
+    console.log(`Solicitando redefinição de senha via WhatsApp para: ${phone}`);
+
+    // Buscar usuário pelo telefone
+    let user = await findUserByPhone(User, phone);
+
+    if (!user) {
+      // Por segurança, não informamos se o telefone existe ou não
+      console.log(`Usuário não encontrado com o telefone: ${phone}`);
+      return res.status(200).json({ 
+        message: 'Se o telefone estiver cadastrado, você receberá instruções para redefinir sua senha via WhatsApp',
+        success: true
+      });
+    }
+
+    // Gerar token para redefinição de senha
+    const crypto = require('crypto');
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    
+    // Salvar token e data de expiração no usuário
+    user.reset_token = resetToken;
+    user.reset_token_expires = new Date(Date.now() + 3600000); // 1 hora
+    await user.save();
+
+    // Construir a URL de redefinição de senha
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetUrl = `${baseUrl}/educare-app/auth/reset-password?token=${resetToken}`;
+    
+    // Construir mensagem WhatsApp
+    const message = `🔐 *Redefinição de Senha Educare+*\n\n` +
+      `Clique no link abaixo para redefinir sua senha:\n\n` +
+      `${resetUrl}\n\n` +
+      `⏰ Este link é válido por 1 hora.\n` +
+      `🔒 Se você não solicitou isso, ignore esta mensagem.`;
+    
+    // Enviar via WhatsApp
+    try {
+      const result = await WhatsappService.sendMessage(user.phone, message);
+      
+      console.log(`Mensagem de redefinição de senha enviada com sucesso para: ${user.phone}`);
+      
+      return res.status(200).json({
+        message: 'Se o telefone estiver cadastrado, você receberá instruções para redefinir sua senha via WhatsApp',
+        success: true
+      });
+    } catch (whatsappError) {
+      console.error('Erro ao enviar mensagem WhatsApp:', whatsappError.message);
+      
+      // Mesmo com erro no WhatsApp, não informamos ao usuário
+      return res.status(200).json({
+        message: 'Se o telefone estiver cadastrado, você receberá instruções para redefinir sua senha via WhatsApp',
+        success: true
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao solicitar redefinição de senha via WhatsApp:', error);
     return res.status(500).json({ 
       error: 'Erro ao processar solicitação de redefinição de senha',
       success: false
