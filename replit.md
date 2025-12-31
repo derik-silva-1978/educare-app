@@ -157,6 +157,50 @@ The frontend, built with React 18, TypeScript, and Vite, uses `shadcn/ui` (Radix
 - **Removed**: "Falar com TitiNauta" button from WelcomeHero component
 - **Consolidated**: TitiNauta access now only via toolbar icon (Bot icon)
 
+### 2025-12-31: TitiNauta Memory & WhatsApp Recognition
+
+**1. Child Memory System (Short & Long Term)**
+- **Service**: `educare-backend/src/services/babyContextService.js`
+- **New Functions**:
+  - `getShortTermMemory(babyId)`: Last 7 days of biometrics, sleep logs, upcoming appointments
+  - `getLongTermMemory(babyId)`: Vaccine history, growth trends, development reports
+  - `getFullChildContext(babyId)`: Combined basic context + short/long term memory
+- **Integration**: RAG service now uses `getFullChildContext` instead of `getBabyContext`
+- **Prompt Injection**: `formatContextForPrompt` extended to include memory sections
+
+**2. Child Context Endpoint**
+- **Endpoint**: `GET /api/children/:id/context`
+- **Controller**: `educare-backend/src/controllers/childController.js`
+- **Returns**: Full child context with formatted prompt for AI
+- **Access**: Authenticated users with ownership or professional access
+
+**3. WhatsApp User Recognition (Security Hardened)**
+- **Endpoint**: `POST /api/n8n/users/recognize`
+- **Controller**: `educare-backend/src/controllers/n8nController.js`
+- **Purpose**: Identify Educare+ users by phone number for WhatsApp integration
+- **Security**: Returns ONLY minimal fields (no sensitive health data)
+- **Returns**:
+  - User info (id, name, role - NO email/phone leaked)
+  - Subscription status and plan
+  - Children list (id, first name only)
+  - Primary child basic context (name, age in months, gender)
+  - Personalized greeting message
+  - Register URL if user not found
+- **Usage**: Called by n8n/Evolution API when user sends WhatsApp message
+- **Note**: Full child context with memory retrieved separately via authenticated RAG calls
+
+**4. Memory Context Format**
+- **Short Term Memory**: Recent biometrics, sleep patterns (avg hours/night), upcoming appointments
+- **Long Term Memory**: Vaccine summary (taken/pending), growth curve (weight gain), latest development report scores
+
+**Files Created/Modified**:
+- `educare-backend/src/services/babyContextService.js` (extended with memory functions)
+- `educare-backend/src/services/ragService.js` (uses getFullChildContext)
+- `educare-backend/src/controllers/childController.js` (added getChildContext)
+- `educare-backend/src/controllers/n8nController.js` (added recognizeWhatsAppUser)
+- `educare-backend/src/routes/childRoutes.js` (added /:id/context route)
+- `educare-backend/src/routes/n8nRoutes.js` (added /users/recognize route)
+
 **2. WhatsApp Report Delivery**
 - **Endpoint**: `POST /api/development-reports/send-whatsapp`
 - **Features**:

@@ -121,6 +121,9 @@ router.get('/', isAuthenticated, childController.listMyChildren);
 // Rota para obter uma criança pelo ID
 router.get('/:id', isAuthenticated, childController.getChildById);
 
+// Rota para obter contexto completo da criança (memória curta e longa) para IA
+router.get('/:id/context', isAuthenticated, childController.getChildContext);
+
 // Rota para criar uma nova criança (verificando limite do plano)
 router.post(
   '/',

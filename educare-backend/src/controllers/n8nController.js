@@ -126,6 +126,120 @@ const n8nController = {
     }
   },
 
+  async recognizeWhatsAppUser(req, res) {
+    try {
+      const { phone, phone_number, sender_name } = req.body;
+      const phoneNumber = phone || phone_number;
+
+      if (!phoneNumber) {
+        return res.status(400).json({
+          recognized: false,
+          error: 'Parâmetro phone é obrigatório'
+        });
+      }
+
+      const cleanPhone = phoneNumber.replace(/\D/g, '');
+      console.log(`[n8n] Reconhecimento WhatsApp - Buscando usuário: ${cleanPhone}`);
+
+      const user = await User.findOne({
+        where: {
+          phone: {
+            [Op.or]: [cleanPhone, `+${cleanPhone}`, `+55${cleanPhone}`, phoneNumber]
+          }
+        },
+        include: [{
+          model: Subscription,
+          as: 'subscriptions',
+          where: { status: { [Op.in]: ['active', 'trial', 'pending'] } },
+          required: false,
+          order: [['createdAt', 'DESC']],
+          limit: 1,
+          include: [{
+            model: SubscriptionPlan,
+            as: 'plan'
+          }]
+        }]
+      });
+
+      if (!user) {
+        console.log(`[n8n] Usuário não encontrado para ${cleanPhone}`);
+        return res.json({
+          recognized: false,
+          message: 'Usuário não cadastrado no Educare+',
+          sender_name: sender_name || null,
+          register_url: `${process.env.APP_URL || 'https://educareapp.com.br'}/register?phone=${cleanPhone}`
+        });
+      }
+
+      const profile = await Profile.findOne({
+        where: { userId: user.id },
+        include: [{
+          model: Child,
+          as: 'children',
+          where: { isActive: true },
+          required: false,
+          order: [['createdAt', 'DESC']]
+        }]
+      });
+
+      const subscription = user.subscriptions?.[0];
+      const subscriptionActive = subscription && ['active', 'trial'].includes(subscription.status);
+
+      const children = profile?.children || [];
+      const primaryChild = children[0];
+
+      let basicContext = null;
+
+      if (primaryChild) {
+        const birthDate = new Date(primaryChild.birthDate);
+        const ageMonths = Math.floor((Date.now() - birthDate) / (1000 * 60 * 60 * 24 * 30.44));
+        basicContext = {
+          name: primaryChild.firstName,
+          age_months: ageMonths,
+          gender: primaryChild.gender
+        };
+      }
+
+      const response = {
+        recognized: true,
+        user: {
+          id: user.id,
+          name: user.name,
+          role: user.role
+        },
+        subscription: {
+          active: subscriptionActive,
+          status: subscription?.status || 'inactive',
+          plan_name: subscription?.plan?.name || null
+        },
+        children: children.map(c => ({
+          id: c.id,
+          name: c.firstName,
+          is_primary: c.id === primaryChild?.id
+        })),
+        primary_child: primaryChild ? {
+          id: primaryChild.id,
+          name: primaryChild.firstName,
+          age_months: basicContext?.age_months,
+          gender: primaryChild.gender
+        } : null,
+        basic_context: basicContext,
+        greeting: primaryChild 
+          ? `Olá ${user.name.split(' ')[0]}! Estou aqui para ajudar com o desenvolvimento de ${primaryChild.firstName}.`
+          : `Olá ${user.name.split(' ')[0]}! Como posso ajudar você hoje?`
+      };
+
+      console.log(`[n8n] Usuário reconhecido: ${user.name} (${user.id}), ${children.length} criança(s)`);
+      return res.json(response);
+    } catch (error) {
+      console.error('[n8n] Erro em recognizeWhatsAppUser:', error);
+      return res.status(500).json({
+        recognized: false,
+        error: 'Erro interno ao reconhecer usuário'
+      });
+    }
+  },
+
   async updateBiometrics(req, res) {
     try {
       const { child_id, raw_text } = req.body;

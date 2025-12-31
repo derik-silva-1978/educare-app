@@ -849,20 +849,27 @@ async function askWithBabyId(question, babyId, options = {}) {
     let inferredAgeRange = options.age_range;
 
     if (babyId) {
-      const contextResult = await babyContextService.getBabyContext(babyId);
+      const contextResult = await babyContextService.getFullChildContext(babyId);
       if (contextResult.success) {
         childContext = contextResult.data;
         
         if (!inferredAgeRange && childContext.educare_track) {
           inferredAgeRange = childContext.educare_track.age_range;
         }
+        
+        console.log('[RAG] Contexto completo da criança carregado:', {
+          baby_id: babyId,
+          has_short_term_memory: !!childContext.short_term_memory,
+          has_long_term_memory: !!childContext.long_term_memory,
+          age_range: inferredAgeRange
+        });
       }
     }
 
     return ask(question, {
       ...options,
       baby_id: babyId,
-      module_type: options.module_type || 'baby',  // Force baby module for child context
+      module_type: options.module_type || 'baby',
       childContext,
       age_range: inferredAgeRange
     });

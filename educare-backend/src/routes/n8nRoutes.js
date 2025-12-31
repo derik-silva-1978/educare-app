@@ -8,6 +8,8 @@ router.use(apiKeyMiddleware.validateApiKey);
 
 router.get('/users/check', n8nController.checkUser);
 
+router.post('/users/recognize', n8nController.recognizeWhatsAppUser);
+
 router.post('/rag/ask', ragController.askMultimodal);
 
 router.post('/biometrics/update', n8nController.updateBiometrics);

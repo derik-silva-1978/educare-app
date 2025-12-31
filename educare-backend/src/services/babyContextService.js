@@ -1,4 +1,4 @@
-const { Child, Profile, User, JourneyBotResponse, JourneyBotQuestion, QuizSession, Answer } = require('../models');
+const { Child, Profile, User, JourneyBotResponse, JourneyBotQuestion, QuizSession, Answer, BiometricsLog, SleepLog, VaccineHistory, Appointment, ChildDevelopmentReport } = require('../models');
 const { Op } = require('sequelize');
 
 async function getBabyContext(babyId) {
@@ -231,6 +231,173 @@ async function getQuizSummary(babyId) {
   }
 }
 
+async function getShortTermMemory(babyId) {
+  try {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const [recentBiometrics, recentSleep, upcomingAppointments] = await Promise.all([
+      BiometricsLog.findAll({
+        where: { childId: babyId, createdAt: { [Op.gte]: sevenDaysAgo } },
+        order: [['recordedAt', 'DESC']],
+        limit: 3
+      }),
+      SleepLog.findAll({
+        where: { childId: babyId, createdAt: { [Op.gte]: sevenDaysAgo } },
+        order: [['createdAt', 'DESC']],
+        limit: 5
+      }),
+      Appointment.findAll({
+        where: { 
+          childId: babyId, 
+          appointmentDate: { [Op.gte]: new Date() },
+          status: { [Op.in]: ['scheduled', 'confirmed'] }
+        },
+        order: [['appointmentDate', 'ASC']],
+        limit: 3
+      })
+    ]);
+
+    return {
+      recent_biometrics: recentBiometrics.map(b => ({
+        weight: b.weight,
+        height: b.height,
+        head_circumference: b.headCircumference,
+        recorded_at: b.recordedAt,
+        source: b.source
+      })),
+      recent_sleep: recentSleep.map(s => ({
+        duration_minutes: s.durationMinutes,
+        sleep_type: s.sleepType,
+        quality: s.quality,
+        start_time: s.startTime
+      })),
+      upcoming_appointments: upcomingAppointments.map(a => ({
+        doctor_name: a.doctorName,
+        specialty: a.specialty,
+        appointment_date: a.appointmentDate,
+        location: a.location
+      })),
+      period: 'últimos 7 dias'
+    };
+  } catch (error) {
+    console.error('[BabyContext] Erro ao obter memória curta:', error);
+    return {
+      recent_biometrics: [],
+      recent_sleep: [],
+      upcoming_appointments: [],
+      period: 'últimos 7 dias'
+    };
+  }
+}
+
+async function getLongTermMemory(babyId) {
+  try {
+    const [vaccines, allBiometrics, developmentReports] = await Promise.all([
+      VaccineHistory.findAll({
+        where: { childId: babyId },
+        order: [['takenAt', 'DESC']]
+      }),
+      BiometricsLog.findAll({
+        where: { childId: babyId },
+        order: [['recordedAt', 'ASC']]
+      }),
+      ChildDevelopmentReport.findAll({
+        where: { child_id: babyId },
+        order: [['generated_at', 'DESC']],
+        limit: 3
+      })
+    ]);
+
+    const takenVaccines = vaccines.filter(v => v.status === 'taken');
+    const pendingVaccines = vaccines.filter(v => ['pending', 'scheduled', 'delayed'].includes(v.status));
+
+    let growthTrend = null;
+    if (allBiometrics.length >= 2) {
+      const first = allBiometrics[0];
+      const last = allBiometrics[allBiometrics.length - 1];
+      
+      if (first.weight && last.weight) {
+        const weightGain = parseFloat(last.weight) - parseFloat(first.weight);
+        growthTrend = {
+          weight_start: parseFloat(first.weight),
+          weight_current: parseFloat(last.weight),
+          weight_gain_kg: Math.round(weightGain * 100) / 100,
+          height_start: first.height ? parseFloat(first.height) : null,
+          height_current: last.height ? parseFloat(last.height) : null,
+          measurements_count: allBiometrics.length
+        };
+      }
+    }
+
+    const latestReport = developmentReports[0];
+
+    return {
+      vaccines_taken: takenVaccines.map(v => ({
+        name: v.vaccineName,
+        dose: v.doseNumber,
+        taken_at: v.takenAt
+      })),
+      vaccines_pending: pendingVaccines.slice(0, 5).map(v => ({
+        name: v.vaccineName,
+        dose: v.doseNumber,
+        scheduled_at: v.scheduledAt,
+        status: v.status
+      })),
+      vaccine_summary: {
+        total_taken: takenVaccines.length,
+        pending: pendingVaccines.length
+      },
+      growth_trend: growthTrend,
+      latest_development_report: latestReport ? {
+        overall_score: latestReport.overall_score,
+        dimension_scores: latestReport.dimension_scores,
+        recommendations: latestReport.recommendations?.slice(0, 3) || [],
+        concerns: latestReport.concerns?.slice(0, 3) || [],
+        generated_at: latestReport.generated_at
+      } : null
+    };
+  } catch (error) {
+    console.error('[BabyContext] Erro ao obter memória longa:', error);
+    return {
+      vaccines_taken: [],
+      vaccines_pending: [],
+      vaccine_summary: { total_taken: 0, pending: 0 },
+      growth_trend: null,
+      latest_development_report: null
+    };
+  }
+}
+
+async function getFullChildContext(babyId) {
+  try {
+    const [basicContext, shortTermMemory, longTermMemory] = await Promise.all([
+      getBabyContext(babyId),
+      getShortTermMemory(babyId),
+      getLongTermMemory(babyId)
+    ]);
+
+    if (!basicContext.success) {
+      return basicContext;
+    }
+
+    return {
+      success: true,
+      data: {
+        ...basicContext.data,
+        short_term_memory: shortTermMemory,
+        long_term_memory: longTermMemory
+      }
+    };
+  } catch (error) {
+    console.error('[BabyContext] Erro ao obter contexto completo:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
 function getEducareTrack(ageMonths) {
   if (ageMonths === null) {
     return {
@@ -330,11 +497,54 @@ function formatContextForPrompt(context) {
     text += `\n- Cuidador: ${context.caregiver.name} (${context.caregiver.relationship || 'responsável'})`;
   }
 
+  if (context.short_term_memory) {
+    const stm = context.short_term_memory;
+    text += '\n\nMEMÓRIA RECENTE (últimos 7 dias):';
+    
+    if (stm.recent_biometrics && stm.recent_biometrics.length > 0) {
+      const latest = stm.recent_biometrics[0];
+      text += `\n- Última medição: ${latest.weight ? `${latest.weight}kg` : ''} ${latest.height ? `${latest.height}cm` : ''}`;
+    }
+    
+    if (stm.recent_sleep && stm.recent_sleep.length > 0) {
+      const avgDuration = stm.recent_sleep.reduce((acc, s) => acc + (s.duration_minutes || 0), 0) / stm.recent_sleep.length;
+      text += `\n- Sono recente: média de ${Math.round(avgDuration / 60)}h por noite (${stm.recent_sleep.length} registros)`;
+    }
+    
+    if (stm.upcoming_appointments && stm.upcoming_appointments.length > 0) {
+      text += `\n- Próximas consultas: ${stm.upcoming_appointments.map(a => `${a.specialty || a.doctor_name}`).join(', ')}`;
+    }
+  }
+
+  if (context.long_term_memory) {
+    const ltm = context.long_term_memory;
+    text += '\n\nHISTÓRICO DE SAÚDE:';
+    
+    if (ltm.vaccine_summary) {
+      text += `\n- Vacinas aplicadas: ${ltm.vaccine_summary.total_taken}, pendentes: ${ltm.vaccine_summary.pending}`;
+    }
+    
+    if (ltm.growth_trend) {
+      text += `\n- Curva de crescimento: de ${ltm.growth_trend.weight_start}kg para ${ltm.growth_trend.weight_current}kg (${ltm.growth_trend.measurements_count} medições)`;
+    }
+    
+    if (ltm.latest_development_report) {
+      const report = ltm.latest_development_report;
+      text += `\n- Última avaliação de desenvolvimento: score geral ${report.overall_score}%`;
+      if (report.concerns && report.concerns.length > 0) {
+        text += `\n- Pontos de atenção identificados: ${report.concerns.slice(0, 2).join(', ')}`;
+      }
+    }
+  }
+
   return text;
 }
 
 module.exports = {
   getBabyContext,
+  getFullChildContext,
+  getShortTermMemory,
+  getLongTermMemory,
   calculateAge,
   getMilestones,
   getQuizSummary,

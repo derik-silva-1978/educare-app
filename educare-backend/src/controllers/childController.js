@@ -1,6 +1,7 @@
 const { Child, Profile, User, Subscription, SubscriptionPlan } = require('../models');
 const { validationResult } = require('express-validator');
 const { Op } = require('sequelize');
+const babyContextService = require('../services/babyContextService');
 
 // Listar crianças do usuário autenticado
 exports.listMyChildren = async (req, res) => {
@@ -631,5 +632,50 @@ exports.listProfessionalChildren = async (req, res) => {
   } catch (error) {
     console.error('Erro ao listar crianças do profissional:', error);
     return res.status(500).json({ error: 'Erro ao listar crianças do profissional' });
+  }
+};
+
+exports.getChildContext = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    
+    const profile = await Profile.findOne({ where: { userId } });
+    if (!profile) {
+      return res.status(404).json({ success: false, error: 'Perfil não encontrado' });
+    }
+    
+    const child = await Child.findOne({
+      where: { id, profileId: profile.id }
+    });
+    
+    if (!child && !['admin', 'owner'].includes(userRole)) {
+      return res.status(403).json({ success: false, error: 'Acesso negado' });
+    }
+    
+    if (!child) {
+      const adminChild = await Child.findByPk(id);
+      if (!adminChild) {
+        return res.status(404).json({ success: false, error: 'Criança não encontrada' });
+      }
+    }
+    
+    const contextResult = await babyContextService.getFullChildContext(id);
+    
+    if (!contextResult.success) {
+      return res.status(400).json({ success: false, error: contextResult.error });
+    }
+    
+    const formattedContext = babyContextService.formatContextForPrompt(contextResult.data);
+    
+    return res.status(200).json({
+      success: true,
+      data: contextResult.data,
+      formatted: formattedContext
+    });
+  } catch (error) {
+    console.error('Erro ao obter contexto da criança:', error);
+    return res.status(500).json({ success: false, error: 'Erro ao obter contexto da criança' });
   }
 };
