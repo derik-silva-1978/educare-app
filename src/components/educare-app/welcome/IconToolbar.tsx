@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Sun, Moon, MessageCircle, MessageSquarePlus, Coffee, Bot, Camera, LogOut, Settings, HelpCircle, User, Send } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Sun, Moon, MessageCircle, MessageSquarePlus, Coffee, Bot, Camera, LogOut, Settings, HelpCircle, User, Send, Baby, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/providers/ThemeProvider';
 import { useNavigate } from 'react-router-dom';
@@ -24,6 +24,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 import { Textarea } from '@/components/ui/textarea';
@@ -33,6 +40,17 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import ragService from '@/services/api/ragService';
 import RAGProgressBar from '@/components/educare-app/RAGProgressBar';
+import { useChildren } from '@/hooks/educare-app/useChildren';
+import { calculateAge } from '@/utils/dateUtils';
+
+interface Child {
+  id: string;
+  first_name: string;
+  last_name: string;
+  birthdate: string;
+  gender: string;
+  age: number;
+}
 
 interface IconToolbarProps {
   messageCount?: number;
@@ -117,6 +135,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
   const { resolvedTheme, setTheme } = useTheme();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { children, isLoading: isLoadingChildren } = useChildren();
   
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [showDonationModal, setShowDonationModal] = useState(false);
@@ -131,9 +150,34 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
   const [donationEmail, setDonationEmail] = useState('');
   const [isProcessingDonation, setIsProcessingDonation] = useState(false);
   
+  const [selectedChildIdLocal, setSelectedChildIdLocal] = useState<string | null>(null);
+  
+  const selectedChild = useMemo(() => {
+    if (!children || children.length === 0) return null;
+    if (selectedChildIdLocal) {
+      return children.find((c: Child) => c.id === selectedChildIdLocal) || children[0];
+    }
+    return children[0];
+  }, [children, selectedChildIdLocal]);
+  
+  const selectedChildAgeMonths = useMemo(() => {
+    if (!selectedChild?.birthdate) return childAgeMonths;
+    const ageData = calculateAge(selectedChild.birthdate);
+    return ageData.months + (ageData.years * 12);
+  }, [selectedChild, childAgeMonths]);
+  
+  useEffect(() => {
+    if (children && children.length > 0 && !selectedChildIdLocal) {
+      setSelectedChildIdLocal(children[0].id);
+    }
+  }, [children, selectedChildIdLocal]);
+  
   const getInitialMessage = () => {
     if (isProfessional) {
       return 'Olá! Sou o TitiNauta Especialista, seu assistente de IA para profissionais de saúde. Posso ajudar com protocolos clínicos, orientações de acompanhamento, marcos de desenvolvimento e práticas baseadas em evidências para a primeira infância.';
+    }
+    if (selectedChild) {
+      return `Olá! Sou o TitiNauta, o assistente de IA do Educare+. Estou aqui para ajudar você com o desenvolvimento de ${selectedChild.first_name}! Posso responder suas dúvidas sobre estimulação, marcos de desenvolvimento, alimentação e muito mais.`;
     }
     return 'Olá! Sou o TitiNauta, o assistente de IA do Educare+. Posso responder suas dúvidas sobre desenvolvimento infantil, estimulação, marcos de desenvolvimento e muito mais!';
   };
@@ -145,6 +189,12 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [ragStatus, setRagStatus] = useState<'idle' | 'retrieving' | 'processing' | 'generating'>('idle');
   const [ragError, setRagError] = useState<string>('');
+  
+  useEffect(() => {
+    if (selectedChild && !isProfessional) {
+      setChatMessages([{ role: 'assistant', content: getInitialMessage() }]);
+    }
+  }, [selectedChild?.id]);
 
   const getInitials = (name?: string) => {
     if (!name) return 'U';
@@ -227,8 +277,20 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
     
     try {
       const moduleType = isProfessional ? 'professional' : 'baby';
-      console.log('[IconToolbar] Enviando pergunta - isProfessional:', isProfessional, ', module_type:', moduleType);
-      const response = await ragService.askQuestion(userMessage, undefined, {
+      
+      let childContext = '';
+      if (!isProfessional && selectedChild) {
+        const ageData = calculateAge(selectedChild.birthdate);
+        const ageText = ageData.years > 0 
+          ? `${ageData.years} ano${ageData.years > 1 ? 's' : ''} e ${ageData.months} ${ageData.months === 1 ? 'mês' : 'meses'}`
+          : `${ageData.months} ${ageData.months === 1 ? 'mês' : 'meses'}`;
+        childContext = `[Contexto: Esta pergunta é sobre ${selectedChild.first_name} ${selectedChild.last_name}, ${selectedChild.gender === 'male' ? 'menino' : selectedChild.gender === 'female' ? 'menina' : 'criança'} de ${ageText}. Por favor, personalize a resposta considerando essa idade e o desenvolvimento esperado.] `;
+      }
+      
+      const contextualQuestion = childContext + userMessage;
+      console.log('[IconToolbar] Enviando pergunta - isProfessional:', isProfessional, ', module_type:', moduleType, ', childContext:', !!childContext);
+      
+      const response = await ragService.askQuestion(contextualQuestion, selectedChild?.id, {
         module_type: moduleType,
         onProgress: (status) => setRagStatus(status)
       });
@@ -541,6 +603,57 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                 ? 'Protocolos clínicos, marcos de desenvolvimento e práticas baseadas em evidências'
                 : 'Desenvolvimento infantil, estimulação e marcos de desenvolvimento'}
             </SheetDescription>
+            
+            {!isProfessional && children && children.length > 1 && (
+              <div className="mt-3 pt-3 border-t border-violet-200/40 dark:border-violet-700/40">
+                <Label className="text-xs text-violet-600 dark:text-violet-300 mb-1.5 block">
+                  Criança selecionada:
+                </Label>
+                <Select
+                  value={selectedChildIdLocal || ''}
+                  onValueChange={(value) => setSelectedChildIdLocal(value)}
+                >
+                  <SelectTrigger className="w-full h-9 text-sm bg-white/80 dark:bg-slate-800/80 border-violet-200 dark:border-violet-700">
+                    <SelectValue placeholder="Selecione uma criança" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {children.map((child: Child) => {
+                      const ageData = calculateAge(child.birthdate);
+                      const ageText = ageData.years > 0 
+                        ? `${ageData.years}a ${ageData.months}m`
+                        : `${ageData.months} meses`;
+                      return (
+                        <SelectItem key={child.id} value={child.id}>
+                          <div className="flex items-center gap-2">
+                            <Baby className="h-3.5 w-3.5 text-violet-500" />
+                            <span>{child.first_name}</span>
+                            <span className="text-muted-foreground text-xs">({ageText})</span>
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
+            {!isProfessional && selectedChild && (
+              <div className={`mt-2 flex items-center gap-2 text-xs px-2 py-1.5 rounded-lg ${
+                'bg-violet-100/60 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300'
+              }`}>
+                <Baby className="h-3.5 w-3.5" />
+                <span>
+                  Conversando sobre <strong>{selectedChild.first_name}</strong>
+                  {selectedChildAgeMonths !== undefined && (
+                    <span className="ml-1 opacity-75">
+                      ({selectedChildAgeMonths < 12 
+                        ? `${selectedChildAgeMonths} ${selectedChildAgeMonths === 1 ? 'mês' : 'meses'}` 
+                        : `${Math.floor(selectedChildAgeMonths / 12)}a ${selectedChildAgeMonths % 12}m`})
+                    </span>
+                  )}
+                </span>
+              </div>
+            )}
           </SheetHeader>
           
           {/* Chat Messages - Fundo suave */}
@@ -581,7 +694,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                     'Sinais de alerta no desenvolvimento motor',
                     'Protocolo de avaliação auditiva neonatal',
                     'Estimulação para bebês prematuros'
-                  ] : getAgeSuggestions(childAgeMonths)).map((suggestion, idx) => (
+                  ] : getAgeSuggestions(selectedChildAgeMonths)).map((suggestion, idx) => (
                     <button
                       key={idx}
                       onClick={() => {

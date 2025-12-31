@@ -43,14 +43,6 @@ const WelcomeHero: React.FC = () => {
               Ir para Dashboard
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
-            <Button
-              onClick={() => navigate('/educare-app/titinauta')}
-              variant="outline"
-              className="border-white/30 text-white hover:bg-white/10"
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Falar com TitiNauta
-            </Button>
           </div>
         </div>
       </CardContent>
