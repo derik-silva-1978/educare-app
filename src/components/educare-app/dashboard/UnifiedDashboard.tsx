@@ -105,7 +105,6 @@ const UnifiedDashboardContent: React.FC = () => {
       {(hasFullAccess || isParent) && totalChildren > 0 && (
         <ChildrenTopBar 
           childList={children} 
-          onChildClick={(childId) => navigate(`/educare-app/child/${childId}`)}
         />
       )}
 

@@ -30,6 +30,8 @@ export interface AuthContextType {
   handleVerifyPhoneCode: (phone: string, code: string) => Promise<User | null>;
   handleLoginByPhone: (phone: string) => Promise<PhoneLoginResult>;
   updatePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
+  refreshUser: () => Promise<void>;
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

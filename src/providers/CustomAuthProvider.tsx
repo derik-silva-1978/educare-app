@@ -20,6 +20,7 @@ import {
 import { 
   getStoredAuthToken, 
   getStoredUserData, 
+  setStoredUserData,
   clearAuthStorage 
 } from '@/utils/authStorage';
 
@@ -532,6 +533,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Método para recarregar dados do usuário
+  const handleRefreshUser = async (): Promise<void> => {
+    try {
+      const token = getStoredAuthToken();
+      if (!token) return;
+
+      // Buscar perfil atualizado diretamente da API
+      const response = await fetch('/api/profiles/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          const profile = data.data;
+          // Atualizar o nome do usuário localmente
+          if (user) {
+            const updatedUser: User = {
+              ...user,
+              name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || user.name,
+              displayName: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || user.displayName
+            };
+            setUser(updatedUser);
+            // Também atualizar no storage local
+            const storedData = getStoredUserData();
+            if (storedData) {
+              storedData.name = updatedUser.name;
+              setStoredUserData(storedData);
+            }
+            console.log('Usuário atualizado com sucesso:', updatedUser.name);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar usuário:', error);
+    }
+  };
+
   // Valores do contexto
   const contextValue: AuthContextType = {
     user,
@@ -579,7 +621,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     handleVerifyPhoneCode,
     handleLoginByPhone,
     updatePassword: handleUpdatePassword,
-    error: null // Adicionando a propriedade error que estava faltando
+    refreshUser: handleRefreshUser,
+    error: null
   };
 
   return (

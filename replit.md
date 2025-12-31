@@ -35,6 +35,37 @@ The frontend, built with React 18, TypeScript, and Vite, uses `shadcn/ui` (Radix
 - **Observability**: Extensive metrics and logging for RAG performance and system health.
 - **Controlled Rollout**: Feature flags enable safe, phased rollouts and easy rollback.
 
+### 2025-12-31: Dashboard & Settings Improvements
+
+**1. User Context Refresh**
+- **Implementation**: Added `refreshUser()` method to CustomAuthProvider
+- **Purpose**: Allows profile updates to reflect immediately in Dashboard name and context
+- **Usage**: Called after profile save in Settings page
+
+**2. Dashboard Child Switching**
+- **Fix**: Removed navigation on child selection in ChildrenTopBar
+- **Behavior**: Selecting a child now only updates dashboard data locally
+- **Context**: Uses SelectedChildContext for state management
+
+**3. Child Profile Tabs Simplified**
+- **Removed**: TitiNauta tab from ChildProfileTabs
+- **Access**: TitiNauta now accessed only via "Jornada do Desenvolvimento" in sidebar
+- **Tabs**: Info, Relatórios, Chat (3 tabs instead of 4)
+
+**4. AI Report Generator (Draft)**
+- **Component**: `src/components/educare-app/child/AIReportGenerator.tsx`
+- **Features**:
+  - Field selection UI with 6 categories (Personal, Biometrics, Birth, Vaccines, Development, Health)
+  - 30+ selectable fields for customizable reports
+  - Section toggle and select-all functionality
+  - Ready for backend integration (feature flagged as "Em breve")
+- **Integration**: Added to ChildReportsTab with tabbed interface
+
+**5. Welcome Hub for Parents**
+- **Added**: "Início" link to parent sidebar navigation
+- **Route**: `/educare-app/welcome`
+- **Purpose**: Parents now have access to WelcomeHub content
+
 ### 2025-12-31: WhatsApp Integration & Password Recovery Complete
 
 **1. Evolution API Direct Integration**

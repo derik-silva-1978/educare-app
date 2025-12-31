@@ -14,7 +14,7 @@ import { User, Bell, Shield, Palette, LogOut, Moon, Sun, Monitor, Key, Smartphon
 import { httpClient } from '@/services/api/httpClient';
 
 const EducareSettingsPage: React.FC = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, refreshUser } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -55,6 +55,7 @@ const EducareSettingsPage: React.FC = () => {
       });
 
       if (response.success) {
+        await refreshUser();
         toast({
           title: 'Perfil atualizado',
           description: 'Suas informações foram salvas com sucesso.',
