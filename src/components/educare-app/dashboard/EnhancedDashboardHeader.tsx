@@ -6,7 +6,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 import { IconToolbar } from '@/components/educare-app/welcome';
 
-const EnhancedDashboardHeader: React.FC = () => {
+interface EnhancedDashboardHeaderProps {
+  childAgeMonths?: number;
+}
+
+const EnhancedDashboardHeader: React.FC<EnhancedDashboardHeaderProps> = ({ childAgeMonths }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showFeedback, setShowFeedback] = useState(false);
@@ -48,9 +52,8 @@ const EnhancedDashboardHeader: React.FC = () => {
               </Button>
             </div>
             <IconToolbar 
-              notificationCount={2}
-              onFeedbackClick={() => setShowFeedback(!showFeedback)}
-              onTitiNautaClick={() => navigate('/educare-app/titinauta')}
+              messageCount={2}
+              childAgeMonths={childAgeMonths}
             />
           </div>
         </div>

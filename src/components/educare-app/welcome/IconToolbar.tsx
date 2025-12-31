@@ -37,11 +37,82 @@ import RAGProgressBar from '@/components/educare-app/RAGProgressBar';
 interface IconToolbarProps {
   messageCount?: number;
   isProfessional?: boolean;
+  childAgeMonths?: number;
 }
+
+const getAgeSuggestions = (ageMonths?: number): string[] => {
+  if (!ageMonths || ageMonths < 0) {
+    return [
+      'Como estimular meu bebê recém-nascido?',
+      'Quando meu bebê deve começar a sentar?',
+      'Atividades para desenvolvimento motor',
+      'Alimentação complementar: como começar?'
+    ];
+  }
+  
+  if (ageMonths < 3) {
+    return [
+      'Como estimular um bebê de 0-3 meses?',
+      'Desenvolvimento motor nos primeiros meses',
+      'Sono do recém-nascido: o que esperar?',
+      'Cólicas do bebê: como aliviar?'
+    ];
+  } else if (ageMonths < 6) {
+    return [
+      'Estimulação para bebê de 3-6 meses',
+      'Quando o bebê começa a virar?',
+      'Brincadeiras para bebê de 4 meses',
+      'Introdução alimentar aos 6 meses'
+    ];
+  } else if (ageMonths < 9) {
+    return [
+      'Desenvolvimento aos 6-9 meses',
+      'Quando o bebê começa a engatinhar?',
+      'Alimentos para bebê de 7 meses',
+      'Sono do bebê de 6 meses'
+    ];
+  } else if (ageMonths < 12) {
+    return [
+      'Marcos do desenvolvimento 9-12 meses',
+      'Quando o bebê começa a andar?',
+      'Primeiras palavras do bebê',
+      'Brincadeiras para bebê de 10 meses'
+    ];
+  } else if (ageMonths < 18) {
+    return [
+      'Desenvolvimento de 1 a 1,5 anos',
+      'Estimulação da linguagem para 1 ano',
+      'Alimentação para bebê de 1 ano',
+      'Birras e limites para crianças pequenas'
+    ];
+  } else if (ageMonths < 24) {
+    return [
+      'Desenvolvimento de 18 a 24 meses',
+      'Desfralde: quando começar?',
+      'Desenvolvimento da fala aos 2 anos',
+      'Atividades para criança de 18 meses'
+    ];
+  } else if (ageMonths < 36) {
+    return [
+      'Desenvolvimento de 2 a 3 anos',
+      'Como lidar com a fase do "não"?',
+      'Socialização na primeira infância',
+      'Atividades educativas para 2 anos'
+    ];
+  } else {
+    return [
+      'Desenvolvimento na primeira infância',
+      'Preparação para a escola',
+      'Atividades de coordenação motora',
+      'Desenvolvimento emocional infantil'
+    ];
+  }
+};
 
 const IconToolbar: React.FC<IconToolbarProps> = ({
   messageCount = 0,
   isProfessional = false,
+  childAgeMonths,
 }) => {
   const { resolvedTheme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -510,12 +581,7 @@ const IconToolbar: React.FC<IconToolbarProps> = ({
                     'Sinais de alerta no desenvolvimento motor',
                     'Protocolo de avaliação auditiva neonatal',
                     'Estimulação para bebês prematuros'
-                  ] : [
-                    'Como estimular meu bebê de 3 meses?',
-                    'Quando meu bebê deve começar a sentar?',
-                    'Atividades para desenvolvimento motor',
-                    'Alimentação complementar: como começar?'
-                  ]).map((suggestion, idx) => (
+                  ] : getAgeSuggestions(childAgeMonths)).map((suggestion, idx) => (
                     <button
                       key={idx}
                       onClick={() => {

@@ -54,18 +54,26 @@ exports.getMyProfile = async (req, res) => {
       include: [{ 
         model: User, 
         as: 'user',
-        attributes: ['id', 'email', 'role', 'isActive', 'createdAt'] 
+        attributes: ['id', 'email', 'role', 'isActive', 'createdAt', 'phoneNumber'] 
       }]
     });
     
     if (!profile) {
-      return res.status(404).json({ error: 'Perfil não encontrado' });
+      return res.status(404).json({ success: false, error: 'Perfil não encontrado' });
     }
     
-    return res.status(200).json({ profile });
+    // Retornar no formato esperado pelo frontend
+    return res.status(200).json({ 
+      success: true, 
+      data: {
+        ...profile.toJSON(),
+        role: profile.user?.role || 'parent',
+        phoneNumber: profile.phoneNumber || profile.user?.phoneNumber || null
+      }
+    });
   } catch (error) {
     console.error('Erro ao buscar perfil:', error);
-    return res.status(500).json({ error: 'Erro ao buscar perfil' });
+    return res.status(500).json({ success: false, error: 'Erro ao buscar perfil' });
   }
 };
 

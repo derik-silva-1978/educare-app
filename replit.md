@@ -109,6 +109,34 @@ The frontend, built with React 18, TypeScript, and Vite, uses `shadcn/ui` (Radix
 - Reset token generated and stored
 - Message format: Formatted with emojis, clear instructions, 1-hour expiration notice
 
+### 2025-12-31: AI Report Generator Fully Enabled
+
+**Status**: Feature fully enabled (removed "Em breve" badge)
+
+**1. AI Report Generation**
+- **Endpoint**: `POST /api/development-reports/generate-ai`
+- **Frontend**: `src/components/educare-app/child/AIReportGenerator.tsx`
+- **Features**:
+  - 6 selectable categories (Personal, Biometrics, Birth, Vaccines, Development, Health)
+  - 30+ customizable fields for personalized reports
+  - Section toggle and select-all functionality
+  - Real-time field selection counter
+  - Gradient styling with purple/indigo theme
+
+**2. WhatsApp Report Delivery**
+- **Endpoint**: `POST /api/development-reports/send-whatsapp`
+- **Features**:
+  - Automatic phone number retrieval from user profile if not provided
+  - Sends formatted report via Evolution API
+  - Green-themed WhatsApp button in report card footer
+  - Loading state with spinner during send
+  - Error handling with clear user feedback
+
+**3. Backend Improvements**
+- Phone lookup cascade: `body.phoneNumber` → `profile.phoneNumber` → `user.phoneNumber`
+- Clear error messaging when no phone number is registered
+- Includes User association for phone fallback
+
 ## External Dependencies
 
 - **Database**: PostgreSQL

@@ -13,7 +13,6 @@ import HealthMetricsCards from './HealthMetricsCards';
 import HealthInsights from './HealthInsights';
 import SocialMediaAccess from './SocialMediaAccess';
 import DomainProgressChart from './DomainProgressChart';
-import TitiNautaQuickAccess from './TitiNautaQuickAccess';
 import ParentalResourcesCarousel from './ParentalResourcesCarousel';
 import MilestonesTimeline from './MilestonesTimeline';
 import { BabyHealthDashboard } from './baby-health';
@@ -49,6 +48,21 @@ const UnifiedDashboardContent: React.FC = () => {
     if (!birthDate) return undefined;
     try {
       return getDetailedAgeDisplay(birthDate);
+    } catch {
+      return undefined;
+    }
+  };
+
+  const getChildAgeMonths = (): number | undefined => {
+    if (!selectedChild) return undefined;
+    const birthDate = selectedChild?.birthDate || selectedChild?.birthdate;
+    if (!birthDate) return undefined;
+    try {
+      const birth = new Date(birthDate);
+      const today = new Date();
+      const months = (today.getFullYear() - birth.getFullYear()) * 12 + 
+                     (today.getMonth() - birth.getMonth());
+      return Math.max(0, months);
     } catch {
       return undefined;
     }
@@ -98,7 +112,7 @@ const UnifiedDashboardContent: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <EnhancedDashboardHeader />
+        <EnhancedDashboardHeader childAgeMonths={getChildAgeMonths()} />
         <SocialMediaAccess />
       </div>
 
@@ -125,8 +139,6 @@ const UnifiedDashboardContent: React.FC = () => {
         />
         <HealthInsights healthData={healthCardsData} />
       </div>
-
-      <TitiNautaQuickAccess />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">

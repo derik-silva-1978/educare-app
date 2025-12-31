@@ -551,21 +551,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const data = await response.json();
         if (data.success && data.data) {
           const profile = data.data;
-          // Atualizar o nome do usuário localmente
+          // Atualizar o usuário com todos os dados do perfil
           if (user) {
+            const fullName = `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || user.name;
             const updatedUser: User = {
               ...user,
-              name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || user.name,
-              displayName: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || user.displayName
+              name: fullName,
+              displayName: fullName,
+              role: (profile.role as UserRole) || profile.user?.role || user.role,
+              profile: {
+                ...user.profile,
+                phoneNumber: profile.phoneNumber || '',
+                title: profile.title || '',
+                organization: profile.organization || '',
+                bio: profile.bio || ''
+              }
             };
             setUser(updatedUser);
             // Também atualizar no storage local
             const storedData = getStoredUserData();
             if (storedData) {
               storedData.name = updatedUser.name;
+              storedData.role = updatedUser.role;
               setStoredUserData(storedData);
             }
-            console.log('Usuário atualizado com sucesso:', updatedUser.name);
+            console.log('Usuário atualizado com sucesso:', updatedUser.name, 'Role:', updatedUser.role);
           }
         }
       }

@@ -54,7 +54,7 @@ interface NavigationItem {
 const getNavigationItems = (userRole?: string): NavigationItem[] => {
   const baseItems = [
     {
-      title: "Início",
+      title: "Boas vindas",
       url: "/educare-app/welcome",
       icon: Sparkles,
     },

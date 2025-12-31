@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Sparkles, FileText, Baby, Heart, Syringe, Brain, User, Scale, Ruler, Calendar, Clock, AlertCircle, CheckCircle } from 'lucide-react';
+import { Loader2, Sparkles, FileText, Baby, Heart, Syringe, Brain, User, Scale, Ruler, Calendar, Clock, AlertCircle, CheckCircle, MessageCircle, Send } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 interface AIReportGeneratorProps {
@@ -130,6 +130,7 @@ export const AIReportGenerator: React.FC<AIReportGeneratorProps> = ({
   const [selectedFields, setSelectedFields] = useState<Set<string>>(new Set());
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedReport, setGeneratedReport] = useState<string | null>(null);
+  const [isSendingWhatsApp, setIsSendingWhatsApp] = useState(false);
 
   const handleFieldToggle = (fieldId: string) => {
     const newSelected = new Set(selectedFields);
@@ -169,8 +170,6 @@ export const AIReportGenerator: React.FC<AIReportGeneratorProps> = ({
     return 'partial';
   };
 
-  const isFeatureReady = false;
-
   const handleGenerateReport = async () => {
     if (selectedFields.size === 0) {
       toast({
@@ -181,19 +180,11 @@ export const AIReportGenerator: React.FC<AIReportGeneratorProps> = ({
       return;
     }
 
-    if (!isFeatureReady) {
-      toast({
-        title: 'Em desenvolvimento',
-        description: 'O gerador de relatórios com IA estará disponível em breve. Enquanto isso, você pode usar o Relatório Padrão.',
-      });
-      return;
-    }
-
     setIsGenerating(true);
     setGeneratedReport(null);
 
     try {
-      const response = await fetch('/api/reports/generate-ai', {
+      const response = await fetch('/api/development-reports/generate-ai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -233,6 +224,43 @@ export const AIReportGenerator: React.FC<AIReportGeneratorProps> = ({
     }
   };
 
+  const handleSendViaWhatsApp = async () => {
+    setIsSendingWhatsApp(true);
+    try {
+      const response = await fetch('/api/development-reports/send-whatsapp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          childId,
+          phoneNumber: '' // Will use the user's registered phone
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast({
+          title: 'Relatório enviado',
+          description: 'O relatório foi enviado para seu WhatsApp com sucesso!',
+        });
+      } else {
+        throw new Error(data.error || 'Erro ao enviar relatório');
+      }
+    } catch (error) {
+      console.error('Erro ao enviar via WhatsApp:', error);
+      toast({
+        title: 'Erro ao enviar',
+        description: 'Não foi possível enviar o relatório via WhatsApp. Verifique se há um número cadastrado.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSendingWhatsApp(false);
+    }
+  };
+
   const totalFields = reportSections.flatMap(s => s.fields).length;
 
   return (
@@ -244,10 +272,7 @@ export const AIReportGenerator: React.FC<AIReportGeneratorProps> = ({
               <Sparkles className="h-6 w-6 text-purple-600" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-xl">Gerador de Relatório com IA</CardTitle>
-                <Badge variant="secondary" className="text-xs">Em breve</Badge>
-              </div>
+              <CardTitle className="text-xl">Gerador de Relatório com IA</CardTitle>
               <CardDescription>
                 Selecione as informações que deseja incluir no relatório. 
                 Nosso assistente IA irá buscar os dados e gerar um relatório personalizado.
@@ -373,13 +398,28 @@ export const AIReportGenerator: React.FC<AIReportGeneratorProps> = ({
               />
             </div>
           </CardContent>
-          <CardFooter className="gap-2">
+          <CardFooter className="flex flex-wrap gap-2">
             <Button variant="outline" className="gap-2">
               <FileText className="h-4 w-4" />
               Exportar PDF
             </Button>
-            <Button variant="outline" className="gap-2">
-              Compartilhar
+            <Button 
+              variant="outline" 
+              className="gap-2 bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
+              onClick={handleSendViaWhatsApp}
+              disabled={isSendingWhatsApp}
+            >
+              {isSendingWhatsApp ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  <MessageCircle className="h-4 w-4" />
+                  Enviar via WhatsApp
+                </>
+              )}
             </Button>
           </CardFooter>
         </Card>

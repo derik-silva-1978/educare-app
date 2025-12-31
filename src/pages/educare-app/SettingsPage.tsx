@@ -20,13 +20,23 @@ const EducareSettingsPage: React.FC = () => {
   const navigate = useNavigate();
   
   const [name, setName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (user?.name) {
       setName(user.name);
     }
-  }, [user?.name]);
+    if (user?.profile?.phoneNumber) {
+      setPhoneNumber(user.profile.phoneNumber);
+    }
+  }, [user?.name, user?.profile?.phoneNumber]);
+
+  useEffect(() => {
+    if (user && refreshUser) {
+      refreshUser();
+    }
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -124,6 +134,18 @@ const EducareSettingsPage: React.FC = () => {
                     className="bg-muted"
                   />
                   <p className="text-xs text-muted-foreground">O email não pode ser alterado</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Celular</Label>
+                  <Input 
+                    id="phone" 
+                    type="tel" 
+                    value={phoneNumber}
+                    disabled
+                    className="bg-muted"
+                    placeholder="(00) 00000-0000"
+                  />
+                  <p className="text-xs text-muted-foreground">Para alterar o celular, entre em contato com o suporte</p>
                 </div>
               </div>
               <Button onClick={handleSaveProfile} disabled={isSaving}>
