@@ -1,7 +1,7 @@
 # Educare+ Platform
 
 ## Overview
-Educare+ is a digital platform for early childhood development and maternal health monitoring. It connects parents, caregivers, educators, and healthcare professionals to facilitate collaborative care through interactive assessments, personalized guidance, and advanced communication. The platform features an AI-powered assistant (TitiNauta) and integrates with WhatsApp for remote engagement. Its vision is to become a leading solution in its domain by leveraging AI and seamless communication to empower stakeholders and improve outcomes through a multi-level SaaS subscription model.
+Educare+ is a digital platform designed for early childhood development and maternal health monitoring. It serves as a comprehensive hub connecting parents, caregivers, educators, and healthcare professionals to foster collaborative care. The platform offers interactive assessments, personalized guidance, and advanced communication tools, including an AI-powered assistant (TitiNauta) and WhatsApp integration for remote engagement. Its core mission is to leverage AI and seamless communication to empower stakeholders, improve developmental and health outcomes, and establish itself as a leading solution in the market through a multi-level SaaS subscription model.
 
 ## User Preferences
 - Preferred communication style: Simple, everyday language.
@@ -12,208 +12,30 @@ Educare+ is a digital platform for early childhood development and maternal heal
 ## System Architecture
 
 ### UI/UX Decisions
-The frontend, built with React 18, TypeScript, and Vite, uses `shadcn/ui` (Radix UI + Tailwind CSS) for a professional, WCAG-compliant interface. Key components like `WelcomeHub` and `ProfessionalWelcomeHub` provide dynamic, audience-filtered content carousels and navigation.
+The frontend, built with React 18, TypeScript, and Vite, utilizes `shadcn/ui` (Radix UI + Tailwind CSS) to ensure a professional and WCAG-compliant user interface. Key components like `WelcomeHub` and `ProfessionalWelcomeHub` deliver dynamic, audience-filtered content and navigation.
 
 ### Technical Implementations
 - **Frontend**: React, `@tanstack/react-query`, React Router, `react-hook-form` with Zod for validation, and a custom JWT-based authentication context.
-- **Backend**: Node.js with Express.js, Sequelize ORM, a layered MVC architecture, and JWT-based authentication with access/refresh tokens and Row-Level Security (RLS). APIs are RESTful.
-- **AI/RAG Architecture**: A sophisticated 11-phase Retrieval-Augmented Generation (RAG) system featuring segmented knowledge bases (`kb_baby`, `kb_mother`, `kb_professional`), dual ingestion/routing, neural re-ranking, confidence scoring, intelligent chunking, data augmentation, context safety, and KB versioning.
-- **Authentication**: JWT-based with comprehensive role-based access control (Owner, Admin, Professional, Parent).
-- **Knowledge Base Management**: Owner panel for managing documents across segmented KBs, supporting cloud storage uploads.
-- **Content Management**: Admin/Owner system for creating and publishing dynamic content with audience targeting, rich text editing, and visual badges.
-- **TitiNauta AI Assistant**: A masculine AI assistant with a multimodal chat interface, integrated RAG, quick topic access, context-aware greetings, and a dedicated "Jornada do Desenvolvimento" experience.
-- **Baby Health Dashboard**: Real-time health monitoring for babies (growth charts, sleep patterns, vaccine checklists), visible only to parents.
-- **Dynamic Contextual FAQ**: A query-based FAQ system with dynamic ranking and suggestions based on a child's development week.
-- **Professional Portal**: Comprehensive portal for healthcare professionals including tailored `ProfessionalWelcomeHub`, simplified dashboard, child management, a specialized `TitiNauta Especialista` (RAG access to `kb_professional`), and a professional qualification module.
-- **Training Content System**: Video-based training platform with public browsing, admin/owner management, Vimeo integration, and Stripe one-time payment checkout.
-- **Prompt Management System (Owner-exclusive)**: System for customizing AI assistant behavior with versioning, module-type specific prompts, dynamic variable substitution, visual API key status, and cache management.
-- **LLM Configuration System (Owner-exclusive)**: Extensible system for per-agent model selection, supporting 9 built-in providers (OpenAI, Google Gemini, DeepSeek, Groq, xAI, Anthropic, Together AI, OpenRouter, Custom) with configurable parameters and dynamic validation of provider availability.
+- **Backend**: Node.js with Express.js, Sequelize ORM, a layered MVC architecture, and JWT-based authentication featuring access/refresh tokens and Row-Level Security (RLS). APIs are RESTful.
+- **AI/RAG Architecture**: An 11-phase Retrieval-Augmented Generation (RAG) system with segmented knowledge bases (`kb_baby`, `kb_mother`, `kb_professional`), dual ingestion/routing, neural re-ranking, confidence scoring, intelligent chunking, data augmentation, context safety, and KB versioning. This system also incorporates short and long-term child memory for personalized AI responses.
+- **Authentication**: Robust JWT-based authentication with role-based access control (Owner, Admin, Professional, Parent), supporting email and phone-based registration and password recovery via email or WhatsApp.
+- **Content Management**: Includes an Owner panel for managing knowledge base documents (with cloud storage uploads) and an Admin/Owner system for creating dynamic, audience-targeted content with rich text editing.
+- **AI Assistant (TitiNauta)**: A multimodal, masculine AI assistant integrated with the RAG system, offering contextual greetings, quick topic access, and a dedicated "Jornada do Desenvolvimento" experience. It supports child-specific context for personalized responses and suggestions.
+- **Baby & Mother Health Dashboards**: Real-time monitoring for babies (growth charts, vaccine checklists) and mothers (wellness metrics, appointments, mood tracking).
+- **Dynamic Contextual FAQ**: A query-based FAQ system with suggestions adapted to a child's developmental stage.
+- **Professional Portal**: Provides tailored dashboards, child management features, a specialized `TitiNauta Especialista` (accessing `kb_professional`), and a professional qualification module.
+- **Training Content System**: A video-based platform with public browsing, admin management, Vimeo integration, and Stripe for one-time payments.
+- **AI Configuration Systems (Owner-exclusive)**:
+    - **Prompt Management**: Customization of AI assistant behavior with versioning and dynamic variable substitution.
+    - **LLM Configuration**: Extensible system for per-agent model selection across 9 providers (OpenAI, Google Gemini, DeepSeek, Groq, xAI, Anthropic, Together AI, OpenRouter, Custom) with configurable parameters.
+- **AI Report Generator**: Enables generation of customizable health and development reports for children across multiple categories, with an option to send reports via WhatsApp.
+- **WhatsApp Integration**: Direct integration with Evolution API for sending messages, including password recovery links and AI-generated reports. It also includes a user recognition system for seamless interaction within n8n workflows.
 
 ### System Design Choices
 - **Scalability**: Designed for cloud deployment on Digital Ocean using multiple droplets, PostgreSQL, and Redis.
-- **Modularity**: Distinct services for independent development and deployment.
-- **Observability**: Extensive metrics and logging for RAG performance and system health.
-- **Controlled Rollout**: Feature flags enable safe, phased rollouts and easy rollback.
-
-### 2025-12-31: Dashboard & Settings Improvements
-
-**1. User Context Refresh**
-- **Implementation**: Added `refreshUser()` method to CustomAuthProvider
-- **Purpose**: Allows profile updates to reflect immediately in Dashboard name and context
-- **Usage**: Called after profile save in Settings page
-
-**2. Dashboard Child Switching**
-- **Fix**: Removed navigation on child selection in ChildrenTopBar
-- **Behavior**: Selecting a child now only updates dashboard data locally
-- **Context**: Uses SelectedChildContext for state management
-
-**3. Child Profile Tabs Simplified**
-- **Removed**: TitiNauta tab from ChildProfileTabs
-- **Access**: TitiNauta now accessed only via "Jornada do Desenvolvimento" in sidebar
-- **Tabs**: Info, Relatórios, Chat (3 tabs instead of 4)
-
-**4. AI Report Generator (Draft)**
-- **Component**: `src/components/educare-app/child/AIReportGenerator.tsx`
-- **Features**:
-  - Field selection UI with 6 categories (Personal, Biometrics, Birth, Vaccines, Development, Health)
-  - 30+ selectable fields for customizable reports
-  - Section toggle and select-all functionality
-  - Ready for backend integration (feature flagged as "Em breve")
-- **Integration**: Added to ChildReportsTab with tabbed interface
-
-**5. Welcome Hub for Parents**
-- **Added**: "Início" link to parent sidebar navigation
-- **Route**: `/educare-app/welcome`
-- **Purpose**: Parents now have access to WelcomeHub content
-
-### 2025-12-31: WhatsApp Integration & Password Recovery Complete
-
-**1. Evolution API Direct Integration**
-- **Implementation**: Replaced webhook fallback with direct Evolution API calls
-- **API**: https://api.educareapp.com.br (instance: `educare-chat`)
-- **Version**: 2.3.7 (verified)
-- **Features**:
-  - Direct message sending via `/message/sendText` endpoint
-  - Automatic retry with exponential backoff
-  - Timeout handling (10s default, 15s for sensitive messages)
-  - Fallback to webhook if Evolution API fails
-  - Detailed logging with message IDs
-
-**2. Password Recovery via WhatsApp (NEW)**
-- **Endpoint**: `POST /api/auth/forgot-password-by-phone`
-- **Flow**:
-  1. User provides phone number
-  2. System generates secure reset token (1 hour expiration)
-  3. Sends formatted WhatsApp message with reset link
-  4. User clicks link and updates password via `/api/auth/reset-password`
-- **Features**:
-  - Same security as email-based recovery (token validation, expiration)
-  - Formatted messages with emojis and formatting
-  - Fallback error handling (doesn't leak user existence)
-  - Phone number normalization applied
-
-**3. Complete Authentication Flows Implemented**
-- ✅ Register: Email/Phone with normalization
-- ✅ Login: Email, Phone, or Temporary Password
-- ✅ Password Recovery: Email (`/forgot-password`) or WhatsApp (`/forgot-password-by-phone`)
-- ✅ Phone Verification: Code sent via WhatsApp
-- ✅ Temporary Password: For phone-based login
-
-**Files Updated**:
-- `educare-backend/src/controllers/authController.js` (added `forgotPasswordByPhone`)
-- `educare-backend/src/routes/authRoutes.js` (added `/forgot-password-by-phone`)
-- `educare-backend/src/services/whatsappService.js` (updated with Evolution API integration)
-
-**Testing Results**: ✅
-- Forgot password by phone: Message sent via Evolution API (ID: 3EB02D586DF61C4BEF285A)
-- Reset token generated and stored
-- Message format: Formatted with emojis, clear instructions, 1-hour expiration notice
-
-### 2025-12-31: AI Report Generator Fully Enabled
-
-**Status**: Feature fully enabled (removed "Em breve" badge)
-
-**1. AI Report Generation**
-- **Endpoint**: `POST /api/development-reports/generate-ai`
-- **Frontend**: `src/components/educare-app/child/AIReportGenerator.tsx`
-- **Features**:
-  - 6 selectable categories (Personal, Biometrics, Birth, Vaccines, Development, Health)
-  - 30+ customizable fields for personalized reports
-  - Section toggle and select-all functionality
-  - Real-time field selection counter
-  - Gradient styling with purple/indigo theme
-
-### 2025-12-31: TitiNauta Child Context & Selection
-
-**1. Child Selector in TitiNauta Modal**
-- **Component**: `src/components/educare-app/welcome/IconToolbar.tsx`
-- **Behavior**: Shows child dropdown only when user has multiple children registered
-- **Features**:
-  - Child selection with age display (years and months)
-  - Context indicator showing which child is being discussed
-  - Auto-selects first child on modal open
-  - Skipped for professional users (isProfessional flag)
-
-**2. Contextual AI Responses**
-- **Implementation**: Child context prefix injected into AI questions
-- **Format**: `[Contexto: Esta pergunta é sobre {nome}, {gênero} de {idade}. Por favor, personalize a resposta considerando essa idade e o desenvolvimento esperado.]`
-- **Features**:
-  - Handles missing last_name gracefully (uses first name only)
-  - Age formatted in years/months for readability
-  - Gender-appropriate language (menino/menina/criança)
-  - childId passed to RAG service for logging
-
-**3. Dynamic FAQ Suggestions**
-- **Logic**: getAgeSuggestions(selectedChildAgeMonths) updates based on selected child
-- **Age Ranges**: 0-3, 4-6, 7-12, 13-24, 25-36, 37-48 months with age-appropriate questions
-- **Fallback**: Uses childAgeMonths prop if no child selected
-
-**4. Initial Greeting Personalization**
-- **Behavior**: TitiNauta greeting mentions selected child's name
-- **Example**: "Estou aqui para ajudar você com o desenvolvimento de Maria!"
-- **Reset**: Greeting updates when child selection changes
-
-**5. WelcomeHero Button Removal**
-- **Removed**: "Falar com TitiNauta" button from WelcomeHero component
-- **Consolidated**: TitiNauta access now only via toolbar icon (Bot icon)
-
-### 2025-12-31: TitiNauta Memory & WhatsApp Recognition
-
-**1. Child Memory System (Short & Long Term)**
-- **Service**: `educare-backend/src/services/babyContextService.js`
-- **New Functions**:
-  - `getShortTermMemory(babyId)`: Last 7 days of biometrics, sleep logs, upcoming appointments
-  - `getLongTermMemory(babyId)`: Vaccine history, growth trends, development reports
-  - `getFullChildContext(babyId)`: Combined basic context + short/long term memory
-- **Integration**: RAG service now uses `getFullChildContext` instead of `getBabyContext`
-- **Prompt Injection**: `formatContextForPrompt` extended to include memory sections
-
-**2. Child Context Endpoint**
-- **Endpoint**: `GET /api/children/:id/context`
-- **Controller**: `educare-backend/src/controllers/childController.js`
-- **Returns**: Full child context with formatted prompt for AI
-- **Access**: Authenticated users with ownership or professional access
-
-**3. WhatsApp User Recognition (Security Hardened)**
-- **Endpoint**: `POST /api/n8n/users/recognize`
-- **Controller**: `educare-backend/src/controllers/n8nController.js`
-- **Purpose**: Identify Educare+ users by phone number for WhatsApp integration
-- **Security**: Returns ONLY minimal fields (no sensitive health data)
-- **Returns**:
-  - User info (id, name, role - NO email/phone leaked)
-  - Subscription status and plan
-  - Children list (id, first name only)
-  - Primary child basic context (name, age in months, gender)
-  - Personalized greeting message
-  - Register URL if user not found
-- **Usage**: Called by n8n/Evolution API when user sends WhatsApp message
-- **Note**: Full child context with memory retrieved separately via authenticated RAG calls
-
-**4. Memory Context Format**
-- **Short Term Memory**: Recent biometrics, sleep patterns (avg hours/night), upcoming appointments
-- **Long Term Memory**: Vaccine summary (taken/pending), growth curve (weight gain), latest development report scores
-
-**Files Created/Modified**:
-- `educare-backend/src/services/babyContextService.js` (extended with memory functions)
-- `educare-backend/src/services/ragService.js` (uses getFullChildContext)
-- `educare-backend/src/controllers/childController.js` (added getChildContext)
-- `educare-backend/src/controllers/n8nController.js` (added recognizeWhatsAppUser)
-- `educare-backend/src/routes/childRoutes.js` (added /:id/context route)
-- `educare-backend/src/routes/n8nRoutes.js` (added /users/recognize route)
-
-**2. WhatsApp Report Delivery**
-- **Endpoint**: `POST /api/development-reports/send-whatsapp`
-- **Features**:
-  - Automatic phone number retrieval from user profile if not provided
-  - Sends formatted report via Evolution API
-  - Green-themed WhatsApp button in report card footer
-  - Loading state with spinner during send
-  - Error handling with clear user feedback
-
-**3. Backend Improvements**
-- Phone lookup cascade: `body.phoneNumber` → `profile.phoneNumber` → `user.phoneNumber`
-- Clear error messaging when no phone number is registered
-- Includes User association for phone fallback
+- **Modularity**: Distinct services to facilitate independent development and deployment.
+- **Observability**: Comprehensive metrics and logging for RAG performance and system health.
+- **Controlled Rollout**: Utilizes feature flags for safe, phased feature rollouts and easy rollbacks.
 
 ## External Dependencies
 

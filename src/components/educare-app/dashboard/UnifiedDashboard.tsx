@@ -16,11 +16,12 @@ import DomainProgressChart from './DomainProgressChart';
 import ParentalResourcesCarousel from './ParentalResourcesCarousel';
 import MilestonesTimeline from './MilestonesTimeline';
 import { BabyHealthDashboard } from './baby-health';
+import MotherDashboard from './MotherDashboard';
 
 const UnifiedDashboardContent: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { selectedChildId } = useSelectedChild();
+  const { selectedChildId, isMotherJourney } = useSelectedChild();
   const role = user?.role as string;
   const isOwner = role === 'owner';
   const isAdmin = role === 'admin';
@@ -44,7 +45,7 @@ const UnifiedDashboardContent: React.FC = () => {
 
   const getChildAge = () => {
     if (!selectedChild) return undefined;
-    const birthDate = selectedChild?.birthDate || selectedChild?.birthdate;
+    const birthDate = selectedChild?.birthDate || (selectedChild as any)?.birthdate;
     if (!birthDate) return undefined;
     try {
       return getDetailedAgeDisplay(birthDate);
@@ -55,7 +56,7 @@ const UnifiedDashboardContent: React.FC = () => {
 
   const getChildAgeMonths = (): number | undefined => {
     if (!selectedChild) return undefined;
-    const birthDate = selectedChild?.birthDate || selectedChild?.birthdate;
+    const birthDate = selectedChild?.birthDate || (selectedChild as any)?.birthdate;
     if (!birthDate) return undefined;
     try {
       const birth = new Date(birthDate);
@@ -112,42 +113,49 @@ const UnifiedDashboardContent: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
-        <EnhancedDashboardHeader childAgeMonths={getChildAgeMonths()} />
+        <EnhancedDashboardHeader childAgeMonths={isMotherJourney ? undefined : getChildAgeMonths()} />
         <SocialMediaAccess />
       </div>
 
-      {(hasFullAccess || isParent) && totalChildren > 0 && (
+      {(hasFullAccess || isParent) && (
         <ChildrenTopBar 
-          childList={children} 
+          childList={children}
+          showMotherOption={isParent}
         />
       )}
 
-      {(hasFullAccess || (isParent && totalChildren > 0)) && (
-        <HealthMetricsCards 
-          healthData={healthCardsData}
-          isLoading={healthLoading}
-        />
+      {isMotherJourney ? (
+        <MotherDashboard />
+      ) : (
+        <>
+          {(hasFullAccess || (isParent && totalChildren > 0)) && (
+            <HealthMetricsCards 
+              healthData={healthCardsData}
+              isLoading={healthLoading}
+            />
+          )}
+
+          {(hasFullAccess || (isParent && totalChildren > 0)) && (
+            <BabyHealthDashboard childId={selectedChild?.id} />
+          )}
+
+          <div className="grid gap-6 lg:grid-cols-2">
+            <DomainProgressChart 
+              childName={selectedChild?.firstName}
+            />
+            <HealthInsights healthData={healthCardsData} />
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <MilestonesTimeline childAge={getChildAge()} />
+            </div>
+            <div className="space-y-6">
+              <ParentalResourcesCarousel />
+            </div>
+          </div>
+        </>
       )}
-
-      {(hasFullAccess || (isParent && totalChildren > 0)) && (
-        <BabyHealthDashboard childId={selectedChild?.id} />
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <DomainProgressChart 
-          childName={selectedChild?.firstName || selectedChild?.first_name}
-        />
-        <HealthInsights healthData={healthCardsData} />
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <MilestonesTimeline childAge={getChildAge()} />
-        </div>
-        <div className="space-y-6">
-          <ParentalResourcesCarousel />
-        </div>
-      </div>
     </div>
   );
 };

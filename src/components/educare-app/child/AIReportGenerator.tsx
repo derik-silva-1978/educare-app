@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Sparkles, FileText, Baby, Heart, Syringe, Brain, User, Scale, Ruler, Calendar, Clock, AlertCircle, CheckCircle, MessageCircle, Send } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { getStoredAuthToken } from '@/utils/authStorage';
 
 interface AIReportGeneratorProps {
   childId: string;
@@ -170,6 +171,54 @@ export const AIReportGenerator: React.FC<AIReportGeneratorProps> = ({
     return 'partial';
   };
 
+  const mapFieldsToCategories = (fields: Set<string>): string[] => {
+    const categories = new Set<string>();
+    const fieldToCategory: Record<string, string> = {
+      'child_name': 'personal',
+      'birth_date': 'personal',
+      'age': 'personal',
+      'gender': 'personal',
+      'parent_names': 'personal',
+      'contact_info': 'personal',
+      'current_weight': 'biometrics',
+      'current_height': 'biometrics',
+      'head_circumference': 'biometrics',
+      'weight_history': 'biometrics',
+      'height_history': 'biometrics',
+      'growth_percentiles': 'biometrics',
+      'gestational_age': 'birth',
+      'birth_weight': 'birth',
+      'birth_height': 'birth',
+      'delivery_type': 'birth',
+      'apgar_score': 'birth',
+      'neonatal_complications': 'birth',
+      'vaccines_taken': 'vaccines',
+      'vaccines_pending': 'vaccines',
+      'vaccines_upcoming': 'vaccines',
+      'vaccination_schedule': 'vaccines',
+      'motor_development': 'development',
+      'cognitive_development': 'development',
+      'language_development': 'development',
+      'social_emotional': 'development',
+      'milestones_achieved': 'development',
+      'milestones_in_progress': 'development',
+      'development_concerns': 'development',
+      'sleep_patterns': 'sleep',
+      'feeding_info': 'health',
+      'allergies': 'health',
+      'medical_conditions': 'health',
+      'medications': 'health',
+      'recent_appointments': 'health',
+    };
+
+    fields.forEach(field => {
+      const category = fieldToCategory[field];
+      if (category) categories.add(category);
+    });
+
+    return Array.from(categories);
+  };
+
   const handleGenerateReport = async () => {
     if (selectedFields.size === 0) {
       toast({
@@ -184,15 +233,18 @@ export const AIReportGenerator: React.FC<AIReportGeneratorProps> = ({
     setGeneratedReport(null);
 
     try {
+      const categoriesToFetch = mapFieldsToCategories(selectedFields);
+      
+      const token = getStoredAuthToken();
       const response = await fetch('/api/development-reports/generate-ai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           childId,
-          selectedFields: Array.from(selectedFields)
+          selectedFields: categoriesToFetch
         })
       });
 
@@ -203,7 +255,8 @@ export const AIReportGenerator: React.FC<AIReportGeneratorProps> = ({
       const data = await response.json();
       
       if (data.success && data.report) {
-        setGeneratedReport(data.report);
+        const reportContent = typeof data.report === 'string' ? data.report : data.report.content;
+        setGeneratedReport(reportContent);
         toast({
           title: 'Relatório gerado',
           description: 'Seu relatório personalizado foi gerado com sucesso!',
@@ -227,15 +280,15 @@ export const AIReportGenerator: React.FC<AIReportGeneratorProps> = ({
   const handleSendViaWhatsApp = async () => {
     setIsSendingWhatsApp(true);
     try {
+      const token = getStoredAuthToken();
       const response = await fetch('/api/development-reports/send-whatsapp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          childId,
-          phoneNumber: '' // Will use the user's registered phone
+          childId
         })
       });
 
