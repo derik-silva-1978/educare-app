@@ -1,0 +1,66 @@
+{
+  "educare": {
+    "api": {
+      "base": {
+        "env": "EDUCARE_API_URL",
+        "fallback": "https://n8n.educareapp.com.br"
+      },
+      "endpoints": {
+        "users_check": {
+          "label": "API: Verificar Usuário",
+          "method": "GET",
+          "path": "/api/n8n/users/check",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/users/check"
+        },
+        "users_recognize": {
+          "label": "API: Reconhecer Usuário",
+          "method": "POST",
+          "path": "/api/n8n/users/recognize",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/users/recognize"
+        },
+        "rag_titinauta_ask": {
+          "label": "API: RAG TitiNauta",
+          "method": "POST",
+          "path": "/api/n8n/rag/ask",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/rag/ask"
+        },
+        "biometrics_update": {
+          "label": "API: Registrar Biometria",
+          "method": "POST",
+          "path": "/api/n8n/biometrics/update",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/biometrics/update"
+        },
+        "sleep_log": {
+          "label": "API: Registrar Sono",
+          "method": "POST",
+          "path": "/api/n8n/sleep/log",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/sleep/log"
+        },
+        "appointments_create": {
+          "label": "API: Agendar Consulta",
+          "method": "POST",
+          "path": "/api/n8n/appointments/create",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/appointments/create"
+        },
+        "vaccines_check": {
+          "label": "API: Verificar Vacinas",
+          "method": "GET",
+          "path": "/api/n8n/vaccines/check",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/vaccines/check"
+        },
+        "content_child": {
+          "label": "API: Conteúdo Criança",
+          "method": "GET",
+          "path": "/api/n8n/content/child",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/content/child"
+        },
+        "content_mother": {
+          "label": "API: Conteúdo Mãe",
+          "method": "GET",
+          "path": "/api/n8n/content/mother",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/content/mother"
+        }
+      }
+    }
+  }
+}
