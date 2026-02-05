@@ -1,0 +1,156 @@
+# 🧠 PROMPT — Extração de Endpoints + Documentação Funcional (Educare App)
+
+Você tem acesso completo ao repositório deste projeto.
+
+---
+
+## 🎯 OBJETIVO GERAL
+
+Gerar documentação **técnica e funcional** dos principais endpoints usados pelo fluxo n8n do **Educare App**, consolidando tudo em um **JSON compatível com o nó n8n-nodes-globals**, com explicação clara do papel de cada endpoint no produto.
+
+> ⚠️ O foco **não é apenas técnico**, mas também de **negócio, jornada do usuário e funcionalidade**.
+
+---
+
+## 🧩 CONTEXTO DO PRODUTO (IMPORTANTE)
+
+Este sistema suporta um aplicativo de apoio ao **desenvolvimento infantil e à parentalidade**, incluindo:
+
+- Jornada da Criança  
+- Jornada da Mãe  
+- Saúde do Bebê  
+- Registro de rotinas  
+- Inteligência Artificial contextual (RAG)
+
+Cada endpoint representa um **bloco funcional do produto**, e isso deve estar refletido na documentação gerada.
+
+---
+
+## 🔌 ENDPOINTS-ALVO E SUAS FUNCIONALIDADES
+
+### 1️⃣ Child Content
+**Função funcional:**  
+Fornece conteúdo educacional estruturado sobre desenvolvimento infantil, marcos, estímulos e orientações conforme idade ou fase.
+
+**Uso no produto:**  
+Jornada da Criança, menus educativos, respostas guiadas.
+
+---
+
+### 2️⃣ Mother Content
+**Função funcional:**  
+Entrega conteúdo de apoio emocional, informativo e prático para mães e cuidadoras (pós-parto, autocuidado, saúde mental).
+
+**Uso no produto:**  
+Jornada da Mãe, acolhimento e retenção emocional.
+
+---
+
+### 3️⃣ Biometrics
+**Função funcional:**  
+Registro e consulta de dados físicos da criança (peso, altura, perímetro cefálico).
+
+**Uso no produto:**  
+Acompanhamento de crescimento, histórico de saúde e base para alertas.
+
+---
+
+### 4️⃣ Sleep Log
+**Função funcional:**  
+Registro e consulta da rotina de sono da criança.
+
+**Uso no produto:**  
+Análise de hábitos, orientação aos cuidadores e saúde do bebê.
+
+---
+
+### 5️⃣ Vaccines (check)
+**Função funcional:**  
+Verificação da situação vacinal com base na idade da criança e no calendário oficial.
+
+**Uso no produto:**  
+Saúde do Bebê, prevenção e alertas de vacinas atrasadas ou futuras.
+
+---
+
+### 6️⃣ RAG – TitiNauta
+**Função funcional:**  
+Endpoint de **Inteligência Artificial contextual (RAG)** que responde perguntas livres com base em:
+
+- Base científica (OMS, BNCC, manuais)
+- Contexto da criança e da mãe
+
+**Uso no produto:**  
+Chat inteligente, dúvidas abertas e suporte contínuo ao cuidador.
+
+---
+
+### 7️⃣ Appointments
+**Função funcional:**  
+Gestão de compromissos relacionados à criança (consultas, vacinas, terapias).
+
+**Uso no produto:**  
+Agenda, organização familiar e automações futuras de lembretes.
+
+---
+
+## 🛠️ O QUE VOCÊ DEVE FAZER (PASSO A PASSO)
+
+1. Fazer uma varredura no repositório buscando:
+   - Rotas que contenham `/api/n8n/`
+   - Handlers (Express, Fastify, Next API Routes etc.)
+   - Arquivos que façam chamadas HTTP (axios, fetch, etc.)
+
+2. Para cada endpoint encontrado, extrair e documentar:
+
+   - `slug` — nome técnico padronizado  
+   - `label` — nome amigável  
+   - `method` — GET, POST, PUT, DELETE  
+   - `path` — exatamente como está no código  
+   - `base_url_env` — ex.: `EDUCARE_API_URL`  
+   - `functional_role` — descrição funcional (baseada nas explicações acima)  
+   - `product_usage` — onde entra na jornada do usuário  
+   - `tags` — ex.: content, health, ai, schedule  
+   - `auth` — none | bearer | apiKey (inferido do código)  
+   - `headers_required`  
+   - `query_params`  
+   - `body_schema` (se houver)  
+   - `example_request`  
+   - `example_response` (se possível)  
+   - `source_files` (**obrigatório**)
+
+---
+
+## 📦 FORMATO DE SAÍDA OBRIGATÓRIO
+
+Crie o arquivo:
+
+📄 `/generated/n8n_globals_constants.json`
+
+### Estrutura esperada:
+
+```json
+{
+  "educare": {
+    "api": {
+      "base": {
+        "env": "EDUCARE_API_URL",
+        "fallback": "https://n8n.educareapp.com.br"
+      },
+      "endpoints": {
+        "rag_titinauta_ask": {
+          "label": "API: RAG TitiNauta",
+          "method": "GET",
+          "path": "/api/n8n/rag/ask",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/rag/ask",
+          "functional_role": "Responde perguntas livres usando IA contextual baseada em conhecimento científico e contexto do usuário.",
+          "product_usage": "Chat inteligente e suporte contínuo ao cuidador.",
+          "tags": ["ai", "rag", "support"],
+          "auth": "bearer",
+          "headers_required": ["Authorization"],
+          "source_files": ["..."]
+        }
+      }
+    }
+  }
+}
