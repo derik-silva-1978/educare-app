@@ -3,7 +3,12 @@
     "api": {
       "base": {
         "env": "EDUCARE_API_URL",
-        "fallback": "https://n8n.educareapp.com.br"
+        "fallback": "https://1d35ed6a-d635-41d2-8d11-7db8db84ce29-00-28ylqytrll200.picard.replit.dev"
+      },
+      "auth": {
+        "type": "apiKey",
+        "header": "x-api-key",
+        "env": "EDUCARE_EXTERNAL_API_KEY"
       },
       "endpoints": {
         "users_check": {
