@@ -17,6 +17,8 @@ export const useChildForm = (id?: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [upgradePlanInfo, setUpgradePlanInfo] = useState<{ currentPlan?: string; currentLimit?: number }>({});
   const isEditMode = !!id;
   
   // Initialize the form with Zod validation
@@ -154,6 +156,11 @@ export const useChildForm = (id?: string) => {
       }
 
       if (!response.success) {
+        if (response.error?.includes('Limite de crianças') || response.error?.includes('Assinatura não encontrada')) {
+          setUpgradePlanInfo({});
+          setShowUpgradeDialog(true);
+          return false;
+        }
         throw new Error(response.error || 'Erro ao salvar dados da criança');
       }
       
@@ -170,7 +177,14 @@ export const useChildForm = (id?: string) => {
       return true;
     } catch (error: unknown) {
       console.error('Error saving child data:', error);
+      
       const errorMessage = (error instanceof Error ? error.message : 'Erro desconhecido') || 'Não foi possível salvar os dados';
+      
+      if (errorMessage.includes('Limite de crianças') || errorMessage.includes('Assinatura não encontrada')) {
+        setShowUpgradeDialog(true);
+        return false;
+      }
+      
       setError(errorMessage);
       toast({
         title: 'Erro',
@@ -240,5 +254,8 @@ export const useChildForm = (id?: string) => {
     saveChildData,
     onSubmit,
     onDelete,
+    showUpgradeDialog,
+    setShowUpgradeDialog,
+    upgradePlanInfo,
   };
 };

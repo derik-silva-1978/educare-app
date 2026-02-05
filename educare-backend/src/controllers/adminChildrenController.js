@@ -249,6 +249,45 @@ class AdminChildrenController {
       });
     }
   }
+
+  async deleteChild(req, res) {
+    try {
+      const { childId } = req.params;
+      const userRole = req.user.role;
+
+      if (userRole !== 'admin' && userRole !== 'owner') {
+        return res.status(403).json({
+          success: false,
+          message: 'Apenas administradores podem excluir perfis de crianças.'
+        });
+      }
+
+      const child = await Child.findByPk(childId, {
+        include: [{ model: Profile, attributes: ['id', 'name'] }]
+      });
+
+      if (!child) {
+        return res.status(404).json({
+          success: false,
+          message: 'Criança não encontrada'
+        });
+      }
+
+      await child.destroy();
+
+      res.json({
+        success: true,
+        message: 'Perfil da criança excluído com sucesso'
+      });
+    } catch (error) {
+      console.error('Erro ao excluir criança:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor',
+        error: error.message
+      });
+    }
+  }
 }
 
 module.exports = new AdminChildrenController();

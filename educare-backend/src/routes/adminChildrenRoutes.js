@@ -243,4 +243,6 @@ router.get('/stats', verifyToken, adminChildrenController.getGlobalStats);
  */
 router.get('/:childId', verifyToken, adminChildrenController.getChildDetails);
 
+router.delete('/:childId', verifyToken, adminChildrenController.deleteChild);
+
 module.exports = router;

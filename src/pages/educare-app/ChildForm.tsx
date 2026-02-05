@@ -12,12 +12,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ChildBasicInfoSection from '@/components/educare-app/ChildBasicInfoSection';
 import ChildAdditionalInfoSection from '@/components/educare-app/ChildAdditionalInfoSection';
 import ChildFormActions from '@/components/educare-app/ChildFormActions';
+import ChildLimitUpgradeDialog from '@/components/educare-app/ChildLimitUpgradeDialog';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const ChildForm: React.FC = () => {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
-  const { form, isLoading, isEditMode, onSubmit, onDelete, isDirty, error } = useChildForm(childId);
+  const { form, isLoading, isEditMode, onSubmit, onDelete, isDirty, error, showUpgradeDialog, setShowUpgradeDialog, upgradePlanInfo } = useChildForm(childId);
 
   if (isLoading && isEditMode) {
     return (
@@ -125,6 +126,13 @@ const ChildForm: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      <ChildLimitUpgradeDialog
+        isOpen={showUpgradeDialog}
+        onClose={() => setShowUpgradeDialog(false)}
+        currentPlan={upgradePlanInfo.currentPlan}
+        currentLimit={upgradePlanInfo.currentLimit}
+      />
     </>
   );
 };

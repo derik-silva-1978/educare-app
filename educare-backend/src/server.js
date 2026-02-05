@@ -31,6 +31,7 @@ const mediaResourceRoutes = require('./routes/mediaResourceRoutes');
 const healthRoutes = require('./routes/healthRoutes');
 const stripeRoutes = require('./routes/stripeRoutes');
 const contentRoutes = require('./routes/contentRoutes');
+const maternalHealthRoutes = require('./routes/maternalHealthRoutes');
 
 // Stripe services
 const { initStripe } = require('./services/stripeInit');
@@ -143,6 +144,7 @@ app.use('/api/external', externalApiRoutes);
 // Novas rotas do TitiNauta
 app.use('/api/journey', titiNautaRoutes); // Interface moderna do TitiNauta
 app.use('/api/media-resources', mediaResourceRoutes); // Gestão de recursos audiovisuais
+app.use('/api/maternal-health', maternalHealthRoutes);
 
 // Rotas do RAG (Knowledge Management)
 const adminKnowledgeRoutes = require('./routes/adminKnowledgeRoutes');

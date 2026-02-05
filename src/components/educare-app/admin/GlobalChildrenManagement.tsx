@@ -8,6 +8,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { 
   Users, 
   Search, 
   Filter, 
@@ -23,10 +34,11 @@ import {
   Edit,
   ChevronLeft,
   ChevronRight,
-  X
+  X,
+  Trash2
 } from 'lucide-react';
 import { useGlobalChildrenManagement } from '@/hooks/useGlobalChildrenManagement';
-import { GlobalChildrenFilters } from '@/services/globalChildrenService';
+import { GlobalChildrenFilters, GlobalChild } from '@/services/globalChildrenService';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -48,12 +60,40 @@ const GlobalChildrenManagement: React.FC<GlobalChildrenManagementProps> = ({ cla
     applyFilters,
     clearFilters,
     goToPage,
+    getChildDetails,
+    deleteChild,
     refreshData
   } = useGlobalChildrenManagement();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [tempFilters, setTempFilters] = useState<GlobalChildrenFilters>({});
+  const [selectedChild, setSelectedChild] = useState<GlobalChild | null>(null);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [childToDelete, setChildToDelete] = useState<GlobalChild | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleViewDetails = async (child: GlobalChild) => {
+    setSelectedChild(child);
+    setShowDetailDialog(true);
+  };
+
+  const handleDeleteClick = (child: GlobalChild) => {
+    setChildToDelete(child);
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!childToDelete) return;
+    setIsDeleting(true);
+    const success = await deleteChild(childToDelete.id);
+    setIsDeleting(false);
+    if (success) {
+      setShowDeleteDialog(false);
+      setChildToDelete(null);
+    }
+  };
 
   // Aplicar busca
   const handleSearch = () => {
@@ -476,7 +516,7 @@ const GlobalChildrenManagement: React.FC<GlobalChildrenManagementProps> = ({ cla
                       </div>
                       
                       <div className="flex flex-col gap-2">
-                        <Button size="sm" variant="outline" className="text-xs">
+                        <Button size="sm" variant="outline" className="text-xs" onClick={() => handleViewDetails(child)}>
                           <Eye className="h-3 w-3 mr-1" />
                           Ver Detalhes
                         </Button>
@@ -484,6 +524,12 @@ const GlobalChildrenManagement: React.FC<GlobalChildrenManagementProps> = ({ cla
                           <Button size="sm" variant="ghost" className="text-xs">
                             <Edit className="h-3 w-3 mr-1" />
                             Editar
+                          </Button>
+                        )}
+                        {permissions.canDelete && (
+                          <Button size="sm" variant="ghost" className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDeleteClick(child)}>
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Excluir
                           </Button>
                         )}
                       </div>
@@ -536,6 +582,85 @@ const GlobalChildrenManagement: React.FC<GlobalChildrenManagementProps> = ({ cla
           </Card>
         )}
       </div>
+
+      <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Detalhes da Criança</DialogTitle>
+            <DialogDescription>Informações completas do perfil</DialogDescription>
+          </DialogHeader>
+          {selectedChild && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarFallback className="bg-blue-100 text-blue-600 text-lg">
+                    {(selectedChild.first_name || 'N')?.charAt(0)?.toUpperCase()}{(selectedChild.last_name || 'N')?.charAt(0)?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-lg font-semibold">{selectedChild.first_name} {selectedChild.last_name}</h3>
+                  <Badge variant="outline">{formatAge(selectedChild.birthdate)}</Badge>
+                </div>
+              </div>
+              <Separator />
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Data de Nascimento</p>
+                  <p className="font-medium">{new Date(selectedChild.birthdate).toLocaleDateString('pt-BR')}</p>
+                </div>
+                {selectedChild.parent && (
+                  <div>
+                    <p className="text-muted-foreground">Responsável</p>
+                    <p className="font-medium">{selectedChild.parent.name}</p>
+                    <p className="text-xs text-muted-foreground">{selectedChild.parent.email}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-muted-foreground">Progresso</p>
+                  <p className="font-medium">{selectedChild.journey_progress ?? 0}%</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Cadastrado em</p>
+                  <p className="font-medium">{selectedChild.created_at && !isNaN(new Date(selectedChild.created_at).getTime()) ? new Date(selectedChild.created_at).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                </div>
+              </div>
+              {selectedChild.teams && selectedChild.teams.length > 0 && (
+                <>
+                  <Separator />
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Equipes</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedChild.teams.map(team => (
+                        <Badge key={team.id} variant="secondary">
+                          <Users2 className="h-3 w-3 mr-1" />
+                          {team.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o perfil de <strong>{childToDelete?.first_name} {childToDelete?.last_name}</strong>? Esta ação não pode ser desfeita e removerá todos os dados associados a esta criança.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} disabled={isDeleting} className="bg-red-600 hover:bg-red-700">
+              {isDeleting ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Excluindo...</> : 'Confirmar Exclusão'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

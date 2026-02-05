@@ -61,6 +61,12 @@ const KbProfessional = require('./KbProfessional');
 const AssistantPrompt = require('./AssistantPrompt');
 const AssistantLLMConfig = require('./AssistantLLMConfig');
 
+// Modelos de Saúde Materna
+const MaternalHealthProfile = require('./MaternalHealthProfile');
+const MaternalDailyHealth = require('./MaternalDailyHealth');
+const MaternalMentalHealth = require('./MaternalMentalHealth');
+const MaternalAppointment = require('./MaternalAppointment');
+
 // Importação dos modelos da Jornada 2.0
 const JourneyV2 = require('./JourneyV2');
 const JourneyV2Week = require('./JourneyV2Week');
@@ -364,6 +370,24 @@ UserEnrollment.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 ContentItem.hasMany(UserEnrollment, { foreignKey: 'content_id', as: 'enrollments' });
 UserEnrollment.belongsTo(ContentItem, { foreignKey: 'content_id', as: 'content' });
 
+// === ASSOCIAÇÕES DE SAÚDE MATERNA ===
+
+// User <-> MaternalHealthProfile (1:1)
+User.hasOne(MaternalHealthProfile, { foreignKey: 'user_id', as: 'maternalProfile' });
+MaternalHealthProfile.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// MaternalHealthProfile <-> MaternalDailyHealth (1:N)
+MaternalHealthProfile.hasMany(MaternalDailyHealth, { foreignKey: 'profile_id', as: 'dailyHealth' });
+MaternalDailyHealth.belongsTo(MaternalHealthProfile, { foreignKey: 'profile_id', as: 'profile' });
+
+// MaternalHealthProfile <-> MaternalMentalHealth (1:N)
+MaternalHealthProfile.hasMany(MaternalMentalHealth, { foreignKey: 'profile_id', as: 'mentalHealth' });
+MaternalMentalHealth.belongsTo(MaternalHealthProfile, { foreignKey: 'profile_id', as: 'profile' });
+
+// MaternalHealthProfile <-> MaternalAppointment (1:N)
+MaternalHealthProfile.hasMany(MaternalAppointment, { foreignKey: 'profile_id', as: 'appointments' });
+MaternalAppointment.belongsTo(MaternalHealthProfile, { foreignKey: 'profile_id', as: 'profile' });
+
 // AssistantPrompt <-> User (created_by, updated_by)
 User.hasMany(AssistantPrompt, { foreignKey: 'created_by', as: 'createdPrompts' });
 AssistantPrompt.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
@@ -433,5 +457,10 @@ module.exports = {
   UserEnrollment,
   // Modelo de Prompts dos Assistentes
   AssistantPrompt,
-  AssistantLLMConfig
+  AssistantLLMConfig,
+  // Modelos de Saúde Materna
+  MaternalHealthProfile,
+  MaternalDailyHealth,
+  MaternalMentalHealth,
+  MaternalAppointment
 };

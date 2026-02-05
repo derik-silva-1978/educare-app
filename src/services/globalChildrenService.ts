@@ -295,6 +295,19 @@ class GlobalChildrenService {
   }
 
   // Atualizar informações básicas de uma criança (admin only)
+  async deleteChild(childId: string): Promise<{ success: boolean; message?: string; error?: string }> {
+    try {
+      const response = await httpClient.delete(`${this.baseUrl}/${childId}`);
+      if (response.data?.success) {
+        return { success: true, message: response.data.message };
+      }
+      return { success: false, error: response.data?.message || 'Erro ao excluir criança' };
+    } catch (error: unknown) {
+      console.error('Erro ao excluir criança:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Erro inesperado' };
+    }
+  }
+
   async updateChild(
     childId: string,
     updates: Partial<{

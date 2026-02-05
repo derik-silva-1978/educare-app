@@ -190,6 +190,30 @@ export function useGlobalChildrenManagement() {
     }
   }, [user]);
 
+  const deleteChild = useCallback(async (childId: string) => {
+    if (user?.role !== 'admin' && user?.role !== 'owner') {
+      toast.error('Acesso não autorizado para exclusão');
+      return false;
+    }
+
+    try {
+      const response = await globalChildrenService.deleteChild(childId);
+      
+      if (response.success) {
+        toast.success('Perfil da criança excluído com sucesso');
+        setChildren(prev => prev.filter(child => child.id !== childId));
+        setTotalChildren(prev => prev - 1);
+        return true;
+      } else {
+        toast.error(response.error || 'Erro ao excluir criança');
+        return false;
+      }
+    } catch (err) {
+      toast.error('Erro inesperado ao excluir criança');
+      return false;
+    }
+  }, [user]);
+
   // Refresh completo dos dados
   const refreshData = useCallback(() => {
     loadChildren(currentPage, 20, filters);
@@ -209,7 +233,8 @@ export function useGlobalChildrenManagement() {
     canViewAll: user?.role === 'admin' || user?.role === 'owner',
     canEdit: user?.role === 'admin' || user?.role === 'owner',
     canViewStats: user?.role === 'admin' || user?.role === 'owner',
-    canViewTeams: true, // Todos podem ver informações de equipes
+    canDelete: user?.role === 'admin' || user?.role === 'owner',
+    canViewTeams: true,
     isProfessional: user?.role === 'professional'
   };
 
@@ -234,6 +259,7 @@ export function useGlobalChildrenManagement() {
     goToPage,
     getChildDetails,
     updateChild,
+    deleteChild,
     refreshData
   };
 }
