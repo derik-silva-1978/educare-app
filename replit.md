@@ -24,7 +24,9 @@ The frontend, built with React 18, TypeScript, and Vite, utilizes `shadcn/ui` (R
     - **TitiNauta** (Parents): Child development focus with baby-specific memory context, accessing `kb_baby`
     - **TitiNauta Materna**: Maternal health journey with pink/rose visual theme, accessing `kb_mother` with null child context for pregnancy, postpartum, nutrition, sleep, and mental health questions
     - **TitiNauta Especialista** (Professionals): Clinical protocols and evidence-based practices, accessing `kb_professional`
-- **Baby & Mother Health Dashboards**: Real-time monitoring for babies (growth charts, vaccine checklists) and mothers (wellness metrics, appointments, mood tracking).
+- **Baby & Mother Health Dashboards**: Real-time monitoring for babies (growth charts, vaccine checklists) and mothers (wellness metrics, appointments, mood tracking). The Maternal Health system uses 4 database tables (maternal_health_profiles, maternal_daily_health, maternal_mental_health, maternal_appointments) with full REST API at `/api/maternal-health/*`, React Query hooks, and functional Health Diary dialogs for symptom, sleep, meal, mood, and appointment logging.
+- **Admin Children Management**: Global admin panel for managing all children across users with search, detail view, and delete functionality (admin/owner only).
+- **Child Limit Upgrade Flow**: When child creation hits the subscription plan limit, a ChildLimitUpgradeDialog shows available Stripe plans for upgrade instead of a generic error.
 - **Dynamic Contextual FAQ**: A query-based FAQ system with suggestions adapted to a child's developmental stage.
 - **Professional Portal**: Provides tailored dashboards, child management features, a specialized `TitiNauta Especialista` (accessing `kb_professional`), and a professional qualification module.
 - **Training Content System**: A video-based platform with public browsing, admin management, Vimeo integration, and Stripe for one-time payments.
