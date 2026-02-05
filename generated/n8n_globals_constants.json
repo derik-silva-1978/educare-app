@@ -1,0 +1,451 @@
+{
+  "educare": {
+    "api": {
+      "base": {
+        "env": "EDUCARE_API_URL",
+        "fallback": "https://n8n.educareapp.com.br"
+      },
+      "endpoints": {
+        "users_check": {
+          "label": "API: Verificar Usuário",
+          "method": "GET",
+          "path": "/api/n8n/users/check",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/users/check",
+          "functional_role": "Verifica se um usuário existe na plataforma pelo número de telefone. Retorna dados de assinatura ativa, nome do plano e informações básicas do filho cadastrado.",
+          "product_usage": "Validação inicial de acesso via WhatsApp, verificação de status de assinatura e encaminhamento para checkout de reativação quando necessário.",
+          "tags": ["users", "validation", "subscription", "whatsapp"],
+          "auth": "apiKey",
+          "headers_required": ["x-api-key"],
+          "query_params": {
+            "phone": {
+              "type": "string",
+              "required": true,
+              "description": "Número de telefone do usuário (aceita formatos: +5511999999999, 5511999999999, 11999999999)"
+            }
+          },
+          "body_schema": null,
+          "example_request": {
+            "method": "GET",
+            "url": "{{EDUCARE_API_URL}}/api/n8n/users/check?phone=5511999999999"
+          },
+          "example_response": {
+            "exists": true,
+            "user_id": "uuid-do-usuario",
+            "user_name": "Maria Silva",
+            "subscription_status": "active",
+            "plan_name": "Plano Família",
+            "child": {
+              "id": "uuid-do-filho",
+              "name": "João Silva",
+              "dob": "2024-01-15"
+            }
+          },
+          "source_files": [
+            "educare-backend/src/routes/n8nRoutes.js",
+            "educare-backend/src/controllers/n8nController.js"
+          ]
+        },
+        "users_recognize": {
+          "label": "API: Reconhecer Usuário WhatsApp",
+          "method": "POST",
+          "path": "/api/n8n/users/recognize",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/users/recognize",
+          "functional_role": "Reconhece um usuário via WhatsApp, retornando contexto completo: dados do usuário, status de assinatura, lista de filhos cadastrados, filho principal com idade em meses, e saudação personalizada para início de conversa.",
+          "product_usage": "Início de fluxo conversacional no WhatsApp, personalização de mensagens com nome do usuário e filho, contexto para IA contextual.",
+          "tags": ["users", "whatsapp", "recognition", "context"],
+          "auth": "apiKey",
+          "headers_required": ["x-api-key", "Content-Type"],
+          "query_params": null,
+          "body_schema": {
+            "phone": {
+              "type": "string",
+              "required": true,
+              "description": "Número de telefone do usuário"
+            },
+            "phone_number": {
+              "type": "string",
+              "required": false,
+              "description": "Alias para phone (compatibilidade)"
+            },
+            "sender_name": {
+              "type": "string",
+              "required": false,
+              "description": "Nome do remetente capturado do WhatsApp"
+            }
+          },
+          "example_request": {
+            "method": "POST",
+            "url": "{{EDUCARE_API_URL}}/api/n8n/users/recognize",
+            "body": {
+              "phone": "5511999999999",
+              "sender_name": "Maria"
+            }
+          },
+          "example_response": {
+            "recognized": true,
+            "user": {
+              "id": "uuid-do-usuario",
+              "name": "Maria Silva",
+              "role": "parent"
+            },
+            "subscription": {
+              "active": true,
+              "status": "active",
+              "plan_name": "Plano Família"
+            },
+            "children": [
+              {
+                "id": "uuid-do-filho",
+                "name": "João",
+                "is_primary": true
+              }
+            ],
+            "primary_child": {
+              "id": "uuid-do-filho",
+              "name": "João",
+              "age_months": 8,
+              "gender": "male"
+            },
+            "basic_context": {
+              "name": "João",
+              "age_months": 8,
+              "gender": "male"
+            },
+            "greeting": "Olá Maria! Estou aqui para ajudar com o desenvolvimento de João."
+          },
+          "source_files": [
+            "educare-backend/src/routes/n8nRoutes.js",
+            "educare-backend/src/controllers/n8nController.js"
+          ]
+        },
+        "rag_titinauta_ask": {
+          "label": "API: RAG TitiNauta",
+          "method": "POST",
+          "path": "/api/n8n/rag/ask",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/rag/ask",
+          "functional_role": "Endpoint de Inteligência Artificial contextual (RAG) que responde perguntas livres usando base de conhecimento científico (OMS, BNCC, manuais) e contexto do filho. Suporta três knowledge bases: kb_baby (desenvolvimento infantil), kb_mother (saúde materna), kb_professional (protocolos clínicos).",
+          "product_usage": "Chat inteligente TitiNauta, suporte contínuo ao cuidador, respostas personalizadas baseadas na idade e contexto do bebê, jornada da mãe e suporte a profissionais.",
+          "tags": ["ai", "rag", "support", "titinauta", "knowledge"],
+          "auth": "apiKey",
+          "headers_required": ["x-api-key", "Content-Type"],
+          "query_params": null,
+          "body_schema": {
+            "question": {
+              "type": "string",
+              "required": true,
+              "description": "Pergunta do usuário em linguagem natural"
+            },
+            "context": {
+              "type": "object",
+              "required": false,
+              "description": "Contexto adicional para a pergunta",
+              "properties": {
+                "child_id": {
+                  "type": "string",
+                  "description": "UUID do filho para contexto personalizado"
+                },
+                "week": {
+                  "type": "integer",
+                  "description": "Semana de desenvolvimento do bebê"
+                }
+              }
+            }
+          },
+          "example_request": {
+            "method": "POST",
+            "url": "{{EDUCARE_API_URL}}/api/n8n/rag/ask",
+            "body": {
+              "question": "Meu bebê de 6 meses pode comer banana?",
+              "context": {
+                "child_id": "uuid-do-filho",
+                "week": 26
+              }
+            }
+          },
+          "example_response": {
+            "response_text": "Sim! A partir dos 6 meses, com a introdução alimentar, a banana é uma excelente opção. Ela é rica em potássio e fácil de amassar. Comece oferecendo pequenas porções amassadas ou em pedaços grandes no método BLW.",
+            "media_type": "text",
+            "media_url": null,
+            "metadata": {
+              "processing_time_ms": 1250,
+              "documents_found": 3,
+              "file_search_used": true
+            }
+          },
+          "source_files": [
+            "educare-backend/src/routes/n8nRoutes.js",
+            "educare-backend/src/controllers/ragController.js",
+            "educare-backend/src/services/ragService.js"
+          ]
+        },
+        "biometrics_update": {
+          "label": "API: Registrar Biometria",
+          "method": "POST",
+          "path": "/api/n8n/biometrics/update",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/biometrics/update",
+          "functional_role": "Registra dados biométricos da criança (peso, altura, perímetro cefálico) a partir de texto livre. Utiliza NLP para extrair valores numéricos da mensagem do usuário.",
+          "product_usage": "Acompanhamento de crescimento infantil via WhatsApp, histórico de saúde do bebê, base para alertas de desenvolvimento e geração de curvas de crescimento.",
+          "tags": ["health", "biometrics", "growth", "baby"],
+          "auth": "apiKey",
+          "headers_required": ["x-api-key", "Content-Type"],
+          "query_params": null,
+          "body_schema": {
+            "child_id": {
+              "type": "string",
+              "required": true,
+              "description": "UUID da criança"
+            },
+            "raw_text": {
+              "type": "string",
+              "required": true,
+              "description": "Texto livre com dados biométricos (ex: 'Peso 8.5kg altura 72cm')"
+            }
+          },
+          "example_request": {
+            "method": "POST",
+            "url": "{{EDUCARE_API_URL}}/api/n8n/biometrics/update",
+            "body": {
+              "child_id": "uuid-do-filho",
+              "raw_text": "Hoje o João pesou 8.5kg e está medindo 72cm"
+            }
+          },
+          "example_response": {
+            "response_text": "✅ Registrado para João: peso: 8.5kg, altura: 72cm. Continue acompanhando o desenvolvimento!",
+            "media_type": "text",
+            "media_url": null,
+            "data": {
+              "id": "uuid-do-registro",
+              "weight": 8.5,
+              "height": 72,
+              "head_circumference": null
+            }
+          },
+          "source_files": [
+            "educare-backend/src/routes/n8nRoutes.js",
+            "educare-backend/src/controllers/n8nController.js",
+            "educare-backend/src/services/nlpParserService.js"
+          ]
+        },
+        "sleep_log": {
+          "label": "API: Registrar Sono",
+          "method": "POST",
+          "path": "/api/n8n/sleep/log",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/sleep/log",
+          "functional_role": "Registra informações sobre o sono da criança (horário de início, fim, duração, tipo e qualidade) a partir de texto livre. Utiliza NLP para extrair horários e duração.",
+          "product_usage": "Análise de hábitos de sono do bebê, orientação aos cuidadores sobre rotina, dados para saúde do bebê e identificação de padrões.",
+          "tags": ["health", "sleep", "routine", "baby"],
+          "auth": "apiKey",
+          "headers_required": ["x-api-key", "Content-Type"],
+          "query_params": null,
+          "body_schema": {
+            "child_id": {
+              "type": "string",
+              "required": true,
+              "description": "UUID da criança"
+            },
+            "raw_text": {
+              "type": "string",
+              "required": true,
+              "description": "Texto livre descrevendo o sono (ex: 'Dormiu das 20h às 6h')"
+            }
+          },
+          "example_request": {
+            "method": "POST",
+            "url": "{{EDUCARE_API_URL}}/api/n8n/sleep/log",
+            "body": {
+              "child_id": "uuid-do-filho",
+              "raw_text": "O João dormiu das 20:30 até 6:00 da manhã"
+            }
+          },
+          "example_response": {
+            "response_text": "😴 Sono registrado para João: início: 20:30, fim: 06:00, tipo: noturno. Bons sonhos!",
+            "media_type": "text",
+            "media_url": null,
+            "data": {
+              "id": "uuid-do-registro",
+              "start_time": "20:30",
+              "end_time": "06:00",
+              "duration_minutes": 570,
+              "sleep_type": "night",
+              "quality": null
+            }
+          },
+          "source_files": [
+            "educare-backend/src/routes/n8nRoutes.js",
+            "educare-backend/src/controllers/n8nController.js",
+            "educare-backend/src/services/nlpParserService.js"
+          ]
+        },
+        "appointments_create": {
+          "label": "API: Agendar Consulta",
+          "method": "POST",
+          "path": "/api/n8n/appointments/create",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/appointments/create",
+          "functional_role": "Cria agendamento de consultas médicas ou compromissos relacionados à criança (pediatra, vacinas, terapias) a partir de texto livre. Extrai médico, especialidade, data, horário e local.",
+          "product_usage": "Gestão de agenda da criança, organização familiar, base para automações de lembretes e notificações.",
+          "tags": ["schedule", "appointments", "health", "reminders"],
+          "auth": "apiKey",
+          "headers_required": ["x-api-key", "Content-Type"],
+          "query_params": null,
+          "body_schema": {
+            "child_id": {
+              "type": "string",
+              "required": true,
+              "description": "UUID da criança"
+            },
+            "raw_text": {
+              "type": "string",
+              "required": true,
+              "description": "Texto livre descrevendo a consulta (ex: 'Pediatra dia 15/02 às 14h')"
+            }
+          },
+          "example_request": {
+            "method": "POST",
+            "url": "{{EDUCARE_API_URL}}/api/n8n/appointments/create",
+            "body": {
+              "child_id": "uuid-do-filho",
+              "raw_text": "Consulta com Dr. Carlos pediatra dia 15/02 às 14:00 no Hospital Santa Maria"
+            }
+          },
+          "example_response": {
+            "response_text": "🏥 Consulta agendada para João: Pediatra com Dr. Carlos em 15/02/2025 às 14:00 no(a) Hospital Santa Maria. Vou te lembrar!",
+            "media_type": "text",
+            "media_url": null,
+            "data": {
+              "id": "uuid-do-agendamento",
+              "doctor_name": "Dr. Carlos",
+              "specialty": "Pediatra",
+              "appointment_date": "2025-02-15",
+              "appointment_time": "14:00",
+              "location": "Hospital Santa Maria"
+            }
+          },
+          "source_files": [
+            "educare-backend/src/routes/n8nRoutes.js",
+            "educare-backend/src/controllers/n8nController.js",
+            "educare-backend/src/services/nlpParserService.js"
+          ]
+        },
+        "vaccines_check": {
+          "label": "API: Verificar Vacinas",
+          "method": "GET",
+          "path": "/api/n8n/vaccines/check",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/vaccines/check",
+          "functional_role": "Verifica a situação vacinal da criança com base na idade em semanas e no calendário oficial da Sociedade Brasileira de Pediatria (SBP). Retorna vacinas pendentes, em dia e próximas doses.",
+          "product_usage": "Saúde do Bebê, prevenção, alertas de vacinas atrasadas, lembrete de próximas doses, acompanhamento do calendário vacinal.",
+          "tags": ["health", "vaccines", "prevention", "calendar"],
+          "auth": "apiKey",
+          "headers_required": ["x-api-key"],
+          "query_params": {
+            "age_weeks": {
+              "type": "integer",
+              "required": true,
+              "description": "Idade da criança em semanas"
+            },
+            "child_id": {
+              "type": "string",
+              "required": false,
+              "description": "UUID da criança para verificar histórico de vacinas tomadas"
+            }
+          },
+          "body_schema": null,
+          "example_request": {
+            "method": "GET",
+            "url": "{{EDUCARE_API_URL}}/api/n8n/vaccines/check?age_weeks=16&child_id=uuid-do-filho"
+          },
+          "example_response": {
+            "response_text": "💉 **Calendário Vacinal - 16 semanas**\n\n✅ Todas as vacinas em dia até 16 semanas!\n\n📅 **Próximas vacinas:**\n• Meningocócica C (dose 2) - às 20 semanas\n• Pentavalente (dose 3) - às 24 semanas",
+            "media_type": "text",
+            "media_url": null,
+            "data": {
+              "age_weeks": 16,
+              "pending_count": 0,
+              "pending_vaccines": [],
+              "upcoming_vaccines": [
+                {"vaccine": "Meningocócica C", "weeks": 20, "dose": 2},
+                {"vaccine": "Pentavalente (DTP+Hib+HB)", "weeks": 24, "dose": 3}
+              ],
+              "taken_count": 8
+            }
+          },
+          "source_files": [
+            "educare-backend/src/routes/n8nRoutes.js",
+            "educare-backend/src/controllers/n8nController.js"
+          ]
+        },
+        "content_child": {
+          "label": "API: Conteúdo Jornada da Criança",
+          "method": "GET",
+          "path": "/api/n8n/content/child",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/content/child",
+          "functional_role": "Fornece conteúdo educacional estruturado sobre desenvolvimento infantil, marcos de desenvolvimento, estímulos e orientações conforme a idade ou fase da criança.",
+          "product_usage": "Jornada da Criança, menus educativos, respostas guiadas, engajamento de pais com conteúdo relevante para a fase do bebê.",
+          "tags": ["content", "education", "development", "child"],
+          "auth": "apiKey",
+          "headers_required": ["x-api-key"],
+          "query_params": {
+            "week": {
+              "type": "integer",
+              "required": false,
+              "description": "Semana de desenvolvimento do bebê para filtrar conteúdo"
+            }
+          },
+          "body_schema": null,
+          "example_request": {
+            "method": "GET",
+            "url": "{{EDUCARE_API_URL}}/api/n8n/content/child?week=26"
+          },
+          "example_response": {
+            "response_text": "👶 **Conteúdo para semana 26:**\n\n1. **Introdução Alimentar: Guia Completo**\nTudo sobre como iniciar a alimentação do seu bebê...\n\n2. **Marcos do 6º mês**\nO que esperar do desenvolvimento...",
+            "media_type": "text",
+            "media_url": null,
+            "data": [
+              {"id": "uuid-conteudo-1", "title": "Introdução Alimentar: Guia Completo", "type": "news"},
+              {"id": "uuid-conteudo-2", "title": "Marcos do 6º mês", "type": "training"}
+            ]
+          },
+          "source_files": [
+            "educare-backend/src/routes/n8nRoutes.js",
+            "educare-backend/src/controllers/n8nController.js"
+          ]
+        },
+        "content_mother": {
+          "label": "API: Conteúdo Jornada da Mãe",
+          "method": "GET",
+          "path": "/api/n8n/content/mother",
+          "url": "{{EDUCARE_API_URL}}/api/n8n/content/mother",
+          "functional_role": "Entrega conteúdo de apoio emocional, informativo e prático para mães e cuidadoras, incluindo temas de pós-parto, autocuidado, saúde mental, amamentação e bem-estar.",
+          "product_usage": "Jornada da Mãe, acolhimento emocional, retenção de usuárias, suporte contínuo às mães no período pós-parto.",
+          "tags": ["content", "mother", "wellness", "postpartum"],
+          "auth": "apiKey",
+          "headers_required": ["x-api-key"],
+          "query_params": {
+            "week": {
+              "type": "integer",
+              "required": false,
+              "description": "Semana pós-parto para filtrar conteúdo relevante"
+            }
+          },
+          "body_schema": null,
+          "example_request": {
+            "method": "GET",
+            "url": "{{EDUCARE_API_URL}}/api/n8n/content/mother?week=8"
+          },
+          "example_response": {
+            "response_text": "👩 **Conteúdo para mães - semana 8:**\n\n1. **Autocuidado no Puerpério**\nDicas essenciais para cuidar de você...\n\n2. **Voltando à Rotina**\nComo equilibrar maternidade e vida pessoal...",
+            "media_type": "text",
+            "media_url": null,
+            "data": [
+              {"id": "uuid-conteudo-1", "title": "Autocuidado no Puerpério", "type": "news"},
+              {"id": "uuid-conteudo-2", "title": "Voltando à Rotina", "type": "training"}
+            ]
+          },
+          "source_files": [
+            "educare-backend/src/routes/n8nRoutes.js",
+            "educare-backend/src/controllers/n8nController.js"
+          ]
+        }
+      }
+    }
+  }
+}
