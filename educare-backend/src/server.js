@@ -26,6 +26,7 @@ const journeyQuestionsRoutes = require('./routes/journeyQuestionsRoutes');
 const activityRoutes = require('./routes/activityRoutes');
 const userActivitiesRoutes = require('./routes/userActivitiesRoutes');
 const journeyV2Routes = require('./routes/journeyV2Routes');
+const adminJourneyV2Routes = require('./routes/adminJourneyV2Routes');
 const externalApiRoutes = require('./routes/externalApiRoutes');
 const mediaResourceRoutes = require('./routes/mediaResourceRoutes');
 const healthRoutes = require('./routes/healthRoutes');
@@ -140,6 +141,7 @@ app.use('/api/journey-questions', journeyQuestionsRoutes); // Rota pública para
 app.use('/api/activities', activityRoutes);
 app.use('/api/admin/user-activities', userActivitiesRoutes);
 app.use('/api/journey-v2', journeyV2Routes);
+app.use('/api/admin/journey-v2', adminJourneyV2Routes);
 app.use('/api/external', externalApiRoutes);
 // Novas rotas do TitiNauta
 app.use('/api/journey', titiNautaRoutes); // Interface moderna do TitiNauta
