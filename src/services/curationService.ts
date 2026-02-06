@@ -133,8 +133,26 @@ export interface ClassifyAllResult {
   type: string;
   classified: number;
   skipped: number;
+  ai_filled: number;
   duplicates_found: number;
   duplicates: Array<{ id: string; title: string; duplicate_of: string }>;
+}
+
+export interface AIGenerateParams {
+  axis: CurationAxis;
+  month: number;
+  weeks: number[];
+  count: number;
+  domain?: string | null;
+  instructions?: string;
+}
+
+export interface AIGenerateResult {
+  axis: string;
+  month: number;
+  weeks: number[];
+  count: number;
+  items: any[];
 }
 
 export interface BatchImportItem {
@@ -296,6 +314,11 @@ class CurationService {
 
   async batchImport(axis: CurationAxis, items: BatchImportItem[]): Promise<BatchImportResult> {
     const response = await httpClient.post(`${this.baseUrl}/batch-import`, { axis, items });
+    return (response as any).data;
+  }
+
+  async generateWithAI(params: AIGenerateParams): Promise<AIGenerateResult> {
+    const response = await httpClient.post(`${this.baseUrl}/generate-ai`, params);
     return (response as any).data;
   }
 

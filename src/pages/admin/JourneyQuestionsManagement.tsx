@@ -9,6 +9,7 @@ import {
   BabyMilestoneMapping,
   MaternalCurationMapping,
   JourneyV2MediaLink,
+  AIGenerateParams,
 } from '../../services/curationService';
 import {
   journeyV2AdminService,
@@ -112,9 +113,10 @@ const QUIZ_TEMPLATE = `[
     "question": "Texto da pergunta?",
     "options": [
       { "id": "opt1", "text": "Opção 1", "value": 1 },
-      { "id": "opt2", "text": "Opção 2", "value": 2 }
+      { "id": "opt2", "text": "Opção 2", "value": 2 },
+      { "id": "opt3", "text": "Opção 3", "value": 3 }
     ],
-    "feedback": { "positive": "Parabéns!", "negative": "Tente novamente" },
+    "feedback": { "positive": "Feedback positivo acolhedor", "negative": "Feedback negativo respeitoso" },
     "knowledge": {}
   }
 ]`;
@@ -217,6 +219,16 @@ const JourneyQuestionsManagement: React.FC = () => {
   const [maternalDomainDialog, setMaternalDomainDialog] = useState(false);
   const [maternalQuizId, setMaternalQuizId] = useState<string>('');
   const [selectedMaternalDomain, setSelectedMaternalDomain] = useState<string>('');
+
+  const [aiGeneratorDialog, setAiGeneratorDialog] = useState(false);
+  const [aiGenAxis, setAiGenAxis] = useState<CurationAxis>(activeAxis);
+  const [aiGenMonth, setAiGenMonth] = useState(1);
+  const [aiGenWeeks, setAiGenWeeks] = useState<number[]>([1]);
+  const [aiGenCount, setAiGenCount] = useState(2);
+  const [aiGenDomain, setAiGenDomain] = useState('');
+  const [aiGenInstructions, setAiGenInstructions] = useState('');
+  const [aiGenResult, setAiGenResult] = useState<any[] | null>(null);
+  const [aiGenResultJson, setAiGenResultJson] = useState('');
 
   /* ======================== EFFECTS ======================== */
 
@@ -413,7 +425,7 @@ const JourneyQuestionsManagement: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['curation-stats'] });
       toast({
         title: 'Classificação concluída',
-        description: `${data.classified} classificados, ${data.duplicates_found} duplicatas encontradas`,
+        description: `${data.classified} itens classificados${data.ai_filled ? `, ${data.ai_filled} preenchidos por IA` : ''}${data.duplicates_found ? `, ${data.duplicates_found} duplicatas` : ''}`,
       });
     },
     onError: () => {
@@ -550,6 +562,21 @@ const JourneyQuestionsManagement: React.FC = () => {
     },
     onError: () => {
       toast({ title: 'Erro', description: 'Erro ao remover mapeamento materno.', variant: 'destructive' });
+    },
+  });
+
+  const aiGenerateMutation = useMutation({
+    mutationFn: (params: AIGenerateParams) => curationService.generateWithAI(params),
+    onSuccess: (data) => {
+      setAiGenResult(data.items);
+      setAiGenResultJson(JSON.stringify(data.items, null, 2));
+      toast({
+        title: 'Conteúdo gerado com sucesso!',
+        description: `${data.count} itens gerados para ${curationService.getAxisLabel(data.axis as CurationAxis)}`,
+      });
+    },
+    onError: () => {
+      toast({ title: 'Erro', description: 'Erro ao gerar conteúdo com IA.', variant: 'destructive' });
     },
   });
 
@@ -696,6 +723,26 @@ const JourneyQuestionsManagement: React.FC = () => {
       return;
     }
     batchImportMutation.mutate({ axis: activeAxis, items });
+  };
+
+  const handleAIGenerateImport = () => {
+    let items: BatchImportItem[];
+    try {
+      items = JSON.parse(aiGenResultJson);
+      if (!Array.isArray(items)) throw new Error('Not array');
+    } catch {
+      toast({ title: 'Erro', description: 'JSON inválido.', variant: 'destructive' });
+      return;
+    }
+    batchImportMutation.mutate({ axis: aiGenAxis, items }, {
+      onSuccess: (data) => {
+        setBatchImportResult(data);
+        setAiGenResult(null);
+        setAiGenResultJson('');
+        setAiGeneratorDialog(false);
+        setBatchImportDialog(true);
+      }
+    });
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -867,6 +914,18 @@ const JourneyQuestionsManagement: React.FC = () => {
           >
             <Sparkles className={`h-4 w-4 mr-2 ${classifyAllMutation.isPending ? 'animate-spin' : ''}`} />
             {classifyAllMutation.isPending ? 'Classificando...' : 'Classificar Todos'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setAiGenAxis(activeAxis);
+              setAiGenResult(null);
+              setAiGenResultJson('');
+              setAiGeneratorDialog(true);
+            }}
+            className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-700 dark:text-purple-400 dark:hover:bg-purple-950"
+          >
+            <Sparkles className="h-4 w-4 mr-2" /> Gerar com IA
           </Button>
           <Button
             variant="outline"
@@ -1953,6 +2012,35 @@ const JourneyQuestionsManagement: React.FC = () => {
                     className="mt-1"
                   />
                 </div>
+                {batchImportJson.trim() && (() => {
+                  try {
+                    const parsed = JSON.parse(batchImportJson);
+                    if (!Array.isArray(parsed)) return (
+                      <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 p-3 rounded-md flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-red-500" />
+                        <span className="text-sm text-red-700 dark:text-red-300">JSON deve ser um array [ ]</span>
+                      </div>
+                    );
+                    const validCount = parsed.filter((item: any) => item.title).length;
+                    const invalidCount = parsed.length - validCount;
+                    return (
+                      <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-3 rounded-md">
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="font-medium text-blue-700 dark:text-blue-300">{parsed.length} itens detectados</span>
+                          <span className="text-green-600">{validCount} válidos</span>
+                          {invalidCount > 0 && <span className="text-red-600">{invalidCount} sem título</span>}
+                        </div>
+                      </div>
+                    );
+                  } catch {
+                    return (
+                      <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 p-3 rounded-md flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-red-500" />
+                        <span className="text-sm text-red-700 dark:text-red-300">JSON inválido — verifique a sintaxe</span>
+                      </div>
+                    );
+                  }
+                })()}
                 <div className="bg-muted p-3 rounded-md">
                   <Label className="text-sm font-semibold">Formato esperado:</Label>
                   <pre className="text-xs mt-1 overflow-x-auto">
@@ -2208,6 +2296,191 @@ const JourneyQuestionsManagement: React.FC = () => {
                 {createMaternalMappingMutation.isPending ? 'Vinculando...' : 'Vincular'}
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* ======================== AI GENERATOR DIALOG ======================== */}
+
+      <Dialog open={aiGeneratorDialog} onOpenChange={setAiGeneratorDialog}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-purple-500" />
+              Gerar Conteúdo com IA — {curationService.getAxisLabel(aiGenAxis)}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {!aiGenResult ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Eixo</Label>
+                    <Select value={aiGenAxis} onValueChange={(v) => setAiGenAxis(v as CurationAxis)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="baby-content">Conteúdo Bebê</SelectItem>
+                        <SelectItem value="mother-content">Conteúdo Mãe</SelectItem>
+                        <SelectItem value="baby-quiz">Quiz Bebê</SelectItem>
+                        <SelectItem value="mother-quiz">Quiz Mãe</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Mês</Label>
+                    <Select value={aiGenMonth.toString()} onValueChange={(v) => setAiGenMonth(parseInt(v))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5].map((m) => (
+                          <SelectItem key={m} value={m.toString()}>Mês {m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Semanas (selecione uma ou mais)</Label>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].filter(w => {
+                      const startWeek = (aiGenMonth - 1) * 4 + 1;
+                      const endWeek = aiGenMonth * 4;
+                      return w >= startWeek && w <= endWeek;
+                    }).map((w) => (
+                      <Button
+                        key={w}
+                        variant={aiGenWeeks.includes(w) ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => {
+                          setAiGenWeeks(prev =>
+                            prev.includes(w) ? prev.filter(x => x !== w) : [...prev, w].sort((a, b) => a - b)
+                          );
+                        }}
+                      >
+                        Sem. {w}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Quantidade por semana</Label>
+                    <Select value={aiGenCount.toString()} onValueChange={(v) => setAiGenCount(parseInt(v))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                          <SelectItem key={n} value={n.toString()}>{n} {n === 1 ? 'item' : 'itens'}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Domínio (opcional)</Label>
+                    <Select value={aiGenDomain} onValueChange={setAiGenDomain}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Todos os domínios" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Todos</SelectItem>
+                        {(aiGenAxis.startsWith('baby') ? curationService.getBabyDomains() : curationService.getMotherDomains()).map((d) => (
+                          <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Instruções adicionais (opcional)</Label>
+                  <Textarea
+                    value={aiGenInstructions}
+                    onChange={(e) => setAiGenInstructions(e.target.value)}
+                    placeholder="Ex: Foque em atividades de estimulação sensorial para bebês de 3 meses..."
+                    className="min-h-[80px]"
+                  />
+                </div>
+
+                <div className="bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 p-3 rounded-md text-sm text-purple-700 dark:text-purple-300">
+                  <strong>Total estimado:</strong> {aiGenWeeks.length * aiGenCount} itens ({aiGenWeeks.length} semana{aiGenWeeks.length > 1 ? 's' : ''} × {aiGenCount} por semana)
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setAiGeneratorDialog(false)}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={() => aiGenerateMutation.mutate({
+                      axis: aiGenAxis,
+                      month: aiGenMonth,
+                      weeks: aiGenWeeks,
+                      count: aiGenCount,
+                      domain: aiGenDomain || null,
+                      instructions: aiGenInstructions,
+                    })}
+                    disabled={aiGenerateMutation.isPending || aiGenWeeks.length === 0}
+                    className="bg-purple-600 hover:bg-purple-700"
+                  >
+                    {aiGenerateMutation.isPending ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Gerando...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Gerar Conteúdo
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-3 rounded-md">
+                  <div className="flex items-center gap-2 text-green-700 dark:text-green-300 font-medium">
+                    <Check className="h-4 w-4" />
+                    {aiGenResult.length} itens gerados com sucesso!
+                  </div>
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                    Revise e edite o JSON abaixo se necessário, depois clique em Importar.
+                  </p>
+                </div>
+
+                <div>
+                  <Label>JSON gerado (editável)</Label>
+                  <Textarea
+                    className="font-mono text-xs min-h-[300px]"
+                    value={aiGenResultJson}
+                    onChange={(e) => setAiGenResultJson(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setAiGenResult(null);
+                      setAiGenResultJson('');
+                    }}
+                  >
+                    Gerar Novamente
+                  </Button>
+                  <Button
+                    onClick={handleAIGenerateImport}
+                    disabled={batchImportMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {batchImportMutation.isPending ? 'Importando...' : 'Importar Conteúdo'}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>

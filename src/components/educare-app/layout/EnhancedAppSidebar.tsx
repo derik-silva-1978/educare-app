@@ -160,7 +160,7 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         icon: Database,
       },
       {
-        title: "Marcos do Desenvolvimento",
+        title: "Curadoria Quiz",
         url: "/educare-app/owner/milestones-curation",
         icon: Baby,
       },
@@ -239,7 +239,7 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         icon: FileVideo,
       },
       {
-        title: "Marcos do Desenvolvimento",
+        title: "Curadoria Quiz",
         url: "/educare-app/admin/milestones-curation",
         icon: Baby,
       },

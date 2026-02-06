@@ -21,6 +21,7 @@ const {
   BABY_DOMAIN_VALUES,
   MOTHER_DOMAIN_VALUES
 } = require('../services/domainClassifierService');
+const { autoFillQuizFields, generateQuizContent } = require('../services/quizAIService');
 
 const curationController = {
 
@@ -110,9 +111,11 @@ const curationController = {
       const whereClause = force ? {} : { dev_domain: null };
       let items, classified = 0, skipped = 0, duplicates = [];
 
+      let ai_filled = 0;
+
       if (type === 'quiz') {
         items = await sequelize.query(`
-          SELECT q.id, q.title, q.question, q.options, q.feedback, q.knowledge, q.content_hash, q.dev_domain
+          SELECT q.id, q.title, q.question, q.options, q.feedback, q.knowledge, q.content_hash, q.dev_domain, w.week as week_number
           FROM journey_v2_quizzes q
           JOIN journey_v2_weeks w ON q.week_id = w.id
           JOIN journey_v2 j ON w.journey_id = j.id
@@ -132,12 +135,31 @@ const curationController = {
             duplicates.push({ id: item.id, title: item.title, duplicate_of: existingHash.id });
           }
 
-          await JourneyV2Quiz.update({
+          const updateData = {
             dev_domain: classification.domain,
             classification_source: classification.source,
             classification_confidence: classification.confidence,
             content_hash: hash
-          }, { where: { id: item.id } });
+          };
+
+          try {
+            const aiResult = await autoFillQuizFields(item, trail, item.week_number);
+            if (aiResult) {
+              if (aiResult.options_filled && aiResult.options) {
+                updateData.options = aiResult.options;
+              }
+              if (aiResult.feedback_filled && aiResult.feedback) {
+                updateData.feedback = aiResult.feedback;
+              }
+              if (aiResult.options_filled || aiResult.feedback_filled) {
+                ai_filled++;
+              }
+            }
+          } catch (aiErr) {
+            console.error(`Erro ao preencher quiz ${item.id} com IA:`, aiErr.message);
+          }
+
+          await JourneyV2Quiz.update(updateData, { where: { id: item.id } });
 
           classified++;
         }
@@ -181,6 +203,7 @@ const curationController = {
           type,
           classified,
           skipped,
+          ai_filled,
           duplicates_found: duplicates.length,
           duplicates
         }
@@ -732,6 +755,52 @@ const curationController = {
     } catch (error) {
       console.error('Erro no batch import:', error);
       return res.status(500).json({ error: 'Erro no batch import de curadoria' });
+    }
+  },
+
+  generateWithAI: async (req, res) => {
+    try {
+      const { axis, month, weeks, count, domain, instructions } = req.body;
+
+      if (!axis || !['baby-quiz', 'mother-quiz', 'baby-content', 'mother-content'].includes(axis)) {
+        return res.status(400).json({ error: 'axis deve ser baby-quiz, mother-quiz, baby-content ou mother-content' });
+      }
+      if (!month || month < 1 || month > 5) {
+        return res.status(400).json({ error: 'month deve ser entre 1 e 5' });
+      }
+      if (!weeks || !Array.isArray(weeks) || weeks.length === 0) {
+        return res.status(400).json({ error: 'weeks deve ser um array não vazio de números de semanas' });
+      }
+      if (!count || count < 1 || count > 10) {
+        return res.status(400).json({ error: 'count deve ser entre 1 e 10 por semana' });
+      }
+
+      const result = await generateQuizContent({
+        axis,
+        month,
+        weeks,
+        count: parseInt(count),
+        domain: domain || null,
+        instructions: instructions || ''
+      });
+
+      if (!result) {
+        return res.status(500).json({ error: 'Não foi possível gerar conteúdo. Verifique se a chave OpenAI está configurada.' });
+      }
+
+      return res.json({
+        success: true,
+        data: {
+          axis,
+          month,
+          weeks,
+          count: result.length,
+          items: result
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao gerar conteúdo com IA:', error);
+      return res.status(500).json({ error: 'Erro ao gerar conteúdo com IA' });
     }
   }
 };

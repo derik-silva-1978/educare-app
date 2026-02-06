@@ -30,4 +30,6 @@ router.delete('/media/:mediaId', verifyToken, requireCuratorRole, curationContro
 
 router.post('/batch-import', verifyToken, requireOwnerRole, curationController.batchImport);
 
+router.post('/generate-ai', verifyToken, requireOwnerRole, curationController.generateWithAI);
+
 module.exports = router;
