@@ -76,6 +76,11 @@ const JourneyV2Badge = require('./JourneyV2Badge');
 const UserJourneyV2Progress = require('./UserJourneyV2Progress');
 const UserJourneyV2Badge = require('./UserJourneyV2Badge');
 
+// Modelos de Curadoria V2 e Mídia
+const MaternalCurationMapping = require('./MaternalCurationMapping');
+const JourneyV2Media = require('./JourneyV2Media');
+const MediaResource = require('./MediaResource');
+
 // Definição das associações
 
 // User <-> Profile (1:1)
@@ -314,6 +319,38 @@ MilestoneCandidateScore.belongsTo(OfficialMilestone, { foreignKey: 'official_mil
 JourneyBotQuestion.hasMany(MilestoneCandidateScore, { foreignKey: 'journey_question_id', as: 'candidateScores' });
 MilestoneCandidateScore.belongsTo(JourneyBotQuestion, { foreignKey: 'journey_question_id', as: 'question' });
 
+// JourneyV2Quiz <-> MilestoneMapping (1:N) — V2 quiz vinculado a marcos
+JourneyV2Quiz.hasMany(MilestoneMapping, { foreignKey: 'journey_v2_quiz_id', as: 'milestoneMappings' });
+MilestoneMapping.belongsTo(JourneyV2Quiz, { foreignKey: 'journey_v2_quiz_id', as: 'journeyV2Quiz' });
+
+// === ASSOCIAÇÕES DE CURADORIA MATERNA ===
+
+// JourneyV2Quiz <-> MaternalCurationMapping (1:N)
+JourneyV2Quiz.hasMany(MaternalCurationMapping, { foreignKey: 'journey_v2_quiz_id', as: 'maternalCurations' });
+MaternalCurationMapping.belongsTo(JourneyV2Quiz, { foreignKey: 'journey_v2_quiz_id', as: 'quiz' });
+
+// JourneyV2Topic <-> MaternalCurationMapping (1:N)
+JourneyV2Topic.hasMany(MaternalCurationMapping, { foreignKey: 'journey_v2_topic_id', as: 'maternalCurations' });
+MaternalCurationMapping.belongsTo(JourneyV2Topic, { foreignKey: 'journey_v2_topic_id', as: 'topic' });
+
+// User (Curador) <-> MaternalCurationMapping (1:N)
+User.hasMany(MaternalCurationMapping, { foreignKey: 'verified_by', as: 'verifiedMaternalMappings' });
+MaternalCurationMapping.belongsTo(User, { foreignKey: 'verified_by', as: 'verifier' });
+
+// === ASSOCIAÇÕES DE MÍDIA V2 ===
+
+// JourneyV2Topic <-> JourneyV2Media (1:N)
+JourneyV2Topic.hasMany(JourneyV2Media, { foreignKey: 'journey_v2_topic_id', as: 'mediaItems' });
+JourneyV2Media.belongsTo(JourneyV2Topic, { foreignKey: 'journey_v2_topic_id', as: 'topic' });
+
+// JourneyV2Quiz <-> JourneyV2Media (1:N)
+JourneyV2Quiz.hasMany(JourneyV2Media, { foreignKey: 'journey_v2_quiz_id', as: 'mediaItems' });
+JourneyV2Media.belongsTo(JourneyV2Quiz, { foreignKey: 'journey_v2_quiz_id', as: 'quiz' });
+
+// MediaResource <-> JourneyV2Media (1:N)
+MediaResource.hasMany(JourneyV2Media, { foreignKey: 'media_resource_id', as: 'journeyV2Usages' });
+JourneyV2Media.belongsTo(MediaResource, { foreignKey: 'media_resource_id', as: 'mediaResource' });
+
 // === ASSOCIAÇÕES DE RELATÓRIOS DE DESENVOLVIMENTO ===
 
 // Child <-> ChildDevelopmentReport (1:N)
@@ -462,5 +499,9 @@ module.exports = {
   MaternalHealthProfile,
   MaternalDailyHealth,
   MaternalMentalHealth,
-  MaternalAppointment
+  MaternalAppointment,
+  // Modelos de Curadoria V2 e Mídia
+  MaternalCurationMapping,
+  JourneyV2Media,
+  MediaResource
 };

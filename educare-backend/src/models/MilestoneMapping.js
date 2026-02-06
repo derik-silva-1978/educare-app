@@ -14,8 +14,19 @@ const MilestoneMapping = sequelize.define('MilestoneMapping', {
   },
   journey_question_id: {
     type: DataTypes.UUID,
-    allowNull: false,
-    comment: 'FK para journey_bot_questions'
+    allowNull: true,
+    comment: 'FK para journey_bot_questions (legado)'
+  },
+  journey_v2_quiz_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    comment: 'FK para journey_v2_quizzes (V2)'
+  },
+  source_type: {
+    type: DataTypes.STRING(20),
+    allowNull: true,
+    defaultValue: 'legacy',
+    comment: 'Tipo de origem: legacy (JourneyBotQuestion) ou v2 (JourneyV2Quiz)'
   },
   weight: {
     type: DataTypes.DECIMAL(3, 2),
@@ -56,17 +67,20 @@ const MilestoneMapping = sequelize.define('MilestoneMapping', {
   underscored: true,
   indexes: [
     {
-      unique: true,
-      fields: ['official_milestone_id', 'journey_question_id'],
-      name: 'unique_milestone_question_mapping'
-    },
-    {
       fields: ['verified_by_curator'],
       name: 'idx_milestone_mappings_verified'
     },
     {
       fields: ['is_auto_generated'],
       name: 'idx_milestone_mappings_auto'
+    },
+    {
+      fields: ['journey_v2_quiz_id'],
+      name: 'idx_milestone_mappings_v2_quiz'
+    },
+    {
+      fields: ['source_type'],
+      name: 'idx_milestone_mappings_source_type'
     }
   ]
 });

@@ -9,6 +9,14 @@ const {
   sequelize
 } = require('../models');
 const { Op } = require('sequelize');
+const {
+  classifyQuiz,
+  classifyTopic,
+  computeQuizHash,
+  computeTopicHash,
+  checkDuplicateQuiz,
+  checkDuplicateTopic
+} = require('../services/domainClassifierService');
 
 const adminJourneyV2Controller = {
   getStatistics: async (req, res) => {
@@ -181,9 +189,33 @@ const adminJourneyV2Controller = {
 
   updateTopic: async (req, res) => {
     try {
-      const topic = await JourneyV2Topic.findByPk(req.params.id);
+      const topic = await JourneyV2Topic.findByPk(req.params.id, {
+        include: [{ model: JourneyV2Week, as: 'week', include: [{ model: JourneyV2, as: 'journey', attributes: ['trail'] }] }]
+      });
       if (!topic) return res.status(404).json({ error: 'Tópico não encontrado' });
-      await topic.update(req.body);
+
+      const updateData = { ...req.body };
+
+      if (req.body.title || req.body.content) {
+        const trail = topic.week?.journey?.trail || 'baby';
+        const merged = { title: req.body.title || topic.title, content: req.body.content || topic.content };
+
+        if (!req.body.dev_domain) {
+          const classification = classifyTopic(merged, trail);
+          updateData.dev_domain = classification.domain;
+          updateData.classification_source = classification.source;
+          updateData.classification_confidence = classification.confidence;
+        }
+
+        const hash = computeTopicHash(merged);
+        const duplicate = await checkDuplicateTopic(JourneyV2Topic, hash, topic.id);
+        if (duplicate) {
+          return res.status(409).json({ error: 'Tópico duplicado detectado', duplicate: { id: duplicate.id, title: duplicate.title } });
+        }
+        updateData.content_hash = hash;
+      }
+
+      await topic.update(updateData);
       return res.json({ success: true, data: topic });
     } catch (error) {
       console.error('Erro ao atualizar tópico:', error);
@@ -200,7 +232,30 @@ const adminJourneyV2Controller = {
       const week = await JourneyV2Week.findByPk(week_id);
       if (!week) return res.status(404).json({ error: 'Semana não encontrada' });
 
-      const topic = await JourneyV2Topic.create({ week_id, title, content, order_index: order_index || 0 });
+      const weekWithJourney = await JourneyV2Week.findByPk(week_id, {
+        include: [{ model: JourneyV2, as: 'journey', attributes: ['trail'] }]
+      });
+      const trail = weekWithJourney?.journey?.trail || 'baby';
+
+      const topicData = { week_id, title, content, order_index: order_index || 0 };
+
+      const classification = classifyTopic(topicData, trail);
+      topicData.dev_domain = req.body.dev_domain || classification.domain;
+      topicData.classification_source = req.body.dev_domain ? 'manual' : classification.source;
+      topicData.classification_confidence = req.body.dev_domain ? 1.0 : classification.confidence;
+
+      const hash = computeTopicHash(topicData);
+      topicData.content_hash = hash;
+
+      const duplicate = await checkDuplicateTopic(JourneyV2Topic, hash);
+      if (duplicate) {
+        return res.status(409).json({
+          error: 'Tópico duplicado detectado',
+          duplicate: { id: duplicate.id, title: duplicate.title }
+        });
+      }
+
+      const topic = await JourneyV2Topic.create(topicData);
       return res.status(201).json({ success: true, data: topic });
     } catch (error) {
       console.error('Erro ao criar tópico:', error);
@@ -261,7 +316,34 @@ const adminJourneyV2Controller = {
         }
       }
 
-      await quiz.update(req.body);
+      const updateData = { ...req.body };
+
+      if (req.body.title || req.body.question || req.body.options) {
+        const trail = week?.journey?.trail || quiz.domain;
+        const merged = {
+          title: req.body.title || quiz.title,
+          question: req.body.question || quiz.question,
+          options: req.body.options || quiz.options,
+          feedback: req.body.feedback || quiz.feedback,
+          knowledge: req.body.knowledge || quiz.knowledge
+        };
+
+        if (!req.body.dev_domain) {
+          const classification = classifyQuiz(merged, trail);
+          updateData.dev_domain = classification.domain;
+          updateData.classification_source = classification.source;
+          updateData.classification_confidence = classification.confidence;
+        }
+
+        const hash = computeQuizHash(merged);
+        const duplicate = await checkDuplicateQuiz(JourneyV2Quiz, hash, quiz.id);
+        if (duplicate) {
+          return res.status(409).json({ error: 'Quiz duplicado detectado', duplicate: { id: duplicate.id, title: duplicate.title, question: duplicate.question } });
+        }
+        updateData.content_hash = hash;
+      }
+
+      await quiz.update(updateData);
       return res.json({ success: true, data: quiz });
     } catch (error) {
       console.error('Erro ao atualizar quiz:', error);
@@ -288,9 +370,26 @@ const adminJourneyV2Controller = {
         return res.status(400).json({ error: `O domínio do quiz (${domain}) deve corresponder à trilha da semana (${week.journey.trail}).` });
       }
 
-      const quiz = await JourneyV2Quiz.create({
-        week_id, domain, domain_id: domain_id || `${domain}_custom`, title, question, options, feedback, knowledge: knowledge || {}
-      });
+      const trail = week.journey ? week.journey.trail : domain;
+      const quizData = { week_id, domain, domain_id: domain_id || `${domain}_custom`, title, question, options, feedback, knowledge: knowledge || {} };
+
+      const classification = classifyQuiz(quizData, trail);
+      quizData.dev_domain = req.body.dev_domain || classification.domain;
+      quizData.classification_source = req.body.dev_domain ? 'manual' : classification.source;
+      quizData.classification_confidence = req.body.dev_domain ? 1.0 : classification.confidence;
+
+      const hash = computeQuizHash(quizData);
+      quizData.content_hash = hash;
+
+      const duplicate = await checkDuplicateQuiz(JourneyV2Quiz, hash);
+      if (duplicate) {
+        return res.status(409).json({
+          error: 'Quiz duplicado detectado',
+          duplicate: { id: duplicate.id, title: duplicate.title, question: duplicate.question }
+        });
+      }
+
+      const quiz = await JourneyV2Quiz.create(quizData);
       return res.status(201).json({ success: true, data: quiz });
     } catch (error) {
       console.error('Erro ao criar quiz:', error);

@@ -34,6 +34,16 @@ The frontend, built with React 18, TypeScript, and Vite, utilizes `shadcn/ui` (R
     - **Prompt Management**: Customization of AI assistant behavior with versioning and dynamic variable substitution.
     - **LLM Configuration**: Extensible system for per-agent model selection across 9 providers (OpenAI, Google Gemini, DeepSeek, Groq, xAI, Anthropic, Together AI, OpenRouter, Custom) with configurable parameters.
 - **Journey V2 Content System**: A comprehensive content management system for educational maternal health and baby development content. Features two content types: educational topics (weeks 1-4 orientation) and interactive quizzes (week 5+). Organized by dual trails (baby/mother), 5 months, 20 weeks. Backend admin CRUD at `/api/admin/journey-v2/*` with server-side Week 5 rule enforcement and trail/domain consistency. Frontend admin page at `/admin/journey-questions` with tabs, filters, statistics, view/edit/create dialogs, and reimport. Database models: `JourneyV2`, `JourneyV2Week`, `JourneyV2Topic`, `JourneyV2Quiz`, `JourneyV2QuizDomain`, `JourneyV2Badge`. Import script at `educare-backend/scripts/importJourneyV2.js`. Source data in `conteudo_quiz/` folder.
+- **Journey V2 Curation System (4-Axis)**: A specialized curation and classification system for Journey V2 content, operating across 4 independent axes:
+    - **Baby Content** (topics): Classified by 6 baby dev domains (motor, cognitivo, linguagem, social, emocional, sensorial) using TitiNauta Criança
+    - **Mother Content** (topics): Classified by 6 maternal domains (nutricao, saude_mental, recuperacao, amamentacao, saude_fisica, autocuidado) using TitiNauta Materna
+    - **Baby Quiz** (week 5+): Same baby dev domains, linked to existing OfficialMilestone system via extended `milestone_mappings`
+    - **Mother Quiz** (week 5+): Same maternal domains, with independent `maternal_curation_mappings` table
+    - Backend REST API at `/api/admin/curation/*` with endpoints for classification, domain management, milestone mappings (baby), maternal mappings (mother), and media linking
+    - `domainClassifierService.js`: Rule-based heuristic classifier with keyword dictionaries for both baby (6 domains) and mother (6 domains), SHA-256 content hashing for anti-duplication
+    - New models: `MaternalCurationMapping`, `JourneyV2Media` (bridge to MediaResource)
+    - Extended models: `JourneyV2Quiz` and `JourneyV2Topic` (added `dev_domain`, `content_hash`, `classification_source`, `classification_confidence`), `MilestoneMapping` (added `journey_v2_quiz_id`, `source_type`)
+    - Audit document: `docs/ingestion-curation-audit.md`
 - **AI Report Generator**: Enables generation of customizable health and development reports for children across multiple categories, with an option to send reports via WhatsApp.
 - **WhatsApp Integration**: Direct integration with Evolution API for sending messages, including password recovery links and AI-generated reports. It also includes a user recognition system for seamless interaction within n8n workflows.
 

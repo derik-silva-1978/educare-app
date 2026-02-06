@@ -180,6 +180,10 @@ app.use('/api/faqs', faqRoutes);
 const milestonesRoutes = require('./routes/milestonesRoutes');
 app.use('/api/admin/milestones', milestonesRoutes);
 
+// Curadoria V2 (4 Eixos) routes
+const curationRoutes = require('./routes/curationRoutes');
+app.use('/api/admin/curation', curationRoutes);
+
 // Development Reports routes
 const developmentReportRoutes = require('./routes/developmentReportRoutes');
 app.use('/api/development-reports', developmentReportRoutes);
