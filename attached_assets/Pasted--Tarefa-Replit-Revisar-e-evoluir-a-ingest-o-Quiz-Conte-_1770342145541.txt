@@ -1,0 +1,168 @@
+# Tarefa (Replit): Revisar e evoluir a ingestão (Quiz + Conteúdo) e o módulo de Curadoria (Marcos do Desenvolvimento)
+
+## Contexto
+A plataforma passou por uma mudança na **estrutura de ingestão de perguntas** (Quiz e Conteúdo). 
+Existe um módulo de **curadoria** que recebe inputs do módulo de perguntas, faz enquadramento por **Marcos do Desenvolvimento**, e alimenta **Dashboard + Banco de Dados**.
+
+Com a mudança, surgiu um risco: o módulo de curadoria ficar “doente” (inconsistências, dados incompletos, perda de capacidade de classificar por domínio/faixa etária, quebra de APIs, etc.).
+
+Antes, havia ingestão capaz de classificar o **domínio** ao qual a pergunta se referia (ex.: motor, cognitivo, sensorial, comunicação, social-emocional, etc.). Agora isso não está claro / não existe como antes — mas continua sendo importante curar perguntas por **faixa etária** e (idealmente) **domínio**.
+
+Você (Replit) tem acesso ao repositório. Tome decisões técnicas sem overengineering, mas garantindo saúde do ecossistema (DB, APIs, dashboard).
+
+---
+
+## Objetivos (resultado esperado)
+1) **Auditar a estrutura atual de ingestão** (Quiz + Conteúdo) e o **módulo de Curadoria** (marcos).
+2) Propor e implementar (ou deixar um plano claro) para manter:
+   - **Curadoria saudável**: dados coerentes, versionáveis, sem duplicidade, com validações.
+   - **DB e Dashboard saudáveis**: consultas consistentes, sem “buracos” e sem regressão.
+   - **APIs funcionando** com a nova estrutura (backward-compat quando necessário).
+3) Reabilitar a capacidade de **classificar domínio**, mesmo que a nova estrutura não traga isso explicitamente.
+4) Garantir ingestão prática de:
+   - **Novas perguntas do Quiz** (Bebê e Mãe).
+   - **Novos conteúdos** (Jornada / conhecimento), incluindo **links e arquivos**.
+5) Avaliar e sugerir **granularidade maior do JSON** para suportar:
+   - Conteúdos com **partes** (texto, microcards, links, anexos, etc.).
+   - Conteúdos com **áudio** (incluindo potencial integração futura com ElevenLabs).
+
+---
+
+## Passo 1 — Inventário e diagnóstico (obrigatório)
+Faça um levantamento nos arquivos e código para responder:
+
+### 1.1 Fluxo atual de ingestão
+- Quais são as fontes de ingestão (arquivos, endpoints, rotinas, jobs, scripts)?
+- Quais estruturas JSON/CSV são aceitas hoje?
+- Como é feito o mapeamento para DB?
+
+### 1.2 Módulo de curadoria (marcos)
+- Onde está o módulo? (pasta/arquivo/component/service)
+- Quais entradas ele espera?
+- Quais saídas ele gera?
+- Quais campos são essenciais para o “enquadramento” dos marcos (idade, semana, domínios, tags, etc.)?
+- Quais pontos quebraram ou ficaram frágeis com a mudança de estrutura?
+
+### 1.3 Banco + Dashboard
+- Quais tabelas/coleções sustentam quiz, conteúdo e curadoria?
+- Quais queries alimentam o dashboard?
+- Onde “domínio” era usado (filtros, agregações, indicadores)?
+- Identifique riscos de regressão (ex.: dados sem domínio; idade sem semana; conteúdo sem vínculo; etc.).
+
+### 1.4 APIs
+- Liste os endpoints relacionados a:
+  - ingestão de perguntas
+  - ingestão de conteúdos
+  - curadoria
+  - listagem/consulta para dashboard
+- Rode/teste (ou crie testes) para confirmar o que está funcionando e o que quebrou.
+
+Entregável do Passo 1: um relatório curto `docs/ingestion-curation-audit.md` com:
+- lista de arquivos/pontos do código
+- achados (o que mudou / onde quebra)
+- riscos
+- dependências
+
+---
+
+## Passo 2 — Proposta de “Curadoria Saudável” (sem perder a flexibilidade)
+Crie uma proposta técnica com:
+- Modelo de dados mínimo necessário para a curadoria funcionar de forma estável
+- Regras de validação e normalização
+- Estratégia para não quebrar o dashboard
+
+### 2.1 Reintroduzir “domínio” (mesmo que não venha no input)
+Como a nova ingestão pode não trazer domínio explicitamente, implemente uma das opções (ou híbrido):
+
+**Opção A — Domínio derivado por regra (recomendado primeiro)**
+- Criar um `domain_classifier` simples (regras + dicionário de palavras-chave + mapeamento por trilha/bebê/mãe).
+- Ex.: question contém “tummy time” -> motor; “balbucia” -> comunicação; “sorri” -> social-emocional, etc.
+- Permitir override manual.
+
+**Opção B — Domínio por tag obrigatório (input)**
+- Ajustar schema para exigir `domain` (ou `tags.domains[]`) no JSON de ingestão.
+- Criar fallback “unknown” com fila de curadoria.
+
+**Opção C — Domínio por LLM (opcional, posterior)**
+- Se houver pipeline de IA, usar LLM somente quando regra falhar (minimiza custo/instabilidade).
+- Persistir resultado (não recalcular sempre).
+
+=> Meta: não permitir que itens entrem no DB “sem domínio” sem um plano (unknown + fila).
+
+### 2.2 Faixa etária e semana como chaves fortes
+- Definir “chaves canônicas”:
+  - `trail` (baby/mother/quiz/content)
+  - `age_range` ou `month/week`
+  - `week` (quando aplicável)
+- Garantir que o dado sempre tenha como ser consultado por idade/semana.
+
+### 2.3 Regras anti-duplicidade
+- Criar `content_hash`/`question_hash` (ex.: hash de texto normalizado + week + trail).
+- Evitar inserir duplicado e registrar “update/merge” quando for o caso.
+
+Entregável do Passo 2:
+- `docs/curation-health-spec.md`
+- checklist de regras e validações aplicadas na ingestão
+
+---
+
+## Passo 3 — Granularidade do JSON (Conteúdo + Quiz) + Suporte a arquivos/links/áudio
+Avalie a praticidade de granularizar o JSON para permitir compor conteúdos como “blocos”.
+
+### 3.1 Modelo sugerido (proponha e implemente um compat layer)
+Para Conteúdo (Jornada / knowledge):
+- `content.blocks[]` onde cada bloco tem `type`:
+  - `microcard`, `text`, `audio`, `link`, `file`, `image`, `video`
+- Exemplo:
+  - microcard: {titulo, itens[]}
+  - audio: {provider, voice_id, text, url?, ssml?, duration?}
+  - file: {title, url, mime, size?}
+
+Para Quiz:
+- manter `question`, `options`, `feedback`
+- adicionar:
+  - `domain` (ou `domains[]`)
+  - `milestones[]` (tags de marco)
+  - `knowledge.blocks[]` (em vez de `text/audio/links` soltos)
+
+### 3.2 ElevenLabs (planejar, não precisa integrar agora)
+- Ajustar schema para suportar `audio.provider = "elevenlabs"` e armazenar:
+  - `audio.text` (fonte)
+  - `audio.voice_id` (referência)
+  - `audio.asset_url` (se gerado)
+- Prever feature flag `ENABLE_TTS` para não travar ingestão.
+
+Entregáveis do Passo 3:
+- `docs/json-schema-vNext.md` (com exemplos)
+- “compat layer” para aceitar versões antigas e novas (se necessário)
+
+---
+
+## Passo 4 — Garantir APIs e DB (testes mínimos + migração segura)
+1) Criar testes simples (unit/integration) ou scripts de verificação:
+   - ingestão de quiz (baby + mother)
+   - ingestão de conteúdo (blocks)
+   - curadoria (domínio/faixa etária)
+   - consultas do dashboard
+2) Se precisar migrar DB:
+   - criar migração idempotente
+   - manter backward compatibility nas respostas de API por um período
+
+Entregável do Passo 4:
+- `docs/api-regression-checklist.md`
+- scripts/tests para rodar localmente/CI (se houver)
+
+---
+
+## Critérios de sucesso
+- Nenhuma quebra no dashboard por falta de domínio/faixa etária.
+- Perguntas e conteúdos entram com validação (ou entram como `unknown` e vão para fila).
+- APIs críticas respondem corretamente após a mudança.
+- JSON mais granular suporta links/arquivos e prevê áudio (ElevenLabs-ready).
+
+---
+
+## Observações finais
+- Priorize as melhorias mais valiosas primeiro (impacto no produto + risco de regressão).
+- Evite overengineering: comece com regras determinísticas e compat layer simples.
+- Documente decisões técnicas (por que escolheu A e não B, etc.).
