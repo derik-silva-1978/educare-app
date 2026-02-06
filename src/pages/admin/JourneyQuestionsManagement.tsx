@@ -225,7 +225,7 @@ const JourneyQuestionsManagement: React.FC = () => {
   const [aiGenMonth, setAiGenMonth] = useState(1);
   const [aiGenWeeks, setAiGenWeeks] = useState<number[]>([1]);
   const [aiGenCount, setAiGenCount] = useState(2);
-  const [aiGenDomain, setAiGenDomain] = useState('');
+  const [aiGenDomain, setAiGenDomain] = useState('all');
   const [aiGenInstructions, setAiGenInstructions] = useState('');
   const [aiGenResult, setAiGenResult] = useState<any[] | null>(null);
   const [aiGenResultJson, setAiGenResultJson] = useState('');
@@ -2387,7 +2387,7 @@ const JourneyQuestionsManagement: React.FC = () => {
                         <SelectValue placeholder="Todos os domínios" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todos</SelectItem>
+                        <SelectItem value="all">Todos</SelectItem>
                         {(aiGenAxis.startsWith('baby') ? curationService.getBabyDomains() : curationService.getMotherDomains()).map((d) => (
                           <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
                         ))}
@@ -2420,7 +2420,7 @@ const JourneyQuestionsManagement: React.FC = () => {
                       month: aiGenMonth,
                       weeks: aiGenWeeks,
                       count: aiGenCount,
-                      domain: aiGenDomain || null,
+                      domain: aiGenDomain === 'all' ? null : aiGenDomain,
                       instructions: aiGenInstructions,
                     })}
                     disabled={aiGenerateMutation.isPending || aiGenWeeks.length === 0}

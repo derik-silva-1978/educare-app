@@ -18,6 +18,26 @@ function isEmpty(value) {
   return false;
 }
 
+function needsOptionsReformat(options) {
+  if (isEmpty(options)) return true;
+  if (!Array.isArray(options)) return true;
+  if (options.length === 0) return true;
+  const firstItem = options[0];
+  if (typeof firstItem === 'string') return true;
+  if (typeof firstItem === 'object' && firstItem !== null && firstItem.id && firstItem.text !== undefined && firstItem.value !== undefined) {
+    return false;
+  }
+  return true;
+}
+
+function hasFeedbackContent(feedback) {
+  if (isEmpty(feedback)) return false;
+  if (typeof feedback !== 'object') return false;
+  const hasPositive = !!(feedback.positive || feedback.positivo);
+  const hasNegative = !!(feedback.negative || feedback.negativo);
+  return hasPositive && hasNegative;
+}
+
 async function autoFillQuizFields(quiz, trail, weekNumber) {
   try {
     const openai = getOpenAI();
@@ -26,9 +46,8 @@ async function autoFillQuizFields(quiz, trail, weekNumber) {
       return null;
     }
 
-    const needsOptions = isEmpty(quiz.options);
-    const needsFeedback = isEmpty(quiz.feedback) ||
-      (typeof quiz.feedback === 'object' && (!quiz.feedback.positive || !quiz.feedback.negative));
+    const needsOptions = needsOptionsReformat(quiz.options);
+    const needsFeedback = !hasFeedbackContent(quiz.feedback);
 
     if (!needsOptions && !needsFeedback) {
       return {
