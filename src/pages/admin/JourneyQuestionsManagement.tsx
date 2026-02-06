@@ -108,7 +108,7 @@ const CONTENT_TEMPLATE = `[
 const QUIZ_TEMPLATE = `[
   {
     "month": 2,
-    "week": 5,
+    "week": 1,
     "title": "Título do quiz",
     "question": "Texto da pergunta?",
     "options": [
@@ -222,13 +222,15 @@ const JourneyQuestionsManagement: React.FC = () => {
 
   const [aiGeneratorDialog, setAiGeneratorDialog] = useState(false);
   const [aiGenAxis, setAiGenAxis] = useState<CurationAxis>(activeAxis);
-  const [aiGenMonth, setAiGenMonth] = useState(1);
+  const [aiGenYear, setAiGenYear] = useState(1);
+  const [aiGenMonthInYear, setAiGenMonthInYear] = useState(1);
   const [aiGenWeeks, setAiGenWeeks] = useState<number[]>([1]);
   const [aiGenCount, setAiGenCount] = useState(2);
   const [aiGenDomain, setAiGenDomain] = useState('all');
   const [aiGenInstructions, setAiGenInstructions] = useState('');
   const [aiGenResult, setAiGenResult] = useState<any[] | null>(null);
   const [aiGenResultJson, setAiGenResultJson] = useState('');
+  const aiGenOverallMonth = (aiGenYear - 1) * 12 + aiGenMonthInYear;
 
   /* ======================== EFFECTS ======================== */
 
@@ -2312,7 +2314,7 @@ const JourneyQuestionsManagement: React.FC = () => {
           <div className="space-y-4">
             {!aiGenResult ? (
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div>
                     <Label>Eixo</Label>
                     <Select value={aiGenAxis} onValueChange={(v) => setAiGenAxis(v as CurationAxis)}>
@@ -2328,28 +2330,49 @@ const JourneyQuestionsManagement: React.FC = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label>Mês</Label>
-                    <Select value={aiGenMonth.toString()} onValueChange={(v) => setAiGenMonth(parseInt(v))}>
+                    <Label>Ano</Label>
+                    <Select value={aiGenYear.toString()} onValueChange={(v) => { setAiGenYear(parseInt(v)); setAiGenWeeks([1]); }}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {[1, 2, 3, 4, 5].map((m) => (
-                          <SelectItem key={m} value={m.toString()}>Mês {m}</SelectItem>
+                        {[1, 2, 3, 4, 5, 6].map((y) => (
+                          <SelectItem key={y} value={y.toString()}>
+                            {y}º Ano {y === 1 ? '(0-12 meses)' : `(${(y-1)*12+1}-${y*12} meses)`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Mês</Label>
+                    <Select value={aiGenMonthInYear.toString()} onValueChange={(v) => { setAiGenMonthInYear(parseInt(v)); setAiGenWeeks([1]); }}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                          <SelectItem key={m} value={m.toString()}>
+                            Mês {m} (geral: {(aiGenYear - 1) * 12 + m})
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
+                <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-2 rounded-md text-sm text-blue-700 dark:text-blue-300">
+                  Mês <strong>{aiGenOverallMonth}</strong> do acompanhamento —{' '}
+                  {aiGenOverallMonth <= 12
+                    ? `Bebê com ~${aiGenOverallMonth} ${aiGenOverallMonth === 1 ? 'mês' : 'meses'} de vida`
+                    : `Criança com ~${Math.floor(aiGenOverallMonth / 12)} ano${Math.floor(aiGenOverallMonth / 12) > 1 ? 's' : ''}${aiGenOverallMonth % 12 > 0 ? ` e ${aiGenOverallMonth % 12} ${aiGenOverallMonth % 12 === 1 ? 'mês' : 'meses'}` : ''}`
+                  }
+                </div>
+
                 <div>
-                  <Label>Semanas (selecione uma ou mais)</Label>
+                  <Label>Semanas do mês (selecione uma ou mais)</Label>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].filter(w => {
-                      const startWeek = (aiGenMonth - 1) * 4 + 1;
-                      const endWeek = aiGenMonth * 4;
-                      return w >= startWeek && w <= endWeek;
-                    }).map((w) => (
+                    {[1, 2, 3, 4].map((w) => (
                       <Button
                         key={w}
                         variant={aiGenWeeks.includes(w) ? 'default' : 'outline'}
@@ -2360,9 +2383,17 @@ const JourneyQuestionsManagement: React.FC = () => {
                           );
                         }}
                       >
-                        Sem. {w}
+                        Semana {w}
                       </Button>
                     ))}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-purple-600"
+                      onClick={() => setAiGenWeeks([1, 2, 3, 4])}
+                    >
+                      Todas
+                    </Button>
                   </div>
                 </div>
 
@@ -2417,7 +2448,7 @@ const JourneyQuestionsManagement: React.FC = () => {
                   <Button
                     onClick={() => aiGenerateMutation.mutate({
                       axis: aiGenAxis,
-                      month: aiGenMonth,
+                      month: aiGenOverallMonth,
                       weeks: aiGenWeeks,
                       count: aiGenCount,
                       domain: aiGenDomain === 'all' ? null : aiGenDomain,

@@ -661,20 +661,34 @@ const curationController = {
             }
           }
 
-          const journey = await JourneyV2.findOne({
+          let journey = await JourneyV2.findOne({
             where: { trail, month: item.month }
           });
           if (!journey) {
-            errors.push({ index: i, item, error: `Jornada não encontrada para trail=${trail}, month=${item.month}` });
-            continue;
+            const yearNum = Math.ceil(item.month / 12);
+            const monthInYear = ((item.month - 1) % 12) + 1;
+            journey = await JourneyV2.create({
+              trail,
+              month: item.month,
+              title: `${trail === 'baby' ? 'Bebê' : 'Mãe'} - Ano ${yearNum}, Mês ${monthInYear} (Geral: ${item.month})`,
+              description: `Conteúdo do mês ${item.month} do acompanhamento`
+            });
           }
 
-          const weekRecord = await JourneyV2Week.findOne({
+          let weekRecord = await JourneyV2Week.findOne({
             where: { journey_id: journey.id, week: item.week }
           });
           if (!weekRecord) {
-            errors.push({ index: i, item, error: `Semana não encontrada para journey_id=${journey.id}, week=${item.week}` });
-            continue;
+            if (item.week < 1 || item.week > 4) {
+              errors.push({ index: i, item, error: `Semana deve ser entre 1 e 4, recebido: ${item.week}` });
+              continue;
+            }
+            weekRecord = await JourneyV2Week.create({
+              journey_id: journey.id,
+              week: item.week,
+              title: `Semana ${item.week}`,
+              description: `Semana ${item.week} do mês ${item.month}`
+            });
           }
 
           const week_id = weekRecord.id;
