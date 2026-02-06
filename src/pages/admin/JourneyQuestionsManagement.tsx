@@ -963,35 +963,34 @@ const JourneyQuestionsManagement: React.FC = () => {
               <Label>Semana *</Label>
               <Select
                 value={createQuizData.week_id || 'none'}
-                onValueChange={(value) => setCreateQuizData({ ...createQuizData, week_id: value === 'none' ? '' : value })}
+                onValueChange={(value) => {
+                  const selectedWeek = allWeeks.find((w: any) => w.id === value);
+                  const trail = selectedWeek?.journey?.trail || createQuizData.domain;
+                  setCreateQuizData({ ...createQuizData, week_id: value === 'none' ? '' : value, domain: trail });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione uma semana" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Selecione...</SelectItem>
-                  {allWeeks.map((w: any) => (
+                  {allWeeks.filter((w: any) => w.journey?.month > 1).map((w: any) => (
                     <SelectItem key={w.id} value={w.id}>
                       {w.journey?.trail === 'baby' ? 'Bebê' : 'Mãe'} - Mês {w.journey?.month} - Semana {w.week}: {w.title}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">Quizzes só podem ser criados a partir do Mês 2 (semana 5+)</p>
             </div>
             <div>
-              <Label>Domínio *</Label>
-              <Select
-                value={createQuizData.domain}
-                onValueChange={(value) => setCreateQuizData({ ...createQuizData, domain: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="baby">Bebê</SelectItem>
-                  <SelectItem value="mother">Mãe</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Domínio</Label>
+              <Input
+                value={createQuizData.domain === 'baby' ? 'Bebê' : createQuizData.domain === 'mother' ? 'Mãe' : createQuizData.domain}
+                disabled
+                className="bg-muted"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Definido automaticamente pela trilha da semana selecionada</p>
             </div>
             <div>
               <Label>Título *</Label>

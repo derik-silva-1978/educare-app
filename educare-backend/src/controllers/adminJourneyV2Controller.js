@@ -246,6 +246,21 @@ const adminJourneyV2Controller = {
     try {
       const quiz = await JourneyV2Quiz.findByPk(req.params.id);
       if (!quiz) return res.status(404).json({ error: 'Quiz não encontrado' });
+
+      const targetWeekId = req.body.week_id || quiz.week_id;
+      const targetDomain = req.body.domain || quiz.domain;
+      const week = await JourneyV2Week.findByPk(targetWeekId, {
+        include: [{ model: JourneyV2, as: 'journey', attributes: ['id', 'trail', 'month'] }]
+      });
+      if (week && week.journey) {
+        if (week.journey.month === 1) {
+          return res.status(400).json({ error: 'Quizzes não podem pertencer ao Mês 1 (semanas 1-4).' });
+        }
+        if (week.journey.trail !== targetDomain) {
+          return res.status(400).json({ error: `O domínio do quiz (${targetDomain}) deve corresponder à trilha da semana (${week.journey.trail}).` });
+        }
+      }
+
       await quiz.update(req.body);
       return res.json({ success: true, data: quiz });
     } catch (error) {
@@ -260,8 +275,18 @@ const adminJourneyV2Controller = {
       if (!week_id || !domain || !title || !question || !options || !feedback) {
         return res.status(400).json({ error: 'Campos obrigatórios: week_id, domain, title, question, options, feedback' });
       }
-      const week = await JourneyV2Week.findByPk(week_id);
+      const week = await JourneyV2Week.findByPk(week_id, {
+        include: [{ model: JourneyV2, as: 'journey', attributes: ['id', 'trail', 'month'] }]
+      });
       if (!week) return res.status(404).json({ error: 'Semana não encontrada' });
+
+      if (week.journey && week.journey.month === 1) {
+        return res.status(400).json({ error: 'Quizzes não podem ser criados no Mês 1 (semanas 1-4). Quizzes começam a partir da semana 5.' });
+      }
+
+      if (week.journey && week.journey.trail !== domain) {
+        return res.status(400).json({ error: `O domínio do quiz (${domain}) deve corresponder à trilha da semana (${week.journey.trail}).` });
+      }
 
       const quiz = await JourneyV2Quiz.create({
         week_id, domain, domain_id: domain_id || `${domain}_custom`, title, question, options, feedback, knowledge: knowledge || {}
