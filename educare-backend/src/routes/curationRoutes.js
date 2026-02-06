@@ -28,4 +28,6 @@ router.get('/media/:type/:id', verifyToken, requireCuratorRole, curationControll
 router.post('/media/:type/:id', verifyToken, requireCuratorRole, curationController.linkMedia);
 router.delete('/media/:mediaId', verifyToken, requireCuratorRole, curationController.unlinkMedia);
 
+router.post('/batch-import', verifyToken, requireOwnerRole, curationController.batchImport);
+
 module.exports = router;

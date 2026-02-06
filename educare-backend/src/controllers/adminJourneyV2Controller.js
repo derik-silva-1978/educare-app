@@ -78,6 +78,8 @@ const adminJourneyV2Controller = {
       const { trail, month, week, type, search, page = 1, limit = 20 } = req.query;
       const offset = (parseInt(page) - 1) * parseInt(limit);
 
+      const { dev_domain } = req.query;
+
       if (type === 'quiz') {
         const whereQuiz = {};
         if (search) {
@@ -86,6 +88,11 @@ const adminJourneyV2Controller = {
             { question: { [Op.iLike]: `%${search}%` } },
             { domain_id: { [Op.iLike]: `%${search}%` } }
           ];
+        }
+        if (dev_domain === 'unclassified') {
+          whereQuiz.dev_domain = null;
+        } else if (dev_domain) {
+          whereQuiz.dev_domain = dev_domain;
         }
 
         const weekWhere = {};
@@ -126,6 +133,11 @@ const adminJourneyV2Controller = {
         whereTopic[Op.or] = [
           { title: { [Op.iLike]: `%${search}%` } }
         ];
+      }
+      if (dev_domain === 'unclassified') {
+        whereTopic.dev_domain = null;
+      } else if (dev_domain) {
+        whereTopic.dev_domain = dev_domain;
       }
 
       const weekWhere = {};

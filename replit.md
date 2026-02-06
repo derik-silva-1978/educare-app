@@ -39,8 +39,11 @@ The frontend, built with React 18, TypeScript, and Vite, utilizes `shadcn/ui` (R
     - **Mother Content** (topics): Classified by 6 maternal domains (nutricao, saude_mental, recuperacao, amamentacao, saude_fisica, autocuidado) using TitiNauta Materna
     - **Baby Quiz** (week 5+): Same baby dev domains, linked to existing OfficialMilestone system via extended `milestone_mappings`
     - **Mother Quiz** (week 5+): Same maternal domains, with independent `maternal_curation_mappings` table
-    - Backend REST API at `/api/admin/curation/*` with endpoints for classification, domain management, milestone mappings (baby), maternal mappings (mother), and media linking
+    - Backend REST API at `/api/admin/curation/*` with endpoints for classification, domain management, milestone mappings (baby), maternal mappings (mother), media linking, and batch import
     - `domainClassifierService.js`: Rule-based heuristic classifier with keyword dictionaries for both baby (6 domains) and mother (6 domains), SHA-256 content hashing for anti-duplication
+    - Batch JSON Import: `POST /api/admin/curation/batch-import` accepts `{ axis, items }` for bulk content ingestion per axis. Resolves week_id from month+week, auto-classifies, deduplicates, returns detailed report
+    - Frontend: `src/services/curationService.ts` connects to all curation endpoints with typed interfaces
+    - Frontend: `JourneyQuestionsManagement.tsx` fully restructured with 4-axis tabs, domain classification badges (colored), confidence indicators, inline domain editing, batch import dialog with JSON paste/file upload, milestone ranking panel (baby quiz), maternal curation panel (mother quiz), MediaSelector for linking media resources, visual quiz option builder, and separated feedback fields
     - New models: `MaternalCurationMapping`, `JourneyV2Media` (bridge to MediaResource)
     - Extended models: `JourneyV2Quiz` and `JourneyV2Topic` (added `dev_domain`, `content_hash`, `classification_source`, `classification_confidence`), `MilestoneMapping` (added `journey_v2_quiz_id`, `source_type`)
     - Audit document: `docs/ingestion-curation-audit.md`

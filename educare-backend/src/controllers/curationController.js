@@ -16,6 +16,8 @@ const {
   classifyTopic,
   computeQuizHash,
   computeTopicHash,
+  checkDuplicateQuiz,
+  checkDuplicateTopic,
   BABY_DOMAIN_VALUES,
   MOTHER_DOMAIN_VALUES
 } = require('../services/domainClassifierService');
@@ -588,6 +590,148 @@ const curationController = {
       });
     } catch (error) {
       return res.status(500).json({ error: 'Erro ao buscar valores de domínio' });
+    }
+  },
+
+  batchImport: async (req, res) => {
+    try {
+      const { axis, items } = req.body;
+
+      const validAxes = ['baby-content', 'mother-content', 'baby-quiz', 'mother-quiz'];
+      if (!axis || !validAxes.includes(axis)) {
+        return res.status(400).json({ error: `axis inválido. Valores aceitos: ${validAxes.join(', ')}` });
+      }
+      if (!items || !Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ error: 'items deve ser um array não vazio' });
+      }
+
+      const trail = axis.startsWith('baby') ? 'baby' : 'mother';
+      const isQuiz = axis.endsWith('-quiz');
+
+      const created = [];
+      const duplicates = [];
+      const errors = [];
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        try {
+          if (!item.month || !item.week) {
+            errors.push({ index: i, item, error: 'month e week são obrigatórios' });
+            continue;
+          }
+
+          if (isQuiz) {
+            if (!item.title || !item.question || !item.options || !item.feedback) {
+              errors.push({ index: i, item, error: 'title, question, options e feedback são obrigatórios para quizzes' });
+              continue;
+            }
+
+            const globalWeek = (item.month - 1) * 4 + item.week;
+            if (globalWeek < 5) {
+              errors.push({ index: i, item, error: 'Quizzes só são permitidos a partir da semana 5 (mês > 1)' });
+              continue;
+            }
+          } else {
+            if (!item.title || !item.content) {
+              errors.push({ index: i, item, error: 'title e content são obrigatórios para tópicos' });
+              continue;
+            }
+          }
+
+          const journey = await JourneyV2.findOne({
+            where: { trail, month: item.month }
+          });
+          if (!journey) {
+            errors.push({ index: i, item, error: `Jornada não encontrada para trail=${trail}, month=${item.month}` });
+            continue;
+          }
+
+          const weekRecord = await JourneyV2Week.findOne({
+            where: { journey_id: journey.id, week: item.week }
+          });
+          if (!weekRecord) {
+            errors.push({ index: i, item, error: `Semana não encontrada para journey_id=${journey.id}, week=${item.week}` });
+            continue;
+          }
+
+          const week_id = weekRecord.id;
+
+          if (isQuiz) {
+            const quizData = {
+              week_id,
+              title: item.title,
+              question: item.question,
+              options: item.options,
+              feedback: item.feedback,
+              knowledge: item.knowledge || {},
+              domain: trail,
+              domain_id: item.domain_id || `${trail}_batch`
+            };
+
+            const classification = classifyQuiz(quizData, trail);
+            quizData.dev_domain = classification.domain;
+            quizData.classification_source = classification.source;
+            quizData.classification_confidence = classification.confidence;
+
+            const hash = computeQuizHash(quizData);
+            quizData.content_hash = hash;
+
+            const duplicate = await checkDuplicateQuiz(JourneyV2Quiz, hash);
+            if (duplicate) {
+              duplicates.push({ index: i, title: item.title, duplicate_of: duplicate.id, duplicate_title: duplicate.title });
+              continue;
+            }
+
+            const record = await JourneyV2Quiz.create(quizData);
+            created.push({ index: i, id: record.id, title: record.title, dev_domain: record.dev_domain });
+          } else {
+            const topicData = {
+              week_id,
+              title: item.title,
+              content: item.content,
+              order_index: item.order_index || 0
+            };
+
+            const classification = classifyTopic(topicData, trail);
+            topicData.dev_domain = classification.domain;
+            topicData.classification_source = classification.source;
+            topicData.classification_confidence = classification.confidence;
+
+            const hash = computeTopicHash(topicData);
+            topicData.content_hash = hash;
+
+            const duplicate = await checkDuplicateTopic(JourneyV2Topic, hash);
+            if (duplicate) {
+              duplicates.push({ index: i, title: item.title, duplicate_of: duplicate.id, duplicate_title: duplicate.title });
+              continue;
+            }
+
+            const record = await JourneyV2Topic.create(topicData);
+            created.push({ index: i, id: record.id, title: record.title, dev_domain: record.dev_domain });
+          }
+        } catch (itemError) {
+          errors.push({ index: i, item, error: itemError.message });
+        }
+      }
+
+      return res.json({
+        success: true,
+        axis,
+        summary: {
+          total: items.length,
+          created: created.length,
+          duplicates: duplicates.length,
+          errors: errors.length
+        },
+        details: {
+          created,
+          duplicates,
+          errors
+        }
+      });
+    } catch (error) {
+      console.error('Erro no batch import:', error);
+      return res.status(500).json({ error: 'Erro no batch import de curadoria' });
     }
   }
 };
