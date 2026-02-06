@@ -1,0 +1,1291 @@
+[
+  {
+    "trail": "mother",
+    "title": "Jornada da Mãe - Mês 1",
+    "journey": [
+      {
+        "week": 1,
+        "title": "Semana 1 - Recuperação Física",
+        "description": "Foco total na sua recuperação física imediata.",
+        "topics": [
+          {
+            "title": "Sinais de Alerta (Mãe)",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "⚠️ Sinais de Alerta Urgentes na Mãe",
+                "itens": [
+                  "**Sangramento intenso:** enche >1 absorvente/hora",
+                  "**Dor de cabeça forte** que não melhora, com visão turva",
+                  "**Febre** >38°C com calafrios",
+                  "**Dor no peito** ou falta de ar súbita",
+                  "**Dor e inchaço** em apenas uma das pernas",
+                  "**Convulsões**",
+                  "Pensamentos de se machucar ou machucar o bebê"
+                ]
+              },
+              "acaoTexto": "O pós-parto é um período de alto risco para complicações graves. Conhecer os sinais de alerta pode salvar sua vida. **Procure um serviço de emergência imediatamente** se apresentar qualquer um destes sintomas: **Hemorragia:** sangramento vaginal que encharca mais de um absorvente noturno por hora ou eliminação de coágulos grandes. **Pré-eclâmpsia pós-parto:** dor de cabeça forte e persistente que não alivia com remédios, alterações na visão (pontos brilhantes, visão turva) ou dor intensa na parte superior do abdômen. **Infecção:** febre acima de 38°C, calafrios ou secreção com mau cheiro. **Tromboembolismo:** dor, inchaço e vermelhidão em apenas uma das pernas (pode ser Trombose) ou dor súbita no peito e falta de ar intensa (pode ser Embolia Pulmonar). **Não minimize seus sintomas**. Na dúvida, sempre procure ajuda.",
+              "acaoAudio": "Alerta máximo do TitiNauta para a sua saúde, mãe! Estes são sinais de emergência, procure um hospital IMEDIATAMENTE se tiver: sangramento muito intenso. Dor de cabeça fortíssima com visão embaçada. Febre alta com calafrios. Dor forte no peito ou falta de ar que veio do nada. Dor e inchaço em uma perna só. Qualquer um desses sinais não é normal. Não espere para ver se melhora. Sua vida é a prioridade. Vá para a emergência.",
+              "audioIllustration": "🚑",
+              "badge": { "id": "vigilante-mae", "nome": "Vigilante da Mãe", "icone": "⚠️" },
+              "extraContent": [{ "titulo": "Checklist de Sinais de Alerta Pós-Parto (CDC)", "url": "https://www.cdc.gov/hearher/resources/download-share/docs/pdf/Warning-Signs-Poster_LTR_whitebkg_Portuguese-BR.pdf" }, { "titulo": "Entendendo a Pré-eclâmpsia Pós-Parto", "url": "https://www.preeclampsia.org/postpartum-preeclampsia" }]
+            }
+          },
+          {
+            "title": "Cuidados com a Ferida Operatória",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🩹 Cuidado com a Cicatrização", "itens": ["Lavar com água e sabão neutro", "Secar bem, sem esfregar", "Manter a área limpa e seca", "Usar roupas folgadas e de algodão", "Observar sinais de infecção", "Vermelhidão, pus ou dor piorando = médico", "Evitar esforço físico pesado", "Para dor perineal: banho de assento"] },
+              "acaoTexto": "Sua recuperação física é uma prioridade. **Se você fez cesariana:** lave a incisão delicadamente com água e sabão no banho, seque com uma toalha limpa dando batidinhas, sem esfregar. Mantenha a área seca e arejada. **Se teve parto vaginal com laceração:** a higiene é a mesma. Lave a região com água após urinar e evacuar. Banhos de assento com água morna podem aliviar o desconforto. Para ambos os casos, fique atenta a **sinais de infecção:** vermelhidão que se espalha, calor excessivo no local, inchaço, secreção amarelada (pus) ou dor que piora com o tempo. Se notar algo, **fale com seu médico**. **Evite carregar peso** (qualquer coisa mais pesada que o bebê) e fazer esforço abdominal. Respeite os limites do seu corpo.",
+              "acaoAudio": "TitiNauta cuidando de você agora. Vamos falar da sua cicatrização. Seja cesárea ou parto normal, a regra é: limpeza e secura. Lave o local dos pontos com água e sabão neutro, todo dia no banho. Depois, seque muito bem, com batidinhas leves. Deixe a área respirar, use roupas folgadas. Fique de olho: se ficar vermelho, inchado, quente ou sair secreção, ligue para o seu médico. Nada de pegar peso, hein? Só o bebê! Respeite seu tempo. Cuidar de você é cuidar {preposicao} {nome} também.",
+              "audioIllustration": "🩹",
+              "badge": { "id": "recuperacao-ativa", "nome": "Recuperação Ativa", "icone": "🩹" },
+              "extraContent": [{ "titulo": "Recuperação Pós-Cesárea", "url": "https://www.msdmanuals.com/pt/casa/problemas-de-sa%C3%BAde-feminina/o-per%C3%ADodo-p%C3%B3s-parto/cesariana" }, { "titulo": "Cuidados com Laceração Perineal", "url": "https://www.msdmanuals.com/pt/profissional/ginecologia-e-obstetr%C3%ADcia/anormalidades-e-complica%C3%A7%C3%B5es-do-trabalho-de-parto-e-parto/lacera%C3%A7%C3%A3o-perineal" }]
+            }
+          },
+          {
+            "title": "Cuidados com as Mamas",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🤱 Saúde das Mamas: Protocolo 2022", "itens": ["Fissuras: a causa é a pega incorreta", "Tratamento da fissura: leite materno", "Ingurgitamento: amamentar e compressa FRIA", "NÃO usar compressas quentes ou massagear", "Sutiã de boa sustentação", "Mastite: febre e área vermelha na mama", "Suspeita de mastite = avaliação médica URGENTE"] },
+              "acaoTexto": "Cuidar das suas mamas é fundamental para o sucesso da amamentação. **Fissuras nos mamilos** são quase sempre causadas pela pega incorreta de {nome}: foque em corrigi-la. Para tratar, passe o **próprio leite materno** e deixe secar ao ar. Se a mama estiver muito cheia e dolorida (**ingurgitamento**), a nova recomendação (Protocolo ABM 2022) é aplicar **compressas FRIAS ou gelo** para reduzir a inflamação e a dor. **NÃO FAÇA** massagens vigorosas ou compressas quentes, pois pioram o inchaço. A amamentação em demanda normal ajuda a regular a produção. Fique atenta aos **sinais de mastite:** uma área da mama fica vermelha, quente e dolorida, acompanhada de febre e mal-estar (como uma gripe forte). Se suspeitar de mastite, **procure avaliação médica imediatamente**, pois pode ser necessário o uso de antibióticos.",
+              "acaoAudio": "TitiNauta com informações atualizadas para a saúde das suas mamas! Mamilo machucado? O problema é a pega do bebê. Corrija a pega e passe seu próprio leite para cicatrizar. Seio empedrado, doendo muito? A nova orientação é compressa FRIA ou gelo! Isso mesmo, FRIA. Ela desinflama. Esqueça as compressas quentes e as massagens fortes, elas podem piorar. Atenção máxima agora: se uma parte do seio ficar vermelha, quente, dolorida e você tiver febre, pode ser mastite. Isso é sério. Fale com seu médico na hora!",
+              "audioIllustration": "🧊",
+              "badge": { "id": "amiga-peito", "nome": "Amiga do Peito", "icone": "🤱" },
+              "extraContent": [{ "titulo": "Protocolo de Mastite ABM 2022 (Resumo)", "url": "https://abm.memberclicks.net/assets/DOCUMENTS/PROTOCOLS/36-mitchell-et-al-2022-academy-of-breastfeeding-medicine-clinical-protocol-36-the-mastitis-spectrum-revised-2022.pdf" }, { "titulo": "Como fazer ordenha de alívio", "url": "https://www.pennmedicine.org/updates/blogs/health-and-wellness/2020/march/how-to-hand-express-breast-milk" }]
+            }
+          }
+        ]
+      },
+      {
+        "week": 2,
+        "title": "Semana 2 - Saúde Mental e Apoio",
+        "description": "Cuidando da mente e fortalecendo seus laços de ajuda.",
+        "topics": [
+          {
+            "title": "Saúde Mental Materna",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "💜 Saúde Mental no Puerpério",
+                "itens": [
+                  "**Baby Blues:** comum, transitório (até 2 sem), choro fácil.",
+                  "**Depressão Pós-Parto (DPP):** tristeza profunda, persistente (>2 sem), apatia.",
+                  "**Psicose Pós-Parto:** emergência rara, confusão, delírios.",
+                  "Não é sua culpa!",
+                  "Converse sobre seus sentimentos",
+                  "DPP tem tratamento eficaz"
+                ]
+              },
+              "acaoTexto": "Sua saúde mental é tão importante quanto a física. É crucial entender o espectro dos transtornos de humor no pós-parto. O **'Baby Blues'** é uma reação emocional comum, afetando até 85% das mulheres. Caracteriza-se por choro fácil e sensibilidade, mas **resolve-se sozinho em até duas semanas**. Já a **Depressão Pós-Parto (DPP)** é uma condição clínica mais grave e persistente. Os sinais de alerta são tristeza profunda que **não passa após duas semanas**, perda de prazer nas atividades, culpa excessiva e, em casos graves, pensamentos sobre se machucar. **DPP não é frescura e tem tratamento**. A forma mais rara e grave é a **Psicose Pós-Parto**, uma emergência médica com início súbito, confusão mental e delírios. Se você se sentir persistentemente triste, **converse com sua rede de apoio e procure ajuda profissional**. Cuidar de você é o melhor presente que você pode dar a {nome}.",
+              "acaoAudio": "TitiNauta aqui para um papo sério e necessário sobre sua saúde mental. Vamos diferenciar. 'Baby Blues': chorar por tudo, se sentir super sensível. É normal, passa em até duas semanas. Depressão Pós-Parto: a tristeza não vai embora, você perde o interesse nas coisas, se sente culpada. Se isso durar mais de duas semanas, não é mais 'Baby Blues'. É hora de procurar ajuda. E existe tratamento! Psicose Pós-Parto: é raro, mas é uma emergência. Confusão, ver ou ouvir coisas. Nesse caso, é hospital na hora. O mais importante: não é sua culpa. Fale sobre o que sente. Peça ajuda. Você não está sozinha.",
+              "audioIllustration": "💬",
+              "badge": { "id": "autocuidado", "nome": "Mestre do Autocuidado", "icone": "💜" },
+              "extraContent": [{ "titulo": "Entendendo a Depressão Pós-Parto (MS)", "url": "https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/d/depressao-pos-parto" }, { "titulo": "CVV - Centro de Valorização da Vida (Ligue 188)", "url": "https://www.cvv.org.br/" }]
+            }
+          },
+          {
+            "title": "Rede de Apoio",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🤝 Rede de Apoio: Seu Time", "itens": ["Liste pessoas que podem ajudar", "Peça ajuda específica e prática", "Ex: 'Pode trazer o almoço amanhã?'", "Divida as tarefas noturnas", "Ensine sua rede a 'Ouvir Ela' (Hear Her)", "Validar sentimentos, não minimizar", "Aceite ajuda sem culpa", "Apoio emocional é tão vital quanto o prático"] },
+              "acaoTexto": "Você não precisa passar por isso sozinha. Sua **rede de apoio** é sua maior aliada. Mas para que ela funcione, você precisa ser a líder. **Seja específica nos pedidos**: em vez de 'preciso de ajuda', diga 'você pode vir ficar com o bebê por 1h para eu tomar um banho em paz?'. Eduque sua rede sobre o conceito da campanha **'Hear Her' (Ouça Ela)**: eles não devem apenas oferecer ajuda, mas **ouvir ativamente** suas preocupações, **validar seus sentimentos** sem julgamento ('é normal se sentir assim') e **agir**. Se você disser que algo não está bem, eles devem te ajudar a procurar um profissional. **Divida as madrugadas** com seu parceiro(a). E lembre-se: **aceitar ajuda não é sinal de fraqueza**, é sinal de força e inteligência.",
+              "acaoAudio": "TitiNauta aqui para montar seu time de campeões! Sua rede de apoio. Regra 1: peça coisas claras e diretas. 'Traz comida', 'Lava a louça', 'Fica com o bebê pra eu dormir'. Regra 2: ensine seu time a te ouvir de verdade. Se você falar que está exausta, a resposta não é 'você dá conta', e sim 'o que posso fazer para te ajudar agora?'. Isso é validar seus sentimentos. Regra 3: divida a noite com seu parceiro, se puder. E regra 4, a mais importante: aceite a ajuda. Deixe-se cuidar. Você merece.",
+              "audioIllustration": "📣",
+              "badge": { "id": "lider-apoio", "nome": "Líder da Rede de Apoio", "icone": "🌐" },
+              "extraContent": [{ "titulo": "Campanha 'Hear Her' (CDC - em inglês)", "url": "https://www.cdc.gov/hearher/index.html" }, { "titulo": "Como Pedir Ajuda (e o que pedir)", "url": "https://www.healthline.com/health/parenting/how-to-ask-for-help#sample-scripts" }]
+            }
+          }
+        ]
+      },
+      {
+        "week": 3,
+        "title": "Semana 3 - Energia e Bem-Estar",
+        "description": "Restaurando suas energias e cuidando do seu corpo.",
+        "topics": [
+          {
+            "title": "Sono e Descanso da Mãe",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "😴 Seu Descanso é Prioridade", "itens": ["**Durma quando o bebê dormir**", "A louça e a roupa podem esperar", "Cochilos curtos (20-30 min) revitalizam", "Divida os cuidados noturnos", "Peça ajuda para ter pausas durante o dia", "Desconecte-se do celular antes de dormir", "Um ambiente escuro e quieto ajuda", "Descansar não é luxo, é necessidade"] },
+              "acaoTexto": "A privação de sono é um dos maiores desafios do puerpério e afeta sua saúde física e mental. A estratégia mais eficaz é simples, mas difícil de executar: **durma sempre que {nome} dormir**. A pilha de louça, as roupas para lavar e a casa para arrumar podem esperar. **Sua recuperação é a tarefa mais importante agora**. Peça para sua rede de apoio assumir as tarefas domésticas para que você possa focar em descansar. **Divida os turnos da madrugada** com seu parceiro(a), se possível, para que ambos consigam algumas horas de sono contínuo. Mesmo cochilos de 20 minutos durante o dia podem fazer uma diferença enorme. Lembre-se: estar descansada te deixa mais paciente, alerta e presente para {nome}. **Priorize seu sono sem culpa**.",
+              "acaoAudio": "TitiNauta com uma ordem direta para você, mãe: DESCANSE! A regra de ouro do puerpério é: o bebê dormiu, você dorme junto. Esqueça a casa, a louça, o mundo. Seu corpo precisa se recuperar e sua mente precisa de paz. Peça ajuda! 'Fique com o bebê por uma hora, vou apagar'. Divida a noite com seu parceiro. Cada um tira um turno. Não se sinta culpada por descansar. Uma mãe descansada é uma mãe mais feliz e um bebê mais seguro. O sono não é um luxo, é sua ferramenta de trabalho número um.",
+              "audioIllustration": "😴",
+              "badge": { "id": "rainha-descanso", "nome": "Rainha do Descanso", "icone": "👑" },
+              "extraContent": [{ "titulo": "Técnicas de Relaxamento Rápido", "url": "https://www.verywellmind.com/how-to-relax-in-5-minutes-5214631" }, { "titulo": "A Importância do Sono no Pós-Parto", "url": "https://www.sleepfoundation.org/postpartum-sleep" }]
+            }
+          },
+          {
+            "title": "Nutrição e Atividade Física",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "💪 Energia e Força no Pós-Parto",
+                "itens": [
+                  "Beba muita água, especialmente ao amamentar",
+                  "Qualidade sobre quantidade: coma comida de verdade",
+                  "Tenha lanches saudáveis sempre à mão",
+                  "Evite alimentos ultraprocessados",
+                  "Retorno à atividade física deve ser gradual",
+                  "Comece com caminhadas leves",
+                  "Foco na reabilitação do core e assoalho pélvico"
+                ]
+              },
+              "acaoTexto": "Recuperar sua energia depende de dois pilares: nutrição e movimento. **Nutrição:** Amamentar exige um acréscimo de 300-400 calorias por dia. Foque na **qualidade dos alimentos**: frutas, verduras, grãos integrais e proteínas. Tenha uma **garrafa de água** sempre com você. Deixe lanches saudáveis (castanhas, frutas) à mão para não pular refeições. Evite ultraprocessados. **Atividade Física:** O retorno deve ser **lento e gradual**, respeitando seu corpo. Comece com **caminhadas leves**, que melhoram o humor e o estresse. O foco inicial não é perder peso, mas a **reabilitação**. Exercícios para o **core (músculos abdominais profundos) e assoalho pélvico** são fundamentais para recuperar a estabilidade e prevenir dores nas costas e incontinência urinária. Converse com seu médico antes de retomar atividades mais intensas.",
+              "acaoAudio": "TitiNauta abastecendo sua energia, mãe! Seu corpo é uma máquina poderosa e precisa do combustível certo. Regra 1: Água, muita água! Especialmente quando for amamentar. Regra 2: Coma comida de verdade. Frutas, legumes, proteínas. Isso te dá força e enriquece o leite. E o corpo em movimento? Comece devagar. Caminhadas leves são ótimas. O objetivo agora não é virar atleta, é reabilitar. Foque em fortalecer a barriga e o assoalho pélvico. Isso previne problemas no futuro. Comida boa e movimento gentil: a dupla perfeita para sua recuperação.",
+              "audioIllustration": "🏋️‍♀️",
+              "badge": { "id": "maquina-nutrientes", "nome": "Máquina de Nutrientes", "icone": "💪" },
+              "extraContent": [{ "titulo": "Guia Alimentar para a População Brasileira", "url": "https://bvsms.saude.gov.br/bvs/publicacoes/guia_alimentar_populacao_brasileira_2ed.pdf" }, { "titulo": "Exercícios para o Assoalho Pélvico", "url": "https://www.mayoclinic.org/healthy-lifestyle/womens-health/in-depth/kegel-exercises/art-20045283" }]
+            }
+          }
+        ]
+      },
+      {
+        "week": 4,
+        "title": "Semana 4 - Olhando para o Futuro",
+        "description": "Planejamento e organização da sua saúde a longo prazo.",
+        "topics": [
+          {
+            "title": "Saúde Sexual e Contracepção",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🗓️ Saúde Sexual e Planejamento",
+                "itens": [
+                  "Retomada da vida sexual: sem prazo fixo, decisão pessoal",
+                  "É normal sentir desconforto ou falta de desejo",
+                  "Lubrificantes à base de água podem ajudar",
+                  "Planejamento contraceptivo é crucial",
+                  "Opções seguras na amamentação: minipílula, DIU, implante",
+                  "Vacina dTpa no puerpério é URGENTE se não tomou na gestação"
+                ]
+              },
+              "acaoTexto": "O puerpério é um momento de grandes mudanças, inclusive na sua vida sexual e reprodutiva. **Retomada da Vida Sexual:** Não existe um 'prazo' fixo. A decisão é pessoal e deve ser baseada em três fatores: cicatrização física completa, conforto emocional e desejo. É normal a libido estar diminuída. Converse abertamente com seu parceiro(a). **Contracepção:** O retorno da fertilidade é imprevisível. É crucial discutir métodos contraceptivos com seu médico. Durante a amamentação, são seguras as opções **apenas com progestagênio** (minipílula, implante, injeção trimestral) e os **DIUs** (hormonal ou de cobre). Métodos com estrogênio devem ser evitados nas primeiras 4 a 6 semanas. **Vacinação:** O puerpério é uma janela de oportunidade para se proteger e proteger {nome}. Se você não tomou a **vacina dTpa (tríplice bacteriana)** durante a gestação, deve tomá-la o mais rápido possível.",
+              "acaoAudio": "TitiNauta falando sobre intimidade e planejamento. Retomar a vida sexual? Só quando você se sentir pronta. Física e emocionalmente. Sem pressão. E é normal o desejo demorar a voltar. Converse com seu parceiro. Sobre o futuro: evitar uma nova gravidez agora é importante. Existem pílulas, DIUs e outros métodos seguros para quem amamenta. Fale com seu médico para escolher o melhor pra você. E por último, vacinas! Se não tomou a vacina da coqueluche na gravidez, tome agora. É uma proteção extra para {nome} que passa pelo seu leite.",
+              "audioIllustration": "💞",
+              "badge": { "id": "planejamento-consciente", "nome": "Planejamento Consciente", "icone": "🗓️" },
+              "extraContent": [{ "titulo": "Contracepção no Pós-Parto (FEBRASGO)", "url": "https://www.febrasgo.org.br/pt/noticias/item/130-anticoncepcao-no-puerperio" }, { "titulo": "Vacinação da Puérpera (SBIm)", "url": "https://sbim.org.br/images/calendarios/calend-sbim-gestante.pdf" }]
+            }
+          },
+          {
+            "title": "Consultas Pós-Parto",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🩺 Preparando-se para a Consulta",
+                "itens": [
+                  "Consulta puerperal: 7 a 42 dias pós-parto",
+                  "Leve uma lista de dúvidas",
+                  "Fale sobre sua saúde mental (como se sente?)",
+                  "Discuta a recuperação física (cicatrização, sangramento)",
+                  "Pergunte sobre amamentação",
+                  "Converse sobre contracepção e vida sexual",
+                  "Verifique sua vacinação (dTpa)"
+                ]
+              },
+              "acaoTexto": "O acompanhamento pós-parto é essencial para a sua saúde. A **consulta puerperal** (geralmente entre 7 e 42 dias após o parto) é a sua oportunidade de tirar todas as dúvidas. Para otimizar o tempo, **prepare-se levando uma lista de perguntas**. Anote tudo o que te preocupa. O checklist deve incluir: **Saúde Mental:** Como você está se sentindo emocionalmente? Fale sobre qualquer sintoma de tristeza ou ansiedade. **Recuperação Física:** Como está a cicatrização? O sangramento (lóquios)? Sente alguma dor? **Amamentação:** Está com alguma dificuldade? Dor? Preocupação com a produção de leite? **Contracepção:** Quais são as opções seguras para você agora? **Vacinação:** Você tomou a vacina dTpa? Outras vacinas estão em dia? Ser uma parceira ativa no seu cuidado é fundamental. Não saia do consultório com dúvidas.",
+              "acaoAudio": "TitiNauta agendando sua saúde, mãe! A consulta pós-parto é o seu momento. E pra aproveitar ao máximo, faça uma colinha. Anote suas dúvidas. O que perguntar? Primeiro, como você está se sentindo? De verdade. Sem medo de falar sobre tristeza. Segundo, seu corpo. Como está a cicatrização? O sangramento? Terceiro, amamentação. Alguma dor ou problema? Quarto, futuro. Converse sobre métodos para evitar outra gravidez agora. E quinto, vacinas. Veja se está tudo em dia. Chegue na consulta preparada. Você é a maior especialista em você mesma.",
+              "audioIllustration": "📝",
+              "badge": { "id": "agenda-saude", "nome": "Agenda da Saúde", "icone": "🩺" },
+              "extraContent": [{ "titulo": "A Importância do Cuidado Pós-Parto (OMS)", "url": "https://www.paho.org/pt/noticias/30-3-2022-oms-pede-atencao-qualidade-para-mulheres-e-recem-nascidos-nas-primeiras-semanas" }, { "titulo": "Checklist para a Consulta Pós-Parto", "url": "https://www.acog.org/womens-health/faqs/postpartum-checklist" }]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "trail": "mother",
+    "title": "Jornada da Mãe - Mês 2",
+    "journey": [
+      {
+        "week": 5,
+        "title": "Semana 5 - Energia & Ritmo",
+        "description": "Consolidando amamentação, saúde mental e energia.",
+        "interactive_flow": { "quiz_ref": "week5" },
+        "topics": [
+          {
+            "title": "Amamentação no 2º Mês",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🤱 Ritmo & Conforto", "itens": [ "Livre demanda observando sinais", "Ajuste de pega se houver dor", "Pausa para arrotar", "Evite bicos/mamadeiras sem orientação", "Rede de apoio ativa" ] },
+              "acaoTexto": "Com picos de crescimento, a demanda pode aumentar. Se houver dor, revise pega/posição. Hidrate-se, descanse quando puder e ative sua rede de apoio.",
+              "acaoAudio": "Sinais de fome, pega confortável e pausas. Se doer, ajuste. Você não está sozinha.",
+              "audioIllustration": "🤱",
+              "badge": { "id": "ritmo-de-ouro", "nome": "Ritmo de Ouro", "icone": "🤱" },
+              "extraContent": [ { "titulo": "Guia de Amamentação", "url": "https://example.org/amamentacao2" } ]
+            }
+          },
+          {
+            "title": "Saúde Mental & Rede de Apoio",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🧠 Você Importa", "itens": [ "Baby blues x depressão", "Sinais: tristeza persistente, culpa", "Converse com profissionais", "Apoio de familiares/amigos", "Peça ajuda prática" ] },
+              "acaoTexto": "Oscilações são comuns, mas sintomas persistentes exigem avaliação. Fale com a equipe de saúde, compartilhe tarefas e aceite ajuda.",
+              "acaoAudio": "Pedir ajuda é força. Sua saúde emocional é prioridade para você e para {nome}.",
+              "audioIllustration": "💜",
+              "badge": { "id": "equilibrio-mente", "nome": "Equilíbrio da Mente", "icone": "💜" },
+              "extraContent": [ { "titulo": "Cuidados em Saúde Mental Pós-parto", "url": "https://example.org/mental2" } ]
+            }
+          },
+          {
+            "title": "Energia Sustentável",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "⚙️ Energia no Dia a Dia", "itens": [ "Sonecas curtas quando possível", "Garrafa de água por perto", "Lanches simples e nutritivos", "Caminhada leve (se liberada)", "Delegue sem culpa" ] },
+              "acaoTexto": "Pequenos hábitos repetidos aumentam a energia: hidratação, lanches fáceis e movimento leve com liberação médica. Delegar é saúde.",
+              "acaoAudio": "Hidratar, nutrir, mover. O básico bem feito gera energia real.",
+              "audioIllustration": "⚡",
+              "badge": { "id": "energia-on", "nome": "Energia ON", "icone": "⚡" },
+              "extraContent": [ { "titulo": "Autocuidado no Puerpério", "url": "https://example.org/autocuidado2" } ]
+            }
+          }
+        ]
+      },
+      {
+        "week": 6,
+        "title": "Semana 6 - Mamas & Conforto",
+        "description": "Prevenção de desconfortos e cuidados com o seu bem-estar.",
+        "interactive_flow": { "quiz_ref": "week6" },
+        "topics": [
+          {
+            "title": "Fissura, Ingurgitamento & Mastite",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🧊 Protocolo Atual", "itens": [ "Pega correta é base", "Leite materno para fissuras", "Compressa fria para inflamação", "Evite massagens vigorosas e calor", "Sinais de mastite = avaliação" ] },
+              "acaoTexto": "Ajuste de pega resolve a maioria das fissuras. Ingurgitamento melhora com compressas frias e mamadas regulares. Sinais de mastite (dor, vermelhidão, febre) exigem avaliação médica.",
+              "acaoAudio": "Se doer, revise a pega. Para inchaço, frio ajuda. Febre e área vermelha? Procure atendimento.",
+              "audioIllustration": "🧊",
+              "badge": { "id": "amiga-do-peito2", "nome": "Amiga do Peito (Mês 2)", "icone": "🤱" },
+              "extraContent": [ { "titulo": "Manejo de Mastite: pontos-chave", "url": "https://example.org/mastite2" } ]
+            }
+          },
+          {
+            "title": "Sono da Mãe",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "😴 Recuperar é Cuidar", "itens": [ "Sonecas sincronizadas com o bebê", "Reduza luz à noite", "Tarefas não essenciais podem esperar", "Peça revezamento com a rede de apoio", "Evite estimulantes à noite" ] },
+              "acaoTexto": "Sono em blocos curtos ainda ajuda. Sincronize cochilos com {nome}, reduza estímulos noturnos e aceite ajuda prática.",
+              "acaoAudio": "Descansar é parte do cuidado. Planeje cochilos e proteja suas noites do excesso de estímulos.",
+              "audioIllustration": "🌙",
+              "badge": { "id": "sono-em-dia", "nome": "Sono em Dia", "icone": "😴" },
+              "extraContent": [ { "titulo": "Higiene do Sono Pós-parto", "url": "https://example.org/sono_mae2" } ]
+            }
+          },
+          {
+            "title": "Alimentação & Hidratação",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🥗 Energia que Sustenta", "itens": [ "Lanches rápidos (frutas, oleaginosas)", "Pratos simples com proteínas", "Garrafa de água por perto", "Evite dietas restritivas", "Planeje compras/quentinhas" ] },
+              "acaoTexto": "Nutrientes sustentam energia e a amamentação. Prefira refeições simples e frequentes. Água à mão e planejamento reduzem estresse.",
+              "acaoAudio": "Nutra-se de forma prática. O simples e constante funciona melhor agora.",
+              "audioIllustration": "🥤",
+              "badge": { "id": "combustivel-bom", "nome": "Combustível Bom", "icone": "🥗" },
+              "extraContent": [ { "titulo": "Dieta Prática para o Puerpério", "url": "https://example.org/dieta2" } ]
+            }
+          }
+        ]
+      },
+      {
+        "week": 7,
+        "title": "Semana 7 - Contracepção & Movimento",
+        "description": "Planejamento, retorno ao movimento e à sexualidade.",
+        "interactive_flow": { "quiz_ref": "week7" },
+        "topics": [
+          {
+            "title": "Contracepção Pós-parto",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🛡️ Planejar com Segurança", "itens": [ "Métodos compatíveis com amamentação", "Condom, DIU, progestagênicos", "Evitar estrogênio inicial", "Decida com seu profissional", "Combinar método + rotina" ] },
+              "acaoTexto": "Avalie métodos seguros na amamentação (barreira, DIU, progestagênicos). O melhor método é o que você consegue usar com regularidade e orientação profissional.",
+              "acaoAudio": "Planeje com calma. Escolha um método que caiba na sua rotina e combine com seu profissional.",
+              "audioIllustration": "🛡️",
+              "badge": { "id": "planejamento-ok", "nome": "Planejamento OK", "icone": "🗓️" },
+              "extraContent": [ { "titulo": "Opções Seguras na Amamentação", "url": "https://example.org/contracepcao2" } ]
+            }
+          },
+          {
+            "title": "Atividade Física Leve",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🚶‍♀️ Volta com Calma", "itens": [ "Liberada pelo profissional? Sim", "Caminhadas curtas e regulares", "Alongamentos leves", "Atenção a dor/excesso de sangramento", "Evolução progressiva" ] },
+              "acaoTexto": "Após liberação, comece com caminhadas curtas e alongamentos. Observe sinais do corpo (dor, sangramento) e evolua devagar.",
+              "acaoAudio": "Devagar é avançar. Comece leve, ouça seu corpo, aumente aos poucos.",
+              "audioIllustration": "👟",
+              "badge": { "id": "movimento-seguro", "nome": "Movimento Seguro", "icone": "👟" },
+              "extraContent": [ { "titulo": "Exercícios no Puerpério", "url": "https://example.org/exercicio2" } ]
+            }
+          },
+          {
+            "title": "Sexualidade com Conforto",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "💗 Diálogo & Respeito", "itens": [ "Lubrificação pode estar reduzida", "Dor não é normal — ajuste e avalie", "Comunicação com o(a) parceiro(a)", "Contracepção definida = tranquilidade", "Voltar no seu tempo" ] },
+              "acaoTexto": "Mudanças hormonais alteram desejo e lubrificação. Priorize conforto, comunicação e métodos contraceptivos definidos. Se houver dor persistente, procure avaliação.",
+              "acaoAudio": "Respeite seu ritmo. Conforto e diálogo guiam o retorno saudável da sexualidade.",
+              "audioIllustration": "💗",
+              "badge": { "id": "cuidado-intimo", "nome": "Cuidado Íntimo", "icone": "💗" },
+              "extraContent": [ { "titulo": "Sexualidade no Pós-parto", "url": "https://example.org/sexualidade2" } ]
+            }
+          }
+        ]
+      },
+      {
+        "week": 8,
+        "title": "Semana 8 - Preparar a Consulta",
+        "description": "Checklist prático para a consulta de seguimento e sinais de atenção.",
+        "interactive_flow": { "quiz_ref": "week8" },
+        "topics": [
+          {
+            "title": "Checklist para a Consulta",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🗂️ Organização que Ajuda", "itens": [ "Descrever rotina (sono, alimentação, humor)", "Relatar dúvidas objetivas", "Anotar reações a vacinas do bebê", "Discutir contracepção e retorno ao exercício", "Sinais de alerta: quando procurar antes" ] },
+              "acaoTexto": "Leve anotações sobre rotina, humor, dúvidas e reações do bebê. Alinhe contracepção e atividade física. Revise sinais de alerta (hemorragia intensa, febre alta, dor no peito/falta de ar, dor e inchaço em uma perna).",
+              "acaoAudio": "Caderneta, anotações e perguntas. Informação organizada torna a consulta mais objetiva e resolutiva.",
+              "audioIllustration": "🩺",
+              "badge": { "id": "gestora-saude", "nome": "Gestora da Saúde", "icone": "🗂️" },
+              "extraContent": [ { "titulo": "Como se Preparar para a Consulta", "url": "https://example.org/consulta_mae2" } ]
+            }
+          },
+          {
+            "title": "Rede de Apoio & Alertas",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🤝 Quem Te Sustenta", "itens": [ "Mapeie quem pode ajudar", "Peça tarefas específicas", "Sinais de alerta: não adie", "Contato do serviço de saúde salvo", "Combine plano de cuidado" ] },
+              "acaoTexto": "Defina papéis práticos na sua rede (compras, comida, ficar com o bebê). Revise alertas e tenha contatos salvos para agir cedo quando necessário.",
+              "acaoAudio": "Ajuda combinada vira rotina leve. E alerta reconhecido vira cuidado rápido.",
+              "audioIllustration": "📞",
+              "badge": { "id": "time-apoio", "nome": "Time de Apoio", "icone": "🤝" },
+              "extraContent": [ { "titulo": "Ativando sua Rede de Apoio", "url": "https://example.org/apoio2" } ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "trail": "mother",
+    "title": "Jornada da Mãe — Mês 3",
+    "month": 3,
+    "journey": [
+      {
+        "week": 9,
+        "title": "Semana 9 - Corpo em Reabilitação",
+        "description": "Consolidando a recuperação: assoalho pélvico, core e postura no dia a dia.",
+        "interactive_flow": { "quiz_ref": "week9" },
+        "topics": [
+          {
+            "title": "Assoalho Pélvico 101",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🏗️ Base do Centro do Corpo",
+                "itens": [ "Respiração diafragmática + contração suave", "Contraia ao tossir/espirrar (manobra antiesforço)", "Evite prender a respiração", "Sinais de alerta: perda de urina/dor", "Procure fisio se houver dificuldade" ]
+              },
+              "acaoTexto": "O assoalho pélvico é a base do seu core. Treine contrações suaves coordenadas com a respiração: ao expirar, ative de leve (como segurar xixi e gás); ao inspirar, relaxe. Use a manobra antiesforço (exalar e contrair suavemente) para tossir, espirrar ou pegar {nome}. Se houver dor, sensação de peso perineal ou perda de urina, procure avaliação com fisioterapia pélvica.",
+              "acaoAudio": "TitiNauta na base do core! Inspire, relaxe. Expire, ative de leve. Use essa ativação quando tossir, espirrar ou pegar {nome}. Dor ou escapes? Hora de conversar com a fisio.",
+              "audioIllustration": "🌬️",
+              "badge": { "id": "base-forte", "nome": "Base Forte", "icone": "🏗️" },
+              "extraContent": [ { "titulo": "Guia rápido de assoalho pélvico", "url": "https://example.org/assoalho_pelvico" }, { "titulo": "Quando procurar fisioterapia pélvica", "url": "https://example.org/fisio_pelvica" } ]
+            }
+          },
+          {
+            "title": "Core & Postura no Cotidiano",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🧘 Postura que Protege", "itens": [ "Pegue o bebê dobrando joelhos", "Traga {nome} perto do corpo", "Evite torções com peso", "Ative o baixo-ventre ao erguer", "Pausas e alongamentos simples" ] },
+              "acaoTexto": "No dia a dia, proteja a lombar: para pegar {nome}, flexione joelhos, aproxime ao tronco e ative levemente o abdome baixo antes de erguer. Evite torções com peso; gire pés/quadris juntos. Faça pausas curtas para abrir o peito e alongar pescoço e costas.",
+              "acaoAudio": "Ergonomia da vida real: agache, traga {nome} pertinho, ative a barriga de leve e só então levante. Nada de torção com peso. Pausas salvam colunas!",
+              "audioIllustration": "🧘",
+              "badge": { "id": "postura-pro", "nome": "Postura PRO", "icone": "🧘" },
+              "extraContent": [ { "titulo": "Ergonomia com o bebê", "url": "https://example.org/ergonomia_mae" } ]
+            }
+          },
+          {
+            "title": "Volta ao Movimento (Progressão Segura)",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🏃‍♀️ Passo a Passo", "itens": [ "Caminhadas regulares", "Exercícios de baixo impacto", "Aumente volume lentamente", "Sem dor aguda ou sangramento", "Sinal verde do profissional" ] },
+              "acaoTexto": "Se liberada, aumente gradualmente o tempo de caminhada e exercícios de baixo impacto (mobilidade, fortalecimento leve). Critérios de segurança: sem dor pélvica/lombar, sem sangramento aumentado, sem sensação de instabilidade. Em qualquer sinal de alerta, reduza e peça orientação.",
+              "acaoAudio": "Devagar é avançar! Caminhe um pouco mais a cada semana, fortaleça leve e observe sinais. Dor ou sangramento? Dê um passo atrás e peça ajuda.",
+              "audioIllustration": "🚦",
+              "badge": { "id": "movimento-inteligente", "nome": "Movimento Inteligente", "icone": "📈" },
+              "extraContent": [ { "titulo": "Progressão de esforço no puerpério", "url": "https://example.org/progressao_puerperio" } ]
+            }
+          }
+        ]
+      },
+      {
+        "week": 10,
+        "title": "Semana 10 - Amamentação, Ordenha & Rotina",
+        "description": "Ajustes finos: livre demanda, ordenha, armazenamento e rede de apoio.",
+        "interactive_flow": { "quiz_ref": "week10" },
+        "topics": [
+          {
+            "title": "Amamentação no 3º Mês (Ritmo & Picos)",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "⏱️ Ritmo que Muda", "itens": [ "Picos de crescimento = mais demanda", "Dor indica ajuste de pega", "Evite relógio rígido", "Observe sinais de fome/ saciedade", "Hidratação & descanso contam" ] },
+              "acaoTexto": "No 3º mês, picos de crescimento são comuns e a demanda pode aumentar por alguns dias. Siga sinais de fome/saciedade e ajuste pega/posição se houver dor. Mantenha hidratação e cochilos curtos quando possível — seu corpo responde melhor assim.",
+              "acaoAudio": "Mais mamadas por alguns dias? Normal! Sinais de fome guiam o ritmo. Se doer, reposicione. Água e descanso ajudam sua produção.",
+              "audioIllustration": "🍼",
+              "badge": { "id": "ritmo-ajustado", "nome": "Ritmo Ajustado", "icone": "⏱️" },
+              "extraContent": [ { "titulo": "Picos de crescimento e livre demanda", "url": "https://example.org/picos_m3" } ]
+            }
+          },
+          {
+            "title": "Ordenha & Armazenamento de Leite",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🧊 Leite Seguro", "itens": [ "Higiene de mãos e equipamento", "Rotular data e volume", "Regras básicas de armazenamento", "Descongelar na geladeira/banho-maria", "Nunca ferver o leite" ] },
+              "acaoTexto": "Lave bem as mãos e higienize o equipamento. Armazene em recipientes próprios, datados. Orientações gerais: temperatura ambiente por período curto, geladeira por até alguns dias, freezer por semanas (siga protocolo local). Descongele preferencialmente na geladeira e aqueça em banho-maria morno. Não ferva; descarte sobras de mamada.",
+              "acaoAudio": "Ordem e higiene: mãos limpas, frascos datados. Geladeira e freezer com regras claras. Para usar: descongele com calma e aqueça sem ferver. Sobras? Descarte.",
+              "audioIllustration": "🥛",
+              "badge": { "id": "mestre-ordenha", "nome": "Mestre da Ordenha", "icone": "🧴" },
+              "extraContent": [ { "titulo": "Tabela prática de armazenamento", "url": "https://example.org/armazenamento_leite" } ]
+            }
+          },
+          {
+            "title": "Rede de Apoio na Rotina de Alimentação",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🤝 Dividir para Fluir", "itens": [ "Delegue tarefas não essenciais", "Alguém cuida da casa enquanto você amamenta", "Turnos noturnos combinados", "Pedidos claros e objetivos", "Tempo para descanso agendado" ] },
+              "acaoTexto": "Amamentar exige energia. Combine tarefas objetivas com sua rede (comida, louça, organização), planeje turnos noturnos quando possível e agende pausas de descanso para recuperar-se. Pedidos claros funcionam melhor: diga exatamente o que precisa.",
+              "acaoAudio": "Peça ajuda como líder do time: tarefa clara, hora combinada. Você amamenta; o time cuida do resto. Isso faz a rotina fluir.",
+              "audioIllustration": "🧭",
+              "badge": { "id": "lider-rotina", "nome": "Líder da Rotina", "icone": "🧭" },
+              "extraContent": [ { "titulo": "Roteiros de pedidos práticos", "url": "https://example.org/rede_pedidos" } ]
+            }
+          }
+        ]
+      },
+      {
+        "week": 11,
+        "title": "Semana 11 - Mente & Relações",
+        "description": "Cuidando da saúde mental, do vínculo do casal e dos limites pessoais.",
+        "interactive_flow": { "quiz_ref": "week11" },
+        "topics": [
+          {
+            "title": "Check-in de Saúde Mental (3º Mês)",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🧠 Sinais que Importam", "itens": [ "Tristeza persistente >2 semanas?", "Culpa excessiva/apatia", "Ansiedade que atrapalha o dia", "Alterações de sono/alimentação", "Procure ajuda sem demora" ] },
+              "acaoTexto": "Oscilações são comuns, mas tristeza profunda que não melhora após 2–3 semanas, ansiedade intensa, culpa excessiva e apatia pedem avaliação. Fale com um profissional e acione sua rede. Saúde mental tratada é proteção para você e {nome}.",
+              "acaoAudio": "Se o peso emocional não passa, é hora de falar. Procurar ajuda é um ato de coragem e cuidado com você e com {nome}.",
+              "audioIllustration": "💬",
+              "badge": { "id": "mente-em-dia", "nome": "Mente em Dia", "icone": "🧠" },
+              "extraContent": [ { "titulo": "Onde buscar ajuda", "url": "https://example.org/saude_mental_apoio" } ]
+            }
+          },
+          {
+            "title": "Intimidade & Comunicação com o Parceiro(a)",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "💞 Conectar é Cuidar", "itens": [ "Conversas curtas e frequentes", "Carinho sem pressão", "Lubrificação pode estar reduzida", "Dor não é normal: avalie", "Contracepção definida = tranquilidade" ] },
+              "acaoTexto": "No puerpério, a intimidade muda. Priorize diálogo honesto e gestos de carinho sem pressão. Lubrificantes à base de água podem ajudar. Dor persistente não é normal: procure avaliação. Definir contracepção traz segurança ao casal.",
+              "acaoAudio": "Conversem cinco minutinhos por dia, de verdade. Carinho sem pressa, respeito ao seu tempo e conforto como regra.",
+              "audioIllustration": "🗝️",
+              "badge": { "id": "parceria-viva", "nome": "Parceria Viva", "icone": "🤝" },
+              "extraContent": [ { "titulo": "Diálogo no puerpério", "url": "https://example.org/dialogo_puerperio" } ]
+            }
+          },
+          {
+            "title": "Limites & Autocuidado Social",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🛡️ Dizer Não é Cuidar", "itens": [ "Defina horários de visitas", "Regras: lavar mãos, nada de beijos", "Priorize seu descanso", "Peça tarefas em vez de conselhos", "Proteja seu tempo com {nome}" ] },
+              "acaoTexto": "Estabeleça limites amorosos com visitas e rotina. Explique regras de higiene e priorize seu descanso. Direcione sua rede para tarefas práticas. Você decide como, quando e por quanto tempo receber pessoas.",
+              "acaoAudio": "Limites claros, vida leve. Você cuida de {nome} e de você ao mesmo tempo quando diz o que precisa.",
+              "audioIllustration": "🧱",
+              "badge": { "id": "limites-claros", "nome": "Limites Claros", "icone": "🛡️" },
+              "extraContent": [ { "titulo": "Limites saudáveis com a família", "url": "https://example.org/limites_familia" } ]
+            }
+          }
+        ]
+      },
+      {
+        "week": 12,
+        "title": "Semana 12 - Preparando os Próximos Passos",
+        "description": "Consulta de seguimento, vacinação do círculo e planejamento prático.",
+        "interactive_flow": { "quiz_ref": "week12" },
+        "topics": [
+          {
+            "title": "Checklist para a Consulta (Mês 3)",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🗂️ Organização que Ajuda", "itens": [ "Relate rotina (sono, humor, alimentação)", "Dores, sangramentos, perdas urinárias?", "Amamentação: dúvidas e ordenha", "Contracepção: revisar/definir", "Vacinação da mãe em dia?" ] },
+              "acaoTexto": "Leve anotações objetivas: sono e humor, desconfortos (dor lombar/pelve), perdas urinárias, dúvidas da amamentação/ordenha e contracepção. Verifique seu status vacinal (dTpa, influenza conforme calendário local). Informação organizada torna a consulta mais resolutiva.",
+              "acaoAudio": "Caderneta da mãe, perguntas e relatos claros. Você chega preparada e sai com plano!",
+              "audioIllustration": "📝",
+              "badge": { "id": "gestora-consulta", "nome": "Gestora da Consulta", "icone": "🗂️" },
+              "extraContent": [ { "titulo": "Roteiro de consulta eficiente", "url": "https://example.org/consulta_mae_m3" } ]
+            }
+          },
+          {
+            "title": "Vacinas do Círculo de Contato (Cocooning)",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🛡️ Proteção em Camadas", "itens": [ "Reforço dTpa para cuidadores se indicado", "Influenza conforme estação", "Mantenha calendário da família", "Tire dúvidas na UBS", "Anote datas e comprovantes" ] },
+              "acaoTexto": "Reforce a proteção ao redor de {nome}: verifique a situação vacinal de quem convive de perto (dTpa/coqueluche, influenza e demais vacinas conforme calendário local). Essa barreira reduz risco de doenças respiratórias no bebê.",
+              "acaoAudio": "Casulo de proteção: quem cuida de {nome} também se vacina. Menos riscos, mais tranquilidade.",
+              "audioIllustration": "🫧",
+              "badge": { "id": "casulo-protetor", "nome": "Casulo Protetor", "icone": "🛡️" },
+              "extraContent": [ { "titulo": "Vacinação de contatos próximos", "url": "https://example.org/cocooning" } ]
+            }
+          },
+          {
+            "title": "Planejamento Prático (Rotina & Retorno ao Trabalho, se aplicável)",
+            "content": {
+              "trail": "mother",
+              "microcard": { "titulo": "🧭 Roteiro de Transição", "itens": [ "Simular rotina da nova fase", "Banco de leite: comece aos poucos", "Alinhamento com rede/cuidador", "Check-list de logística diária", "Planos B e C para imprevistos" ] },
+              "acaoTexto": "Se o retorno ao trabalho estiver próximo, faça simulações de horários, organize um pequeno banco de leite, alinhe combinados com quem cuidará de {nome} e tenha um check-list diário (mochila, fraldas, leite, contatos). Planeje alternativas para imprevistos.",
+              "acaoAudio": "Transição sem sustos: teste a rotina, alinhe o time e deixe o kit pronto. Planejar dá paz.",
+              "audioIllustration": "📦",
+              "badge": { "id": "planejamento-afinadissimo", "nome": "Planejamento Afinadíssimo", "icone": "🧭" },
+              "extraContent": [ { "titulo": "Guia de retorno com amamentação", "url": "https://example.org/retorno_amamentando" } ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "trail": "mother",
+    "title": "Jornada da Mãe - Mês 4",
+    "month": 4,
+    "journey": [
+      {
+        "week": 13,
+        "title": "Semana 13 - Reforçando o Autocuidado",
+        "description": "Equilibrando cuidados com o bebê e com você mesma.",
+        "topics": [
+          {
+            "title": "Sono e Rotina",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🌙 Organização do Descanso",
+                "itens": [
+                  "Cochilos junto com o bebê",
+                  "Evitar telas 1h antes de dormir",
+                  "Rotina consistente",
+                  "Dividir tarefas quando possível"
+                ]
+              },
+              "acaoTexto": "Otimize o descanso com pequenos cochilos e higiene do sono. Aceitar ajuda é estratégia de cuidado, não de fraqueza.",
+              "acaoAudio": "TitiNauta: descanse quando {nome} descansar. Seu corpo precisa recarregar.",
+              "audioIllustration": "😴",
+              "badge": {
+                "id": "sono-recuperado",
+                "nome": "Sono Recuperado",
+                "icone": "🌙"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Sono materno (OMS/OPAS)",
+                  "url": "https://www.paho.org/pt"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Saúde Emocional",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "💜 Atenção aos Sinais",
+                "itens": [
+                  "Tristeza persistente > 2 semanas",
+                  "Ansiedade e irritabilidade constantes",
+                  "Dificuldade de vínculo",
+                  "Procure apoio profissional"
+                ]
+              },
+              "acaoTexto": "A depressão pós-parto pode surgir até meses após o nascimento. Fale com o(a) médico(a) se sinais persistirem.",
+              "acaoAudio": "Você não está sozinha. Falar sobre o que sente é um passo de coragem.",
+              "audioIllustration": "💜",
+              "badge": {
+                "id": "forca-mental",
+                "nome": "Força Mental",
+                "icone": "🧠"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Saúde mental no puerpério",
+                  "url": "https://www.who.int"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Nutrição e Hidratação",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🥗 Energia que Sustenta",
+                "itens": [
+                  "Água por perto ao amamentar",
+                  "Refeições regulares",
+                  "Priorizar in natura",
+                  "Evitar excesso de cafeína"
+                ]
+              },
+              "acaoTexto": "Alimentação e hidratação adequadas fazem diferença na disposição, humor e, quando aplicável, na amamentação.",
+              "acaoAudio": "Monte lanches rápidos e nutritivos: frutas, iogurte, castanhas.",
+              "audioIllustration": "🥗",
+              "badge": {
+                "id": "energia-mae",
+                "nome": "Energia da Mãe",
+                "icone": "⚡"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Guia alimentar MS",
+                  "url": "https://bvsms.saude.gov.br"
+                }
+              ]
+            }
+          }
+        ],
+        "interactive_flow": {
+          "quiz_ref": "week13"
+        }
+      },
+      {
+        "week": 14,
+        "title": "Semana 14 - Corpo em Movimento",
+        "description": "Retomada gradual de atividade física e cuidado pélvico.",
+        "topics": [
+          {
+            "title": "Exercícios Pós-Parto",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🏃 Recomeçar com Leveza",
+                "itens": [
+                  "Caminhadas curtas",
+                  "Alongamentos suaves",
+                  "Fortalecimento leve",
+                  "Respeitar limites"
+                ]
+              },
+              "acaoTexto": "Após liberação médica, inicie com treinos leves e progressivos. A consistência importa mais que a intensidade.",
+              "acaoAudio": "Movimente-se por 10–15 minutos/dia e aumente conforme tolerância.",
+              "audioIllustration": "🏃",
+              "badge": {
+                "id": "retorno-ativo",
+                "nome": "Retorno Ativo",
+                "icone": "🏃"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Atividade física pós-parto (ACOG)",
+                  "url": "https://www.acog.org"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Saúde Íntima e Assoalho Pélvico",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🌸 Cuidado Pélvico",
+                "itens": [
+                  "Exercícios de Kegel",
+                  "Observar escapes urinários",
+                  "Evitar impacto alto",
+                  "Consultar fisio pélvica"
+                ]
+              },
+              "acaoTexto": "O fortalecimento pélvico previne incontinência e melhora o conforto nas atividades diárias e na vida sexual.",
+              "acaoAudio": "Kegel: contrair, sustentar 5s, relaxar 5s — repetir 10x, 3 séries/dia.",
+              "audioIllustration": "🌸",
+              "badge": {
+                "id": "cuidado-intimo",
+                "nome": "Cuidado Íntimo",
+                "icone": "🌸"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Exercícios de Kegel (MSD)",
+                  "url": "https://www.msdmanuals.com"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Autoestima e Imagem Corporal",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "💃 Confiança Renovada",
+                "itens": [
+                  "Evitar comparações",
+                  "Celebrar pequenas vitórias",
+                  "Roupas confortáveis",
+                  "Autocuidado regular"
+                ]
+              },
+              "acaoTexto": "Apoie-se em metas realistas e gentis. Seu corpo fez algo extraordinário e ainda está se reorganizando.",
+              "acaoAudio": "Você é suficiente. Valorize a jornada, não a pressa.",
+              "audioIllustration": "💃",
+              "badge": {
+                "id": "autoestima",
+                "nome": "Autoestima Renovada",
+                "icone": "💃"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Autoimagem no puerpério",
+                  "url": "https://www.unicef.org"
+                }
+              ]
+            }
+          }
+        ],
+        "interactive_flow": {
+          "quiz_ref": "week14"
+        }
+      },
+      {
+        "week": 15,
+        "title": "Semana 15 - Redes de Apoio",
+        "description": "Cultivar relações que sustentam a rotina materna.",
+        "topics": [
+          {
+            "title": "Rede de Apoio",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🤝 Compartilhar é Cuidar",
+                "itens": [
+                  "Delegar tarefas domésticas",
+                  "Pedir ajuda sem culpa",
+                  "Grupos de mães e família",
+                  "Combinar rotinas com parceiros"
+                ]
+              },
+              "acaoTexto": "Apoio social melhora saúde emocional e reduz sobrecarga. Combine responsabilidades de forma clara.",
+              "acaoAudio": "Faça uma lista de tarefas que podem ser delegadas nesta semana.",
+              "audioIllustration": "🤝",
+              "badge": {
+                "id": "rede-apoio",
+                "nome": "Rede de Apoio",
+                "icone": "🤝"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Puerpério e suporte (OMS)",
+                  "url": "https://www.who.int"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Relacionamento Conjugal",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "❤️ A Dois na Jornada",
+                "itens": [
+                  "Comunicação aberta",
+                  "Tempo de qualidade",
+                  "Dividir responsabilidades",
+                  "Celebrar conquistas juntos"
+                ]
+              },
+              "acaoTexto": "Reconectar-se ajuda o bem-estar do casal e da família. Pequenos momentos valem muito.",
+              "acaoAudio": "Agende 30 minutos nesta semana para um momento a dois, mesmo em casa.",
+              "audioIllustration": "❤️",
+              "badge": {
+                "id": "casal-forte",
+                "nome": "Casal Forte",
+                "icone": "❤️"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Relacionamento e pós-parto",
+                  "url": "https://www.psychologytoday.com"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Autonomia Materna",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🌟 Redescobrir-se",
+                "itens": [
+                  "Retomar hobbies",
+                  "Pequenos prazeres diários",
+                  "Cuidar da identidade pessoal",
+                  "Planejar metas curtas"
+                ]
+              },
+              "acaoTexto": "Sua identidade também importa. Inclua atividades que te façam bem e caibam na rotina atual.",
+              "acaoAudio": "Escreva 2 atividades simples que você pode fazer esta semana por você.",
+              "audioIllustration": "🌟",
+              "badge": {
+                "id": "autonomia",
+                "nome": "Autonomia Materna",
+                "icone": "🌟"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Autocuidado e maternidade",
+                  "url": "https://bvsms.saude.gov.br"
+                }
+              ]
+            }
+          }
+        ],
+        "interactive_flow": {
+          "quiz_ref": "week15"
+        }
+      },
+      {
+        "week": 16,
+        "title": "Semana 16 - Planejando os Próximos Passos",
+        "description": "Reflexões sobre retorno ao trabalho, rotinas e saúde continuada.",
+        "topics": [
+          {
+            "title": "Planejamento do Retorno ao Trabalho",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "📅 Organização Prática",
+                "itens": [
+                  "Mapear horários e apoio",
+                  "Ensaiar rotina do bebê",
+                  "Alinhar expectativas com a família",
+                  "Manter consultas em dia"
+                ]
+              },
+              "acaoTexto": "Planejar reduz ansiedade: teste rotinas, combine apoios e faça ajustes de forma gradual.",
+              "acaoAudio": "Faça um checklist simples do que precisa estar organizado antes do retorno.",
+              "audioIllustration": "📅",
+              "badge": {
+                "id": "planejamento",
+                "nome": "Planejamento",
+                "icone": "📅"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Retorno ao trabalho (OIT/ILO)",
+                  "url": "https://www.ilo.org"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Autocuidado Estratégico",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🧘‍♀️ Rotina que Sustenta",
+                "itens": [
+                  "Agenda de sono e pausas",
+                  "Exercício regular leve",
+                  "Alimentação planejada",
+                  "Tempo de qualidade pessoal"
+                ]
+              },
+              "acaoTexto": "Consolide uma rotina realista que inclua pausas, movimento e alimentação, respeitando a fase atual.",
+              "acaoAudio": "Reserve 10 minutos diários para respirar, alongar e beber água conscientemente.",
+              "audioIllustration": "🧘‍♀️",
+              "badge": {
+                "id": "autocuidado-estrategico",
+                "nome": "Autocuidado Estratégico",
+                "icone": "🧘‍♀️"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Hábitos saudáveis (OPAS)",
+                  "url": "https://www.paho.org/pt"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Sinais de Alerta Tardios",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "⚠️ Fique Atenta",
+                "itens": [
+                  "Dor de cabeça intensa e visão turva",
+                  "Dor/edema em uma perna (risco trombótico)",
+                  "Febre persistente",
+                  "Pensamentos de autoagressão"
+                ]
+              },
+              "acaoTexto": "Na dúvida, procure serviço de saúde. Reconhecer sinais de alerta salva vidas.",
+              "acaoAudio": "Se algo não parece certo, confie no seu instinto e busque ajuda imediatamente.",
+              "audioIllustration": "🚑",
+              "badge": {
+                "id": "vigilante",
+                "nome": "Vigilante Materna",
+                "icone": "⚠️"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Checklist de sinais (CDC/OPAS)",
+                  "url": "https://www.cdc.gov"
+                }
+              ]
+            }
+          }
+        ],
+        "interactive_flow": {
+          "quiz_ref": "week16"
+        }
+      }
+    ]
+  },
+  {
+    "trail": "mother",
+    "title": "Jornada da Mãe - Mês 5",
+    "month": 5,
+    "journey": [
+      {
+        "week": 17,
+        "title": "Semana 17 - Redescobrindo o Ritmo",
+        "description": "Ajuste de rotina, autocuidado e confiança no maternar.",
+        "topics": [
+          {
+            "title": "Ritmo e Rotina",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🕰️ Criando uma rotina leve e realista",
+                "itens": [
+                  "Observe os horários naturais do bebê",
+                  "Priorize o descanso e alimentação equilibrada",
+                  "Inclua pequenos intervalos para si mesma",
+                  "Aceite que cada dia pode ser diferente"
+                ]
+              },
+              "acaoTexto": "A rotina ajuda tanto você quanto o bebê a se sentirem mais seguros. Crie uma sequência previsível (banho, música, sono). Pequenas pausas e refeições leves são essenciais para seu corpo se equilibrar novamente.",
+              "acaoAudio": "TitiNauta diz: rotina é o superpoder das mães! Não precisa ser rígida, mas previsível. Comer, descansar e sorrir um pouco por dia é vitória.",
+              "audioIllustration": "🕰️",
+              "badge": {
+                "id": "rotina-mes5",
+                "nome": "Ritmo Tranquilo",
+                "icone": "🕰️"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Rotinas saudáveis (UNICEF)",
+                  "url": "https://www.unicef.org/brazil"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Autocuidado Mental",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "💆‍♀️ Respire e se observe",
+                "itens": [
+                  "Perceba seus sentimentos sem julgamento",
+                  "Evite sobrecarga emocional",
+                  "Procure espaços de escuta e apoio",
+                  "Celebre pequenas conquistas diárias"
+                ]
+              },
+              "acaoTexto": "As oscilações emocionais ainda são comuns. Valorize suas pausas mentais: respire fundo, escreva o que sente, converse com alguém de confiança. O autocuidado emocional é a base do bem-estar da mãe e do bebê.",
+              "acaoAudio": "Ei, mãe, pare um segundo e respire fundo. Você está aprendendo, e isso já é suficiente. Permita-se sentir e pedir ajuda quando precisar.",
+              "audioIllustration": "💆‍♀️",
+              "badge": {
+                "id": "autocuidado-mental5",
+                "nome": "Mente Serena",
+                "icone": "💆‍♀️"
+              },
+              "extraContent": [
+                {
+                  "titulo": "Saúde mental materna (OMS)",
+                  "url": "https://www.who.int"
+                },
+                {
+                  "titulo": "Apoio emocional (CVV 188)",
+                  "url": "https://www.cvv.org.br"
+                }
+              ]
+            }
+          },
+          {
+            "title": "Rede de Apoio",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🤝 Rede que acolhe",
+                "itens": [
+                  "Compartilhe tarefas com parceiros e familiares",
+                  "Aceite ajuda sem culpa",
+                  "Mantenha contato com outras mães",
+                  "Participe de grupos de apoio pós-parto"
+                ]
+              },
+              "acaoTexto": "Você não precisa dar conta de tudo sozinha. Permitir-se ser cuidada é um ato de amor. Busque grupos de mães, comunidades locais ou online que valorizem o cuidado e a empatia.",
+              "acaoAudio": "O TitiNauta lembra: pedir ajuda é coragem, não fraqueza. Cuidar de quem cuida também é missão do universo!",
+              "audioIllustration": "🤝",
+              "badge": {
+                "id": "rede-apoio",
+                "nome": "Rede Acolhedora",
+                "icone": "🤝"
+              },
+              "extraContent": []
+            }
+          }
+        ],
+        "interactive_flow": {
+          "quiz_ref": "quiz_week17"
+        }
+      },
+      {
+        "week": 18,
+        "title": "Semana 18 - Corpo e Movimento",
+        "description": "Reconexão com o corpo e fortalecimento físico gradual.",
+        "topics": [
+          {
+            "title": "Movimento Consciente",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🧘‍♀️ Movimento leve, corpo desperto",
+                "itens": [
+                  "Alongue-se ao acordar",
+                  "Caminhe por alguns minutos ao dia",
+                  "Evite comparações físicas",
+                  "Respeite seus limites corporais"
+                ]
+              },
+              "acaoTexto": "Após a liberação médica, o movimento leve ajuda a recuperar energia e autoconfiança. Caminhar, respirar e alongar são formas de se reconectar com o corpo pós-parto.",
+              "acaoAudio": "Seu corpo é um mapa de amor. Caminhe, alongue-se e respire. Cada passo é parte da sua cura.",
+              "audioIllustration": "🧘‍♀️",
+              "badge": {
+                "id": "movimento-mes5",
+                "nome": "Corpo Desperto",
+                "icone": "🧘‍♀️"
+              },
+              "extraContent": []
+            }
+          },
+          {
+            "title": "Sono Materno",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "😴 Sono: o desafio real",
+                "itens": [
+                  "Durma quando o bebê dormir",
+                  "Evite telas à noite",
+                  "Crie um ritual de relaxamento",
+                  "Aceite ajuda para revezar turnos"
+                ]
+              },
+              "acaoTexto": "O sono da mãe é fragmentado, mas é possível buscar qualidade. Evite luzes fortes, relaxe com música leve e aceite ajuda para descansar quando possível.",
+              "acaoAudio": "TitiNauta sugere: transforme o sono em prioridade. Pequenos cochilos são grandes recargas. Seu corpo agradece.",
+              "audioIllustration": "😴",
+              "badge": {
+                "id": "sono-mes5",
+                "nome": "Soneca Restauradora",
+                "icone": "😴"
+              },
+              "extraContent": []
+            }
+          },
+          {
+            "title": "Alimentação que Nutre",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🥗 Comer bem é cuidar de si",
+                "itens": [
+                  "Faça pequenas refeições balanceadas",
+                  "Inclua frutas e legumes variados",
+                  "Hidrate-se com frequência",
+                  "Evite longos períodos em jejum"
+                ]
+              },
+              "acaoTexto": "A alimentação influencia o humor, a energia e até a produção de leite. Tenha sempre à mão lanches práticos e nutritivos, como frutas e castanhas.",
+              "acaoAudio": "Energia boa vem da comida simples. Beba água, coma leve e com prazer. O amor também se alimenta!",
+              "audioIllustration": "🥗",
+              "badge": {
+                "id": "alimentacao-mes5",
+                "nome": "Energia Vital",
+                "icone": "🥗"
+              },
+              "extraContent": []
+            }
+          }
+        ],
+        "interactive_flow": {
+          "quiz_ref": "week18"
+        }
+      },
+      {
+        "week": 19,
+        "title": "Semana 19 - Vínculo e Comunicação",
+        "description": "Reforçando o laço afetivo e a escuta emocional com o bebê.",
+        "topics": [
+          {
+            "title": "Olhar que fala",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "👁️ A linguagem silenciosa do olhar",
+                "itens": [
+                  "Troque olhares durante o cuidado",
+                  "Sorria e espere o sorriso de volta",
+                  "Nomeie emoções e reações do bebê"
+                ]
+              },
+              "acaoTexto": "O olhar é o primeiro diálogo entre mãe e bebê. Durante a amamentação ou o banho, mantenha contato visual e descreva o que está acontecendo. Isso fortalece o vínculo e estimula o desenvolvimento da linguagem.",
+              "acaoAudio": "Cada olhar entre vocês é uma conversa de amor. O bebê entende o mundo pelo seu rosto e pelo seu tom de voz.",
+              "audioIllustration": "�️",
+              "badge": {
+                "id": "olhar-fala",
+                "nome": "Olhar de Amor",
+                "icone": "👁️"
+              },
+              "extraContent": []
+            }
+          },
+          {
+            "title": "Brincar e Cuidar",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🎲 Cuidar brincando",
+                "itens": [
+                  "Inclua o brincar nas rotinas de higiene",
+                  "Use canções e rimas durante os cuidados",
+                  "Transforme gestos simples em afeto"
+                ]
+              },
+              "acaoTexto": "Brincar é linguagem do bebê. Aproveite momentos de cuidado para cantar e sorrir. Isso ajuda o bebê a associar o toque ao carinho e à segurança.",
+              "acaoAudio": "Banho, troca e carinho podem ser brincadeiras! Cante, sorria e torne cada gesto um aprendizado afetivo.",
+              "audioIllustration": "🎲",
+              "badge": {
+                "id": "brincar-cuidar",
+                "nome": "Cuidado Brincante",
+                "icone": "🎲"
+              },
+              "extraContent": []
+            }
+          },
+          {
+            "title": "Diálogo Emocional",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "💬 Escuta e empatia",
+                "itens": [
+                  "Reconheça seu cansaço sem culpa",
+                  "Compartilhe o que sente",
+                  "Valide suas emoções e as do bebê"
+                ]
+              },
+              "acaoTexto": "A maternidade é feita de altos e baixos. Ser sincera sobre suas emoções cria leveza. Se sentir tristeza persistente, procure apoio profissional.",
+              "acaoAudio": "Sentir não é fraqueza. O TitiNauta te lembra: toda emoção é válida. Compartilhar é se libertar.",
+              "audioIllustration": "💬",
+              "badge": {
+                "id": "dialogo-emocional",
+                "nome": "Coração Aberto",
+                "icone": "�"
+              },
+              "extraContent": []
+            }
+          }
+        ],
+        "interactive_flow": {
+          "quiz_ref": "week19"
+        }
+      },
+      {
+        "week": 20,
+        "title": "Semana 20 - Redefinindo o Eu",
+        "description": "Autoconfiança, identidade e novos propósitos.",
+        "topics": [
+          {
+            "title": "Autoimagem e Confiança",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "💖 Redescobrindo-se",
+                "itens": [
+                  "Observe-se com gentileza",
+                  "Evite comparações com outras mães",
+                  "Valorize cada conquista pessoal"
+                ]
+              },
+              "acaoTexto": "O corpo muda, a rotina muda — e você também. A maternidade não anula quem você é; ela amplia. Reconheça suas conquistas, dentro e fora da maternagem.",
+              "acaoAudio": "Olhe-se com carinho. Seu corpo e sua alma estão escrevendo uma nova história, cheia de força e amor.",
+              "audioIllustration": "💖",
+              "badge": {
+                "id": "autoimagem",
+                "nome": "Força Serena",
+                "icone": "💖"
+              },
+              "extraContent": []
+            }
+          },
+          {
+            "title": "Tempo para Si",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "⏳ Seu tempo importa",
+                "itens": [
+                  "Reserve 10 minutos só para você",
+                  "Ouça uma música ou leia algo leve",
+                  "Peça ajuda sem culpa"
+                ]
+              },
+              "acaoTexto": "Mesmo poucos minutos de pausa diária têm impacto no bem-estar mental. Crie um pequeno ritual só seu: café em silêncio, leitura, música. Você merece esse tempo.",
+              "acaoAudio": "TitiNauta diz: o tempo para si não é luxo — é combustível. Cuide de você para continuar brilhando.",
+              "audioIllustration": "⏳",
+              "badge": {
+                "id": "tempo-si",
+                "nome": "Tempo Meu",
+                "icone": "⏳"
+              },
+              "extraContent": []
+            }
+          },
+          {
+            "title": "Propósito e Gratidão",
+            "content": {
+              "trail": "mother",
+              "microcard": {
+                "titulo": "🌱 Cultive o propósito",
+                "itens": [
+                  "Reflita sobre o que te inspira",
+                  "Anote três motivos de gratidão por dia",
+                  "Transforme o cansaço em aprendizado"
+                ]
+              },
+              "acaoTexto": "Reconectar-se com seus valores e propósitos ajuda a encontrar sentido nessa nova fase. Pequenos gestos de gratidão geram serenidade e equilíbrio.",
+              "acaoAudio": "Gratidão transforma. Pense em algo bom que aconteceu hoje — mesmo que pequeno. Isso muda tudo.",
+              "audioIllustration": "🌱",
+              "badge": {
+                "id": "proposito",
+                "nome": "Coração Grato",
+                "icone": "🌱"
+              },
+              "extraContent": []
+            }
+          }
+        ],
+        "interactive_flow": {
+          "quiz_ref": "week20"
+        }
+      }
+    ]
+  }
+]
