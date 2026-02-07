@@ -54,15 +54,11 @@ const RegisterPage: React.FC = () => {
     try {
       // Use appropriate registration method based on what's available
       if (handleRegister) {
-        await handleRegister(name, email, password, 'teacher', true, phone);
-      } else if (signUp) {
-        await signUp(email, password, {
-          name,
-          phone,
-          role: 'teacher'
-        });
+        await handleRegister(name, email, password, 'user' as any, true, phone);
       } else if (register) {
-        await register(email, password, name, phone);
+        await register(email, password, { name, phone });
+      } else if (signUp) {
+        await signUp(name, email, password, 'user' as any, true);
       }
       
       toast({
