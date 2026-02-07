@@ -157,7 +157,7 @@ export function MediaResourceForm({ resource, onSubmit, onCancel }: MediaResourc
               placeholder="Digite o título do recurso"
             />
             {errors.title && (
-              <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+              <p className="text-sm text-destructive mt-1">{errors.title.message}</p>
             )}
           </div>
 
@@ -203,7 +203,7 @@ export function MediaResourceForm({ resource, onSubmit, onCancel }: MediaResourc
               </SelectContent>
             </Select>
             {errors.resource_type && (
-              <p className="text-sm text-red-500 mt-1">{errors.resource_type.message}</p>
+              <p className="text-sm text-destructive mt-1">{errors.resource_type.message}</p>
             )}
           </div>
 
@@ -242,15 +242,15 @@ export function MediaResourceForm({ resource, onSubmit, onCancel }: MediaResourc
                     resourceType === 'video' ? 'video/*' : undefined
                   }
                 />
-                <Upload className="w-5 h-5 text-gray-400" />
+                <Upload className="w-5 h-5 text-muted-foreground" />
               </div>
               {file && (
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Arquivo selecionado: {file.name}
                 </p>
               )}
               {resource?.file_name && !file && (
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   Arquivo atual: {resource.file_name}
                 </p>
               )}
@@ -334,7 +334,7 @@ export function MediaResourceForm({ resource, onSubmit, onCancel }: MediaResourc
                   type="url"
                 />
                 {errors.tts_endpoint && (
-                  <p className="text-sm text-red-500 mt-1">{errors.tts_endpoint.message}</p>
+                  <p className="text-sm text-destructive mt-1">{errors.tts_endpoint.message}</p>
                 )}
               </div>
 

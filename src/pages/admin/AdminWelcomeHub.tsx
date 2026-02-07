@@ -35,9 +35,9 @@ const audienceConfig = {
 };
 
 const sectionConfig = {
-  news: { label: 'Noticias', icon: Newspaper, color: 'text-blue-600' },
-  training: { label: 'Treinamentos', icon: BookOpen, color: 'text-amber-600' },
-  course: { label: 'Cursos', icon: GraduationCap, color: 'text-purple-600' },
+  news: { label: 'Noticias', icon: Newspaper, color: 'text-blue-600 dark:text-blue-400' },
+  training: { label: 'Treinamentos', icon: BookOpen, color: 'text-amber-600 dark:text-amber-400' },
+  course: { label: 'Cursos', icon: GraduationCap, color: 'text-purple-600 dark:text-purple-400' },
 };
 
 const ContentCard: React.FC<{ item: ContentItem; onEdit: () => void }> = ({ item, onEdit }) => {

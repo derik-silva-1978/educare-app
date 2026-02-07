@@ -94,15 +94,15 @@ interface ContentItem {
 }
 
 const typeLabels = {
-  news: { label: 'Notícia', icon: Newspaper, color: 'bg-blue-100 text-blue-700' },
-  training: { label: 'Treinamento', icon: BookOpen, color: 'bg-amber-100 text-amber-700' },
-  course: { label: 'Curso', icon: GraduationCap, color: 'bg-purple-100 text-purple-700' },
+  news: { label: 'Notícia', icon: Newspaper, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
+  training: { label: 'Treinamento', icon: BookOpen, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
+  course: { label: 'Curso', icon: GraduationCap, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' },
 };
 
 const statusLabels = {
-  draft: { label: 'Rascunho', color: 'bg-gray-100 text-gray-700' },
-  published: { label: 'Publicado', color: 'bg-green-100 text-green-700' },
-  archived: { label: 'Arquivado', color: 'bg-red-100 text-red-700' },
+  draft: { label: 'Rascunho', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' },
+  published: { label: 'Publicado', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
+  archived: { label: 'Arquivado', color: 'bg-slate-100 text-slate-600 dark:bg-slate-800/60 dark:text-slate-400' },
 };
 
 const ContentManagement: React.FC = () => {
@@ -538,9 +538,9 @@ const ContentManagement: React.FC = () => {
               {formData.title && (
                 <div className="space-y-2 pt-4 border-t">
                   <Label className="text-base font-semibold">Preview do Card</Label>
-                  <div className="border rounded-lg overflow-hidden bg-white shadow-sm max-w-sm">
+                  <div className="border rounded-lg overflow-hidden bg-card shadow-sm max-w-sm">
                     {formData.image_url && (
-                      <div className="h-32 bg-gray-100 overflow-hidden">
+                      <div className="h-32 bg-muted overflow-hidden">
                         <img 
                           src={formData.image_url} 
                           alt="Preview" 
@@ -557,18 +557,18 @@ const ContentManagement: React.FC = () => {
                           {typeLabels[formData.type]?.label}
                         </Badge>
                         {formData.category && (
-                          <span className="text-xs text-gray-500">{formData.category}</span>
+                          <span className="text-xs text-muted-foreground">{formData.category}</span>
                         )}
                       </div>
-                      <h4 className="font-semibold text-gray-900 line-clamp-2">{formData.title}</h4>
+                      <h4 className="font-semibold text-foreground line-clamp-2">{formData.title}</h4>
                       {formData.summary && (
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{formData.summary}</p>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{formData.summary}</p>
                       )}
                       {formData.duration && (
-                        <p className="text-xs text-gray-500 mt-2">Duração: {formData.duration}</p>
+                        <p className="text-xs text-muted-foreground mt-2">Duração: {formData.duration}</p>
                       )}
                       {formData.cta_text && (
-                        <button className="mt-3 text-sm text-blue-600 font-medium hover:underline">
+                        <button className="mt-3 text-sm text-primary font-medium hover:underline">
                           {formData.cta_text} →
                         </button>
                       )}
@@ -741,9 +741,9 @@ const ContentManagement: React.FC = () => {
                       <TableCell>{item.category || '-'}</TableCell>
                       <TableCell>
                         <Badge variant="outline" className={
-                          item.target_audience === 'all' ? 'bg-blue-50 text-blue-700 border-blue-300' :
-                          item.target_audience === 'parents' ? 'bg-green-50 text-green-700 border-green-300' :
-                          'bg-purple-50 text-purple-700 border-purple-300'
+                          item.target_audience === 'all' ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700' :
+                          item.target_audience === 'parents' ? 'bg-green-50 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700' :
+                          'bg-purple-50 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700'
                         }>
                           {item.target_audience === 'all' ? 'Todos' :
                            item.target_audience === 'parents' ? 'Pais' :
