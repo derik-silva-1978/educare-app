@@ -95,7 +95,8 @@ const getAxisStatsData = (stats: CurationStatistics | null, axis: CurationAxis) 
   return stats.axes[map[axis]];
 };
 
-const CONTENT_TEMPLATE = `[
+const CONTENT_TEMPLATE = `// month: mês (1-72), week: semana relativa (1-5)
+[
   {
     "month": 1,
     "week": 1,
@@ -105,7 +106,8 @@ const CONTENT_TEMPLATE = `[
   }
 ]`;
 
-const QUIZ_TEMPLATE = `[
+const QUIZ_TEMPLATE = `// month: mês (1-72), week: semana relativa (1-5)
+[
   {
     "month": 2,
     "week": 1,
@@ -2372,7 +2374,7 @@ const JourneyQuestionsManagement: React.FC = () => {
                 <div>
                   <Label>Semanas do mês (selecione uma ou mais)</Label>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    {[1, 2, 3, 4].map((w) => (
+                    {[1, 2, 3, 4, 5].map((w) => (
                       <Button
                         key={w}
                         variant={aiGenWeeks.includes(w) ? 'default' : 'outline'}
@@ -2390,7 +2392,7 @@ const JourneyQuestionsManagement: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       className="text-purple-600"
-                      onClick={() => setAiGenWeeks([1, 2, 3, 4])}
+                      onClick={() => setAiGenWeeks([1, 2, 3, 4, 5])}
                     >
                       Todas
                     </Button>

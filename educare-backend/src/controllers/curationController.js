@@ -679,8 +679,8 @@ const curationController = {
             where: { journey_id: journey.id, week: item.week }
           });
           if (!weekRecord) {
-            if (item.week < 1 || item.week > 4) {
-              errors.push({ index: i, item, error: `Semana deve ser entre 1 e 4, recebido: ${item.week}` });
+            if (item.week < 1 || item.week > 5) {
+              errors.push({ index: i, item, error: `Semana deve ser entre 1 e 5, recebido: ${item.week}` });
               continue;
             }
             weekRecord = await JourneyV2Week.create({

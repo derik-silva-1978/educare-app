@@ -217,7 +217,7 @@ IMPORTANTE:
 - As opções devem ser observações/comportamentos adequados para criança com ${ageDesc}
 - Feedbacks acolhedores e sem julgamento
 - Use linguagem simples e empática
-- As semanas são relativas ao mês (1-4), NÃO absolutas`;
+- As semanas são relativas ao mês (1-5), NÃO absolutas — alguns meses podem ter 5 semanas`;
     } else {
       userPrompt = `${contextBlock}
 
@@ -244,7 +244,7 @@ IMPORTANTE:
 - Os microcards devem conter informações práticas e baseadas em evidências, adequadas à faixa etária
 - O action_text deve ser uma atividade ou ação prática
 - Use linguagem simples e empática
-- As semanas são relativas ao mês (1-4), NÃO absolutas`;
+- As semanas são relativas ao mês (1-5), NÃO absolutas — alguns meses podem ter 5 semanas`;
     }
 
     const response = await openai.chat.completions.create({
