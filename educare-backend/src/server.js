@@ -41,6 +41,8 @@ const { WebhookHandlers } = require('./services/webhookHandlers');
 // Inicialização do app Express
 const app = express();
 
+app.set('trust proxy', 1);
+
 // Rate limiters
 const { generalLimiter, authLimiter, externalLimiter } = require('./middlewares/rateLimiter');
 
