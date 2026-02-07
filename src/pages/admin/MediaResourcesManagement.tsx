@@ -324,7 +324,7 @@ export default function MediaResourcesManagement() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+                      const apiUrl = import.meta.env.VITE_API_URL || '';
                       const fileUrl = selectedResource.file_url.startsWith('http') 
                         ? selectedResource.file_url 
                         : `${apiUrl}${selectedResource.file_url}`;

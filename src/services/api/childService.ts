@@ -99,7 +99,7 @@ export const addChildDocument = async (
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/children/${childId}/documents`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/children/${childId}/documents`, {
       method: 'POST',
       headers,
       body: formData,

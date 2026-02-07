@@ -20,7 +20,7 @@ const JornadaQuizPage: React.FC = () => {
       if (!childId || !user?.id) return null;
       
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/children/${childId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/children/${childId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'

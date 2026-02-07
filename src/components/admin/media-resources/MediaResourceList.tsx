@@ -246,7 +246,7 @@ export function MediaResourceList({
                         </DropdownMenuItem>
                         {resource.file_url && (
                           <DropdownMenuItem onClick={() => {
-                            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+                            const apiUrl = import.meta.env.VITE_API_URL || '';
                             const fileUrl = resource.file_url.startsWith('http') 
                               ? resource.file_url 
                               : `${apiUrl}${resource.file_url}`;

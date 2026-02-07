@@ -6,7 +6,7 @@
  */
 
 // URL base da API - usa variável de ambiente ou fallback para desenvolvimento
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 // Timeout padrão para requisições (em milissegundos)
 export const API_TIMEOUT = 30000;

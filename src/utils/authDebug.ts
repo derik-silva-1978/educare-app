@@ -26,7 +26,7 @@ export const debugAuthStatus = () => {
 
 export const testAuthEndpoint = async () => {
   const token = getStoredAuthToken();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  const API_URL = import.meta.env.VITE_API_URL || '';
   
   if (!token) {
     console.error('❌ No token available for testing');

@@ -5,8 +5,7 @@
 
 import { getStoredAuthToken, setStoredAuthToken, removeStoredAuthToken } from '@/utils/authStorage';
 
-// Configuração da API
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 // Tipos para as respostas da API
 export interface ApiResponse<T = unknown> {
@@ -42,10 +41,11 @@ class HttpClient {
    * Constrói a URL completa para o endpoint
    */
   private buildUrl(endpoint: string): string {
-    // Remove barra inicial se existir
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
-    // Adiciona /api automaticamente se não estiver presente
     const apiEndpoint = cleanEndpoint.startsWith('api/') ? cleanEndpoint : `api/${cleanEndpoint}`;
+    if (!this.baseUrl) {
+      return `/${apiEndpoint}`;
+    }
     return `${this.baseUrl}/${apiEndpoint}`;
   }
 

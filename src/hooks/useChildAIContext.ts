@@ -23,7 +23,7 @@ export const useChildAIContext = (childId?: string) => {
 
       try {
         // Fetch child data from backend
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/children/${childId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/children/${childId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
@@ -119,7 +119,7 @@ export const useChildAIContext = (childId?: string) => {
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Re-fetch child data from backend
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/children/${childId}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/children/${childId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
