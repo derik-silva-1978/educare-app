@@ -206,6 +206,10 @@ app.use('/api/content', contentRoutes);
 const faqRoutes = require('./routes/faqRoutes');
 app.use('/api/faqs', faqRoutes);
 
+// Public landing page chat (no auth, rate-limited)
+const publicChatRoutes = require('./routes/publicChatRoutes');
+app.use('/api/public/chat', publicChatRoutes);
+
 // Milestones (Marcos do Desenvolvimento) routes
 const milestonesRoutes = require('./routes/milestonesRoutes');
 app.use('/api/admin/milestones', milestonesRoutes);
