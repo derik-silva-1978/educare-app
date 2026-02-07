@@ -12,9 +12,9 @@ packages = ["jq"]
 [userenv.shared]
 VITE_API_URL = "https://1d35ed6a-d635-41d2-8d11-7db8db84ce29-00-28ylqytrll200.picard.replit.dev:3001"
 EXTERNAL_API_KEY = "educare_external_api_key_2025"
-DB_USERNAME = "educareapp"
-DB_DATABASE = "educareapp"
-DB_HOST = "86.48.30.74"
+DB_USERNAME = "dsg"
+DB_DATABASE = "educare1"
+DB_HOST = "app.voipsimples.com.br"
 DB_PORT = "5432"
 DB_DIALECT = "postgres"
 DB_TIMEZONE = "America/Sao_Paulo"
