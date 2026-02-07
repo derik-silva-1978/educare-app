@@ -95,7 +95,10 @@ const EducareAppLayout: React.FC = () => {
       '/educare-app/communication',
       '/educare-app/settings',
       '/educare-app/news',
-      '/educare-app/trainings'
+      '/educare-app/trainings',
+      '/educare-app/blog',
+      '/educare-app/academia',
+      '/educare-app/em-desenvolvimento'
     ];
     
     const isAllowedPath = allowedPaths.some(path => location.pathname.startsWith(path));
