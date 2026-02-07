@@ -331,12 +331,23 @@ exports.approveUser = async (req, res) => {
     // Enviar mensagem de boas-vindas via WhatsApp
     if (user.phone) {
       try {
+        const loginUrl = process.env.BACKEND_URL
+          ? `${process.env.BACKEND_URL.replace(/\/$/, '')}/educare-app/auth/login`
+          : `${getFrontendUrl()}/educare-app/auth/login`;
+
         const welcomeMessage = `🎉 *Bem-vindo(a) ao Educare+!*\n\n` +
           `Olá, *${user.name}*! 👋\n\n` +
-          `Seu acesso à plataforma Educare+ foi aprovado com sucesso! ✅\n\n` +
-          `Agora você pode acessar todos os recursos disponíveis para o seu perfil.\n\n` +
-          `📱 Acesse a plataforma e faça login com suas credenciais.\n\n` +
-          `Se precisar de ajuda, estamos aqui para você! 💙`;
+          `Seu acesso à plataforma Educare+ foi *aprovado com sucesso*! ✅\n\n` +
+          `Agora você tem acesso a diversas funcionalidades pensadas para apoiar o desenvolvimento do seu filho:\n\n` +
+          `🧒 *Acompanhamento do Desenvolvimento* — Monitore marcos importantes do crescimento e desenvolvimento infantil\n\n` +
+          `🤖 *TitiNauta (Assistente IA)* — Tire dúvidas sobre saúde, comportamento e rotina do seu bebê a qualquer momento\n\n` +
+          `🤰 *Saúde Materna* — Diário de saúde, humor, sono, alimentação e acompanhamento do bem-estar da mãe\n\n` +
+          `📊 *Relatórios Inteligentes* — Relatórios personalizados sobre a evolução do seu filho, gerados por inteligência artificial\n\n` +
+          `📚 *Jornada do Desenvolvimento* — Conteúdos educativos semanais e quizzes interativos sobre cada fase\n\n` +
+          `💉 *Vacinas e Crescimento* — Checklist de vacinas e gráficos de crescimento atualizados\n\n` +
+          `🔗 *Acesse a plataforma agora:*\n${loginUrl}\n\n` +
+          `Faça login com o e-mail e senha que você cadastrou.\n\n` +
+          `Qualquer dúvida, estamos aqui para ajudar! 💙`;
 
         WhatsappService.sendMessage(user.phone, welcomeMessage)
           .then(() => console.log(`Mensagem de boas-vindas enviada para: ${user.phone}`))
