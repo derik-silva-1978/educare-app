@@ -174,21 +174,22 @@ const autoLinkMilestones = async (req, res) => {
     let skippedDuplicates = 0;
     const results = [];
 
+    const allQuestions = await JourneyBotQuestion.findAll({
+      where: {
+        is_active: true,
+        domain_name: {
+          [Op.ne]: null
+        }
+      }
+    });
+    console.log(`📊 ${allQuestions.length} perguntas ativas encontradas`);
+
     for (const milestone of milestones) {
       const targetWeek = monthToWeeks(milestone.target_month);
       const minWeek = Math.max(0, targetWeek - toleranceWeeks);
       const maxWeek = targetWeek + toleranceWeeks;
 
-      const questions = await JourneyBotQuestion.findAll({
-        where: {
-          is_active: true,
-          domain_name: {
-            [Op.ne]: null
-          }
-        }
-      });
-
-      const matchedQuestions = questions.filter(q => {
+      const matchedQuestions = allQuestions.filter(q => {
         const normalizedDomain = normalizeDomain(q.domain_name);
         if (normalizedDomain !== milestone.category) return false;
 

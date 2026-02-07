@@ -125,34 +125,34 @@ export interface CurationViewResponse {
 
 class MilestonesService {
   async getCurationStats(): Promise<CurationStats> {
-    const response = await httpClient.get<{ success: boolean; data: CurationStats }>(
+    const response = await httpClient.get<CurationStats>(
       '/admin/milestones/stats'
     );
-    return response.data!;
+    return response.data as CurationStats;
   }
 
   async listMilestones(category?: string): Promise<OfficialMilestone[]> {
     const params = category ? `?category=${category}` : '';
-    const response = await httpClient.get<{ success: boolean; data: OfficialMilestone[] }>(
+    const response = await httpClient.get<OfficialMilestone[]>(
       `/admin/milestones/milestones${params}`
     );
-    return response.data || [];
+    return (response.data as OfficialMilestone[]) || [];
   }
 
   async listMappings(verified?: boolean): Promise<MilestoneMapping[]> {
     const params = verified !== undefined ? `?verified=${verified}` : '';
-    const response = await httpClient.get<{ success: boolean; count: number; data: MilestoneMapping[] }>(
+    const response = await httpClient.get<MilestoneMapping[]>(
       `/admin/milestones/mappings${params}`
     );
-    return response.data || [];
+    return (response.data as MilestoneMapping[]) || [];
   }
 
   async verifyMapping(id: string, notes?: string): Promise<MilestoneMapping> {
-    const response = await httpClient.post<{ success: boolean; data: MilestoneMapping }>(
+    const response = await httpClient.post<MilestoneMapping>(
       `/admin/milestones/mappings/${id}/verify`,
       { notes }
     );
-    return response.data!;
+    return response.data as MilestoneMapping;
   }
 
   async deleteMapping(id: string): Promise<void> {
@@ -160,29 +160,28 @@ class MilestonesService {
   }
 
   async getMilestonesChart(): Promise<ChartData[]> {
-    const response = await httpClient.get<{ success: boolean; data: { chartData: ChartData[] } }>(
+    const response = await httpClient.get<{ chartData: ChartData[] }>(
       '/admin/milestones/dashboard/milestones-chart'
     );
-    return response.data?.chartData || [];
+    const data = response.data as { chartData: ChartData[] } | undefined;
+    return data?.chartData || [];
   }
 
   async seedMilestones(): Promise<{ message: string; count: number }> {
-    const response = await httpClient.post<{ success: boolean; message: string; count: number }>(
-      '/admin/milestones/setup/seed'
+    const response = await httpClient.post<any>(
+      '/admin/milestones/setup/seed',
+      {}
     );
-    return { message: response.message || '', count: (response as any).count || 0 };
+    return { message: response.message || '', count: response.data?.count || 0 };
   }
 
   async autoLink(toleranceWeeks = 4): Promise<{ totalMappings: number; skippedDuplicates: number }> {
-    const response = await httpClient.post<{ 
-      success: boolean; 
-      totalMappings: number; 
-      skippedDuplicates: number 
-    }>(
+    const response = await httpClient.post<any>(
       '/admin/milestones/setup/auto-link',
       { toleranceWeeks }
     );
-    return { totalMappings: (response as any).totalMappings || 0, skippedDuplicates: (response as any).skippedDuplicates || 0 };
+    const d = response.data || response;
+    return { totalMappings: d.totalMappings || 0, skippedDuplicates: d.skippedDuplicates || 0 };
   }
 
   async getCurationView(): Promise<CurationViewResponse> {
@@ -193,16 +192,16 @@ class MilestonesService {
     return {
       success: response.success ?? true,
       data: ageRanges,
-      total_milestones: ageRanges.reduce((sum, range) => sum + (range.milestones_count || 0), 0)
+      total_milestones: ageRanges.reduce((sum: number, range: AgeRangeGroup) => sum + (range.milestones_count || 0), 0)
     };
   }
 
   async createMapping(milestoneId: string, questionId: string, weight: number = 1.0): Promise<MilestoneMapping> {
-    const response = await httpClient.post<{ success: boolean; data: MilestoneMapping }>(
+    const response = await httpClient.post<MilestoneMapping>(
       '/admin/milestones/mappings',
       { official_milestone_id: milestoneId, journey_question_id: questionId, weight }
     );
-    return response.data!;
+    return response.data as MilestoneMapping;
   }
 
   async runAIMatching(milestoneId?: string): Promise<AIMatchingResult> {
@@ -210,7 +209,7 @@ class MilestonesService {
       '/admin/milestones/ai-matching',
       milestoneId ? { milestoneId } : {}
     );
-    return response as AIMatchingResult;
+    return (response.data || response) as AIMatchingResult;
   }
 }
 
