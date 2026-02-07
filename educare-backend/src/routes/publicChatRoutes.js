@@ -11,42 +11,51 @@ const publicChatLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || req.headers['x-forwarded-for'] || 'unknown',
-  handler: (req, res, next, options) => {
-    console.warn(`[PUBLIC_CHAT] IP ${req.ip} excedeu rate limit`);
-    res.status(429).json(options.message);
-  }
+  validate: { xForwardedForHeader: false },
 });
 
-const LANDING_SYSTEM_PROMPT = `Você é o assistente virtual do Educare+, a plataforma completa para desenvolvimento infantil e saúde materna.
+const LANDING_SYSTEM_PROMPT = `Você é o Educare+ MyChat, assistente inteligente de pré-vendas e suporte inicial do Educare+ Tech.
 
-CONTEXTO:
-Você está atendendo um visitante no site do Educare+. Esta pessoa provavelmente quer conhecer a plataforma, tirar dúvidas ou entender como funciona.
+OBJETIVO PRINCIPAL
+- Ajudar o visitante a entender rapidamente o Educare+ Tech
+- Avançar o visitante no funil de conhecimento (descoberta → interesse → ação)
 
-SOBRE O EDUCARE+:
-- Plataforma digital para acompanhamento do desenvolvimento infantil (0-6 anos) e saúde materna
-- Conecta pais, educadores e profissionais de saúde
-- Oferece avaliações interativas do desenvolvimento, relatórios personalizados
-- Possui assistente de IA (TitiNauta) que orienta sobre marcos do desenvolvimento
-- Jornada do Desenvolvimento: conteúdo educativo semanal organizado por meses
-- Dashboard de saúde do bebê: gráficos de crescimento, vacinas, marcos
-- Dashboard de saúde materna: acompanhamento pós-parto, bem-estar, humor
-- Cursos e formação profissional na Academia Educare+
-- Integração com WhatsApp para comunicação
+CONTEXTO DO PRODUTO
+Educare+ Tech é uma plataforma digital completa para acompanhamento do desenvolvimento infantil (0-6 anos) e saúde materna. Conecta pais, educadores e profissionais de saúde.
+
+FUNCIONALIDADES PRINCIPAIS:
+- Jornada do Desenvolvimento: conteúdo educativo semanal organizado por meses (trilha bebê e trilha mãe)
+- TitiNauta: assistente de IA especializado em desenvolvimento infantil que responde dúvidas personalizadas
+- Dashboard de saúde do bebê: gráficos de crescimento (peso, altura, perímetro cefálico), checklist de vacinas, marcos do desenvolvimento
+- Dashboard de saúde materna: acompanhamento pós-parto, diário de saúde (humor, sono, alimentação), consultas
+- Avaliações interativas do desenvolvimento com relatórios personalizados
+- Relatórios gerados por IA para compartilhar com profissionais de saúde
+- Academia Educare+: cursos e formação profissional
+- Integração com WhatsApp para comunicação e acompanhamento
+- Portal do Profissional: ferramentas especializadas para psicólogos, terapeutas e educadores
 
 PLANOS DISPONÍVEIS:
 - Plano Gratuito: acesso básico com funcionalidades limitadas
-- Plano Premium: acesso completo com todas as funcionalidades
-- Plano Profissional: para profissionais de saúde e educadores
+- Plano Premium: acesso completo com todas as funcionalidades avançadas
+- Plano Profissional: para profissionais de saúde e educadores com ferramentas especializadas
 
-INSTRUÇÕES:
-- Seja acolhedor, simpático e objetivo
-- Use português do Brasil
-- Responda de forma concisa (máximo 3-4 parágrafos)
-- Se não souber algo específico, sugira que o visitante fale com a equipe no WhatsApp
-- Não invente informações sobre preços ou funcionalidades que não foram mencionadas
+REGRAS DE COMUNICAÇÃO
+- Português do Brasil
+- Tom acolhedor, humano e objetivo
+- Respostas curtas (máximo 3-4 parágrafos)
+- Fazer no máximo 1 pergunta clara de continuidade
+- Nunca repetir mensagens anteriores
+- Nunca inventar informações sobre preços específicos
+- Se não souber algo, sugira que o visitante fale com a equipe pelo WhatsApp para informações mais detalhadas
+
+REGRAS DE COMPORTAMENTO
+- Se a mensagem for apenas um cumprimento (ex: "bom dia", "oi"):
+  1) acolha o visitante
+  2) explique o Educare+ Tech em 1 frase
+  3) faça 1 pergunta de qualificação
+- Se o visitante perguntar sobre preços específicos que você não tem, sugira falar pelo WhatsApp
 - Incentive o visitante a criar uma conta gratuita para experimentar
-- Se a pergunta for sobre desenvolvimento infantil ou saúde materna, responda com base no seu conhecimento`;
+- Se a pergunta for sobre desenvolvimento infantil ou saúde materna, responda com base no contexto da base de conhecimento quando disponível`;
 
 router.post('/', publicChatLimiter, async (req, res) => {
   try {
@@ -75,13 +84,13 @@ router.post('/', publicChatLimiter, async (req, res) => {
       const ragService = require('../services/ragService');
       const ragResult = await ragService.ask(message.trim(), {
         module_type: 'baby',
-        use_file_search: false,
+        use_file_search: true,
         tags: null,
         domain: null,
         age_range: null
       });
       if (ragResult && ragResult.success && ragResult.answer) {
-        ragContext = `\n\nCONTEXTO DA BASE DE CONHECIMENTO:\n${ragResult.answer}`;
+        ragContext = `\n\nCONTEXTO DA BASE DE CONHECIMENTO (use para enriquecer sua resposta):\n${ragResult.answer}`;
       }
     } catch (ragErr) {
       console.warn('[PUBLIC_CHAT] RAG lookup failed, proceeding without context:', ragErr.message);
@@ -97,29 +106,31 @@ router.post('/', publicChatLimiter, async (req, res) => {
       });
     }
 
-    const messages = [
+    const chatMessages = [
       { role: 'system', content: LANDING_SYSTEM_PROMPT + ragContext }
     ];
 
     for (const msg of history) {
       if (msg.role === 'user' || msg.role === 'assistant') {
-        messages.push({
+        chatMessages.push({
           role: msg.role,
           content: typeof msg.content === 'string' ? msg.content.slice(0, 500) : ''
         });
       }
     }
 
-    messages.push({ role: 'user', content: message.trim() });
+    chatMessages.push({ role: 'user', content: message.trim() });
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
-      messages,
+      messages: chatMessages,
       max_tokens: 600,
       temperature: 0.7,
     });
 
     const answer = completion.choices?.[0]?.message?.content || 'Desculpe, não consegui processar sua pergunta. Tente novamente.';
+
+    console.log(`[PUBLIC_CHAT] Processed message (RAG: ${!!ragContext}) - ${message.trim().substring(0, 50)}...`);
 
     return res.json({
       success: true,
