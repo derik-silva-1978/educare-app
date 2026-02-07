@@ -1,31 +1,8 @@
 const rateLimit = require('express-rate-limit');
 
-/**
- * Rate Limiter para endpoints sensíveis do Educare+
- * 
- * Protege contra spam e abuso, especialmente em endpoints de feedback.
- */
-
-const faqFeedbackLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minuto
-  max: 10, // máximo 10 requisições por minuto por IP
-  message: {
-    success: false,
-    message: 'Muitas requisições. Tente novamente em 1 minuto.',
-    error: 'RATE_LIMIT_EXCEEDED'
-  },
-  standardHeaders: true, // Retorna info do rate limit nos headers `RateLimit-*`
-  legacyHeaders: false, // Desabilita headers `X-RateLimit-*`
-  validate: { xForwardedForHeader: false }, // Desabilita validação IPv6 para keyGenerator customizado
-  handler: (req, res, next, options) => {
-    console.warn(`[RATE_LIMIT] IP ${req.ip} excedeu limite no endpoint ${req.path}`);
-    res.status(429).json(options.message);
-  }
-});
-
-const generalApiLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minuto
-  max: 100, // máximo 100 requisições por minuto por IP
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: {
     success: false,
     message: 'Muitas requisições. Aguarde um momento.',
@@ -35,20 +12,58 @@ const generalApiLimiter = rateLimit({
   legacyHeaders: false
 });
 
-const strictLimiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minuto
-  max: 5, // máximo 5 requisições por minuto (para endpoints muito sensíveis)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   message: {
     success: false,
-    message: 'Limite de requisições atingido. Tente novamente em 1 minuto.',
+    message: 'Muitas tentativas de autenticação. Tente novamente em 15 minutos.',
     error: 'RATE_LIMIT_EXCEEDED'
   },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  handler: (req, res, next, options) => {
+    console.warn(`[RATE_LIMIT] IP ${req.ip} excedeu limite no endpoint de autenticação ${req.path}`);
+    res.status(429).json(options.message);
+  }
+});
+
+const externalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  message: {
+    success: false,
+    message: 'Limite de requisições da API externa atingido. Tente novamente em 1 minuto.',
+    error: 'RATE_LIMIT_EXCEEDED'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res, next, options) => {
+    console.warn(`[RATE_LIMIT] IP ${req.ip} excedeu limite no endpoint externo ${req.path}`);
+    res.status(429).json(options.message);
+  }
+});
+
+const faqFeedbackLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: {
+    success: false,
+    message: 'Muitas requisições. Tente novamente em 1 minuto.',
+    error: 'RATE_LIMIT_EXCEEDED'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
+  handler: (req, res, next, options) => {
+    console.warn(`[RATE_LIMIT] IP ${req.ip} excedeu limite no endpoint ${req.path}`);
+    res.status(429).json(options.message);
+  }
 });
 
 module.exports = {
-  faqFeedbackLimiter,
-  generalApiLimiter,
-  strictLimiter
+  generalLimiter,
+  authLimiter,
+  externalLimiter,
+  faqFeedbackLimiter
 };

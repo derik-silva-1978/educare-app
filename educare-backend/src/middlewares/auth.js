@@ -26,7 +26,7 @@ exports.verifyToken = async (req, res, next) => {
     }
     
     // Verificar validade do token
-    jwt.verify(token, authConfig.secret, async (err, decoded) => {
+    jwt.verify(token, authConfig.secret, { issuer: authConfig.issuer, audience: authConfig.audience }, async (err, decoded) => {
       if (err) {
         return res.status(401).json({ error: 'Token inválido ou expirado' });
       }

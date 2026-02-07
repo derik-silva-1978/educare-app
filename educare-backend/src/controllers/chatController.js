@@ -9,7 +9,6 @@ const Profile = require('../models/Profile');
 const createChatGroup = async (req, res) => {
   try {
     console.log('🚀 createChatGroup chamado!');
-    console.log('📋 Body recebido:', req.body);
     console.log('👤 Usuário autenticado:', req.user);
     
     const { team_id, child_id, name, description } = req.body;

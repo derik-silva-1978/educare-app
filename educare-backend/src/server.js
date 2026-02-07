@@ -41,9 +41,26 @@ const { WebhookHandlers } = require('./services/webhookHandlers');
 // Inicialização do app Express
 const app = express();
 
+// Rate limiters
+const { generalLimiter, authLimiter, externalLimiter } = require('./middlewares/rateLimiter');
+
+// CORS configuration
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? (process.env.CORS_ORIGINS || 'https://educareapp.com.br').split(',')
+    : true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+  maxAge: 86400
+};
+
 // Basic middlewares (before Stripe webhook)
-app.use(cors());
-app.use(helmet());
+app.use(cors(corsOptions));
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
 app.use(morgan('dev'));
 
 // CRITICAL: Register Stripe webhook routes BEFORE express.json()
@@ -109,8 +126,11 @@ app.post(
 );
 
 // Now apply JSON middleware for all other routes
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Apply general rate limiter globally
+app.use(generalLimiter);
 
 // Servir arquivos estáticos da pasta uploads
 app.use('/uploads', express.static(process.env.UPLOAD_PATH || './uploads'));
@@ -119,7 +139,7 @@ app.use('/uploads', express.static(process.env.UPLOAD_PATH || './uploads'));
 // app.use('/api', routes); // TODO: Implementar rota principal que gerencia todas as outras
 
 // Rotas específicas
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/children', childRoutes);
@@ -142,7 +162,7 @@ app.use('/api/activities', activityRoutes);
 app.use('/api/admin/user-activities', userActivitiesRoutes);
 app.use('/api/journey-v2', journeyV2Routes);
 app.use('/api/admin/journey-v2', adminJourneyV2Routes);
-app.use('/api/external', externalApiRoutes);
+app.use('/api/external', externalLimiter, externalApiRoutes);
 // Novas rotas do TitiNauta
 app.use('/api/journey', titiNautaRoutes); // Interface moderna do TitiNauta
 app.use('/api/media-resources', mediaResourceRoutes); // Gestão de recursos audiovisuais
@@ -190,7 +210,7 @@ app.use('/api/development-reports', developmentReportRoutes);
 
 // n8n Integration routes (v3.0 - Omnicanal)
 const n8nRoutes = require('./routes/n8nRoutes');
-app.use('/api/n8n', n8nRoutes);
+app.use('/api/n8n', externalLimiter, n8nRoutes);
 
 // Cloud file integration routes (Google Drive, OneDrive)
 const cloudRoutes = require('./routes/cloudRoutes');

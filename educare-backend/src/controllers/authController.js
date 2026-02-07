@@ -10,7 +10,9 @@ const WhatsappService = require('../services/whatsappService');
 // Função para gerar token JWT
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, authConfig.secret, {
-    expiresIn: authConfig.expiresIn
+    expiresIn: authConfig.expiresIn,
+    issuer: authConfig.issuer,
+    audience: authConfig.audience
   });
 };
 
@@ -18,7 +20,6 @@ const generateToken = (userId) => {
 exports.register = async (req, res) => {
   try {
     console.log('=== REGISTRO - Dados recebidos ===');
-    console.log('Body:', req.body);
     
     // Validar dados de entrada
     const errors = validationResult(req);
@@ -39,7 +40,7 @@ exports.register = async (req, res) => {
     if (!password && mappedRole === 'professional' && req.headers.authorization) {
       // Gerar senha temporária de 16 caracteres
       finalPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
-      console.log(`Senha temporária gerada para profissional: ${finalPassword}`);
+      console.log('Senha temporária gerada para profissional (user registration)');
     }
     
     // Verificar se temos senha (fornecida ou gerada)
@@ -301,10 +302,6 @@ exports.login = async (req, res) => {
     }
 
     // Verificar senha
-    console.log(`Verificando senha para usuário: ${user.email || user.phone}`);
-    console.log(`Senha fornecida (comprimento): ${password ? password.length : 'senha vazia'}`);
-    console.log(`Senha contém @: ${password && password.includes('@') ? 'Sim' : 'Não'}`);
-    
     const passwordMatch = await user.checkPassword(password);
     
     if (passwordMatch) {
@@ -752,9 +749,7 @@ const generateSecurePassword = () => {
   // Embaralhar a senha para não ter um padrão previsível
   const shuffled = password.split('').sort(() => 0.5 - Math.random()).join('');
   
-  console.log('Senha temporária gerada (exata):', shuffled);
-  console.log('Comprimento da senha:', shuffled.length);
-  console.log('Contém @:', shuffled.includes('@') ? 'Sim' : 'Não');
+  console.log('Senha temporária gerada para recuperação de conta');
   
   return shuffled;
 };
@@ -824,10 +819,6 @@ const processLoginByPhone = async (user, phone, res) => {
       console.log(`Enviando senha temporária para ${phone} via WhatsApp`);
       
       const result = await WhatsappService.sendTemporaryPassword(phone, tempPassword, user.email);
-      
-      // Verificar a senha gerada com o hash armazenado (teste de verificação)
-      const verifyPassword = await bcrypt.compare(tempPassword, user.password);
-      console.log('Verificação da senha temporária com o hash armazenado:', verifyPassword ? 'OK' : 'FALHA');
       
       let responseMessage = 'Senha temporária enviada com sucesso para o seu telefone';
       if (hasEmail) {
