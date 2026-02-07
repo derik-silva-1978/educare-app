@@ -45,9 +45,17 @@ const app = express();
 const { generalLimiter, authLimiter, externalLimiter } = require('./middlewares/rateLimiter');
 
 // CORS configuration
+const getProductionOrigins = () => {
+  if (process.env.CORS_ORIGINS) return process.env.CORS_ORIGINS.split(',');
+  if (process.env.REPLIT_DOMAINS) {
+    return process.env.REPLIT_DOMAINS.split(',').map(d => `https://${d}`);
+  }
+  return ['https://educareapp.com.br'];
+};
+
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? (process.env.CORS_ORIGINS || 'https://educareapp.com.br').split(',')
+    ? getProductionOrigins()
     : true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -243,6 +251,23 @@ app.get('/', (req, res) => {
 // Configuração do Swagger
 app.use('/api-docs', swaggerConfig.serve, swaggerConfig.setup);
 
+// Serve frontend static files in production
+const path = require('path');
+const frontendDistPath = path.join(__dirname, '../../dist');
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(frontendDistPath, {
+    maxAge: '1d',
+    etag: true
+  }));
+  
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/api-docs') || req.path.startsWith('/uploads') || req.path === '/health') {
+      return next();
+    }
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+}
+
 // Middleware de tratamento de erros
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -280,7 +305,7 @@ if (process.env.DB_SYNC_ENABLED === 'true') {
 }
 
 // Inicialização do servidor
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.NODE_ENV === 'production' ? (process.env.PORT || 5000) : (process.env.PORT || 3001);
 app.listen(PORT, async () => {
   console.log(`Servidor rodando na porta ${PORT}`);
   console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);

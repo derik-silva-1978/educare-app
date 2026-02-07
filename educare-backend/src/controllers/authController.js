@@ -491,7 +491,11 @@ exports.forgotPassword = async (req, res) => {
     const { sendEmail } = require('../utils/emailSender');
     
     // Construir a URL de redefinição de senha
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    let baseUrl = process.env.FRONTEND_URL;
+    if (!baseUrl && process.env.REPLIT_DOMAINS) {
+      baseUrl = `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+    }
+    if (!baseUrl) baseUrl = 'http://localhost:5173';
     const resetUrl = `${baseUrl}/educare-app/auth/reset-password?token=${resetToken}`;
     
     // Construir o corpo do email
@@ -573,7 +577,11 @@ exports.forgotPasswordByPhone = async (req, res) => {
     await user.save();
 
     // Construir a URL de redefinição de senha
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    let baseUrl = process.env.FRONTEND_URL;
+    if (!baseUrl && process.env.REPLIT_DOMAINS) {
+      baseUrl = `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+    }
+    if (!baseUrl) baseUrl = 'http://localhost:5173';
     const resetUrl = `${baseUrl}/educare-app/auth/reset-password?token=${resetToken}`;
     
     // Construir mensagem WhatsApp
