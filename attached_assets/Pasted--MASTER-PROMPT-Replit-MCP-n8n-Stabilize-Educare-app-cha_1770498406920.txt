@@ -1,0 +1,244 @@
+# MASTER PROMPT — Replit (MCP + n8n) | Stabilize “Educare app-chat” to 100% Functional
+# + DIFF CHECKLIST (Objective Auto-Fixes)
+
+You are an expert n8n workflow maintainer using MCP tools. Your job is to inspect, repair, and validate the workflow **“Educare app-chat”** until it is **100% functional, predictable, and MCP-maintainable**.
+
+You have:
+- n8n MCP access (installed: n8n-mcp-tools-expert)
+- n8n workflow patterns (installed: n8n-workflow-patterns)
+- Local export file: `Educare app-chat.json` (current state of the workflow)
+
+## Mission (definition of “100% functional”)
+The workflow must:
+1) Accept inbound events/messages from **Chatwoot** and **Evolution API**
+2) Normalize inbound data into a **unified payload contract** (always present fields; sane defaults)
+3) Route deterministically by **menus/commands/intents** (no reliance on disabled AI intent)
+4) Call internal Educare APIs reliably (correct URL building; constants-driven)
+5) Never end in dead-ends: **every branch must send a valid reply** to the correct channel
+6) Handle failures gracefully (HTTP errors, missing fields, timeouts) with safe fallback messaging
+7) Provide minimal observability (debug snapshots + error summaries) without overengineering
+8) Produce an importable patched workflow JSON + a fix report + test plan
+
+## Strict constraints (do not violate)
+- No overengineering, no architectural redesign
+- Do NOT create new workflows unless explicitly required by a fix
+- Do NOT duplicate business/domain logic that belongs in Educare APIs
+- Prefer incremental changes and backward compatibility
+- Keep node count minimal; only add nodes when required for reliability
+
+---
+
+# Phase 0 — Gather facts via MCP (no changes yet)
+1) Locate and fetch the workflow definition via MCP:
+   - name: “Educare app-chat”
+   - retrieve nodes, connections, settings, and active credentials references
+2) Compare MCP-fetched workflow vs local export `Educare app-chat.json`
+   - Confirm they match, or document differences
+3) Produce a concise “Workflow Map”:
+   - entrypoint(s)
+   - normalization block (Source Detector + any Set nodes)
+   - intent/menu routing block
+   - all HTTP Request nodes (name, method, URL expression source)
+   - response/output block (Chatwoot send / Evolution send)
+
+Output: `workflow-map.md`
+
+---
+
+# Phase 1 — Define the Unified Payload Contract (must be enforced)
+Create a strict payload schema that MUST exist immediately after normalization:
+
+Required fields (always present):
+- source: "chatwoot" | "evolution"
+- message_text: string ("" allowed)
+- message_type: "text" | "image" | "audio" | "document" | "unknown"
+- contact_id: string
+- contact_name: string
+- conversation_id: string ("" allowed when not applicable)
+- phone: string ("" allowed when not applicable)
+- timestamp: ISO string
+- constants: object (global constants injected/merged)
+- trace_id: string (generated per execution)
+
+Rules:
+- If any field is missing, compute a default in a single Set node
+- Add a minimal “Debug Snapshot” node right after normalization:
+  - logs a compact object with these fields (no sensitive secrets)
+  - store it in execution data / optionally a short log output
+
+Deliverable: `payload-contract.md`
+
+---
+
+# Phase 2 — Fix known critical issues first (must-do)
+## 2.1 URL Expression Consistency (high priority)
+Audit all HTTP Request nodes:
+- Identify any node whose URL is not built using a consistent expression pattern.
+
+Goal:
+- Standardize **ALL** HTTP node URLs to ONE consistent approach:
+  Option A: `={{ $vars.EDUCARE_API_URL }}/api/...`
+  Option B: `={{ $json.constants.educare.api.base_url + "/api/..." }}`
+Pick one, apply everywhere, justify in report.
+
+## 2.2 Deterministic routing (AI intent disabled)
+Implement robust deterministic routing:
+- Primary: menu commands/options and keywords routing
+- Secondary: safe default route (e.g., show main menu / help / handoff)
+- Ensure unknown inputs never crash or loop
+
+## 2.3 No dead ends (every branch must exit)
+Audit every IF/Switch:
+- Ensure each branch connects to a valid “Send” for the source channel.
+- Add a single global fallback handler if necessary.
+
+---
+
+# Phase 3 — Global Constants as Single Source of Truth
+Ensure there is a consistent Global Constants object available early in the flow, containing at minimum:
+
+- educare.api.base_url
+- educare.api.endpoints (map)
+- chatwoot (base_url/account_id/credentials refs as needed)
+- evolution (base_url/credentials refs as needed)
+- feature_flags (e.g., deterministic_intent_router_enabled: true)
+
+Rules:
+- Do not hardcode endpoint strings in multiple nodes
+- If a constant is missing, extend the constants object minimally
+
+Deliverable: `constants-spec.md`
+
+---
+
+# Phase 4 — HTTP Reliability and Error Handling
+For each HTTP Request node:
+1) Define expected success criteria:
+   - status code (2xx)
+   - required response fields (if any)
+2) Implement safe handling:
+   - If request fails (>=400 / timeout / missing expected fields):
+     - capture minimal diagnostics: node_name, status_code, short message
+     - route to a fallback message send (channel-aware)
+3) “Continue On Fail” is allowed ONLY if you explicitly handle the fail branch
+
+Also:
+- Add one compact “HTTP Error Router” block (shared) if it reduces duplication.
+
+Deliverable: `http-reliability.md`
+
+---
+
+# Phase 5 — Output Delivery Contract (Chatwoot vs Evolution)
+Enforce a standard response object before sending:
+- reply_text (string)
+- attachments (optional; standardized)
+- target_channel (chatwoot | evolution)
+- conversation_id / phone (as applicable)
+- trace_id (propagated)
+
+Ensure:
+- Chatwoot send nodes always have conversation context
+- Evolution send nodes always have phone context
+- Fallback sends never require unavailable identifiers
+
+Deliverable: `output-contract.md`
+
+---
+
+# Phase 6 — Validation and Tests (must run)
+Create two canonical test payloads:
+
+1) Chatwoot inbound sample:
+- includes conversation_id, contact info, message text
+2) Evolution inbound sample:
+- includes phone, contact info, message text
+
+Test scenarios (minimum):
+- menu command recognized (routes correctly)
+- unknown text (hits safe fallback)
+- one HTTP endpoint success (returns expected response)
+- one HTTP endpoint failure simulation (hits error fallback)
+- image/audio/document message type routing (no crash)
+
+If MCP supports test executions or dry-run, run them.
+Otherwise, provide manual n8n test steps.
+
+Deliverable: `test-plan.md` + `sample-payloads.json`
+
+---
+
+# Phase 7 — Export and Documentation
+Provide:
+1) Patched workflow export: `Educare app-chat.fixed.json`
+2) Fix report: `fix-report.md`
+3) Quick rollback note: how to revert safely
+
+---
+
+# DIFF CHECKLIST — Objective, Automatic Fixes (apply these rules)
+You MUST run this checklist against every node and connection.
+For each item: detect → fix → document in `fix-report.md`.
+
+## A) URL / Expressions
+- [A1] If any HTTP node URL does NOT start with `={{` then fix to the chosen standard.
+- [A2] If any HTTP node URL contains `EDUCARE_API_URL` without `$vars.` or without constants, fix it.
+- [A3] If any HTTP node concatenation could generate `//api` or missing `/`, normalize.
+- [A4] If any node uses mixed patterns (some `$vars`, some `$json.constants`), standardize to ONE.
+- [A5] If any query params are embedded as raw text, ensure they use expressions safely (encode where required).
+
+## B) Global Constants
+- [B1] If constants node/object exists but misses `educare.api.base_url`, add it.
+- [B2] If endpoint paths are repeated in multiple nodes, centralize into `educare.api.endpoints`.
+- [B3] If credentials/keys appear hardcoded in node parameters, replace with vars/constants (never log secrets).
+- [B4] If feature flags are absent, add `feature_flags.deterministic_router=true`.
+
+## C) Normalization Contract
+- [C1] If `source` is missing or ambiguous, derive it from the Source Detector output deterministically.
+- [C2] If `message_text` can be undefined/null, coerce to `""`.
+- [C3] If `message_type` can be undefined, set to `"unknown"` and route safely.
+- [C4] If both `conversation_id` and `phone` are missing, stop gracefully with a fallback message and log.
+- [C5] Add `trace_id` generation (uuid-like) at normalization boundary.
+
+## D) Routing / Switches / IFs
+- [D1] Every Switch must have a default/fallback branch (or an “else”).
+- [D2] Every IF must route both true and false to an eventual Send.
+- [D3] Any loop-prone routing (sending the menu repeatedly on unknown input) must be rate-limited or made safe.
+- [D4] Remove/replace any disabled AI-intent nodes with deterministic rules + safe default.
+
+## E) HTTP Error Handling
+- [E1] If “Continue On Fail” is enabled without explicit handling, disable it OR add a fail branch.
+- [E2] If HTTP response is used downstream, validate required fields exist before use.
+- [E3] If status code >= 400, route to a friendly fallback response (channel-aware).
+- [E4] Add minimal diagnostics: endpoint key/name + status code + trace_id (no sensitive data).
+
+## F) Output / Sends
+- [F1] Before sending, enforce `reply_text` exists (string). If missing, set a safe fallback text.
+- [F2] Chatwoot sends must verify `conversation_id`; if missing, route to generic fallback/handoff.
+- [F3] Evolution sends must verify `phone`; if missing, route to generic fallback/handoff.
+- [F4] Ensure only one final send occurs per execution (avoid double-send unless explicitly intended).
+
+## G) Observability (minimal, safe)
+- [G1] Add ONE “Debug Snapshot” right after normalization (compact payload + trace_id).
+- [G2] Add ONE “Error Summary” builder used by all failure branches (short; no secrets).
+- [G3] Avoid verbose logs; keep to essentials for troubleshooting.
+
+---
+
+# Quality checklist (must pass)
+- [ ] Unified payload contract enforced after normalization
+- [ ] URL building consistent for all HTTP nodes
+- [ ] No dead-end branches
+- [ ] Deterministic routing works without AI intent
+- [ ] HTTP failures handled gracefully and logged minimally
+- [ ] Channel-aware sending works (Chatwoot/Evolution)
+- [ ] Export file imports cleanly into n8n
+- [ ] Documentation files created
+
+---
+
+# Start now
+1) Read `Educare app-chat.json`
+2) Fetch the workflow via MCP and compare
+3) Produce `workflow-map.md`
+4) Apply phases + checklist, generate final outputs
