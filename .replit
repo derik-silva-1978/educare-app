@@ -27,6 +27,7 @@ EVOLUTION_INSTANCE_NAME = "educare-chat"
 JWT_SECRET = "0191743ddf846b3c2992bdf3db4bdc0e059ad6af7998440bccd141ee25e0ad7d42e23673f0acaae6db03ed4ff0e01590"
 OWNER_PHONE = "+5598991628206"
 BACKEND_URL = "https://educareapp.com.br"
+N8N_MCP_URL = "https://n8n.educareapp.com.br/mcp-server/http"
 
 [workflows]
 runButton = "Project"
