@@ -248,7 +248,7 @@ exports.register = async (req, res) => {
         }
         if (!approvalBaseUrl) approvalBaseUrl = 'http://localhost:3001';
 
-        const approvalLink = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}`;
+        const approvalLink = `${approvalBaseUrl}/auth/approve-user/${approvalToken}`;
         const roleLabel = { user: 'Pai/Mãe', professional: 'Profissional', admin: 'Administrador' };
         const notifMessage = `📋 *Novo Cadastro Educare+*\n\n` +
           `👤 *Nome:* ${name}\n` +
