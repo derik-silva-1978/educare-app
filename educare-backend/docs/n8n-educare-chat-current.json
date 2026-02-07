@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-07T21:57:27.459Z",
+  "updatedAt": "2026-02-07T22:05:23.961Z",
   "createdAt": "2025-12-21T14:20:56.960Z",
   "id": "iLDio0CFRs2Qa1VM",
   "name": "Educare app-chat",
@@ -288,31 +288,24 @@
     },
     {
       "parameters": {
-        "model": "gpt-4o-mini",
-        "options": {},
-        "requestOptions": {}
+        "jsCode": "// Deterministic Intent Classifier v1.0\n// Classifica a intenção do usuário por palavras-chave\nconst item = $input.item;\nconst msg = (item.json.message || '').toString().trim().toLowerCase();\n\nlet intent = 'question'; // fallback = RAG\n\n// Menu navigation\nif (/^(menu|opções|opcoes|ajuda|help|início|inicio|voltar)$/i.test(msg) || /^\\d$/.test(msg)) {\n  intent = 'menu_nav';\n}\n// Biometrics (weight, height, head)\nelse if (/peso|quilos?|kg|gramas?|altura|mede|centímetros?|cm|perímetro|cefálico|cabeça/i.test(msg)) {\n  intent = 'biometrics';\n}\n// Sleep\nelse if (/sono|dormi[rua]?|acordou|cochilo|soneca|noite|madrugada|nap/i.test(msg)) {\n  intent = 'sleep';\n}\n// Vaccines\nelse if (/vacina|imuniza|bcg|hepatite|pentavalente|polio|tríplice|rotavírus|pneumo|meningo|febre amarela|varicela|dose/i.test(msg)) {\n  intent = 'vaccine';\n}\n// Appointments\nelse if (/consulta|médico|doutor|dra?\\.|pediatra|especialista|exame|agend|marcar|clínica|ubs|hospital/i.test(msg)) {\n  intent = 'appointment';\n}\n\nreturn [{\n  json: {\n    ...item.json,\n    intent,\n    classifier_version: 'deterministic_v1'\n  }\n}];"
       },
-      "id": "4b27a7f6-d9d0-4831-828b-cfda3da83e43",
-      "name": "AI Intent Classifier",
-      "type": "n8n-nodes-base.openAi",
+      "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
         -608,
         496
       ],
-      "credentials": {
-        "openAiApi": {
-          "id": "gddH24JwjrAV57aC",
-          "name": "OpenAi account"
-        }
-      },
-      "disabled": true,
-      "notes": "⚠️ Node desativado: versão do n8n não possui suporte a OpenAI"
+      "id": "4b27a7f6-d9d0-4831-828b-cfda3da83e43",
+      "name": "Intent Classifier",
+      "disabled": false,
+      "alwaysOutputData": true,
+      "notes": "Classificador determinístico por palavras-chave — substitui AI Classifier desabilitado"
     },
     {
       "parameters": {
         "dataType": "string",
-        "value1": "={{ $json.message.content.trim().toLowerCase() }}",
+        "value1": "={{ ($json.intent || $json.message || '').toString().trim().toLowerCase() }}",
         "rules": {
           "rules": [
             {
@@ -1519,18 +1512,7 @@
       "main": [
         [
           {
-            "node": "AI Intent Classifier",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "AI Intent Classifier": {
-      "main": [
-        [
-          {
-            "node": "Router: Intent Switch",
+            "node": "Intent Classifier",
             "type": "main",
             "index": 0
           }
@@ -1807,6 +1789,17 @@
           }
         ]
       ]
+    },
+    "Intent Classifier": {
+      "main": [
+        [
+          {
+            "node": "Router: Intent Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -1951,9 +1944,9 @@
       }
     ]
   },
-  "versionId": "2244dd2f-8f72-428a-99f4-e0ef533cf24f",
-  "activeVersionId": "2244dd2f-8f72-428a-99f4-e0ef533cf24f",
-  "versionCounter": 396,
+  "versionId": "8930c704-2207-487e-bfab-bab59e73678c",
+  "activeVersionId": "8930c704-2207-487e-bfab-bab59e73678c",
+  "versionCounter": 402,
   "triggerCount": 1,
   "tags": [
     {
@@ -1964,9 +1957,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-02-07T21:57:27.463Z",
-    "createdAt": "2026-02-07T21:57:27.463Z",
-    "versionId": "2244dd2f-8f72-428a-99f4-e0ef533cf24f",
+    "updatedAt": "2026-02-07T22:05:23.966Z",
+    "createdAt": "2026-02-07T22:05:23.966Z",
+    "versionId": "8930c704-2207-487e-bfab-bab59e73678c",
     "workflowId": "iLDio0CFRs2Qa1VM",
     "nodes": [
       {
@@ -2250,31 +2243,24 @@
       },
       {
         "parameters": {
-          "model": "gpt-4o-mini",
-          "options": {},
-          "requestOptions": {}
+          "jsCode": "// Deterministic Intent Classifier v1.0\n// Classifica a intenção do usuário por palavras-chave\nconst item = $input.item;\nconst msg = (item.json.message || '').toString().trim().toLowerCase();\n\nlet intent = 'question'; // fallback = RAG\n\n// Menu navigation\nif (/^(menu|opções|opcoes|ajuda|help|início|inicio|voltar)$/i.test(msg) || /^\\d$/.test(msg)) {\n  intent = 'menu_nav';\n}\n// Biometrics (weight, height, head)\nelse if (/peso|quilos?|kg|gramas?|altura|mede|centímetros?|cm|perímetro|cefálico|cabeça/i.test(msg)) {\n  intent = 'biometrics';\n}\n// Sleep\nelse if (/sono|dormi[rua]?|acordou|cochilo|soneca|noite|madrugada|nap/i.test(msg)) {\n  intent = 'sleep';\n}\n// Vaccines\nelse if (/vacina|imuniza|bcg|hepatite|pentavalente|polio|tríplice|rotavírus|pneumo|meningo|febre amarela|varicela|dose/i.test(msg)) {\n  intent = 'vaccine';\n}\n// Appointments\nelse if (/consulta|médico|doutor|dra?\\.|pediatra|especialista|exame|agend|marcar|clínica|ubs|hospital/i.test(msg)) {\n  intent = 'appointment';\n}\n\nreturn [{\n  json: {\n    ...item.json,\n    intent,\n    classifier_version: 'deterministic_v1'\n  }\n}];"
         },
-        "id": "4b27a7f6-d9d0-4831-828b-cfda3da83e43",
-        "name": "AI Intent Classifier",
-        "type": "n8n-nodes-base.openAi",
+        "type": "n8n-nodes-base.code",
         "typeVersion": 1,
         "position": [
           -608,
           496
         ],
-        "credentials": {
-          "openAiApi": {
-            "id": "gddH24JwjrAV57aC",
-            "name": "OpenAi account"
-          }
-        },
-        "disabled": true,
-        "notes": "⚠️ Node desativado: versão do n8n não possui suporte a OpenAI"
+        "id": "4b27a7f6-d9d0-4831-828b-cfda3da83e43",
+        "name": "Intent Classifier",
+        "disabled": false,
+        "alwaysOutputData": true,
+        "notes": "Classificador determinístico por palavras-chave — substitui AI Classifier desabilitado"
       },
       {
         "parameters": {
           "dataType": "string",
-          "value1": "={{ $json.message.content.trim().toLowerCase() }}",
+          "value1": "={{ ($json.intent || $json.message || '').toString().trim().toLowerCase() }}",
           "rules": {
             "rules": [
               {
@@ -3481,18 +3467,7 @@
         "main": [
           [
             {
-              "node": "AI Intent Classifier",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "AI Intent Classifier": {
-        "main": [
-          [
-            {
-              "node": "Router: Intent Switch",
+              "node": "Intent Classifier",
               "type": "main",
               "index": 0
             }
@@ -3764,6 +3739,17 @@
           [
             {
               "node": "API: Check User",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Intent Classifier": {
+        "main": [
+          [
+            {
+              "node": "Router: Intent Switch",
               "type": "main",
               "index": 0
             }
