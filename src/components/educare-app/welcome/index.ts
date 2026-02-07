@@ -4,6 +4,7 @@ export { default as ProfessionalWelcomeHero } from './ProfessionalWelcomeHero';
 export { default as NewsCarousel } from './NewsCarousel';
 export { default as TrainingSection } from './TrainingSection';
 export { default as AcademyCourses } from './AcademyCourses';
+export { default as BlogHighlights } from './BlogHighlights';
 export { default as TitiNautaWidget } from './TitiNautaWidget';
 export { default as FeedbackPanel } from './FeedbackPanel';
 export { default as DonationCTA } from './DonationCTA';

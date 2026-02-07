@@ -3,7 +3,9 @@ import {
   IconToolbar,
   WelcomeHero, 
   NewsCarousel, 
-  TrainingSection
+  TrainingSection,
+  AcademyCourses,
+  BlogHighlights,
 } from '@/components/educare-app/welcome';
 
 const WelcomeHub: React.FC = () => {
@@ -23,7 +25,11 @@ const WelcomeHub: React.FC = () => {
 
         <NewsCarousel />
 
+        <BlogHighlights />
+
         <TrainingSection />
+
+        <AcademyCourses />
       </main>
     </div>
   );

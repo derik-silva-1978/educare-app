@@ -247,7 +247,8 @@ const curationController = {
 
   listByAxis: async (req, res) => {
     try {
-      const { axis } = req.params;
+      const rawAxis = req.params.axis;
+      const axis = rawAxis.replace(/-/g, '_');
       const { dev_domain, month, week, search, classified, page = 1, limit = 20 } = req.query;
       const offset = (parseInt(page) - 1) * parseInt(limit);
 

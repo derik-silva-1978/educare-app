@@ -63,6 +63,7 @@ import LojaPage from "./pages/educare-app/LojaPage";
 import SupportPage from "./pages/educare-app/SupportPage";
 import MaterialApoioPage from "./pages/educare-app/MaterialApoioPage";
 import WelcomeHub from "./pages/educare-app/WelcomeHub";
+import EmDesenvolvimento from "./pages/educare-app/EmDesenvolvimento";
 import NewsDetail from "./pages/educare-app/NewsDetail";
 import TrainingsPage from "./pages/educare-app/TrainingsPage";
 import TrainingsAdmin from "./pages/educare-app/TrainingsAdmin";
@@ -163,6 +164,9 @@ const App = () => (
                     <QualificacaoProfissional />
                   </ProfessionalOnlyGuard>
                 } />
+                <Route path="em-desenvolvimento" element={<EmDesenvolvimento />} />
+                <Route path="blog" element={<EmDesenvolvimento />} />
+                <Route path="academia" element={<EmDesenvolvimento />} />
                 <Route path="trainings" element={<TrainingsPage />} />
                 
                 {/* Admin Routes */}
