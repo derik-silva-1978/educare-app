@@ -94,6 +94,13 @@ router.get(
  * @desc    Buscar recurso por ID
  * @access  Private (Owner, Admin)
  */
+router.post(
+  '/generate-ai-meta',
+  verifyToken,
+  authorizeRoles('owner', 'admin'),
+  mediaResourceController.generateAIMeta
+);
+
 router.get(
   '/:id',
   verifyToken,

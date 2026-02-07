@@ -420,6 +420,109 @@ const incrementViewCount = async (req, res) => {
   }
 };
 
+const generateAIContent = async (req, res) => {
+  try {
+    const { type = 'news', target_audience = 'all', topic, language = 'pt-BR' } = req.body;
+
+    if (!['news', 'training', 'course'].includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tipo invalido. Use: news, training ou course'
+      });
+    }
+
+    if (!['all', 'parents', 'professionals'].includes(target_audience)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Publico-alvo invalido. Use: all, parents ou professionals'
+      });
+    }
+
+    const OpenAI = require('openai');
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({
+        success: false,
+        message: 'OpenAI API key nao configurada'
+      });
+    }
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+    const typeLabels = {
+      news: 'noticia informativa',
+      training: 'treinamento educacional',
+      course: 'curso estruturado'
+    };
+
+    const audienceLabels = {
+      all: 'publico geral (pais e profissionais)',
+      parents: 'pais e cuidadores',
+      professionals: 'profissionais de saude e educacao'
+    };
+
+    const topicInstruction = topic
+      ? `O tema principal deve ser: "${topic}".`
+      : 'Escolha um tema relevante e atual sobre desenvolvimento infantil ou saude materna.';
+
+    const systemPrompt = `Voce e um redator de conteudo especializado para a plataforma Educare+, focada em desenvolvimento infantil (0-6 anos) e saude materna.
+
+Crie um conteudo do tipo "${typeLabels[type]}" direcionado para "${audienceLabels[target_audience]}".
+${topicInstruction}
+
+O idioma do conteudo deve ser: ${language}.
+
+Retorne APENAS um JSON valido (sem markdown, sem code blocks) com a seguinte estrutura:
+{
+  "title": "titulo atrativo e informativo",
+  "summary": "resumo de 1-2 frases para exibicao em cards",
+  "description": "conteudo completo em HTML rico com tags <h2>, <h3>, <p>, <ul>, <li>, <strong>, <em>. Minimo de 3 paragrafos bem estruturados.",
+  "category": "categoria do conteudo (ex: Desenvolvimento Motor, Saude Materna, Nutricao, etc)",
+  "cta_text": "texto para o botao de acao (ex: Leia mais, Iniciar treinamento, Comece agora)"
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Gere o conteudo conforme as instrucoes do sistema.` }
+      ],
+      temperature: 0.8,
+      max_tokens: 2000
+    });
+
+    const rawContent = response.choices[0].message.content.trim();
+    let parsed;
+    try {
+      const cleaned = rawContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      parsed = JSON.parse(cleaned);
+    } catch (parseError) {
+      console.error('Error parsing AI response:', parseError, rawContent);
+      return res.status(500).json({
+        success: false,
+        message: 'Erro ao processar resposta da IA'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        title: parsed.title || '',
+        summary: parsed.summary || '',
+        description: parsed.description || '',
+        category: parsed.category || '',
+        cta_text: parsed.cta_text || 'Saiba mais'
+      }
+    });
+  } catch (error) {
+    console.error('Error generating AI content:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao gerar conteudo com IA',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getPublishedContent,
   getAllContent,
@@ -429,5 +532,6 @@ module.exports = {
   createContent,
   updateContent,
   deleteContent,
-  updateContentStatus
+  updateContentStatus,
+  generateAIContent
 };

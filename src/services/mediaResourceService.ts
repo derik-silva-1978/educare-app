@@ -265,6 +265,25 @@ class MediaResourceService {
     const result = await response.json();
     return result.data;
   }
+  async generateAIMeta(title: string, resourceType: string): Promise<{
+    description: string;
+    category: string;
+    tags: string[];
+  }> {
+    const response = await fetch(`${API_URL}/media-resources/generate-ai-meta`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ title, resource_type: resourceType }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao gerar metadados com IA');
+    }
+
+    const result = await response.json();
+    return result.data;
+  }
 }
 
 export const mediaResourceService = new MediaResourceService();

@@ -5,6 +5,8 @@ const { verifyToken, isAdminOrOwner } = require('../middlewares/auth');
 
 router.get('/public', contentController.getPublishedContent);
 
+router.post('/generate-ai', verifyToken, isAdminOrOwner, contentController.generateAIContent);
+
 router.get('/:id/public', contentController.getPublicContentById);
 
 router.post('/:id/view', contentController.incrementViewCount);

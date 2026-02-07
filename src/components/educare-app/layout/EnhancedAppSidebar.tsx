@@ -54,7 +54,7 @@ interface NavigationItem {
 const getNavigationItems = (userRole?: string): NavigationItem[] => {
   const baseItems = [
     {
-      title: "Boas vindas",
+      title: "Bem Vindo",
       url: "/educare-app/welcome",
       icon: Sparkles,
     },
@@ -95,8 +95,8 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
   if (userRole === 'owner') {
     return [
       {
-        title: "WelcomeHub",
-        url: "/educare-app/welcome",
+        title: "Bem Vindo",
+        url: "/educare-app/admin/welcome",
         icon: Sparkles,
       },
       {
@@ -189,8 +189,8 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
   if (userRole === 'admin') {
     return [
       {
-        title: "WelcomeHub",
-        url: "/educare-app/welcome",
+        title: "Bem Vindo",
+        url: "/educare-app/admin/welcome",
         icon: Sparkles,
       },
       {
@@ -263,7 +263,7 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
   if (userRole === 'professional') {
     return [
       {
-        title: "Boas Vindas",
+        title: "Bem Vindo",
         url: "/educare-app/professional/welcome",
         icon: Home,
       },

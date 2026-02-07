@@ -47,10 +47,31 @@ import {
   FileText,
   BookOpen,
   GraduationCap,
-  Newspaper
+  Newspaper,
+  Paperclip,
+  X,
+  Music,
+  Image as ImageIcon,
+  FileType,
+  Video,
+  Link as LinkIcon,
+  Sparkles,
+  Wand2,
 } from 'lucide-react';
 import { httpClient } from '@/services/api/httpClient';
+import { generateAIContent, AIContentGenerateParams } from '@/services/contentService';
 import RichTextEditor from '@/components/editor/RichTextEditor';
+import { MediaSelector } from '@/components/admin/media-resources/MediaSelector';
+import { MediaResource, ResourceType } from '@/types/mediaResource';
+
+const mediaTypeIcons: Record<ResourceType, React.ElementType> = {
+  text: FileText,
+  audio: Music,
+  image: ImageIcon,
+  pdf: FileType,
+  video: Video,
+  link: LinkIcon,
+};
 
 interface ContentItem {
   id: string;
@@ -90,6 +111,11 @@ const ContentManagement: React.FC = () => {
   const [editingItem, setEditingItem] = useState<ContentItem | null>(null);
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [isMediaSelectorOpen, setIsMediaSelectorOpen] = useState(false);
+  const [attachedMedia, setAttachedMedia] = useState<MediaResource[]>([]);
+  const [isAIDialogOpen, setIsAIDialogOpen] = useState(false);
+  const [aiParams, setAiParams] = useState<AIContentGenerateParams>({ type: 'news', target_audience: 'all', topic: '' });
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const [formData, setFormData] = useState({
     type: 'news' as 'news' | 'training' | 'course',
@@ -183,6 +209,7 @@ const ContentManagement: React.FC = () => {
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
     setEditingItem(null);
+    setAttachedMedia([]);
     setFormData({
       type: 'news',
       title: '',
@@ -198,6 +225,23 @@ const ContentManagement: React.FC = () => {
       status: 'draft',
       sort_order: 0,
     });
+  };
+
+  const handleMediaSelect = (resource: MediaResource) => {
+    if (attachedMedia.find((m) => m.id === resource.id)) {
+      setAttachedMedia(attachedMedia.filter((m) => m.id !== resource.id));
+    } else {
+      setAttachedMedia([...attachedMedia, resource]);
+      if (resource.resource_type === 'image' && resource.file_url && !formData.image_url) {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        const url = resource.file_url.startsWith('http') ? resource.file_url : `${apiUrl}${resource.file_url}`;
+        setFormData({ ...formData, image_url: url });
+      }
+    }
+  };
+
+  const handleRemoveMedia = (id: string) => {
+    setAttachedMedia(attachedMedia.filter((m) => m.id !== id));
   };
 
   const handleEdit = (item: ContentItem) => {
@@ -229,6 +273,32 @@ const ContentManagement: React.FC = () => {
     }
   };
 
+  const handleGenerateAI = async () => {
+    setIsGenerating(true);
+    try {
+      const result = await generateAIContent(aiParams);
+      setFormData({
+        ...formData,
+        type: aiParams.type,
+        title: result.title || '',
+        summary: result.summary || '',
+        description: result.description || '',
+        category: result.category || '',
+        cta_text: result.cta_text || 'Saiba mais',
+        target_audience: aiParams.target_audience,
+        status: 'draft',
+      });
+      setEditingItem(null);
+      setIsAIDialogOpen(false);
+      setIsDialogOpen(true);
+      toast.success('Conteudo gerado com sucesso!');
+    } catch (error: any) {
+      toast.error(error?.message || 'Erro ao gerar conteudo com IA');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const content: ContentItem[] = contentData || [];
 
   return (
@@ -240,13 +310,18 @@ const ContentManagement: React.FC = () => {
             Gerencie notícias, treinamentos e cursos do WelcomeHub
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => handleCloseDialog()}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Conteúdo
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setIsAIDialogOpen(true)}>
+            <Wand2 className="h-4 w-4 mr-2" />
+            Gerar com IA
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => handleCloseDialog()}>
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Conteúdo
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
@@ -331,6 +406,45 @@ const ContentManagement: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                   placeholder="https://..."
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Paperclip className="h-4 w-4" />
+                  Recursos de Midia Anexados
+                </Label>
+                {attachedMedia.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {attachedMedia.map((media) => {
+                      const MIcon = mediaTypeIcons[media.resource_type] || FileText;
+                      return (
+                        <div
+                          key={media.id}
+                          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border bg-muted/50 text-sm"
+                        >
+                          <MIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span className="max-w-[150px] truncate">{media.title}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveMedia(media.id)}
+                            className="ml-1 text-muted-foreground hover:text-destructive transition-colors"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsMediaSelectorOpen(true)}
+                >
+                  <Paperclip className="h-4 w-4 mr-2" />
+                  Selecionar Midia
+                </Button>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -477,7 +591,87 @@ const ContentManagement: React.FC = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
+
+      <Dialog open={isAIDialogOpen} onOpenChange={setIsAIDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              Gerar Conteudo com IA
+            </DialogTitle>
+            <DialogDescription>
+              Configure os parametros para gerar conteudo automaticamente.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Tipo de Conteudo</Label>
+              <Select
+                value={aiParams.type}
+                onValueChange={(value: 'news' | 'training' | 'course') =>
+                  setAiParams({ ...aiParams, type: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="news">Noticia</SelectItem>
+                  <SelectItem value="training">Treinamento</SelectItem>
+                  <SelectItem value="course">Curso</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Publico-alvo</Label>
+              <Select
+                value={aiParams.target_audience}
+                onValueChange={(value: 'all' | 'parents' | 'professionals') =>
+                  setAiParams({ ...aiParams, target_audience: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="parents">Pais</SelectItem>
+                  <SelectItem value="professionals">Profissionais</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Tema (opcional)</Label>
+              <Textarea
+                value={aiParams.topic || ''}
+                onChange={(e) => setAiParams({ ...aiParams, topic: e.target.value })}
+                placeholder="Ex: Alimentacao complementar, marcos motores do primeiro ano..."
+                rows={3}
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setIsAIDialogOpen(false)} disabled={isGenerating}>
+                Cancelar
+              </Button>
+              <Button onClick={handleGenerateAI} disabled={isGenerating}>
+                {isGenerating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                    Gerando...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Gerar
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardHeader>
@@ -638,6 +832,14 @@ const ContentManagement: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      <MediaSelector
+        open={isMediaSelectorOpen}
+        onOpenChange={setIsMediaSelectorOpen}
+        onSelect={handleMediaSelect}
+        selectedIds={attachedMedia.map((m) => m.id)}
+        multiple
+      />
     </div>
   );
 };

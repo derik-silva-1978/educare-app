@@ -16,7 +16,9 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MediaResource, ResourceType } from '@/types/mediaResource';
-import { Upload, Loader2 } from 'lucide-react';
+import { mediaResourceService } from '@/services/mediaResourceService';
+import { Upload, Loader2, Wand2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const resourceSchema = z.object({
   title: z.string().min(3, 'Título deve ter no mínimo 3 caracteres'),
@@ -87,8 +89,31 @@ export function MediaResourceForm({ resource, onSubmit, onCancel }: MediaResourc
     },
   });
 
+  const { toast } = useToast();
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const resourceType = watch('resource_type');
   const ttsEnabled = watch('tts_enabled');
+
+  const handleGenerateAIMeta = async () => {
+    const title = watch('title');
+    const type = watch('resource_type');
+    if (!title || title.length < 3) {
+      toast({ title: 'Preencha o título primeiro', description: 'O título precisa ter no mínimo 3 caracteres para gerar metadados.', variant: 'destructive' });
+      return;
+    }
+    setIsGeneratingAI(true);
+    try {
+      const meta = await mediaResourceService.generateAIMeta(title, type);
+      if (meta.description) setValue('description', meta.description);
+      if (meta.category) setValue('category', meta.category);
+      if (meta.tags) setValue('tags', meta.tags.join(', '));
+      toast({ title: 'Metadados gerados!', description: 'Descrição, categoria e tags foram preenchidos pela IA.' });
+    } catch (error: any) {
+      toast({ title: 'Erro ao gerar metadados', description: error.message, variant: 'destructive' });
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -137,7 +162,20 @@ export function MediaResourceForm({ resource, onSubmit, onCancel }: MediaResourc
           </div>
 
           <div>
-            <Label htmlFor="description">Descrição</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label htmlFor="description">Descrição</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleGenerateAIMeta}
+                disabled={isGeneratingAI}
+                className="text-xs"
+              >
+                {isGeneratingAI ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Wand2 className="w-3 h-3 mr-1" />}
+                Gerar com IA
+              </Button>
+            </div>
             <Textarea
               id="description"
               {...register('description')}

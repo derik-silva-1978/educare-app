@@ -67,6 +67,7 @@ import EmDesenvolvimento from "./pages/educare-app/EmDesenvolvimento";
 import NewsDetail from "./pages/educare-app/NewsDetail";
 import TrainingsPage from "./pages/educare-app/TrainingsPage";
 import TrainingsAdmin from "./pages/educare-app/TrainingsAdmin";
+import AdminWelcomeHub from "./pages/admin/AdminWelcomeHub";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -195,7 +196,9 @@ const App = () => (
                 <Route path="owner/prompt-management" element={<PromptManagement />} />
                 <Route path="admin/milestones-curation" element={<MilestonesCuration />} />
                 <Route path="admin/content-management" element={<ContentManagement />} />
+                <Route path="admin/welcome" element={<AdminWelcomeHub />} />
                 <Route path="admin/trainings" element={<TrainingsAdmin />} />
+                <Route path="owner/welcome" element={<AdminWelcomeHub />} />
                 <Route path="owner/trainings" element={<TrainingsAdmin />} />
                 
                 {/* Professional Routes - Gestão de Crianças */}

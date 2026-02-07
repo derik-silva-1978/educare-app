@@ -390,6 +390,63 @@ class MediaResourceController {
       });
     }
   }
+  async generateAIMeta(req, res) {
+    try {
+      const { title, resource_type } = req.body;
+
+      if (!title || !resource_type) {
+        return res.status(400).json({
+          success: false,
+          message: 'Titulo e tipo do recurso sao obrigatorios'
+        });
+      }
+
+      const OpenAI = require('openai');
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `Voce e um assistente da plataforma Educare+, especializado em desenvolvimento infantil e saude materna. Gere metadados para recursos audiovisuais da plataforma.
+
+Responda SOMENTE com JSON valido (sem markdown), no formato:
+{
+  "description": "descricao informativa do recurso (2-3 frases)",
+  "category": "categoria adequada (ex: Desenvolvimento Motor, Saude Materna, Nutricao, Estimulacao Cognitiva, Saude Emocional, Atividades Ludicas, Orientacao Profissional)",
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"]
+}
+
+Considere o tipo do recurso (${resource_type}) para adequar a descricao.`
+          },
+          {
+            role: 'user',
+            content: `Gere metadados para o recurso: "${title}" (tipo: ${resource_type})`
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 500,
+      });
+
+      let responseText = completion.choices[0]?.message?.content || '';
+      responseText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+      const result = JSON.parse(responseText);
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      console.error('Erro ao gerar metadados com IA:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erro ao gerar metadados com IA',
+        error: error.message
+      });
+    }
+  }
 }
 
 module.exports = new MediaResourceController();

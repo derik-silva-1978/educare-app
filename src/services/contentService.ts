@@ -55,3 +55,75 @@ export const getTrainingContent = async (): Promise<ContentItem[]> => {
 export const getCourseContent = async (): Promise<ContentItem[]> => {
   return getPublishedContent('course');
 };
+
+export interface AllContentParams {
+  type?: string;
+  status?: string;
+  audience?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface AllContentResponse {
+  data: ContentItem[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+export interface AIContentGenerateParams {
+  type: 'news' | 'training' | 'course';
+  target_audience: 'all' | 'parents' | 'professionals';
+  topic?: string;
+}
+
+export interface AIContentGenerateResult {
+  title: string;
+  summary: string;
+  description: string;
+  category: string;
+  cta_text: string;
+}
+
+export const generateAIContent = async (params: AIContentGenerateParams): Promise<AIContentGenerateResult> => {
+  const response = await httpClient.post('/api/content/generate-ai', params);
+  return response.data;
+};
+
+export const getAllContent = async (params?: AllContentParams): Promise<AllContentResponse> => {
+  try {
+    const queryParams = new URLSearchParams();
+    if (params?.type) queryParams.append('type', params.type);
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.page) queryParams.append('page', String(params.page));
+    queryParams.append('limit', String(params?.limit || 50));
+
+    const response = await httpClient.get(`/api/content?${queryParams.toString()}`);
+    const items: ContentItem[] = response.data || [];
+    const meta = response.meta;
+    const pagination = {
+      total: meta?.total || items.length,
+      page: meta?.page || 1,
+      limit: meta?.limit || 50,
+      pages: meta?.totalPages || 1,
+    };
+
+    if (params?.audience && params.audience !== 'all') {
+      const filtered = items.filter(
+        (item: ContentItem) => item.target_audience === 'all' || item.target_audience === params.audience
+      );
+      return {
+        data: filtered,
+        pagination: { ...pagination, total: filtered.length },
+      };
+    }
+
+    return { data: items, pagination };
+  } catch (error) {
+    console.error('Error fetching all content:', error);
+    return { data: [], pagination: { total: 0, page: 1, limit: 50, pages: 1 } };
+  }
+};
