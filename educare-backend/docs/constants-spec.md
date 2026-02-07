@@ -20,10 +20,12 @@ These variables must be configured in n8n Settings → Variables:
 | Variable | Purpose | Example Value | Used By |
 |----------|---------|---------------|---------|
 | `EDUCARE_API_URL` | Base URL da API Educare backend | `https://educareapp.com.br` | 8 API nodes |
-| `EDUCARE_API_KEY` | API key para autenticação no backend | `(secret)` | API: Check User |
+| `EDUCARE_API_KEY` | API key para autenticação no backend | `(secret)` | All 8 API nodes |
 | `EVOLUTION_API_URL` | Base URL da Evolution API (WhatsApp) | `https://api.educareapp.com.br` | 4 Evo send nodes |
 | `EVOLUTION_INSTANCE` | Nome da instância Evolution | `educare-chat` | 4 Evo send nodes |
 | `CHATWOOT_API_URL` | Base URL da API Chatwoot | `https://chatwoot.educareapp.com.br` | Chatwoot: Send Text |
+| `EVOLUTION_API_KEY` | API key da Evolution API | `(secret)` | 4 Evo send nodes |
+| `CHATWOOT_API_TOKEN` | Token de acesso da API Chatwoot | `(secret)` | Chatwoot: Send Text |
 
 ---
 
