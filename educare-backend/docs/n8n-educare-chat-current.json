@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-07T22:26:56.485Z",
+  "updatedAt": "2026-02-07T23:02:17.318Z",
   "createdAt": "2025-12-21T14:20:56.960Z",
   "id": "iLDio0CFRs2Qa1VM",
   "name": "Educare app-chat",
@@ -954,7 +954,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.item;\nconst ref = $('Chatwoot Extractor').item.json;\n\nconst escapeMarkdown = (text = '') => text.replace(/([_*~])/g, '\\\\$1');\n\nconst phone = String(ref.phone || '');\nconst message = ref.message || '';\nconst media_type = ref.media_type || 'text';\nconst media_url = ref.media_url || null;\nconst is_audio = String(ref.is_audio || false);\nconst source_id = ref.source_id || null;\nconst timestamp = ref.timestamp || Date.now();\n\nconst conversation_id = String(ref.conversation_id || '');\nconst inbox_id = String(ref.inbox_id || '');\nconst account_id = String(ref.account_id || '');\nconst contact_id = String(ref.contact_id || '');\nconst sender_name_raw = ref.sender_name || '';\nconst sender_name = sender_name_raw.trim() || 'mamãe/papai';\nconst safe_sender_name = escapeMarkdown(sender_name);\n\nconst thumbnail = ref.raw?.sender?.thumbnail ?? null;\nconst account_name = ref.raw?.account?.name ?? 'Educare+';\nconst inbox_name = ref.raw?.inbox?.name ?? 'WhatsApp';\n\nconst response_text = `Oi, ${safe_sender_name}! 👋\n\nNotei que você ainda não tem uma conta ativa no app *${account_name}*. Com ele, você acompanha vacinas, consultas, fases do bebê, tudo com muito carinho e praticidade. 👶✨\n\n💙 Que tal experimentar o app gratuitamente?\n\n📲 Baixe agora: https://educareapp.com.br/app\n\nSe preferir, posso te ajudar por aqui no WhatsApp (${inbox_name}) também!`;\n\nreturn [{\n  json: {\n    phone,\n    message,\n    media_type,\n    media_url,\n    is_audio,\n    source_id,\n    timestamp,\n    conversation_id,\n    inbox_id,\n    account_id,\n    contact_id,\n    sender_name,\n    thumbnail,\n    source: 'chatwoot',\n    response_text,\n    user_found: false,\n    lead_status: 'novo'\n  }\n}];"
+        "jsCode": "// Prepare: No User Msg v2.0 — supports both Chatwoot and Evolution sources\nconst item = $input.item;\n\n// Try to get data from whichever extractor ran\nlet ref;\ntry {\n  ref = $('Chatwoot Extractor').item.json;\n} catch (e1) {\n  try {\n    ref = $('Evolution Extractor').item.json;\n  } catch (e2) {\n    ref = item.json;\n  }\n}\n\nconst escapeMarkdown = (text = '') => text.replace(/([_*~])/g, '\\\\$1');\n\nconst phone = String(ref.phone || '');\nconst message = ref.message || '';\nconst media_type = ref.media_type || 'text';\nconst media_url = ref.media_url || null;\nconst is_audio = String(ref.is_audio || false);\nconst source_id = ref.source_id || null;\nconst timestamp = ref.timestamp || Date.now();\nconst source = ref.source || 'evolution';\n\nconst conversation_id = String(ref.conversation_id || '');\nconst inbox_id = String(ref.inbox_id || '');\nconst account_id = String(ref.account_id || '');\nconst contact_id = String(ref.contact_id || '');\nconst sender_name_raw = ref.sender_name || ref.name || '';\nconst sender_name = sender_name_raw.trim() || 'mamãe/papai';\nconst safe_sender_name = escapeMarkdown(sender_name);\n\nconst instancia = ref.instancia || 'educare-chat';\n\nconst response_text = `Oi, ${safe_sender_name}! 👋\n\nNotei que você ainda não tem uma conta ativa no app *Educare+*. Com ele, você acompanha vacinas, consultas, fases do bebê, tudo com muito carinho e praticidade. 👶✨\n\n💙 Que tal experimentar o app gratuitamente?\n\n📲 Baixe agora: https://educareapp.com.br/app\n\nSe preferir, posso te ajudar por aqui no WhatsApp também!`;\n\nreturn [{\n  json: {\n    phone,\n    message,\n    media_type,\n    media_url,\n    is_audio,\n    source_id,\n    timestamp,\n    conversation_id,\n    inbox_id,\n    account_id,\n    contact_id,\n    sender_name,\n    instancia,\n    source,\n    response_text,\n    user_found: false,\n    lead_status: 'novo'\n  }\n}];"
       },
       "id": "873f7608-c956-4d1f-9140-151357602a33",
       "name": "Prepare: No User Msg",
@@ -1968,9 +1968,9 @@
       }
     ]
   },
-  "versionId": "b582d746-9908-4461-b2cd-5dd360dce37b",
-  "activeVersionId": "b582d746-9908-4461-b2cd-5dd360dce37b",
-  "versionCounter": 432,
+  "versionId": "1e146f60-8d74-40d0-9c77-a74aa5beba03",
+  "activeVersionId": "1e146f60-8d74-40d0-9c77-a74aa5beba03",
+  "versionCounter": 435,
   "triggerCount": 1,
   "tags": [
     {
@@ -1981,9 +1981,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-02-07T22:26:56.516Z",
-    "createdAt": "2026-02-07T22:26:56.516Z",
-    "versionId": "b582d746-9908-4461-b2cd-5dd360dce37b",
+    "updatedAt": "2026-02-07T23:02:17.322Z",
+    "createdAt": "2026-02-07T23:02:17.322Z",
+    "versionId": "1e146f60-8d74-40d0-9c77-a74aa5beba03",
     "workflowId": "iLDio0CFRs2Qa1VM",
     "nodes": [
       {
@@ -2933,7 +2933,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const item = $input.item;\nconst ref = $('Chatwoot Extractor').item.json;\n\nconst escapeMarkdown = (text = '') => text.replace(/([_*~])/g, '\\\\$1');\n\nconst phone = String(ref.phone || '');\nconst message = ref.message || '';\nconst media_type = ref.media_type || 'text';\nconst media_url = ref.media_url || null;\nconst is_audio = String(ref.is_audio || false);\nconst source_id = ref.source_id || null;\nconst timestamp = ref.timestamp || Date.now();\n\nconst conversation_id = String(ref.conversation_id || '');\nconst inbox_id = String(ref.inbox_id || '');\nconst account_id = String(ref.account_id || '');\nconst contact_id = String(ref.contact_id || '');\nconst sender_name_raw = ref.sender_name || '';\nconst sender_name = sender_name_raw.trim() || 'mamãe/papai';\nconst safe_sender_name = escapeMarkdown(sender_name);\n\nconst thumbnail = ref.raw?.sender?.thumbnail ?? null;\nconst account_name = ref.raw?.account?.name ?? 'Educare+';\nconst inbox_name = ref.raw?.inbox?.name ?? 'WhatsApp';\n\nconst response_text = `Oi, ${safe_sender_name}! 👋\n\nNotei que você ainda não tem uma conta ativa no app *${account_name}*. Com ele, você acompanha vacinas, consultas, fases do bebê, tudo com muito carinho e praticidade. 👶✨\n\n💙 Que tal experimentar o app gratuitamente?\n\n📲 Baixe agora: https://educareapp.com.br/app\n\nSe preferir, posso te ajudar por aqui no WhatsApp (${inbox_name}) também!`;\n\nreturn [{\n  json: {\n    phone,\n    message,\n    media_type,\n    media_url,\n    is_audio,\n    source_id,\n    timestamp,\n    conversation_id,\n    inbox_id,\n    account_id,\n    contact_id,\n    sender_name,\n    thumbnail,\n    source: 'chatwoot',\n    response_text,\n    user_found: false,\n    lead_status: 'novo'\n  }\n}];"
+          "jsCode": "// Prepare: No User Msg v2.0 — supports both Chatwoot and Evolution sources\nconst item = $input.item;\n\n// Try to get data from whichever extractor ran\nlet ref;\ntry {\n  ref = $('Chatwoot Extractor').item.json;\n} catch (e1) {\n  try {\n    ref = $('Evolution Extractor').item.json;\n  } catch (e2) {\n    ref = item.json;\n  }\n}\n\nconst escapeMarkdown = (text = '') => text.replace(/([_*~])/g, '\\\\$1');\n\nconst phone = String(ref.phone || '');\nconst message = ref.message || '';\nconst media_type = ref.media_type || 'text';\nconst media_url = ref.media_url || null;\nconst is_audio = String(ref.is_audio || false);\nconst source_id = ref.source_id || null;\nconst timestamp = ref.timestamp || Date.now();\nconst source = ref.source || 'evolution';\n\nconst conversation_id = String(ref.conversation_id || '');\nconst inbox_id = String(ref.inbox_id || '');\nconst account_id = String(ref.account_id || '');\nconst contact_id = String(ref.contact_id || '');\nconst sender_name_raw = ref.sender_name || ref.name || '';\nconst sender_name = sender_name_raw.trim() || 'mamãe/papai';\nconst safe_sender_name = escapeMarkdown(sender_name);\n\nconst instancia = ref.instancia || 'educare-chat';\n\nconst response_text = `Oi, ${safe_sender_name}! 👋\n\nNotei que você ainda não tem uma conta ativa no app *Educare+*. Com ele, você acompanha vacinas, consultas, fases do bebê, tudo com muito carinho e praticidade. 👶✨\n\n💙 Que tal experimentar o app gratuitamente?\n\n📲 Baixe agora: https://educareapp.com.br/app\n\nSe preferir, posso te ajudar por aqui no WhatsApp também!`;\n\nreturn [{\n  json: {\n    phone,\n    message,\n    media_type,\n    media_url,\n    is_audio,\n    source_id,\n    timestamp,\n    conversation_id,\n    inbox_id,\n    account_id,\n    contact_id,\n    sender_name,\n    instancia,\n    source,\n    response_text,\n    user_found: false,\n    lead_status: 'novo'\n  }\n}];"
         },
         "id": "873f7608-c956-4d1f-9140-151357602a33",
         "name": "Prepare: No User Msg",

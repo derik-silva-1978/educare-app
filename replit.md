@@ -53,6 +53,10 @@ The frontend, built with React 18, TypeScript, and Vite, utilizes `shadcn/ui` (R
 - **AI Report Generator**: Enables generation of customizable health and development reports for children across multiple categories, with an option to send reports via WhatsApp.
 - **WhatsApp Integration**: Direct integration with Evolution API for sending messages, including password recovery links, AI-generated reports, and user access approval notifications. It also includes a user recognition system for seamless interaction within n8n workflows.
 - **User Access Approval Workflow**: New users register with 'pending' status. Owner receives WhatsApp notification with approval link. Clicking the link activates the user (`GET /api/auth/approve-user/:token`), sends welcome WhatsApp message, and notifies owner of approval. Token expires after 30 days. Admin-created professionals/admins are auto-approved (skip pending). Login returns specific messages for pending users (403). Handles edge cases: already approved, expired token, invalid token.
+- **n8n Workflow System**: Two interconnected n8n workflows for WhatsApp message processing:
+    - **Educare app-chat** (`iLDio0CFRs2Qa1VM`): Main workflow with 41 nodes handling message ingestion from Evolution/Chatwoot, user verification, deterministic intent classification (v2.3 — biometrics, sleep, vaccine, appointment, question/RAG), and response routing. HTTP nodes migrated to v4.2 with SSL bypass. 30+ fixes applied across Phases 2-5.
+    - **Lead CRM** (`n6ZpQvp96iPCaIvG`): Sub-workflow (32 nodes) for unregistered users. Features: 3-stage sales funnel (discovery→interest→action), AI agent (GPT-4.1-mini) with structured output, PGVector RAG context, Postgres chat memory, Evolution API messaging. Database tables: `lead_context`, `lead_journey`, `lead_summary`. 10 fixes applied (credential unification, SQL injection, disabled nodes, dual-source support).
+    - Audit reports: `educare-backend/docs/phase5-report.md`, `educare-backend/docs/lead-crm-audit-report.md`
 
 ### System Design Choices
 - **Scalability**: Designed for cloud deployment on Digital Ocean using multiple droplets, PostgreSQL, and Redis.
