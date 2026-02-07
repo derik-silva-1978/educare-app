@@ -242,13 +242,15 @@ exports.register = async (req, res) => {
     const ownerPhone = process.env.OWNER_PHONE;
     if (ownerPhone && approvalToken) {
       try {
-        let approvalBaseUrl = process.env.BACKEND_URL || process.env.FRONTEND_URL;
-        if (!approvalBaseUrl && process.env.REPLIT_DOMAINS) {
+        let approvalBaseUrl = '';
+        if (process.env.REPLIT_DOMAINS) {
           approvalBaseUrl = `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+        } else if (process.env.FRONTEND_URL) {
+          approvalBaseUrl = process.env.FRONTEND_URL.replace(/\/educare-app$/, '');
         }
-        if (!approvalBaseUrl) approvalBaseUrl = 'http://localhost:3001';
+        if (!approvalBaseUrl) approvalBaseUrl = 'http://localhost:5000';
 
-        const approvalLink = `${approvalBaseUrl}/auth/approve-user/${approvalToken}`;
+        const approvalLink = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}`;
         const roleLabel = { user: 'Pai/Mãe', professional: 'Profissional', admin: 'Administrador' };
         const notifMessage = `📋 *Novo Cadastro Educare+*\n\n` +
           `👤 *Nome:* ${name}\n` +
