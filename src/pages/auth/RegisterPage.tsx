@@ -13,6 +13,7 @@ import { Loader2 } from 'lucide-react';
 const RegisterPage: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +31,7 @@ const RegisterPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !email || !password || !confirmPassword) {
+    if (!name || !email || !phone || !password || !confirmPassword) {
       toast({
         title: 'Campos obrigatórios',
         description: 'Por favor, preencha todos os campos',
@@ -52,20 +53,21 @@ const RegisterPage: React.FC = () => {
     
     try {
       // Use appropriate registration method based on what's available
-      if (signUp) {
+      if (handleRegister) {
+        await handleRegister(name, email, password, 'teacher', true, phone);
+      } else if (signUp) {
         await signUp(email, password, {
           name,
+          phone,
           role: 'teacher'
         });
-      } else if (handleRegister) {
-        await handleRegister(name, email, password, 'teacher', true);
       } else if (register) {
-        await register(email, password, name);
+        await register(email, password, name, phone);
       }
       
       toast({
         title: 'Conta criada com sucesso',
-        description: 'Sua conta foi criada. Verifique seu email para confirmar o cadastro.',
+        description: 'Sua conta foi criada. Aguarde a aprovação do seu acesso.',
       });
       // Redirect to login page after successful registration
       navigate('/auth/login');
@@ -118,6 +120,18 @@ const RegisterPage: React.FC = () => {
                   placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">Celular (WhatsApp)</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+55 99 99999-9999"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   required
                 />
               </div>

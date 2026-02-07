@@ -30,7 +30,10 @@ exports.register = async (req, res) => {
     
     console.log('Validação passou, processando registro...');
 
-    const { email, phone, password, name, firstName, lastName, role, plan_id, profile } = req.body;
+    // Verificar se email, telefone e nome foram fornecidos
+    if (!email || !phone || !name) {
+      return res.status(400).json({ error: 'É necessário fornecer nome, email e telefone' });
+    }
 
     // Mapear role 'parent' para 'user' (compatibilidade com ENUM do banco)
     const mappedRole = role === 'parent' ? 'user' : role;
