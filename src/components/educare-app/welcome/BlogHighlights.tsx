@@ -28,7 +28,7 @@ const BlogHighlights: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={() => navigate('/educare-app/blog')}
-            className="mr-28"
+            className=""
           >
             Ver todos
             <ArrowRight className="h-4 w-4 ml-1" />
