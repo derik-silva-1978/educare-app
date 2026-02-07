@@ -197,6 +197,9 @@ router.post(
 // Rota para verificar token
 router.get('/verify', authMiddleware.verifyToken, authController.verifyToken);
 
+// Rota para aprovar acesso de usuário (via link no WhatsApp)
+router.get('/approve-user/:token', authController.approveUser);
+
 /**
  * @swagger
  * /api/auth/forgot-password:

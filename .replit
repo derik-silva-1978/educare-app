@@ -25,6 +25,7 @@ FRONTEND_URL = "https://1d35ed6a-d635-41d2-8d11-7db8db84ce29-00-28ylqytrll200.pi
 EVOLUTION_API_URL = "https://api.educareapp.com.br"
 EVOLUTION_INSTANCE_NAME = "educare-chat"
 JWT_SECRET = "0191743ddf846b3c2992bdf3db4bdc0e059ad6af7998440bccd141ee25e0ad7d42e23673f0acaae6db03ed4ff0e01590"
+OWNER_PHONE = "+5598991628206"
 
 [workflows]
 runButton = "Project"

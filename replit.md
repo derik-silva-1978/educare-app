@@ -51,7 +51,8 @@ The frontend, built with React 18, TypeScript, and Vite, utilizes `shadcn/ui` (R
     - Extended models: `JourneyV2Quiz` and `JourneyV2Topic` (added `dev_domain`, `content_hash`, `classification_source`, `classification_confidence`), `MilestoneMapping` (added `journey_v2_quiz_id`, `source_type`)
     - Audit document: `docs/ingestion-curation-audit.md`
 - **AI Report Generator**: Enables generation of customizable health and development reports for children across multiple categories, with an option to send reports via WhatsApp.
-- **WhatsApp Integration**: Direct integration with Evolution API for sending messages, including password recovery links and AI-generated reports. It also includes a user recognition system for seamless interaction within n8n workflows.
+- **WhatsApp Integration**: Direct integration with Evolution API for sending messages, including password recovery links, AI-generated reports, and user access approval notifications. It also includes a user recognition system for seamless interaction within n8n workflows.
+- **User Access Approval Workflow**: New users register with 'pending' status. Owner receives WhatsApp notification with approval link. Clicking the link activates the user (`GET /api/auth/approve-user/:token`), sends welcome WhatsApp message, and notifies owner of approval. Token expires after 30 days. Admin-created professionals/admins are auto-approved (skip pending). Login returns specific messages for pending users (403). Handles edge cases: already approved, expired token, invalid token.
 
 ### System Design Choices
 - **Scalability**: Designed for cloud deployment on Digital Ocean using multiple droplets, PostgreSQL, and Redis.

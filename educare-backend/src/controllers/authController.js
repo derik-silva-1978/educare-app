@@ -86,13 +86,35 @@ exports.register = async (req, res) => {
 
     // Criar usuário com telefone normalizado
     const phoneToSave = phone ? normalizePhoneNumber(phone) : null;
+    const crypto = require('crypto');
+    // Verificar se é criação por admin autenticado (não confiar apenas no header)
+    let isAdminCreated = false;
+    if (req.headers.authorization && (mappedRole === 'professional' || mappedRole === 'admin')) {
+      try {
+        const authToken = req.headers.authorization.replace('Bearer ', '');
+        const decoded = jwt.verify(authToken, authConfig.secret, {
+          issuer: authConfig.issuer,
+          audience: authConfig.audience
+        });
+        const creatorUser = await User.findByPk(decoded.id);
+        if (creatorUser && (creatorUser.role === 'owner' || creatorUser.role === 'admin')) {
+          isAdminCreated = true;
+        }
+      } catch (tokenErr) {
+        // Token inválido - tratar como registro público
+        isAdminCreated = false;
+      }
+    }
+    const approvalToken = isAdminCreated ? null : crypto.randomBytes(24).toString('hex');
     const user = await User.create({
       email,
       phone: phoneToSave,
       password: finalPassword,
       name,
-      role: mappedRole || 'user',
-      status: 'active'  // Definir como ativo automaticamente para pais/users
+      role: isAdminCreated ? (mappedRole || 'user') : 'user',
+      status: isAdminCreated ? 'active' : 'pending',
+      reset_token: approvalToken,
+      reset_token_expires: approvalToken ? new Date(Date.now() + 30 * 24 * 3600000) : null
     });
 
     // Criar perfil do usuário
@@ -206,16 +228,129 @@ exports.register = async (req, res) => {
     };
     
     // Se é um profissional criado pelo admin com senha temporária, incluir a senha na resposta
-    if (mappedRole === 'professional' && req.headers.authorization && !password) {
+    if (isAdminCreated && mappedRole === 'professional' && !password) {
       response.temporaryPassword = finalPassword;
       response.message = 'Profissional criado com sucesso. Senha temporária gerada.';
     }
-    
+
+    // Notificar Owner via WhatsApp sobre novo registro
+    const ownerPhone = process.env.OWNER_PHONE;
+    if (ownerPhone && approvalToken) {
+      try {
+        let approvalBaseUrl = process.env.BACKEND_URL || process.env.FRONTEND_URL;
+        if (!approvalBaseUrl && process.env.REPLIT_DOMAINS) {
+          approvalBaseUrl = `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+        }
+        if (!approvalBaseUrl) approvalBaseUrl = 'http://localhost:3001';
+
+        const approvalLink = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}`;
+        const roleLabel = { user: 'Pai/Mãe', professional: 'Profissional', admin: 'Administrador' };
+        const notifMessage = `📋 *Novo Cadastro Educare+*\n\n` +
+          `👤 *Nome:* ${name}\n` +
+          `📧 *Email:* ${email || 'Não informado'}\n` +
+          `📱 *Telefone:* ${phoneToSave || 'Não informado'}\n` +
+          `🏷️ *Tipo:* ${roleLabel[mappedRole] || mappedRole || 'Pai/Mãe'}\n\n` +
+          `✅ *Para aprovar o acesso, clique no link abaixo:*\n${approvalLink}\n\n` +
+          `⏰ Link válido por 30 dias.`;
+
+        WhatsappService.sendMessage(ownerPhone, notifMessage)
+          .then(() => console.log(`Notificação de novo registro enviada ao Owner`))
+          .catch(err => console.error(`Erro ao notificar Owner: ${err.message}`));
+      } catch (notifError) {
+        console.error('Erro ao preparar notificação ao Owner:', notifError.message);
+      }
+    }
+
     // Retornar dados do usuário
+    if (!response.message) {
+      response.message = isAdminCreated
+        ? 'Usuário criado com sucesso.'
+        : 'Cadastro realizado com sucesso! Aguarde a aprovação do seu acesso.';
+    }
+    response.pendingApproval = !isAdminCreated;
     return res.status(201).json(response);
   } catch (error) {
     console.error('Erro ao registrar usuário:', error);
     return res.status(500).json({ error: 'Erro ao registrar usuário' });
+  }
+};
+
+// Aprovar acesso de usuário (via link de aprovação)
+exports.approveUser = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    if (!token) {
+      return res.status(400).json({ error: 'Token de aprovação inválido' });
+    }
+
+    const { Op } = require('sequelize');
+    const user = await User.findOne({
+      where: { reset_token: token }
+    });
+
+    const getFrontendUrl = () => {
+      let baseUrl = process.env.FRONTEND_URL;
+      if (!baseUrl && process.env.REPLIT_DOMAINS) {
+        baseUrl = `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+      }
+      return baseUrl || 'http://localhost:5173';
+    };
+
+    if (!user) {
+      return res.redirect(`${getFrontendUrl()}/educare-app/auth/login?approved=invalid`);
+    }
+
+    if (user.status === 'active') {
+      return res.redirect(`${getFrontendUrl()}/educare-app/auth/login?approved=already`);
+    }
+
+    if (user.reset_token_expires && new Date() > new Date(user.reset_token_expires)) {
+      user.reset_token = null;
+      user.reset_token_expires = null;
+      await user.save();
+      return res.redirect(`${getFrontendUrl()}/educare-app/auth/login?approved=expired`);
+    }
+
+    user.status = 'active';
+    user.reset_token = null;
+    user.reset_token_expires = null;
+    await user.save();
+
+    console.log(`Usuário aprovado: ${user.name} (${user.email || user.phone})`);
+
+    // Enviar mensagem de boas-vindas via WhatsApp
+    if (user.phone) {
+      try {
+        const welcomeMessage = `🎉 *Bem-vindo(a) ao Educare+!*\n\n` +
+          `Olá, *${user.name}*! 👋\n\n` +
+          `Seu acesso à plataforma Educare+ foi aprovado com sucesso! ✅\n\n` +
+          `Agora você pode acessar todos os recursos disponíveis para o seu perfil.\n\n` +
+          `📱 Acesse a plataforma e faça login com suas credenciais.\n\n` +
+          `Se precisar de ajuda, estamos aqui para você! 💙`;
+
+        WhatsappService.sendMessage(user.phone, welcomeMessage)
+          .then(() => console.log(`Mensagem de boas-vindas enviada para: ${user.phone}`))
+          .catch(err => console.error(`Erro ao enviar boas-vindas: ${err.message}`));
+      } catch (welcomeError) {
+        console.error('Erro ao preparar mensagem de boas-vindas:', welcomeError.message);
+      }
+    }
+
+    // Notificar Owner que a aprovação foi concluída
+    const ownerPhone = process.env.OWNER_PHONE;
+    if (ownerPhone) {
+      const confirmMsg = `✅ *Acesso Aprovado*\n\n` +
+        `Usuário *${user.name}* (${user.email || user.phone}) foi ativado com sucesso.`;
+      WhatsappService.sendMessage(ownerPhone, confirmMsg)
+        .catch(err => console.error(`Erro ao confirmar aprovação ao Owner: ${err.message}`));
+    }
+
+    // Redirecionar para a página de login com mensagem de sucesso
+    return res.redirect(`${getFrontendUrl()}/educare-app/auth/login?approved=success&name=${encodeURIComponent(user.name)}`);
+  } catch (error) {
+    console.error('Erro ao aprovar usuário:', error);
+    return res.status(500).json({ error: 'Erro ao aprovar usuário' });
   }
 };
 
@@ -297,8 +432,11 @@ exports.login = async (req, res) => {
     }
 
     // Verificar se o usuário está ativo
+    if (user.status === 'pending') {
+      return res.status(403).json({ error: 'Seu cadastro está aguardando aprovação. Você receberá uma notificação no WhatsApp quando seu acesso for liberado.' });
+    }
     if (user.status !== 'active') {
-      return res.status(401).json({ error: 'Usuário inativo' });
+      return res.status(401).json({ error: 'Usuário inativo. Entre em contato com o suporte.' });
     }
 
     // Verificar senha
@@ -803,9 +941,15 @@ exports.loginByPhone = async (req, res) => {
 const processLoginByPhone = async (user, phone, res) => {
   try {
     // Verificar se o usuário está ativo
+    if (user.status === 'pending') {
+      return res.status(403).json({ 
+        error: 'Seu cadastro está aguardando aprovação. Você receberá uma notificação no WhatsApp quando seu acesso for liberado.',
+        success: false
+      });
+    }
     if (user.status !== 'active') {
       return res.status(401).json({ 
-        error: 'Usuário inativo. Por favor, entre em contato com o suporte.',
+        error: 'Usuário inativo. Entre em contato com o suporte.',
         success: false
       });
     }
@@ -1007,8 +1151,11 @@ exports.refreshToken = async (req, res) => {
     }
 
     // Verificar se o usuário está ativo
+    if (user.status === 'pending') {
+      return res.status(403).json({ error: 'Seu cadastro está aguardando aprovação. Você receberá uma notificação no WhatsApp quando seu acesso for liberado.' });
+    }
     if (user.status !== 'active') {
-      return res.status(401).json({ error: 'Usuário inativo' });
+      return res.status(401).json({ error: 'Usuário inativo. Entre em contato com o suporte.' });
     }
 
     // Gerar novos tokens
