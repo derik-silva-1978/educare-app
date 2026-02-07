@@ -1,22 +1,38 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Menu,
+  Contrast,
+  Type,
+  TrendingUp,
+  GraduationCap,
+  ClipboardCheck,
+  FileText,
+  Users,
+  ListChecks,
+  Smartphone,
+  Bot,
+  ArrowUp,
+  MessageCircle,
+  Mail,
+  Monitor,
+  BookOpen,
+  Brain,
+  Activity
+} from 'lucide-react';
 
-// Import our utilities
 import { initAccessibilitySettings, toggleContrast, increaseFontSize, decreaseFontSize } from '../utils/accessibility.js';
 import { initScrollAnimations, initBackToTop } from '../utils/animations.js';
 import { initMobileMenu, initSmoothScrolling } from '../utils/navigation.js';
 
 const EducareHtml = () => {
   useEffect(() => {
-    // Initialize all the JavaScript functionality
     initAccessibilitySettings();
     initScrollAnimations();
     initBackToTop();
     initMobileMenu();
     initSmoothScrolling();
     
-    // Add event listener for back to top button
     const backToTopButton = document.getElementById('back-to-top');
     if (backToTopButton) {
       backToTopButton.addEventListener('click', () => {
@@ -24,7 +40,6 @@ const EducareHtml = () => {
       });
     }
     
-    // Cleanup function
     return () => {
       if (backToTopButton) {
         backToTopButton.removeEventListener('click', () => {});
@@ -34,21 +49,19 @@ const EducareHtml = () => {
 
   return (
     <div className="educare-html-wrapper">
-      {/* Skip to content link for accessibility */}
       <a href="#main-content" className="skip-link">Pular para o conteúdo principal</a>
 
-      {/* Header */}
       <header className="main-header" role="banner">
         <div className="container">
           <div className="header-content">
             <div className="logo">
-              <img src="/images/educare-logo.svg" alt="Educare+ Logo" width="180" height="60" />
+              <span style={{ fontSize: '1.8rem', fontWeight: 800, background: 'linear-gradient(135deg, #3b82f6, #9333ea)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.5px' }}>Educare+</span>
             </div>
             
             <nav className="main-nav" role="navigation" aria-label="Menu principal">
               <button className="menu-toggle" aria-expanded="false" aria-controls="main-menu">
                 <span className="sr-only">Menu</span>
-                <i className="fas fa-bars" aria-hidden="true"></i>
+                <Menu size={24} />
               </button>
               
               <ul id="main-menu" className="nav-menu">
@@ -57,28 +70,25 @@ const EducareHtml = () => {
                 <li><a href="#educare-app">Educare+ App</a></li>
                 <li><a href="#smart-pei">Educare+ Smart PEI</a></li>
                 <li><a href="#robotica">Educare+ Robótica</a></li>
-                <li><a href="#cursos">Cursos</a></li>
-                <li><a href="#loja">Loja</a></li>
                 <li><a href="#contato" className="btn-outline-sm">Contato</a></li>
               </ul>
             </nav>
             
             <div className="accessibility-controls">
               <button id="contrast-toggle" aria-label="Alternar alto contraste" title="Alternar alto contraste" onClick={toggleContrast}>
-                <i className="fas fa-adjust" aria-hidden="true"></i>
+                <Contrast size={20} />
               </button>
               <button id="font-increase" aria-label="Aumentar fonte" title="Aumentar fonte" onClick={increaseFontSize}>
-                <i className="fas fa-text-height" aria-hidden="true"></i>
+                <Type size={20} />
               </button>
               <button id="font-decrease" aria-label="Diminuir fonte" title="Diminuir fonte" onClick={decreaseFontSize}>
-                <i className="fas fa-text-height fa-rotate-180" aria-hidden="true"></i>
+                <Type size={16} />
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
       <div className="hero-section" aria-labelledby="hero-heading" id="inicio">
         <div className="container">
           <div className="hero-content">
@@ -90,14 +100,23 @@ const EducareHtml = () => {
             </div>
           </div>
           <div className="hero-image">
-            <img src="/images/hero-astronaut.svg" alt="Astronauta Educare+" width="500" height="350" />
+            <div style={{ width: 500, height: 350, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(147,51,234,0.1))', borderRadius: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', width: 200, height: 200, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(147,51,234,0.15))', top: 20, right: 40 }} />
+              <div style={{ position: 'absolute', width: 120, height: 120, borderRadius: '50%', background: 'linear-gradient(135deg, rgba(147,51,234,0.1), rgba(59,130,246,0.1))', bottom: 30, left: 50 }} />
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', zIndex: 1 }}>
+                <div style={{ display: 'flex', gap: '1.5rem' }}>
+                  <Brain size={48} style={{ color: '#3b82f6' }} />
+                  <BookOpen size={48} style={{ color: '#7c3aed' }} />
+                  <Activity size={48} style={{ color: '#9333ea' }} />
+                </div>
+                <span style={{ fontSize: '1.2rem', fontWeight: 600, background: 'linear-gradient(135deg, #3b82f6, #9333ea)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Desenvolvimento & Educação</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
       <main id="main-content">
-        {/* Solutions Overview Section */}
         <section id="solucoes" className="section bg-light" aria-labelledby="solucoes-heading">
           <div className="container">
             <h2 id="solucoes-heading" className="section-heading">Nossas Soluções</h2>
@@ -106,7 +125,7 @@ const EducareHtml = () => {
             <div className="solutions-grid">
               <div className="solution-card" data-aos="fade-up">
                 <div className="card-icon app-icon">
-                  <i className="fas fa-mobile-alt" aria-hidden="true"></i>
+                  <Smartphone size={32} />
                 </div>
                 <h3>Educare+ App</h3>
                 <p>Plataforma para rastreamento do desenvolvimento infantil desde a gestação até os cinco anos, com avaliações interativas e conteúdo personalizado.</p>
@@ -115,7 +134,7 @@ const EducareHtml = () => {
               
               <div className="solution-card" data-aos="fade-up" data-aos-delay="100">
                 <div className="card-icon pei-icon">
-                  <i className="fas fa-file-alt" aria-hidden="true"></i>
+                  <FileText size={32} />
                 </div>
                 <h3>Educare+ Smart PEI</h3>
                 <p>Ferramenta para a criação e gestão de Planos Educacionais Individualizados, com foco na educação inclusiva e no acompanhamento personalizado.</p>
@@ -124,7 +143,7 @@ const EducareHtml = () => {
               
               <div className="solution-card" data-aos="fade-up" data-aos-delay="200">
                 <div className="card-icon robotics-icon">
-                  <i className="fas fa-robot" aria-hidden="true"></i>
+                  <Bot size={32} />
                 </div>
                 <h3>Educare+ Robótica</h3>
                 <p>Programa de robótica e automação para crianças e adolescentes, incluindo metodologia adaptada para alunos com TEA e outras condições.</p>
@@ -134,7 +153,6 @@ const EducareHtml = () => {
           </div>
         </section>
 
-        {/* Interactive Section - Educare App */}
         <section id="educare-app" className="section" aria-labelledby="app-heading">
           <div className="container">
             <div className="section-content reverse">
@@ -145,7 +163,7 @@ const EducareHtml = () => {
                 <div className="feature-list">
                   <div className="feature-item">
                     <div className="feature-icon">
-                      <i className="fas fa-chart-line" aria-hidden="true"></i>
+                      <TrendingUp size={24} />
                     </div>
                     <div className="feature-text">
                       <h4>Rastreio Eficiente</h4>
@@ -155,7 +173,7 @@ const EducareHtml = () => {
                   
                   <div className="feature-item">
                     <div className="feature-icon">
-                      <i className="fas fa-user-graduate" aria-hidden="true"></i>
+                      <GraduationCap size={24} />
                     </div>
                     <div className="feature-text">
                       <h4>Conteúdo Especializado</h4>
@@ -165,7 +183,7 @@ const EducareHtml = () => {
                   
                   <div className="feature-item">
                     <div className="feature-icon">
-                      <i className="fas fa-clipboard-check" aria-hidden="true"></i>
+                      <ClipboardCheck size={24} />
                     </div>
                     <div className="feature-text">
                       <h4>Avaliações Interativas</h4>
@@ -174,22 +192,53 @@ const EducareHtml = () => {
                   </div>
                 </div>
                 
-                <a href="#" className="btn btn-primary mt-lg">Conhecer a Jornada Educare+</a>
+                <Link to="/educare-app/auth?action=register" className="btn btn-primary mt-lg">Começar Agora</Link>
               </div>
               
               <div className="image-content" data-aos="fade-left">
-                <img src="/images/app-device.webp" alt="Interface do Educare App em um smartphone" className="rounded-image" width="500" height="400" loading="lazy" />
+                <div style={{ width: 500, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(59,130,246,0.08), rgba(147,51,234,0.08))', borderRadius: '1.5rem', border: '1px solid rgba(59,130,246,0.15)' }} className="rounded-image">
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+                    <div style={{ width: 120, height: 200, borderRadius: '1rem', background: 'linear-gradient(135deg, #3b82f6, #7c3aed)', padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', boxShadow: '0 20px 40px rgba(59,130,246,0.2)' }}>
+                      <Smartphone size={36} style={{ color: 'white' }} />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', width: '100%' }}>
+                        <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.4)', width: '100%' }} />
+                        <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.3)', width: '75%' }} />
+                        <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.2)', width: '50%' }} />
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '0.9rem', color: '#6b7280', fontWeight: 500 }}>Interface do Educare+ App</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Smart PEI Section */}
         <section id="smart-pei" className="section bg-light" aria-labelledby="pei-heading">
           <div className="container">
             <div className="section-content">
               <div className="image-content" data-aos="fade-right">
-                <img src="/images/smart-pei-interface.webp" alt="Interface do sistema Smart PEI mostrando um plano educacional" className="rounded-image" width="500" height="400" loading="lazy" />
+                <div style={{ width: 500, height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(147,51,234,0.08), rgba(59,130,246,0.08))', borderRadius: '1.5rem', border: '1px solid rgba(147,51,234,0.15)' }} className="rounded-image">
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+                    <div style={{ width: 280, height: 180, borderRadius: '0.75rem', background: 'linear-gradient(135deg, #7c3aed, #3b82f6)', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', boxShadow: '0 20px 40px rgba(147,51,234,0.2)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Monitor size={20} style={{ color: 'white' }} />
+                        <span style={{ color: 'white', fontWeight: 600, fontSize: '0.85rem' }}>Smart PEI</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                        <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.3)', width: '100%' }} />
+                        <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.25)', width: '85%' }} />
+                        <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.2)', width: '70%' }} />
+                        <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.15)', width: '60%' }} />
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
+                        <div style={{ flex: 1, height: 24, borderRadius: 4, background: 'rgba(255,255,255,0.2)' }} />
+                        <div style={{ flex: 1, height: 24, borderRadius: 4, background: 'rgba(255,255,255,0.15)' }} />
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '0.9rem', color: '#6b7280', fontWeight: 500 }}>Interface do Smart PEI</span>
+                  </div>
+                </div>
               </div>
               
               <div className="text-content" data-aos="fade-left">
@@ -199,7 +248,7 @@ const EducareHtml = () => {
                 <div className="feature-list">
                   <div className="feature-item">
                     <div className="feature-icon">
-                      <i className="fas fa-file-signature" aria-hidden="true"></i>
+                      <FileText size={24} />
                     </div>
                     <div className="feature-text">
                       <h4>Geração Automatizada</h4>
@@ -209,7 +258,7 @@ const EducareHtml = () => {
                   
                   <div className="feature-item">
                     <div className="feature-icon">
-                      <i className="fas fa-users" aria-hidden="true"></i>
+                      <Users size={24} />
                     </div>
                     <div className="feature-text">
                       <h4>Abordagem Colaborativa</h4>
@@ -219,7 +268,7 @@ const EducareHtml = () => {
                   
                   <div className="feature-item">
                     <div className="feature-icon">
-                      <i className="fas fa-tasks" aria-hidden="true"></i>
+                      <ListChecks size={24} />
                     </div>
                     <div className="feature-text">
                       <h4>Acompanhamento Contínuo</h4>
@@ -228,29 +277,38 @@ const EducareHtml = () => {
                   </div>
                 </div>
                 
-                <a href="#" className="btn btn-primary mt-lg">Explorar Smart PEI</a>
+                <Link to="/smart-pei/app/dashboard" className="btn btn-primary mt-lg">Acessar Smart PEI</Link>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Footer section will be partially shown for brevity */}
         <section id="contato" className="section cta-section" aria-labelledby="contato-heading">
           <div className="container">
             <h2 id="contato-heading" className="section-heading light-text">Entre em Contato</h2>
             <p className="section-description light-text">Estamos prontos para responder suas dúvidas e ajudar você a iniciar essa jornada educacional.</p>
             
-            {/* Form would go here in the complete implementation */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', marginTop: '2rem' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '2rem' }}>
+                <a href="https://wa.me/5598991628206" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 2rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.75rem', color: 'white', textDecoration: 'none', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)', transition: 'background 0.3s' }}>
+                  <MessageCircle size={24} />
+                  <span style={{ fontSize: '1.1rem', fontWeight: 500 }}>Fale pelo WhatsApp</span>
+                </a>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 2rem', background: 'rgba(255,255,255,0.15)', borderRadius: '0.75rem', color: 'white', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                  <Mail size={24} />
+                  <span style={{ fontSize: '1.1rem', fontWeight: 500 }}>contato@educareapp.com.br</span>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="main-footer" role="contentinfo">
         <div className="container">
           <div className="footer-content">
             <div className="footer-logo">
-              <img src="/images/educare-logo.svg" alt="Educare+ Logo" width="150" height="50" />
+              <span style={{ fontSize: '1.5rem', fontWeight: 800, background: 'linear-gradient(135deg, #3b82f6, #9333ea)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Educare+</span>
               <p>Transformando educação e desenvolvimento infantil.</p>
             </div>
             
@@ -267,7 +325,7 @@ const EducareHtml = () => {
               <div className="footer-column">
                 <h3>Suporte</h3>
                 <ul>
-                  <li><a href="#">FAQ</a></li>
+                  <li><a href="#contato">FAQ</a></li>
                   <li><a href="#contato">Contato</a></li>
                 </ul>
               </div>
@@ -277,15 +335,14 @@ const EducareHtml = () => {
           <div className="footer-bottom">
             <p>&copy; {new Date().getFullYear()} Educare+ | Todos os direitos reservados</p>
             <div className="accessibility-statement">
-              <a href="#">Declaração de Acessibilidade</a>
+              <span>Declaração de Acessibilidade</span>
             </div>
           </div>
         </div>
       </footer>
 
-      {/* Back to top button */}
       <button id="back-to-top" className="back-to-top" aria-label="Voltar ao topo">
-        <i className="fas fa-arrow-up" aria-hidden="true"></i>
+        <ArrowUp size={20} />
       </button>
     </div>
   );

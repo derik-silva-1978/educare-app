@@ -35,7 +35,10 @@ type EducareUserRole = 'parent' | 'professional';
 const formSchema = z.object({
   name: z.string().min(3, { message: 'Por favor, insira seu nome completo.' }),
   email: z.string().email({ message: 'Por favor, insira um e-mail válido.' }),
-  phone: z.string().min(10, { message: 'Por favor, insira um telefone válido.' }),
+  phone: z.string().min(10, { message: 'Por favor, insira um telefone válido.' }).refine((val) => {
+    const digits = val.replace(/\D/g, '').replace(/^55/, '');
+    return digits.length >= 10 && digits.length <= 11;
+  }, { message: 'Informe um telefone válido com DDD. Ex: (11) 99999-9999' }),
   password: z.string().min(6, { message: 'A senha deve ter pelo menos 6 caracteres.' }),
   confirmPassword: z.string().min(6, { message: 'A senha deve ter pelo menos 6 caracteres.' }),
   role: z.enum(['parent', 'professional']),
@@ -191,8 +194,8 @@ const EducareRegisterForm: React.FC<EducareRegisterFormProps> = ({ redirectPath 
         console.log('Registration successful:', authResult);
         setRegistrationSuccess(true);
         toast({
-          title: "Cadastro realizado com sucesso!",
-          description: "Bem-vindo ao EducareApp!",
+          title: "Cadastro realizado!",
+          description: "Seu acesso está sendo analisado. Você receberá uma notificação no WhatsApp quando for aprovado.",
         });
         
         // Redirecionar para a página de login após um breve delay
@@ -234,7 +237,7 @@ const EducareRegisterForm: React.FC<EducareRegisterFormProps> = ({ redirectPath 
             <div className="space-y-2">
               <p className="font-medium">Cadastro realizado com sucesso!</p>
               <p className="text-sm text-muted-foreground">
-                Bem-vindo ao EducareApp! Você será redirecionado em instantes.
+                Seu acesso está aguardando aprovação. Você receberá uma notificação no WhatsApp quando for aprovado.
               </p>
             </div>
           </AlertDescription>
@@ -244,7 +247,7 @@ const EducareRegisterForm: React.FC<EducareRegisterFormProps> = ({ redirectPath 
           onClick={() => navigate('/educare-app/auth?action=login')} 
           className="w-full"
         >
-          Ir para Login
+          Voltar ao Login
         </Button>
       </div>
     );
@@ -342,6 +345,22 @@ const EducareRegisterForm: React.FC<EducareRegisterFormProps> = ({ redirectPath 
                           type="tel" 
                           placeholder="(11) 99999-9999" 
                           {...field} 
+                          onChange={(e) => {
+                            let digits = e.target.value.replace(/\D/g, '');
+                            if (digits.startsWith('55')) digits = digits.slice(2);
+                            if (digits.length > 11) digits = digits.slice(0, 11);
+                            let masked = digits;
+                            if (digits.length > 2 && digits.length <= 6) {
+                              masked = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+                            } else if (digits.length > 6 && digits.length <= 10) {
+                              masked = `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+                            } else if (digits.length === 11) {
+                              masked = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+                            } else if (digits.length === 2) {
+                              masked = `(${digits}) `;
+                            }
+                            field.onChange(masked);
+                          }}
                           disabled={isLoading}
                           className={phoneError ? "border-red-500 pr-10" : ""}
                         />
@@ -361,7 +380,7 @@ const EducareRegisterForm: React.FC<EducareRegisterFormProps> = ({ redirectPath 
                       <FormMessage />
                     )}
                     <p className="text-xs text-gray-500">
-                      Usado para comunicação e suporte via WhatsApp
+                      Formato WhatsApp com DDD. Ex: (11) 99999-9999
                     </p>
                   </FormItem>
                 )}

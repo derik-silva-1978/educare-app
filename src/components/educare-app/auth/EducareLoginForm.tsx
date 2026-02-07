@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -18,7 +18,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, AlertCircle, Mail, Phone, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Mail, Phone, Eye, EyeOff, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PhoneVerification } from '@/components/auth/PhoneVerification';
@@ -44,10 +44,48 @@ interface EducareLoginFormProps {
 const EducareLoginForm: React.FC<EducareLoginFormProps> = ({ redirectPath }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [showEmailConfirmationAlert, setShowEmailConfirmationAlert] = useState(false);
+  const [showPendingAlert, setShowPendingAlert] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const approved = params.get('approved');
+    if (!approved) return;
+
+    switch (approved) {
+      case 'success':
+        toast({
+          title: "Acesso aprovado!",
+          description: "Faça login para acessar a plataforma.",
+        });
+        break;
+      case 'already':
+        toast({
+          title: "Já aprovado",
+          description: "Este acesso já foi aprovado anteriormente.",
+        });
+        break;
+      case 'expired':
+        toast({
+          variant: "destructive",
+          title: "Link expirado",
+          description: "O link de aprovação expirou. Entre em contato com o suporte.",
+        });
+        break;
+      case 'invalid':
+        toast({
+          variant: "destructive",
+          title: "Link inválido",
+          description: "Link de aprovação inválido.",
+        });
+        break;
+    }
+
+    window.history.replaceState({}, '', location.pathname);
+  }, [location.search, toast, location.pathname]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -58,47 +96,9 @@ const EducareLoginForm: React.FC<EducareLoginFormProps> = ({ redirectPath }) => 
     },
   });
 
-  const { signUp } = useAuth();
-  
-  const handleResendConfirmation = async () => {
-    const loginIdentifier = form.getValues('loginIdentifier');
-    if (!loginIdentifier) {
-      toast({
-        variant: "destructive",
-        title: "Email ou telefone necessário",
-        description: "Por favor, insira seu email ou telefone para reenviar a confirmação.",
-      });
-      return;
-    }
-
-    // Verificar se é email ou telefone
-    const isEmail = loginIdentifier.includes('@');
-    
-    if (!isEmail) {
-      toast({
-        variant: "destructive",
-        title: "Email necessário",
-        description: "Para reenviar a confirmação, é necessário usar o email.",
-      });
-      return;
-    }
-
-    try {
-      const { error } = await signUp(loginIdentifier, 'temp', { resend: true });
-      if (!error) {
-        toast({
-          title: "Email de confirmação reenviado",
-          description: "Verifique sua caixa de entrada e spam.",
-        });
-      }
-    } catch (error) {
-      console.error('Error resending confirmation:', error);
-    }
-  };
-
   const onSubmit = async (data: FormValues) => {
     setIsLoading(true);
-    setShowEmailConfirmationAlert(false);
+    setShowPendingAlert(false);
     
     // Limpar erros anteriores
     form.clearErrors();
@@ -133,14 +133,8 @@ const EducareLoginForm: React.FC<EducareLoginFormProps> = ({ redirectPath }) => 
       
       const errorMsg = error?.message || 'Erro desconhecido';
       
-      // Handle specific error cases
-      if (errorMsg.includes('Email not confirmed')) {
-        setShowEmailConfirmationAlert(true);
-        toast({
-          variant: "destructive",
-          title: "Email não confirmado",
-          description: "Por favor, confirme seu email antes de fazer login. Verifique sua caixa de entrada.",
-        });
+      if (errorMsg.includes('aguardando aprovação') || errorMsg.includes('pendente')) {
+        setShowPendingAlert(true);
         return;
       }
 
@@ -211,18 +205,11 @@ const EducareLoginForm: React.FC<EducareLoginFormProps> = ({ redirectPath }) => 
 
   return (
     <div className="space-y-6">
-      {showEmailConfirmationAlert && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
+      {showPendingAlert && (
+        <Alert className="border-blue-200 bg-blue-50 text-blue-800 [&>svg]:text-blue-600">
+          <Info className="h-4 w-4" />
           <AlertDescription>
-            Email não confirmado. Por favor, verifique sua caixa de entrada e spam.
-            <Button 
-              variant="link" 
-              className="p-0 h-auto font-semibold ml-1" 
-              onClick={handleResendConfirmation}
-            >
-              Reenviar email de confirmação
-            </Button>
+            Seu cadastro está aguardando aprovação. Você receberá uma notificação no WhatsApp quando seu acesso for liberado.
           </AlertDescription>
         </Alert>
       )}
