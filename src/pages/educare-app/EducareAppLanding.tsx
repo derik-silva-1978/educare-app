@@ -9,6 +9,7 @@ import EducareMenuBar from '@/components/educare-app/EducareMenuBar';
 import HeroSection from '@/components/educare-app/landing/HeroSection';
 import PlatformAreasSection from '@/components/educare-app/landing/PlatformAreasSection';
 import FinalCTASection from '@/components/educare-app/landing/FinalCTASection';
+import { WhatsAppLandingPopup } from '@/components/whatsapp';
 
 const EducareAppLanding: React.FC = () => {
   useEffect(() => {
@@ -340,6 +341,7 @@ const EducareAppLanding: React.FC = () => {
       </section>
       
       <FinalCTASection />
+      <WhatsAppLandingPopup />
     </div>
   );
 };

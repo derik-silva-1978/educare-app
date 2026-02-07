@@ -6,7 +6,7 @@ const SocialMediaAccess: React.FC = () => {
     {
       name: 'WhatsApp',
       icon: MessageCircle,
-      url: 'https://wa.me/5511999999999?text=Olá! Gostaria de saber mais sobre o Educare.',
+      url: 'https://wa.me/559192018206?text=Olá! Gostaria de saber mais sobre o Educare.',
       bgColor: 'bg-green-500',
       hoverColor: 'hover:bg-green-600',
     },

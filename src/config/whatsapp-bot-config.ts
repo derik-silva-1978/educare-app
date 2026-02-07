@@ -18,8 +18,7 @@ export interface WhatsAppBotFlow {
 }
 
 export const whatsappBotConfig: WhatsAppBotConfig = {
-  // Mock phone number - substitua pelo número real do seu bot
-  phoneNumber: "5511999999999",
+  phoneNumber: "559192018206",
   defaultMessage: "Olá! 👋 Gostaria de conhecer o Educare+ Tech. Pode me ajudar?",
   productMessages: {
     'jornada': "Olá! 👋 Tenho interesse na Jornada do Desenvolvimento Infantil. Gostaria de saber mais!",

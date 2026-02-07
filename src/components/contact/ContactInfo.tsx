@@ -32,8 +32,8 @@ const ContactInfo: React.FC = () => {
         <ContactCard 
           icon={<MessageSquare className="h-5 w-5 text-educare-600" />}
           title="Whatsapp"
-          description="+55 (11) 98765-4321"
-          link="https://wa.me/5511987654321"
+          description="+55 (91) 9201-8206"
+          link="https://wa.me/559192018206"
           isWhatsApp={true}
         />
         
@@ -54,7 +54,7 @@ const ContactInfo: React.FC = () => {
       {/* WhatsApp Direct Button */}
       <div className="mt-8">
         <a 
-          href="https://wa.me/5511987654321?text=Olá,%20gostaria%20de%20mais%20informações%20sobre%20o%20Educare+." 
+          href="https://wa.me/559192018206?text=Olá,%20gostaria%20de%20mais%20informações%20sobre%20o%20Educare+." 
           target="_blank" 
           rel="noopener noreferrer"
         >
