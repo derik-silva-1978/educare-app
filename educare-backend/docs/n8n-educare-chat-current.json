@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-07T22:05:23.961Z",
+  "updatedAt": "2026-02-07T22:26:56.485Z",
   "createdAt": "2025-12-21T14:20:56.960Z",
   "id": "iLDio0CFRs2Qa1VM",
   "name": "Educare app-chat",
@@ -165,21 +165,23 @@
     },
     {
       "parameters": {
-        "requestMethod": "GET",
-        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/users/check",
+        "method": "GET",
+        "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/users/check",
         "options": {
-          "splitIntoItems": false
+          "allowUnauthorizedCerts": true
         },
-        "headerParametersUi": {
-          "parameter": [
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
             {
               "name": "x-api-key",
-              "value": "={{ $vars.EDUCARE_API_KEY }}"
+              "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
             }
           ]
         },
-        "queryParametersUi": {
-          "parameter": [
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
             {
               "name": "phone",
               "value": "={{ $input.item.json.phone }}"
@@ -190,7 +192,7 @@
       "id": "e9882692-7e4f-4370-81a4-87b4683aad19",
       "name": "API: Check User",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         -1648,
         624
@@ -288,7 +290,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Deterministic Intent Classifier v1.0\n// Classifica a intenção do usuário por palavras-chave\nconst item = $input.item;\nconst msg = (item.json.message || '').toString().trim().toLowerCase();\n\nlet intent = 'question'; // fallback = RAG\n\n// Menu navigation\nif (/^(menu|opções|opcoes|ajuda|help|início|inicio|voltar)$/i.test(msg) || /^\\d$/.test(msg)) {\n  intent = 'menu_nav';\n}\n// Biometrics (weight, height, head)\nelse if (/peso|quilos?|kg|gramas?|altura|mede|centímetros?|cm|perímetro|cefálico|cabeça/i.test(msg)) {\n  intent = 'biometrics';\n}\n// Sleep\nelse if (/sono|dormi[rua]?|acordou|cochilo|soneca|noite|madrugada|nap/i.test(msg)) {\n  intent = 'sleep';\n}\n// Vaccines\nelse if (/vacina|imuniza|bcg|hepatite|pentavalente|polio|tríplice|rotavírus|pneumo|meningo|febre amarela|varicela|dose/i.test(msg)) {\n  intent = 'vaccine';\n}\n// Appointments\nelse if (/consulta|médico|doutor|dra?\\.|pediatra|especialista|exame|agend|marcar|clínica|ubs|hospital/i.test(msg)) {\n  intent = 'appointment';\n}\n\nreturn [{\n  json: {\n    ...item.json,\n    intent,\n    classifier_version: 'deterministic_v1'\n  }\n}];"
+        "jsCode": "// Deterministic Intent Classifier v2.3\n// Classificação robusta com vocabulário PT-BR expandido, logging e desambiguação\nconst item = $input.item;\nconst rawMsg = (item.json.message || '').toString().trim();\nconst msg = rawMsg.toLowerCase()\n  .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/(?<!\\d)[.,](?!\\d)|[!?;:()]/g, ' ')  // preserve decimal points like 8.5\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst wordCount = msg.split(' ').filter(w => w.length > 0).length;\nlet intent = 'question';\nlet confidence = 0;\nlet matched_keywords = [];\n\n// === QUESTION SIGNALS (detect questions FIRST) ===\nconst isQuestion = /^(como|quando|qual|quais|que|quanto|por\\s*que|porque|onde|o\\s+que|sera\\s+que|pode|posso|devo|preciso|e\\s+normal|e\\s+verdade|o\\s+que\\s+e|o\\s+que\\s+sao|dicas?|ajuda\\s+com|me\\s+(ajuda|explica|fala|diz)|gostaria\\s+de\\s+saber|quero\\s+saber)/.test(msg);\n  const hasAdvicePattern = /\\b(ideal|normal|certo|correto|adequado|recomendad|esperado|indicado|saudavel|deve\\s+ser|deveria|media|medio|tabela|referencia|padrao)\\b/.test(msg);\nconst endsWithQuestion = /\\?$/.test(rawMsg.trim());\nconst isQuestionLike = isQuestion || endsWithQuestion || hasAdvicePattern;\n\n// === MENU NAVIGATION ===\nconst menuExact = /^(menu|opcoes|opcao|ajuda|help|inicio|voltar|sair|cancelar|oi|ola|bom dia|boa tarde|boa noite)$/;\nconst menuSingle = /^\\d$/;\nif (menuExact.test(msg) || menuSingle.test(msg)) {\n  intent = 'menu_nav'; confidence = 1.0;\n  matched_keywords.push('menu_exact');\n}\n\n// === BIOMETRICS (peso, altura, perímetro cefálico) ===\nif (intent === 'question') {\n  const bioPatterns = [\n    /\\bpeso\\b/, /\\bpesa\\b/, /\\bpesou\\b/, /\\bpesar\\b/, /\\bpesando\\b/,\n    /\\bquilos?\\b/, /\\bkg\\b/, /\\bgramas?\\b/, /\\b\\d+\\s*g\\b/,\n    /\\baltura\\b/, /\\bmede\\b/, /\\bmediu\\b/, /\\bmedir\\b/, /\\bmedindo\\b/,\n    /\\bcentimetros?\\b/, /\\bcm\\b/,\n    /\\bperimetro\\b/, /\\bcefalico\\b/, /\\bcabeca\\b/, /\\bcircunferencia\\b/,\n    /\\bcrescimento\\b/, /\\bcresceu\\b/, /\\bengordou\\b/, /\\bemagreceu\\b/,\n    /\\bganhou\\b.*\\bpeso\\b/, /\\bperdeu\\b.*\\bpeso\\b/,\n    /\\btamanho\\b/, /\\bcomprimento\\b/,\n    /\\b\\d+[.,]?\\d*\\s*(kg|cm|g|m)\\b/, /\\d+kg/, /\\d+cm/, /\\d+g\\b/\n  ];\n  const m = bioPatterns.filter(p => p.test(msg));\n  if (m.length > 0) {\n    const hasNumericData = /\\d/.test(msg);\n    const hasActionVerb = /registr|anot|salv|log|colocar|atualiz/i.test(msg);\n\n    if (isQuestionLike && !hasNumericData && !hasActionVerb) {\n      intent = 'question'; confidence = 0.8;\n      matched_keywords = ['question_about_biometrics'];\n    } else if (wordCount <= 1 && !hasNumericData) {\n      intent = 'question'; confidence = 0.6;\n      matched_keywords = ['single_word_ambiguous'];\n    } else {\n      intent = 'biometrics';\n      confidence = Math.min(1.0, 0.5 + m.length * 0.2);\n      if (hasNumericData) confidence = Math.min(1.0, confidence + 0.2);\n      matched_keywords = m.map(p => p.source).slice(0, 5);\n    }\n  }\n}\n\n// === SLEEP ===\nif (intent === 'question') {\n  const sleepPatterns = [\n    /\\bsono\\b/, /\\bdormiu\\b/, /\\bdormir\\b/, /\\bdormindo\\b/, /\\bdorme\\b/,\n    /\\bacordou\\b/, /\\bacordar\\b/, /\\bacordando\\b/,\n    /\\bcochilo\\b/, /\\bcochilar\\b/, /\\bsoneca\\b/, /\\bsoninho\\b/,\n    /\\bnoite\\b.*\\b(dormiu|sono|acordou)\\b/, /\\bmadrugada\\b/,\n    /\\binsonia\\b/, /\\bdespertou\\b/, /\\bdespertar\\b/,\n    /\\bnaninha\\b/, /\\bninar\\b/, /\\bninando\\b/,\n    /\\bhoras?\\b.*\\b(dormiu|sono)\\b/, /\\bdormiu\\b.*\\bhoras?\\b/,\n    /\\bdescanso\\b/, /\\bdescansou\\b/, /\\bdescansar\\b/,\n    /\\brotina\\b.*\\bsono\\b/, /\\bsono\\b.*\\brotina\\b/\n  ];\n  const m = sleepPatterns.filter(p => p.test(msg));\n  if (m.length > 0) {\n    const hasTimeData = /\\d+\\s*h|\\d{1,2}:\\d{2}|\\d+\\s*horas?|\\d+\\s*minutos?/i.test(msg);\n    const hasActionVerb = /registr|anot|salv|log/i.test(msg);\n    const hasPastTense = /dormiu|acordou|descansou|despertou|cochilou/i.test(msg);\n\n    if (isQuestionLike && !hasTimeData && !hasActionVerb && !hasPastTense) {\n      intent = 'question'; confidence = 0.8;\n      matched_keywords = ['question_about_sleep'];\n    } else if (wordCount <= 1) {\n      intent = 'question'; confidence = 0.6;\n      matched_keywords = ['single_word_ambiguous'];\n    } else {\n      intent = 'sleep';\n      confidence = Math.min(1.0, 0.5 + m.length * 0.2);\n      if (hasTimeData || hasPastTense) confidence = Math.min(1.0, confidence + 0.2);\n      matched_keywords = m.map(p => p.source).slice(0, 5);\n    }\n  }\n}\n\n// === VACCINES ===\nif (intent === 'question') {\n  const vaccinePatterns = [\n    /\\bvacina\\b/, /\\bvacinas\\b/, /\\bvacinacao\\b/, /\\bvacinado\\b/, /\\bvacinar\\b/,\n    /\\bimuniza\\b/, /\\bimunizacao\\b/,\n    /\\bbcg\\b/, /\\bhepatite\\b/, /\\bpentavalente\\b/, /\\btetravalente\\b/,\n    /\\bpolio\\b/, /\\bpoliomelite\\b/, /\\bvop\\b/, /\\bvip\\b/,\n    /\\btriplice\\b/, /\\bsrc\\b/, /\\bmmr\\b/,\n    /\\brotavirus\\b/, /\\bpneumo\\b/, /\\bpneumococica\\b/,\n    /\\bmeningo\\b/, /\\bmeningococica\\b/,\n    /\\bfebre\\s*amarela\\b/, /\\bvaricela\\b/, /\\bcatapora\\b/,\n    /\\bdose\\b/, /\\breforco\\b/, /\\bcaderneta\\b.*\\bvacin\\b/,\n    /\\bdtp\\b/, /\\binfluenza\\b/, /\\bgripe\\b.*\\bvacin\\b/,\n    /\\bcovid\\b.*\\bvacin\\b/, /\\bvacin\\b.*\\bcovid\\b/,\n    /\\bcartao\\b.*\\bvacin\\b/, /\\bvacin\\b.*\\bcartao\\b/\n  ];\n  const m = vaccinePatterns.filter(p => p.test(msg));\n  if (m.length > 0) {\n    const hasActionVerb = /tomou|registr|anot|salv|fez|aplicou|log/i.test(msg);\n    const hasDoseInfo = /\\bdose\\b|\\breforco\\b|\\bsegunda\\b|\\bterceira\\b|\\bprimeira\\b/i.test(msg);\n\n    if (isQuestionLike && !hasActionVerb && !hasDoseInfo && m.length <= 1) {\n      intent = 'question'; confidence = 0.7;\n      matched_keywords = ['question_about_vaccine'];\n    } else {\n      intent = 'vaccine';\n      confidence = Math.min(1.0, 0.5 + m.length * 0.2);\n      if (hasActionVerb || hasDoseInfo) confidence = Math.min(1.0, confidence + 0.15);\n      matched_keywords = m.map(p => p.source).slice(0, 5);\n    }\n  }\n}\n\n// === APPOINTMENTS ===\nif (intent === 'question') {\n  const apptPatterns = [\n    /\\bconsulta\\b/, /\\bconsultas\\b/, /\\bconsultar\\b/,\n    /\\bmedico\\b/, /\\bmedica\\b/, /\\bdoutor\\b/, /\\bdoutora\\b/,\n    /\\bdr\\b/, /\\bdra\\b/,\n    /\\bpediatra\\b/, /\\bneuropediatra\\b/, /\\bortopedista\\b/,\n    /\\bespecialista\\b/, /\\bginecologista\\b/, /\\bobstetra\\b/,\n    /\\bexame\\b/, /\\bexames\\b/,\n    /\\bagend\\b/, /\\bagendar\\b/, /\\bagendamento\\b/, /\\bagendei\\b/,\n    /\\bmarcar\\b/, /\\bmarquei\\b/, /\\bmarque\\b/,\n    /\\bclinica\\b/, /\\bubs\\b/, /\\bhospital\\b/, /\\bmaternidade\\b/,\n    /\\bpronto\\s*socorro\\b/,\n    /\\bretorno\\b/, /\\brevisao\\b/,\n    /\\bultra\\b/, /\\bultrass?om\\b/, /\\becografia\\b/,\n    /\\bhemograma\\b/, /\\braio\\s*x\\b/, /\\bressonancia\\b/\n  ];\n  const m = apptPatterns.filter(p => p.test(msg));\n  if (m.length > 0) {\n    const hasActionVerb = /agend|marc|registr|anot|salv|log/i.test(msg);\n    const hasDateRef = /dia|amanha|semana|mes|segunda|terca|quarta|quinta|sexta|sabado|domingo|\\d{1,2}\\/\\d/i.test(msg);\n\n    if (isQuestionLike && !hasActionVerb && !hasDateRef && m.length <= 1) {\n      intent = 'question'; confidence = 0.7;\n      matched_keywords = ['question_about_appointment'];\n    } else {\n      intent = 'appointment';\n      confidence = Math.min(1.0, 0.5 + m.length * 0.2);\n      if (hasActionVerb || hasDateRef) confidence = Math.min(1.0, confidence + 0.15);\n      matched_keywords = m.map(p => p.source).slice(0, 5);\n    }\n  }\n}\n\n// Logging para auditoria\nconst log = {\n  ts: new Date().toISOString(),\n  msg: rawMsg.substring(0, 80),\n  intent,\n  conf: Math.round(confidence * 100) / 100,\n  keys: matched_keywords.slice(0, 3),\n  words: wordCount,\n  q: isQuestionLike,\n  v: 'v2.3'\n};\nconsole.log('[IC]', JSON.stringify(log));\n\nreturn [{\n  json: {\n    ...item.json,\n    intent,\n    intent_confidence: Math.round(confidence * 100) / 100,\n    classifier_version: 'deterministic_v2.3'\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -300,7 +302,7 @@
       "name": "Intent Classifier",
       "disabled": false,
       "alwaysOutputData": true,
-      "notes": "Classificador determinístico por palavras-chave — substitui AI Classifier desabilitado"
+      "notes": "Classificador determinístico v2.0 — vocabulário PT-BR expandido, normalização Unicode, logging, resolução de conflitos"
     },
     {
       "parameters": {
@@ -384,14 +386,27 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/biometrics/update",
+        "method": "POST",
+        "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/biometrics/update",
         "options": {
-          "splitIntoItems": false
+          "allowUnauthorizedCerts": true
         },
-        "requestMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
         "sendBody": true,
-        "bodyParametersUi": {
-          "parameter": [
+        "bodyParameters": {
+          "parameters": [
             {
               "name": "child_id",
               "value": "={{ $input.item.json.child_id }}"
@@ -401,25 +416,12 @@
               "value": "={{ $input.item.json.message }}"
             }
           ]
-        },
-        "headerParametersUi": {
-          "parameter": [
-            {
-              "name": "x-api-key",
-              "value": "={{ $vars.EDUCARE_API_KEY }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "contentType": "json"
+        }
       },
       "id": "cbcbb161-43c4-41bc-9a8a-2332a94096cd",
       "name": "API: Biometrics",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         0,
         304
@@ -428,14 +430,27 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/sleep/log",
+        "method": "POST",
+        "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/sleep/log",
         "options": {
-          "splitIntoItems": false
+          "allowUnauthorizedCerts": true
         },
-        "requestMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
         "sendBody": true,
-        "bodyParametersUi": {
-          "parameter": [
+        "bodyParameters": {
+          "parameters": [
             {
               "name": "child_id",
               "value": "={{ $input.item.json.child_id }}"
@@ -445,25 +460,12 @@
               "value": "={{ $input.item.json.message }}"
             }
           ]
-        },
-        "headerParametersUi": {
-          "parameter": [
-            {
-              "name": "x-api-key",
-              "value": "={{ $vars.EDUCARE_API_KEY }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "contentType": "json"
+        }
       },
       "id": "072a06aa-c76e-4077-8bc8-f9a247e70aff",
       "name": "API: Sleep Log",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         16,
         480
@@ -472,18 +474,23 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/vaccines/check",
-        "options": {},
-        "headerParametersUi": {
-          "parameter": [
+        "method": "GET",
+        "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/vaccines/check",
+        "options": {
+          "allowUnauthorizedCerts": true
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
             {
               "name": "x-api-key",
-              "value": "={{ $vars.EDUCARE_API_KEY }}"
+              "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
             }
           ]
         },
-        "queryParametersUi": {
-          "parameter": [
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
             {
               "name": "childId",
               "value": "={{ $input.item.json.child_id }}"
@@ -498,7 +505,7 @@
       "id": "d76b5f9e-9621-471e-82c0-dd5960ed373d",
       "name": "API: Vaccines",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         16,
         672
@@ -507,16 +514,17 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/rag/ask",
+        "method": "POST",
+        "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/rag/ask",
         "options": {
-          "splitIntoItems": false
+          "allowUnauthorizedCerts": true
         },
-        "requestMethod": "POST",
-        "headerParametersUi": {
-          "parameter": [
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
             {
               "name": "x-api-key",
-              "value": "={{ $vars.EDUCARE_API_KEY }}"
+              "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
             },
             {
               "name": "Content-Type",
@@ -524,15 +532,14 @@
             }
           ]
         },
-        "contentType": "json",
         "sendBody": true,
-        "jsonParameters": true,
-        "body": "={{ JSON.stringify({question: $input.item.json.message, context: {child_id: $input.item.json.child_id || null, week: $input.item.json.current_week || null}}) }}"
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify({question: $input.item.json.message, context: {child_id: $input.item.json.child_id || null, week: $input.item.json.current_week || null}}) }}"
       },
       "id": "eeba3f30-d87c-426e-b1c3-67261241b396",
       "name": "API: RAG (TitiNauta)",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         16,
         880
@@ -541,14 +548,27 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/appointments/create",
+        "method": "POST",
+        "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/appointments/create",
         "options": {
-          "splitIntoItems": false
+          "allowUnauthorizedCerts": true
         },
-        "requestMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
         "sendBody": true,
-        "bodyParametersUi": {
-          "parameter": [
+        "bodyParameters": {
+          "parameters": [
             {
               "name": "child_id",
               "value": "={{ $input.item.json.child_id }}"
@@ -558,25 +578,12 @@
               "value": "={{ $input.item.json.message }}"
             }
           ]
-        },
-        "headerParametersUi": {
-          "parameter": [
-            {
-              "name": "x-api-key",
-              "value": "={{ $vars.EDUCARE_API_KEY }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "contentType": "json"
+        }
       },
       "id": "1c6dfe97-455e-4075-9bc4-64379ddeca04",
       "name": "API: Appointments",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         0,
         1136
@@ -585,18 +592,23 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/content/child",
-        "options": {},
-        "headerParametersUi": {
-          "parameter": [
+        "method": "GET",
+        "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/content/child",
+        "options": {
+          "allowUnauthorizedCerts": true
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
             {
               "name": "x-api-key",
-              "value": "={{ $vars.EDUCARE_API_KEY }}"
+              "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
             }
           ]
         },
-        "queryParametersUi": {
-          "parameter": [
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
             {
               "name": "weeks",
               "value": "={{ $input.item.json.current_week }}"
@@ -607,7 +619,7 @@
       "id": "d9190aae-4619-4de6-946e-c64a781c71d5",
       "name": "API: Child Content",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         0,
         -32
@@ -615,18 +627,23 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/content/mother",
-        "options": {},
-        "headerParametersUi": {
-          "parameter": [
+        "method": "GET",
+        "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/content/mother",
+        "options": {
+          "allowUnauthorizedCerts": true
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
             {
               "name": "x-api-key",
-              "value": "={{ $vars.EDUCARE_API_KEY }}"
+              "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
             }
           ]
         },
-        "queryParametersUi": {
-          "parameter": [
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
             {
               "name": "weeks",
               "value": "={{ $input.item.json.current_week }}"
@@ -637,7 +654,7 @@
       "id": "fcdb2bd2-6c01-446d-b770-f95f8c377da2",
       "name": "API: Mother Content",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         0,
         128
@@ -686,13 +703,23 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.CHATWOOT_API_URL }}/api/v1/accounts/{{ $json.account_id }}/conversations/{{ $json.conversation_id }}/messages",
-        "options": {},
-        "requestMethod": "POST",
+        "method": "POST",
+        "url": "={{ $node[\"Global Constants\"].json.CHATWOOT_API_URL }}/api/v1/accounts/{{ $json.account_id }}/conversations/{{ $json.conversation_id }}/messages",
+        "options": {
+          "allowUnauthorizedCerts": true
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "={{ $node[\"Global Constants\"].json.CHATWOOT_API_TOKEN || '' }}"
+            }
+          ]
+        },
         "sendBody": true,
-        "contentType": "json",
-        "bodyParametersUi": {
-          "parameter": [
+        "bodyParameters": {
+          "parameters": [
             {
               "name": "content",
               "value": "={{ $json.response_text }}"
@@ -706,20 +733,12 @@
               "value": "text"
             }
           ]
-        },
-        "headerParametersUi": {
-          "parameter": [
-            {
-              "name": "api_access_token",
-              "value": "={{ $vars.CHATWOOT_API_TOKEN || '' }}"
-            }
-          ]
         }
       },
       "id": "d88f2d2a-1a71-4139-ada0-a8d02e597a02",
       "name": "Chatwoot: Send Text",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         560,
         288
@@ -763,13 +782,23 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendText/{{ $vars.EVOLUTION_INSTANCE }}",
-        "options": {},
-        "requestMethod": "POST",
+        "method": "POST",
+        "url": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_URL }}/message/sendText/{{ $node[\"Global Constants\"].json.EVOLUTION_INSTANCE }}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_KEY || '' }}"
+            }
+          ]
+        },
         "sendBody": true,
-        "contentType": "json",
-        "bodyParametersUi": {
-          "parameter": [
+        "bodyParameters": {
+          "parameters": [
             {
               "name": "number",
               "value": "={{ $json.phone }}"
@@ -779,20 +808,12 @@
               "value": "={{ $json.response_text }}"
             }
           ]
-        },
-        "headerParametersUi": {
-          "parameter": [
-            {
-              "name": "apikey",
-              "value": "={{ $vars.EVOLUTION_API_KEY || '' }}"
-            }
-          ]
         }
       },
       "id": "a6fb2c65-4170-4c1a-8cf9-e799af45a472",
       "name": "Evo: Send Text",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         960,
         144
@@ -800,13 +821,23 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendMedia/{{ $vars.EVOLUTION_INSTANCE }}",
-        "options": {},
-        "requestMethod": "POST",
+        "method": "POST",
+        "url": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_URL }}/message/sendMedia/{{ $node[\"Global Constants\"].json.EVOLUTION_INSTANCE }}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_KEY || '' }}"
+            }
+          ]
+        },
         "sendBody": true,
-        "contentType": "json",
-        "bodyParametersUi": {
-          "parameter": [
+        "bodyParameters": {
+          "parameters": [
             {
               "name": "number",
               "value": "={{ $json.phone }}"
@@ -824,20 +855,12 @@
               "value": "={{ $json.response_text }}"
             }
           ]
-        },
-        "headerParametersUi": {
-          "parameter": [
-            {
-              "name": "apikey",
-              "value": "={{ $vars.EVOLUTION_API_KEY || '' }}"
-            }
-          ]
         }
       },
       "id": "79a7281c-9d55-41ca-8b1a-530f3c4793a8",
       "name": "Evo: Send Image",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         960,
         336
@@ -845,13 +868,23 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendWhatsAppAudio/{{ $vars.EVOLUTION_INSTANCE }}",
-        "options": {},
-        "requestMethod": "POST",
+        "method": "POST",
+        "url": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_URL }}/message/sendWhatsAppAudio/{{ $node[\"Global Constants\"].json.EVOLUTION_INSTANCE }}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_KEY || '' }}"
+            }
+          ]
+        },
         "sendBody": true,
-        "contentType": "json",
-        "bodyParametersUi": {
-          "parameter": [
+        "bodyParameters": {
+          "parameters": [
             {
               "name": "number",
               "value": "={{ $json.phone }}"
@@ -861,20 +894,12 @@
               "value": "={{ $json.media_url }}"
             }
           ]
-        },
-        "headerParametersUi": {
-          "parameter": [
-            {
-              "name": "apikey",
-              "value": "={{ $vars.EVOLUTION_API_KEY || '' }}"
-            }
-          ]
         }
       },
       "id": "07d71687-6614-4859-a05f-63135dc2828f",
       "name": "Evo: Send Audio",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         976,
         544
@@ -882,13 +907,23 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendMedia/{{ $vars.EVOLUTION_INSTANCE }}",
-        "options": {},
-        "requestMethod": "POST",
+        "method": "POST",
+        "url": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_URL }}/message/sendMedia/{{ $node[\"Global Constants\"].json.EVOLUTION_INSTANCE }}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_KEY || '' }}"
+            }
+          ]
+        },
         "sendBody": true,
-        "contentType": "json",
-        "bodyParametersUi": {
-          "parameter": [
+        "bodyParameters": {
+          "parameters": [
             {
               "name": "number",
               "value": "={{ $json.phone }}"
@@ -906,20 +941,12 @@
               "value": "={{ $json.response_text }}"
             }
           ]
-        },
-        "headerParametersUi": {
-          "parameter": [
-            {
-              "name": "apikey",
-              "value": "={{ $vars.EVOLUTION_API_KEY || '' }}"
-            }
-          ]
         }
       },
       "id": "4e10b0e0-a80f-402a-a2e8-dcc4ebb3e80a",
       "name": "Evo: Send Document",
       "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 1,
+      "typeVersion": 4.2,
       "position": [
         976,
         768
@@ -1317,8 +1344,10 @@
       "name": "Call 'Agente Lead'"
     },
     {
-      "parameters": {},
-      "type": "n8n-nodes-globals.globalConstants",
+      "parameters": {
+        "jsCode": "// Global Constants v2.0 — Static values (no $env needed)\nconst item = $input.item;\n\nreturn [{\n  json: {\n    ...item.json,\n    EDUCARE_API_URL: \"https://educareapp.com.br\",\n    EDUCARE_API_KEY: \"educare_external_api_key_2025\",\n    EVOLUTION_API_URL: \"https://api.educareapp.com.br\",\n    EVOLUTION_INSTANCE: \"educare-chat\",\n    EVOLUTION_API_KEY: \"0C7951B425D6-458B-B662-1FF1EFDE0AFF\",\n    CHATWOOT_API_URL: \"https://chatwoot.educareapp.com.br\",\n    CHATWOOT_API_TOKEN: \"\"\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
         -1856,
@@ -1327,12 +1356,7 @@
       "id": "8cdeb497-286a-4d70-bae7-756e8c68eb99",
       "name": "Global Constants",
       "alwaysOutputData": true,
-      "credentials": {
-        "globalConstantsApi": {
-          "id": "I0U483eFAXTruzVB",
-          "name": "Global Constants account"
-        }
-      }
+      "notes": "Constantes globais hardcoded (server-to-server, seguro)"
     }
   ],
   "connections": {
@@ -1944,9 +1968,9 @@
       }
     ]
   },
-  "versionId": "8930c704-2207-487e-bfab-bab59e73678c",
-  "activeVersionId": "8930c704-2207-487e-bfab-bab59e73678c",
-  "versionCounter": 402,
+  "versionId": "b582d746-9908-4461-b2cd-5dd360dce37b",
+  "activeVersionId": "b582d746-9908-4461-b2cd-5dd360dce37b",
+  "versionCounter": 432,
   "triggerCount": 1,
   "tags": [
     {
@@ -1957,9 +1981,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-02-07T22:05:23.966Z",
-    "createdAt": "2026-02-07T22:05:23.966Z",
-    "versionId": "8930c704-2207-487e-bfab-bab59e73678c",
+    "updatedAt": "2026-02-07T22:26:56.516Z",
+    "createdAt": "2026-02-07T22:26:56.516Z",
+    "versionId": "b582d746-9908-4461-b2cd-5dd360dce37b",
     "workflowId": "iLDio0CFRs2Qa1VM",
     "nodes": [
       {
@@ -2120,21 +2144,23 @@
       },
       {
         "parameters": {
-          "requestMethod": "GET",
-          "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/users/check",
+          "method": "GET",
+          "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/users/check",
           "options": {
-            "splitIntoItems": false
+            "allowUnauthorizedCerts": true
           },
-          "headerParametersUi": {
-            "parameter": [
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
               {
                 "name": "x-api-key",
-                "value": "={{ $vars.EDUCARE_API_KEY }}"
+                "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
               }
             ]
           },
-          "queryParametersUi": {
-            "parameter": [
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
               {
                 "name": "phone",
                 "value": "={{ $input.item.json.phone }}"
@@ -2145,7 +2171,7 @@
         "id": "e9882692-7e4f-4370-81a4-87b4683aad19",
         "name": "API: Check User",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           -1648,
           624
@@ -2243,7 +2269,7 @@
       },
       {
         "parameters": {
-          "jsCode": "// Deterministic Intent Classifier v1.0\n// Classifica a intenção do usuário por palavras-chave\nconst item = $input.item;\nconst msg = (item.json.message || '').toString().trim().toLowerCase();\n\nlet intent = 'question'; // fallback = RAG\n\n// Menu navigation\nif (/^(menu|opções|opcoes|ajuda|help|início|inicio|voltar)$/i.test(msg) || /^\\d$/.test(msg)) {\n  intent = 'menu_nav';\n}\n// Biometrics (weight, height, head)\nelse if (/peso|quilos?|kg|gramas?|altura|mede|centímetros?|cm|perímetro|cefálico|cabeça/i.test(msg)) {\n  intent = 'biometrics';\n}\n// Sleep\nelse if (/sono|dormi[rua]?|acordou|cochilo|soneca|noite|madrugada|nap/i.test(msg)) {\n  intent = 'sleep';\n}\n// Vaccines\nelse if (/vacina|imuniza|bcg|hepatite|pentavalente|polio|tríplice|rotavírus|pneumo|meningo|febre amarela|varicela|dose/i.test(msg)) {\n  intent = 'vaccine';\n}\n// Appointments\nelse if (/consulta|médico|doutor|dra?\\.|pediatra|especialista|exame|agend|marcar|clínica|ubs|hospital/i.test(msg)) {\n  intent = 'appointment';\n}\n\nreturn [{\n  json: {\n    ...item.json,\n    intent,\n    classifier_version: 'deterministic_v1'\n  }\n}];"
+          "jsCode": "// Deterministic Intent Classifier v2.3\n// Classificação robusta com vocabulário PT-BR expandido, logging e desambiguação\nconst item = $input.item;\nconst rawMsg = (item.json.message || '').toString().trim();\nconst msg = rawMsg.toLowerCase()\n  .normalize('NFD').replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/(?<!\\d)[.,](?!\\d)|[!?;:()]/g, ' ')  // preserve decimal points like 8.5\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nconst wordCount = msg.split(' ').filter(w => w.length > 0).length;\nlet intent = 'question';\nlet confidence = 0;\nlet matched_keywords = [];\n\n// === QUESTION SIGNALS (detect questions FIRST) ===\nconst isQuestion = /^(como|quando|qual|quais|que|quanto|por\\s*que|porque|onde|o\\s+que|sera\\s+que|pode|posso|devo|preciso|e\\s+normal|e\\s+verdade|o\\s+que\\s+e|o\\s+que\\s+sao|dicas?|ajuda\\s+com|me\\s+(ajuda|explica|fala|diz)|gostaria\\s+de\\s+saber|quero\\s+saber)/.test(msg);\n  const hasAdvicePattern = /\\b(ideal|normal|certo|correto|adequado|recomendad|esperado|indicado|saudavel|deve\\s+ser|deveria|media|medio|tabela|referencia|padrao)\\b/.test(msg);\nconst endsWithQuestion = /\\?$/.test(rawMsg.trim());\nconst isQuestionLike = isQuestion || endsWithQuestion || hasAdvicePattern;\n\n// === MENU NAVIGATION ===\nconst menuExact = /^(menu|opcoes|opcao|ajuda|help|inicio|voltar|sair|cancelar|oi|ola|bom dia|boa tarde|boa noite)$/;\nconst menuSingle = /^\\d$/;\nif (menuExact.test(msg) || menuSingle.test(msg)) {\n  intent = 'menu_nav'; confidence = 1.0;\n  matched_keywords.push('menu_exact');\n}\n\n// === BIOMETRICS (peso, altura, perímetro cefálico) ===\nif (intent === 'question') {\n  const bioPatterns = [\n    /\\bpeso\\b/, /\\bpesa\\b/, /\\bpesou\\b/, /\\bpesar\\b/, /\\bpesando\\b/,\n    /\\bquilos?\\b/, /\\bkg\\b/, /\\bgramas?\\b/, /\\b\\d+\\s*g\\b/,\n    /\\baltura\\b/, /\\bmede\\b/, /\\bmediu\\b/, /\\bmedir\\b/, /\\bmedindo\\b/,\n    /\\bcentimetros?\\b/, /\\bcm\\b/,\n    /\\bperimetro\\b/, /\\bcefalico\\b/, /\\bcabeca\\b/, /\\bcircunferencia\\b/,\n    /\\bcrescimento\\b/, /\\bcresceu\\b/, /\\bengordou\\b/, /\\bemagreceu\\b/,\n    /\\bganhou\\b.*\\bpeso\\b/, /\\bperdeu\\b.*\\bpeso\\b/,\n    /\\btamanho\\b/, /\\bcomprimento\\b/,\n    /\\b\\d+[.,]?\\d*\\s*(kg|cm|g|m)\\b/, /\\d+kg/, /\\d+cm/, /\\d+g\\b/\n  ];\n  const m = bioPatterns.filter(p => p.test(msg));\n  if (m.length > 0) {\n    const hasNumericData = /\\d/.test(msg);\n    const hasActionVerb = /registr|anot|salv|log|colocar|atualiz/i.test(msg);\n\n    if (isQuestionLike && !hasNumericData && !hasActionVerb) {\n      intent = 'question'; confidence = 0.8;\n      matched_keywords = ['question_about_biometrics'];\n    } else if (wordCount <= 1 && !hasNumericData) {\n      intent = 'question'; confidence = 0.6;\n      matched_keywords = ['single_word_ambiguous'];\n    } else {\n      intent = 'biometrics';\n      confidence = Math.min(1.0, 0.5 + m.length * 0.2);\n      if (hasNumericData) confidence = Math.min(1.0, confidence + 0.2);\n      matched_keywords = m.map(p => p.source).slice(0, 5);\n    }\n  }\n}\n\n// === SLEEP ===\nif (intent === 'question') {\n  const sleepPatterns = [\n    /\\bsono\\b/, /\\bdormiu\\b/, /\\bdormir\\b/, /\\bdormindo\\b/, /\\bdorme\\b/,\n    /\\bacordou\\b/, /\\bacordar\\b/, /\\bacordando\\b/,\n    /\\bcochilo\\b/, /\\bcochilar\\b/, /\\bsoneca\\b/, /\\bsoninho\\b/,\n    /\\bnoite\\b.*\\b(dormiu|sono|acordou)\\b/, /\\bmadrugada\\b/,\n    /\\binsonia\\b/, /\\bdespertou\\b/, /\\bdespertar\\b/,\n    /\\bnaninha\\b/, /\\bninar\\b/, /\\bninando\\b/,\n    /\\bhoras?\\b.*\\b(dormiu|sono)\\b/, /\\bdormiu\\b.*\\bhoras?\\b/,\n    /\\bdescanso\\b/, /\\bdescansou\\b/, /\\bdescansar\\b/,\n    /\\brotina\\b.*\\bsono\\b/, /\\bsono\\b.*\\brotina\\b/\n  ];\n  const m = sleepPatterns.filter(p => p.test(msg));\n  if (m.length > 0) {\n    const hasTimeData = /\\d+\\s*h|\\d{1,2}:\\d{2}|\\d+\\s*horas?|\\d+\\s*minutos?/i.test(msg);\n    const hasActionVerb = /registr|anot|salv|log/i.test(msg);\n    const hasPastTense = /dormiu|acordou|descansou|despertou|cochilou/i.test(msg);\n\n    if (isQuestionLike && !hasTimeData && !hasActionVerb && !hasPastTense) {\n      intent = 'question'; confidence = 0.8;\n      matched_keywords = ['question_about_sleep'];\n    } else if (wordCount <= 1) {\n      intent = 'question'; confidence = 0.6;\n      matched_keywords = ['single_word_ambiguous'];\n    } else {\n      intent = 'sleep';\n      confidence = Math.min(1.0, 0.5 + m.length * 0.2);\n      if (hasTimeData || hasPastTense) confidence = Math.min(1.0, confidence + 0.2);\n      matched_keywords = m.map(p => p.source).slice(0, 5);\n    }\n  }\n}\n\n// === VACCINES ===\nif (intent === 'question') {\n  const vaccinePatterns = [\n    /\\bvacina\\b/, /\\bvacinas\\b/, /\\bvacinacao\\b/, /\\bvacinado\\b/, /\\bvacinar\\b/,\n    /\\bimuniza\\b/, /\\bimunizacao\\b/,\n    /\\bbcg\\b/, /\\bhepatite\\b/, /\\bpentavalente\\b/, /\\btetravalente\\b/,\n    /\\bpolio\\b/, /\\bpoliomelite\\b/, /\\bvop\\b/, /\\bvip\\b/,\n    /\\btriplice\\b/, /\\bsrc\\b/, /\\bmmr\\b/,\n    /\\brotavirus\\b/, /\\bpneumo\\b/, /\\bpneumococica\\b/,\n    /\\bmeningo\\b/, /\\bmeningococica\\b/,\n    /\\bfebre\\s*amarela\\b/, /\\bvaricela\\b/, /\\bcatapora\\b/,\n    /\\bdose\\b/, /\\breforco\\b/, /\\bcaderneta\\b.*\\bvacin\\b/,\n    /\\bdtp\\b/, /\\binfluenza\\b/, /\\bgripe\\b.*\\bvacin\\b/,\n    /\\bcovid\\b.*\\bvacin\\b/, /\\bvacin\\b.*\\bcovid\\b/,\n    /\\bcartao\\b.*\\bvacin\\b/, /\\bvacin\\b.*\\bcartao\\b/\n  ];\n  const m = vaccinePatterns.filter(p => p.test(msg));\n  if (m.length > 0) {\n    const hasActionVerb = /tomou|registr|anot|salv|fez|aplicou|log/i.test(msg);\n    const hasDoseInfo = /\\bdose\\b|\\breforco\\b|\\bsegunda\\b|\\bterceira\\b|\\bprimeira\\b/i.test(msg);\n\n    if (isQuestionLike && !hasActionVerb && !hasDoseInfo && m.length <= 1) {\n      intent = 'question'; confidence = 0.7;\n      matched_keywords = ['question_about_vaccine'];\n    } else {\n      intent = 'vaccine';\n      confidence = Math.min(1.0, 0.5 + m.length * 0.2);\n      if (hasActionVerb || hasDoseInfo) confidence = Math.min(1.0, confidence + 0.15);\n      matched_keywords = m.map(p => p.source).slice(0, 5);\n    }\n  }\n}\n\n// === APPOINTMENTS ===\nif (intent === 'question') {\n  const apptPatterns = [\n    /\\bconsulta\\b/, /\\bconsultas\\b/, /\\bconsultar\\b/,\n    /\\bmedico\\b/, /\\bmedica\\b/, /\\bdoutor\\b/, /\\bdoutora\\b/,\n    /\\bdr\\b/, /\\bdra\\b/,\n    /\\bpediatra\\b/, /\\bneuropediatra\\b/, /\\bortopedista\\b/,\n    /\\bespecialista\\b/, /\\bginecologista\\b/, /\\bobstetra\\b/,\n    /\\bexame\\b/, /\\bexames\\b/,\n    /\\bagend\\b/, /\\bagendar\\b/, /\\bagendamento\\b/, /\\bagendei\\b/,\n    /\\bmarcar\\b/, /\\bmarquei\\b/, /\\bmarque\\b/,\n    /\\bclinica\\b/, /\\bubs\\b/, /\\bhospital\\b/, /\\bmaternidade\\b/,\n    /\\bpronto\\s*socorro\\b/,\n    /\\bretorno\\b/, /\\brevisao\\b/,\n    /\\bultra\\b/, /\\bultrass?om\\b/, /\\becografia\\b/,\n    /\\bhemograma\\b/, /\\braio\\s*x\\b/, /\\bressonancia\\b/\n  ];\n  const m = apptPatterns.filter(p => p.test(msg));\n  if (m.length > 0) {\n    const hasActionVerb = /agend|marc|registr|anot|salv|log/i.test(msg);\n    const hasDateRef = /dia|amanha|semana|mes|segunda|terca|quarta|quinta|sexta|sabado|domingo|\\d{1,2}\\/\\d/i.test(msg);\n\n    if (isQuestionLike && !hasActionVerb && !hasDateRef && m.length <= 1) {\n      intent = 'question'; confidence = 0.7;\n      matched_keywords = ['question_about_appointment'];\n    } else {\n      intent = 'appointment';\n      confidence = Math.min(1.0, 0.5 + m.length * 0.2);\n      if (hasActionVerb || hasDateRef) confidence = Math.min(1.0, confidence + 0.15);\n      matched_keywords = m.map(p => p.source).slice(0, 5);\n    }\n  }\n}\n\n// Logging para auditoria\nconst log = {\n  ts: new Date().toISOString(),\n  msg: rawMsg.substring(0, 80),\n  intent,\n  conf: Math.round(confidence * 100) / 100,\n  keys: matched_keywords.slice(0, 3),\n  words: wordCount,\n  q: isQuestionLike,\n  v: 'v2.3'\n};\nconsole.log('[IC]', JSON.stringify(log));\n\nreturn [{\n  json: {\n    ...item.json,\n    intent,\n    intent_confidence: Math.round(confidence * 100) / 100,\n    classifier_version: 'deterministic_v2.3'\n  }\n}];"
         },
         "type": "n8n-nodes-base.code",
         "typeVersion": 1,
@@ -2255,7 +2281,7 @@
         "name": "Intent Classifier",
         "disabled": false,
         "alwaysOutputData": true,
-        "notes": "Classificador determinístico por palavras-chave — substitui AI Classifier desabilitado"
+        "notes": "Classificador determinístico v2.0 — vocabulário PT-BR expandido, normalização Unicode, logging, resolução de conflitos"
       },
       {
         "parameters": {
@@ -2339,14 +2365,27 @@
       },
       {
         "parameters": {
-          "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/biometrics/update",
+          "method": "POST",
+          "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/biometrics/update",
           "options": {
-            "splitIntoItems": false
+            "allowUnauthorizedCerts": true
           },
-          "requestMethod": "POST",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
           "sendBody": true,
-          "bodyParametersUi": {
-            "parameter": [
+          "bodyParameters": {
+            "parameters": [
               {
                 "name": "child_id",
                 "value": "={{ $input.item.json.child_id }}"
@@ -2356,25 +2395,12 @@
                 "value": "={{ $input.item.json.message }}"
               }
             ]
-          },
-          "headerParametersUi": {
-            "parameter": [
-              {
-                "name": "x-api-key",
-                "value": "={{ $vars.EDUCARE_API_KEY }}"
-              },
-              {
-                "name": "Content-Type",
-                "value": "application/json"
-              }
-            ]
-          },
-          "contentType": "json"
+          }
         },
         "id": "cbcbb161-43c4-41bc-9a8a-2332a94096cd",
         "name": "API: Biometrics",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           0,
           304
@@ -2383,14 +2409,27 @@
       },
       {
         "parameters": {
-          "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/sleep/log",
+          "method": "POST",
+          "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/sleep/log",
           "options": {
-            "splitIntoItems": false
+            "allowUnauthorizedCerts": true
           },
-          "requestMethod": "POST",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
           "sendBody": true,
-          "bodyParametersUi": {
-            "parameter": [
+          "bodyParameters": {
+            "parameters": [
               {
                 "name": "child_id",
                 "value": "={{ $input.item.json.child_id }}"
@@ -2400,25 +2439,12 @@
                 "value": "={{ $input.item.json.message }}"
               }
             ]
-          },
-          "headerParametersUi": {
-            "parameter": [
-              {
-                "name": "x-api-key",
-                "value": "={{ $vars.EDUCARE_API_KEY }}"
-              },
-              {
-                "name": "Content-Type",
-                "value": "application/json"
-              }
-            ]
-          },
-          "contentType": "json"
+          }
         },
         "id": "072a06aa-c76e-4077-8bc8-f9a247e70aff",
         "name": "API: Sleep Log",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           16,
           480
@@ -2427,18 +2453,23 @@
       },
       {
         "parameters": {
-          "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/vaccines/check",
-          "options": {},
-          "headerParametersUi": {
-            "parameter": [
+          "method": "GET",
+          "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/vaccines/check",
+          "options": {
+            "allowUnauthorizedCerts": true
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
               {
                 "name": "x-api-key",
-                "value": "={{ $vars.EDUCARE_API_KEY }}"
+                "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
               }
             ]
           },
-          "queryParametersUi": {
-            "parameter": [
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
               {
                 "name": "childId",
                 "value": "={{ $input.item.json.child_id }}"
@@ -2453,7 +2484,7 @@
         "id": "d76b5f9e-9621-471e-82c0-dd5960ed373d",
         "name": "API: Vaccines",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           16,
           672
@@ -2462,16 +2493,17 @@
       },
       {
         "parameters": {
-          "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/rag/ask",
+          "method": "POST",
+          "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/rag/ask",
           "options": {
-            "splitIntoItems": false
+            "allowUnauthorizedCerts": true
           },
-          "requestMethod": "POST",
-          "headerParametersUi": {
-            "parameter": [
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
               {
                 "name": "x-api-key",
-                "value": "={{ $vars.EDUCARE_API_KEY }}"
+                "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
               },
               {
                 "name": "Content-Type",
@@ -2479,15 +2511,14 @@
               }
             ]
           },
-          "contentType": "json",
           "sendBody": true,
-          "jsonParameters": true,
-          "body": "={{ JSON.stringify({question: $input.item.json.message, context: {child_id: $input.item.json.child_id || null, week: $input.item.json.current_week || null}}) }}"
+          "contentType": "json",
+          "jsonBody": "={{ JSON.stringify({question: $input.item.json.message, context: {child_id: $input.item.json.child_id || null, week: $input.item.json.current_week || null}}) }}"
         },
         "id": "eeba3f30-d87c-426e-b1c3-67261241b396",
         "name": "API: RAG (TitiNauta)",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           16,
           880
@@ -2496,14 +2527,27 @@
       },
       {
         "parameters": {
-          "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/appointments/create",
+          "method": "POST",
+          "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/appointments/create",
           "options": {
-            "splitIntoItems": false
+            "allowUnauthorizedCerts": true
           },
-          "requestMethod": "POST",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-api-key",
+                "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
           "sendBody": true,
-          "bodyParametersUi": {
-            "parameter": [
+          "bodyParameters": {
+            "parameters": [
               {
                 "name": "child_id",
                 "value": "={{ $input.item.json.child_id }}"
@@ -2513,25 +2557,12 @@
                 "value": "={{ $input.item.json.message }}"
               }
             ]
-          },
-          "headerParametersUi": {
-            "parameter": [
-              {
-                "name": "x-api-key",
-                "value": "={{ $vars.EDUCARE_API_KEY }}"
-              },
-              {
-                "name": "Content-Type",
-                "value": "application/json"
-              }
-            ]
-          },
-          "contentType": "json"
+          }
         },
         "id": "1c6dfe97-455e-4075-9bc4-64379ddeca04",
         "name": "API: Appointments",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           0,
           1136
@@ -2540,18 +2571,23 @@
       },
       {
         "parameters": {
-          "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/content/child",
-          "options": {},
-          "headerParametersUi": {
-            "parameter": [
+          "method": "GET",
+          "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/content/child",
+          "options": {
+            "allowUnauthorizedCerts": true
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
               {
                 "name": "x-api-key",
-                "value": "={{ $vars.EDUCARE_API_KEY }}"
+                "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
               }
             ]
           },
-          "queryParametersUi": {
-            "parameter": [
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
               {
                 "name": "weeks",
                 "value": "={{ $input.item.json.current_week }}"
@@ -2562,7 +2598,7 @@
         "id": "d9190aae-4619-4de6-946e-c64a781c71d5",
         "name": "API: Child Content",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           0,
           -32
@@ -2570,18 +2606,23 @@
       },
       {
         "parameters": {
-          "url": "={{ $vars.EDUCARE_API_URL }}/api/n8n/content/mother",
-          "options": {},
-          "headerParametersUi": {
-            "parameter": [
+          "method": "GET",
+          "url": "={{ $node[\"Global Constants\"].json.EDUCARE_API_URL }}/api/n8n/content/mother",
+          "options": {
+            "allowUnauthorizedCerts": true
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
               {
                 "name": "x-api-key",
-                "value": "={{ $vars.EDUCARE_API_KEY }}"
+                "value": "={{ $node[\"Global Constants\"].json.EDUCARE_API_KEY }}"
               }
             ]
           },
-          "queryParametersUi": {
-            "parameter": [
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
               {
                 "name": "weeks",
                 "value": "={{ $input.item.json.current_week }}"
@@ -2592,7 +2633,7 @@
         "id": "fcdb2bd2-6c01-446d-b770-f95f8c377da2",
         "name": "API: Mother Content",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           0,
           128
@@ -2641,13 +2682,23 @@
       },
       {
         "parameters": {
-          "url": "={{ $vars.CHATWOOT_API_URL }}/api/v1/accounts/{{ $json.account_id }}/conversations/{{ $json.conversation_id }}/messages",
-          "options": {},
-          "requestMethod": "POST",
+          "method": "POST",
+          "url": "={{ $node[\"Global Constants\"].json.CHATWOOT_API_URL }}/api/v1/accounts/{{ $json.account_id }}/conversations/{{ $json.conversation_id }}/messages",
+          "options": {
+            "allowUnauthorizedCerts": true
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "api_access_token",
+                "value": "={{ $node[\"Global Constants\"].json.CHATWOOT_API_TOKEN || '' }}"
+              }
+            ]
+          },
           "sendBody": true,
-          "contentType": "json",
-          "bodyParametersUi": {
-            "parameter": [
+          "bodyParameters": {
+            "parameters": [
               {
                 "name": "content",
                 "value": "={{ $json.response_text }}"
@@ -2661,20 +2712,12 @@
                 "value": "text"
               }
             ]
-          },
-          "headerParametersUi": {
-            "parameter": [
-              {
-                "name": "api_access_token",
-                "value": "={{ $vars.CHATWOOT_API_TOKEN || '' }}"
-              }
-            ]
           }
         },
         "id": "d88f2d2a-1a71-4139-ada0-a8d02e597a02",
         "name": "Chatwoot: Send Text",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           560,
           288
@@ -2718,13 +2761,23 @@
       },
       {
         "parameters": {
-          "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendText/{{ $vars.EVOLUTION_INSTANCE }}",
-          "options": {},
-          "requestMethod": "POST",
+          "method": "POST",
+          "url": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_URL }}/message/sendText/{{ $node[\"Global Constants\"].json.EVOLUTION_INSTANCE }}",
+          "options": {
+            "allowUnauthorizedCerts": true
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_KEY || '' }}"
+              }
+            ]
+          },
           "sendBody": true,
-          "contentType": "json",
-          "bodyParametersUi": {
-            "parameter": [
+          "bodyParameters": {
+            "parameters": [
               {
                 "name": "number",
                 "value": "={{ $json.phone }}"
@@ -2734,20 +2787,12 @@
                 "value": "={{ $json.response_text }}"
               }
             ]
-          },
-          "headerParametersUi": {
-            "parameter": [
-              {
-                "name": "apikey",
-                "value": "={{ $vars.EVOLUTION_API_KEY || '' }}"
-              }
-            ]
           }
         },
         "id": "a6fb2c65-4170-4c1a-8cf9-e799af45a472",
         "name": "Evo: Send Text",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           960,
           144
@@ -2755,13 +2800,23 @@
       },
       {
         "parameters": {
-          "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendMedia/{{ $vars.EVOLUTION_INSTANCE }}",
-          "options": {},
-          "requestMethod": "POST",
+          "method": "POST",
+          "url": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_URL }}/message/sendMedia/{{ $node[\"Global Constants\"].json.EVOLUTION_INSTANCE }}",
+          "options": {
+            "allowUnauthorizedCerts": true
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_KEY || '' }}"
+              }
+            ]
+          },
           "sendBody": true,
-          "contentType": "json",
-          "bodyParametersUi": {
-            "parameter": [
+          "bodyParameters": {
+            "parameters": [
               {
                 "name": "number",
                 "value": "={{ $json.phone }}"
@@ -2779,20 +2834,12 @@
                 "value": "={{ $json.response_text }}"
               }
             ]
-          },
-          "headerParametersUi": {
-            "parameter": [
-              {
-                "name": "apikey",
-                "value": "={{ $vars.EVOLUTION_API_KEY || '' }}"
-              }
-            ]
           }
         },
         "id": "79a7281c-9d55-41ca-8b1a-530f3c4793a8",
         "name": "Evo: Send Image",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           960,
           336
@@ -2800,13 +2847,23 @@
       },
       {
         "parameters": {
-          "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendWhatsAppAudio/{{ $vars.EVOLUTION_INSTANCE }}",
-          "options": {},
-          "requestMethod": "POST",
+          "method": "POST",
+          "url": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_URL }}/message/sendWhatsAppAudio/{{ $node[\"Global Constants\"].json.EVOLUTION_INSTANCE }}",
+          "options": {
+            "allowUnauthorizedCerts": true
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_KEY || '' }}"
+              }
+            ]
+          },
           "sendBody": true,
-          "contentType": "json",
-          "bodyParametersUi": {
-            "parameter": [
+          "bodyParameters": {
+            "parameters": [
               {
                 "name": "number",
                 "value": "={{ $json.phone }}"
@@ -2816,20 +2873,12 @@
                 "value": "={{ $json.media_url }}"
               }
             ]
-          },
-          "headerParametersUi": {
-            "parameter": [
-              {
-                "name": "apikey",
-                "value": "={{ $vars.EVOLUTION_API_KEY || '' }}"
-              }
-            ]
           }
         },
         "id": "07d71687-6614-4859-a05f-63135dc2828f",
         "name": "Evo: Send Audio",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           976,
           544
@@ -2837,13 +2886,23 @@
       },
       {
         "parameters": {
-          "url": "={{ $vars.EVOLUTION_API_URL }}/message/sendMedia/{{ $vars.EVOLUTION_INSTANCE }}",
-          "options": {},
-          "requestMethod": "POST",
+          "method": "POST",
+          "url": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_URL }}/message/sendMedia/{{ $node[\"Global Constants\"].json.EVOLUTION_INSTANCE }}",
+          "options": {
+            "allowUnauthorizedCerts": true
+          },
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "apikey",
+                "value": "={{ $node[\"Global Constants\"].json.EVOLUTION_API_KEY || '' }}"
+              }
+            ]
+          },
           "sendBody": true,
-          "contentType": "json",
-          "bodyParametersUi": {
-            "parameter": [
+          "bodyParameters": {
+            "parameters": [
               {
                 "name": "number",
                 "value": "={{ $json.phone }}"
@@ -2861,20 +2920,12 @@
                 "value": "={{ $json.response_text }}"
               }
             ]
-          },
-          "headerParametersUi": {
-            "parameter": [
-              {
-                "name": "apikey",
-                "value": "={{ $vars.EVOLUTION_API_KEY || '' }}"
-              }
-            ]
           }
         },
         "id": "4e10b0e0-a80f-402a-a2e8-dcc4ebb3e80a",
         "name": "Evo: Send Document",
         "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 1,
+        "typeVersion": 4.2,
         "position": [
           976,
           768
@@ -3272,8 +3323,10 @@
         "name": "Call 'Agente Lead'"
       },
       {
-        "parameters": {},
-        "type": "n8n-nodes-globals.globalConstants",
+        "parameters": {
+          "jsCode": "// Global Constants v2.0 — Static values (no $env needed)\nconst item = $input.item;\n\nreturn [{\n  json: {\n    ...item.json,\n    EDUCARE_API_URL: \"https://educareapp.com.br\",\n    EDUCARE_API_KEY: \"educare_external_api_key_2025\",\n    EVOLUTION_API_URL: \"https://api.educareapp.com.br\",\n    EVOLUTION_INSTANCE: \"educare-chat\",\n    EVOLUTION_API_KEY: \"0C7951B425D6-458B-B662-1FF1EFDE0AFF\",\n    CHATWOOT_API_URL: \"https://chatwoot.educareapp.com.br\",\n    CHATWOOT_API_TOKEN: \"\"\n  }\n}];"
+        },
+        "type": "n8n-nodes-base.code",
         "typeVersion": 1,
         "position": [
           -1856,
@@ -3282,12 +3335,7 @@
         "id": "8cdeb497-286a-4d70-bae7-756e8c68eb99",
         "name": "Global Constants",
         "alwaysOutputData": true,
-        "credentials": {
-          "globalConstantsApi": {
-            "id": "I0U483eFAXTruzVB",
-            "name": "Global Constants account"
-          }
-        }
+        "notes": "Constantes globais hardcoded (server-to-server, seguro)"
       }
     ],
     "connections": {
