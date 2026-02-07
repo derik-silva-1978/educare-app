@@ -243,7 +243,9 @@ exports.register = async (req, res) => {
     if (ownerPhone && approvalToken) {
       try {
         let approvalBaseUrl = '';
-        if (process.env.REPLIT_DOMAINS) {
+        if (process.env.BACKEND_URL) {
+          approvalBaseUrl = process.env.BACKEND_URL.replace(/\/$/, '');
+        } else if (process.env.REPLIT_DOMAINS) {
           approvalBaseUrl = `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
         } else if (process.env.FRONTEND_URL) {
           approvalBaseUrl = process.env.FRONTEND_URL.replace(/\/educare-app$/, '');
