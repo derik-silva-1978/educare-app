@@ -306,8 +306,25 @@ if (process.env.DB_SYNC_ENABLED === 'true') {
 } else {
   console.log('Sincronização do banco de dados desativada (DB_SYNC_ENABLED != true)');
   sequelize.authenticate()
-    .then(() => {
+    .then(async () => {
       console.log('Conexão com o banco de dados estabelecida com sucesso.');
+      try {
+        const [results] = await sequelize.query(
+          `SELECT column_name FROM information_schema.columns WHERE table_name = 'assistant_llm_configs' AND column_name = 'rag_enabled'`
+        );
+        if (results.length === 0) {
+          console.log('[AutoMigration] Adicionando colunas RAG à tabela assistant_llm_configs...');
+          await sequelize.query(`ALTER TABLE assistant_llm_configs ADD COLUMN IF NOT EXISTS rag_enabled BOOLEAN NOT NULL DEFAULT false`);
+          await sequelize.query(`ALTER TABLE assistant_llm_configs ADD COLUMN IF NOT EXISTS rag_knowledge_base VARCHAR(50) DEFAULT NULL`);
+          await sequelize.query(`UPDATE assistant_llm_configs SET rag_enabled = true, rag_knowledge_base = 'kb_baby' WHERE module_type = 'baby' AND rag_enabled = false`);
+          await sequelize.query(`UPDATE assistant_llm_configs SET rag_enabled = true, rag_knowledge_base = 'kb_mother' WHERE module_type = 'mother' AND rag_enabled = false`);
+          await sequelize.query(`UPDATE assistant_llm_configs SET rag_enabled = true, rag_knowledge_base = 'kb_professional' WHERE module_type = 'professional' AND rag_enabled = false`);
+          await sequelize.query(`UPDATE assistant_llm_configs SET rag_enabled = true, rag_knowledge_base = 'landing' WHERE module_type = 'landing_chat' AND rag_enabled = false`);
+          console.log('[AutoMigration] Colunas RAG adicionadas e configuradas com sucesso.');
+        }
+      } catch (migErr) {
+        console.warn('[AutoMigration] Aviso ao verificar/aplicar migração RAG:', migErr.message);
+      }
     })
     .catch(err => {
       console.error('Erro ao conectar ao banco de dados:', err);
