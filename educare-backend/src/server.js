@@ -325,6 +325,46 @@ if (process.env.DB_SYNC_ENABLED === 'true') {
       } catch (migErr) {
         console.warn('[AutoMigration] Aviso ao verificar/aplicar migração RAG:', migErr.message);
       }
+
+      try {
+        const [docsNeedUpdate] = await sequelize.query(`
+          SELECT COUNT(*) as cnt FROM knowledge_documents 
+          WHERE metadata IS NULL OR NOT (metadata::text LIKE '%knowledge_categories%')
+        `);
+        const needsBackfill = parseInt(docsNeedUpdate[0]?.cnt || '0') > 0;
+        if (needsBackfill) {
+          console.log('[AutoMigration] Backfill: atualizando metadata dos documentos existentes...');
+
+          await sequelize.query(`
+            UPDATE knowledge_documents kd
+            SET metadata = COALESCE(kd.metadata, '{}'::jsonb) || jsonb_build_object(
+              'knowledge_categories', (
+                SELECT COALESCE(jsonb_agg(DISTINCT cat.category), '[]'::jsonb)
+                FROM (
+                  SELECT 'baby' as category FROM kb_baby WHERE migrated_from = kd.id
+                  UNION ALL
+                  SELECT 'mother' as category FROM kb_mother WHERE migrated_from = kd.id
+                  UNION ALL
+                  SELECT 'professional' as category FROM kb_professional WHERE migrated_from = kd.id
+                ) cat
+              ),
+              'rag_providers', CASE
+                WHEN kd.file_search_id IS NOT NULL THEN '["openai"]'::jsonb
+                ELSE '[]'::jsonb
+              END
+            )
+            WHERE kd.metadata IS NULL OR NOT (kd.metadata::text LIKE '%knowledge_categories%')
+          `);
+
+          const [updated] = await sequelize.query(`
+            SELECT COUNT(*) as cnt FROM knowledge_documents 
+            WHERE metadata::text LIKE '%knowledge_categories%'
+          `);
+          console.log('[AutoMigration] Backfill concluído:', updated[0]?.cnt, 'documentos atualizados.');
+        }
+      } catch (backfillErr) {
+        console.warn('[AutoMigration] Aviso ao backfill metadata:', backfillErr.message);
+      }
     })
     .catch(err => {
       console.error('Erro ao conectar ao banco de dados:', err);
