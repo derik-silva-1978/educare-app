@@ -1,0 +1,208 @@
+# PROMPT (Replit) — AI Agents Control Center (Admin/Owner) | Educare App
+
+## Contexto Geral
+Estamos evoluindo o Educare app. Já existe uma área de controle de prompts (Admin/Owner).  
+Agora queremos transformá-la em um **AI Agents Control Center**, um painel claro, elegante e funcional para **gestão completa de assistentes de IA**, seus prompts, modelos LLM e decisões de custo-benefício.
+
+Você (Replit) possui **skills de frontend, webdesign, shadcn/ui e TailwindCSS**, e deve utilizá-las para:
+- Criar uma **UI limpa, consistente e escalável**
+- Melhorar a **experiência do Owner/Admin**
+- Evitar telas técnicas demais ou confusas
+
+⚠️ Importante:  
+- **Sem overengineering**
+- **Sem duplicar lógica ou código**
+- **Reuse ao máximo o que já existe**
+- Prefira **configuração por dados**, não por código rígido
+
+---
+
+## Objetivo do Recurso
+Criar um painel administrativo que permita:
+
+1) Gerenciar todos os **agentes/assistentes de IA** do Educare app  
+2) Editar, versionar e publicar **prompts e regras**  
+3) Selecionar **modelos LLM por agente** (e opcionalmente por função)  
+4) Visualizar e registrar um **ranking por estrelas (⭐)** de custo-benefício por modelo  
+5) Testar rapidamente alterações via **playground integrado**
+
+Tudo isso com uma **experiência visual moderna**, usando:
+- shadcn/ui
+- TailwindCSS
+- Layouts claros, legíveis e orientados à decisão
+
+---
+
+## Requisitos Funcionais (MVP)
+
+### 1) Catálogo de Agentes (AI Resources Registry)
+Implementar ou consolidar um **registro central de agentes**, contendo:
+
+- `agent_id`
+- `name`
+- `description`
+- `capabilities / functions`
+- configurações padrão:
+  - prompt base
+  - modelo default
+  - parâmetros essenciais
+
+📌 Diretriz:
+- Se já existir algo parecido no código, **não recriar**
+- Consolidar em uma **single source of truth**
+
+---
+
+### 2) Painel Admin/Owner — UX e UI
+Criar ou evoluir telas usando **shadcn + Tailwind**, priorizando clareza e fluidez.
+
+#### Tela: Lista de Agentes
+- Cards ou tabela moderna
+- Exibir:
+  - Nome do agente
+  - Descrição curta
+  - Modelo LLM ativo
+  - Status (ativo / rascunho / publicado)
+  - Última atualização
+- Ação clara: **“Gerenciar agente”**
+
+#### Tela: Detalhe do Agente
+Organizar em **abas ou seções bem definidas**:
+
+##### Aba 1 — Prompt & Regras
+- Editor de prompt (system)
+- Instruções adicionais por função (se aplicável)
+- Histórico de versões (visual simples)
+
+##### Aba 2 — Modelo LLM
+- Dropdown para selecionar o modelo default do agente
+- Opcional (se simples): override por função
+- Mostrar informações úteis:
+  - custo relativo
+  - latência média (se disponível)
+
+##### Aba 3 — Ranking de Modelos (⭐)
+- Lista de modelos com:
+  - ⭐ de 1 a 5 (custo-benefício para aquele agente)
+  - campo de observação curta
+- **MVP**: estrelas definidas manualmente pelo Owner
+- UI deve facilitar comparação visual
+
+##### Aba 4 — Parâmetros
+- Apenas parâmetros que já façam sentido no projeto:
+  - temperature
+  - max_tokens
+- Evitar excesso de knobs desnecessários
+
+##### Aba 5 — Playground
+- Campo de input
+- Botão “Testar”
+- Exibir:
+  - resposta do agente
+  - modelo utilizado
+  - tokens/custo (se disponível)
+- Layout simples e direto
+
+---
+
+### 3) Seleção de Modelo por Assistente
+Implementar lógica de resolução clara:
+
+1. Se função tiver modelo específico → usar
+2. Senão, usar modelo default do agente
+3. Senão, usar modelo global do app
+
+⚠️ Evitar ifs espalhados pelo código.  
+Preferir uma função central de resolução de modelo.
+
+---
+
+### 4) Versionamento e Publicação (Lean)
+Toda alteração relevante deve gerar versão:
+
+- `version_id`
+- `created_at`
+- `created_by`
+- `change_note`
+
+Fluxo simples:
+- salvar rascunho
+- publicar
+- rollback
+
+UI clara com botões explícitos:
+- “Salvar rascunho”
+- “Publicar”
+- “Restaurar versão anterior”
+
+---
+
+### 5) Permissões
+Usar o **RBAC já existente**, sem criar um novo sistema.
+
+Sugestão (se fizer sentido):
+- Owner:
+  - altera tudo
+  - publica
+  - altera modelo e ranking
+- Admin:
+  - edita rascunho
+  - não publica em produção
+
+---
+
+## Requisitos Não-Funcionais
+- UI consistente com o design system do app
+- Código limpo e reaproveitável
+- Nada de “framework novo dentro do projeto”
+- Segurança:
+  - nenhuma chave sensível no frontend
+  - validação server-side de permissões
+
+---
+
+## Entregáveis Esperados
+1) Painel Admin/Owner funcional e bem desenhado
+2) Estrutura de dados (DB ou config) para:
+   - agentes
+   - versões de prompt
+   - modelo por agente/função
+   - ranking de modelos
+3) Ajustes no runtime para:
+   - resolver prompt e modelo corretos
+4) Documentação curta explicando:
+   - como adicionar agente
+   - como trocar modelo
+   - como funciona versionamento e rollback
+
+---
+
+## Diretrizes para Implementação
+Antes de codar:
+1. Mapear o que já existe (prompts, admin, seleção de modelo)
+2. Propor a **menor mudança possível**
+3. Priorizar legibilidade e manutenção
+
+Você tem autonomia técnica para decidir:
+- componentes
+- estrutura
+- nomes
+Desde que respeite:
+- não duplicar código
+- não overengineer
+- entregar valor rápido
+
+---
+
+## Critérios de Aceite (MVP)
+- Lista de agentes visível no admin
+- Prompt editável com versão e publicação
+- Modelo LLM selecionável por agente
+- Ranking ⭐ funcional
+- Playground executando corretamente
+- Resolução correta de modelo em runtime
+
+Implemente e reporte:
+- arquivos alterados
+- estruturas criadas
+- como testar localmente
