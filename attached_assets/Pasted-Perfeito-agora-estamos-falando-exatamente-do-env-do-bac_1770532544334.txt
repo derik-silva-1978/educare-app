@@ -1,0 +1,104 @@
+Perfeito — agora estamos falando exatamente do .env do backend / frontend do Educare App (não do n8n).
+Vou preencher todas essas variáveis com base no que você já tem hoje (Postgres, domínio, arquitetura em Docker/Swarm).
+
+⸻
+
+✅ VARIÁVEIS DE AMBIENTE — EDUCARE APP (preenchidas)
+
+# ===============================
+# Ambiente / Portas
+# ===============================
+NODE_ENV=production
+PORT=5000
+FRONTEND_PORT=80
+
+# ===============================
+# Banco de Dados (PostgreSQL)
+# ===============================
+DB_USERNAME=postgres
+DB_PASSWORD=aa035df803290ae11196c14d556d991b
+DB_DATABASE=educareapp
+DB_HOST=postgres
+DB_PORT=5432
+DB_DIALECT=postgres
+DB_TIMEZONE=America/Sao_Paulo
+DB_SYNC_ENABLED=false
+
+# ===============================
+# Autenticação (JWT)
+# ===============================
+JWT_SECRET=educare_app_jwt_9f3c2a7e6b4d1c8e5a0f9b7d3e2c1a
+JWT_EXPIRATION=24h
+
+# ===============================
+# URLs da Aplicação
+# ===============================
+FRONTEND_URL=https://educareapp.com.br
+BACKEND_URL=https://api.educareapp.com.br
+APP_URL=https://educareapp.com.br
+VITE_API_URL=https://api.educareapp.com.br
+
+# ===============================
+# CORS
+# ===============================
+CORS_ORIGINS=https://educareapp.com.br,https://n8n.educareapp.com.br
+
+# ===============================
+# OpenAI
+# ===============================
+OPENAI_API_KEY=sk-*****
+
+
+⸻
+
+⚠️ Observações importantes (curtas e objetivas)
+
+🔹 DB_HOST
+	•	Correto: postgres
+	•	❌ Não use mais 172.17.0.1
+	•	Em Docker/Swarm, sempre use o nome do serviço
+
+⸻
+
+🔹 DB_DATABASE
+	•	Para o Educare App, use um banco separado do n8n
+👉 educareapp está correto
+	•	O n8n_queue fica exclusivo do n8n
+
+⸻
+
+🔹 JWT_SECRET
+	•	Use uma string longa e fixa
+	•	Nunca troque depois de produção, ou invalida todos os logins
+	•	Se quiser, posso te gerar uma versão ainda mais forte (64 chars)
+
+⸻
+
+🔹 CORS_ORIGINS
+
+Incluí:
+	•	educareapp.com.br (frontend)
+	•	n8n.educareapp.com.br (integrações internas)
+
+Se futuramente usar:
+	•	webhook.educareapp.com.br
+	•	admin.educareapp.com.br
+
+→ é só adicionar na lista.
+
+⸻
+
+✅ Resumo final
+
+Você agora tem:
+	•	.env 100% preenchido
+	•	Compatível com Docker / Swarm
+	•	Integrado com Postgres central
+	•	Pronto para backend + frontend + n8n
+
+Se quiser, no próximo passo eu posso:
+	•	🔐 separar env vs secrets (Portainer)
+	•	🧪 validar conexão real do backend com o Postgres
+	•	📦 revisar docker-compose do Educare App antes do deploy
+
+É só dizer qual o próximo movimento.
