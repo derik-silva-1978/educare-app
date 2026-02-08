@@ -1,0 +1,187 @@
+# CONTEXT — DOCKER COMPOSER SKILL ENABLED
+
+You are an AI development agent running inside Replit with the following capability enabled:
+
+- **Docker Composer Skill**
+  Installed via:
+  npx skills add https://github.com/eddiebe147/claude-settings --skill docker-composer
+
+This skill provides best practices and patterns for:
+- Dockerfiles (development and production)
+- Docker Compose (dev, prod, override, multi-service)
+- Multi-stage builds
+- Networking, volumes, healthchecks
+- Secure, minimal, production-ready containerization
+
+You MUST follow the Docker Composer Skill philosophy and best practices.
+
+---
+
+## OBJECTIVE
+
+Migrate this application from the Replit development environment to a **Docker Compose–based production deployment** targeting an external VPS (Contabo).
+
+The goal is to:
+- Generate **production-ready Docker artifacts**
+- Preserve compatibility with an **existing PostgreSQL database** already running on the VPS
+- Avoid overengineering
+- Avoid executing Docker commands inside Replit
+
+Replit is used **only for authoring and validation**, not for runtime execution.
+
+---
+
+## HARD EXECUTION RULES (IMPORTANT)
+
+- ❌ DO NOT attempt to run `docker`, `docker compose`, or access a Docker daemon inside Replit.
+- ❌ DO NOT assume Docker is available in this environment.
+- ✅ Your responsibility is **infrastructure authoring**, not execution.
+- ✅ Docker execution will happen manually or via MCP on the VPS.
+
+---
+
+## DOCKER COMPOSER SKILL — REQUIRED PRINCIPLES
+
+You MUST adhere to the following principles:
+
+### Container Principles
+1. One process per container
+2. Immutable infrastructure
+3. Stateless containers (state via volumes or external services)
+4. Minimal images (alpine/slim when possible)
+
+### Mandatory Best Practices
+- Use **multi-stage builds** for production
+- Pin specific base image versions (NO `latest`)
+- Include `.dockerignore`
+- Run containers as **non-root**
+- Externalize all secrets (env / env_file)
+- Do NOT install unnecessary packages
+- Do NOT store secrets in images or compose files
+
+---
+
+## TASKS (EXECUTE IN ORDER)
+
+### 1. Project Audit (Read-Only)
+Analyze the repository and identify:
+- Runtime stack (Node / Python / framework)
+- Production start command
+- Build step (if any)
+- Required environment variables
+- Default port
+- Whether background workers exist
+
+Output a short **technical summary** of findings and decisions.
+
+---
+
+### 2. Dockerfile (Production)
+Generate a **production Dockerfile** that:
+- Uses a **multi-stage build** pattern
+- Uses a minimal base image
+- Runs as a **non-root user**
+- Exposes a configurable `PORT`
+- Listens on `0.0.0.0`
+- Follows the Docker Composer Skill patterns
+
+If Node.js:
+- Follow the Node Production Dockerfile pattern from the skill
+If Python:
+- Follow the Python Production Dockerfile pattern from the skill
+
+📦 Output file:
+- `Dockerfile`
+
+---
+
+### 3. Docker Compose (Production-Oriented)
+Generate a **minimal docker-compose.yml** that:
+- Defines only the application service
+- Uses `restart: unless-stopped`
+- Uses `env_file`
+- Defines a healthcheck (HTTP if available, otherwise TCP)
+- Connects to an **external PostgreSQL database**
+- Does NOT create Postgres unless strictly required
+
+If Postgres is external:
+- Allow configuration via `DATABASE_URL` or DB_* vars
+- Do NOT expose DB ports
+
+📦 Output file:
+- `docker-compose.yml`
+
+---
+
+### 4. Environment Template
+Generate an environment template:
+
+📦 Output file:
+- `.env.example`
+
+Include:
+- PORT
+- DATABASE_URL (preferred) or DB_HOST / DB_USER / DB_PASS / DB_NAME / DB_PORT
+- Any other required app secrets (JWT, API keys, base URLs)
+
+Do NOT include real secrets.
+
+---
+
+### 5. Optional Hardening (Commented)
+If relevant, include **commented examples** (not active by default) for:
+- Reverse proxy compatibility (Traefik / Nginx)
+- Resource limits
+- Logging options
+
+These must be **opt-in**, not enforced.
+
+---
+
+### 6. Deployment Documentation
+Create a clear deployment guide explaining:
+
+- Required tools on the VPS
+- How to copy the project
+- How to configure `.env`
+- How to build and start with Docker Compose
+- How to view logs
+- How to rollback safely
+
+📦 Output file:
+- `DEPLOY.md`
+
+---
+
+## FILES YOU MAY CREATE OR MODIFY
+
+You are allowed to create or modify ONLY:
+
+- `Dockerfile`
+- `docker-compose.yml`
+- `.env.example`
+- `.dockerignore` (recommended)
+- `DEPLOY.md`
+
+Do NOT modify application code unless strictly necessary to:
+- Bind to `0.0.0.0`
+- Respect `PORT`
+
+If code changes are required, document them clearly instead of silently applying them.
+
+---
+
+## QUALITY BAR
+
+- Prefer clarity over cleverness
+- Prefer fewer services over completeness
+- Prefer production safety over dev convenience
+- Assume the user is **not a Docker expert**
+- The output must be copy-paste deployable on a VPS
+
+---
+
+## FINAL GOAL
+
+Enable a clean, predictable transition from Replit → Docker Compose → VPS,
+using the Docker Composer Skill as the single source of truth for containerization quality.
