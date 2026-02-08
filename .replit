@@ -29,6 +29,9 @@ OWNER_PHONE = "+5598991628206"
 BACKEND_URL = "https://educareapp.com.br"
 N8N_MCP_URL = "https://n8n.educareapp.com.br/mcp-server/http"
 
+[userenv.development]
+DB_SYNC_ENABLED = "false"
+
 [workflows]
 runButton = "Project"
 
