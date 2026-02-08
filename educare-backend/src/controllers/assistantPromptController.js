@@ -1,4 +1,5 @@
 const { AssistantPrompt, User } = require('../models');
+const { ALL_MODULE_TYPES } = require('../constants/agentModules');
 
 exports.getPrompts = async (req, res) => {
   try {
@@ -89,10 +90,10 @@ exports.getActivePromptByModule = async (req, res) => {
   try {
     const { module_type } = req.params;
     
-    if (!['baby', 'mother', 'professional'].includes(module_type)) {
+    if (!ALL_MODULE_TYPES.includes(module_type)) {
       return res.status(400).json({
         success: false,
-        error: 'Tipo de módulo inválido. Use: baby, mother ou professional'
+        error: `Tipo de módulo inválido. Use: ${ALL_MODULE_TYPES.join(', ')}`
       });
     }
     
@@ -129,10 +130,10 @@ exports.createPrompt = async (req, res) => {
       });
     }
     
-    if (!['baby', 'mother', 'professional'].includes(module_type)) {
+    if (!ALL_MODULE_TYPES.includes(module_type)) {
       return res.status(400).json({
         success: false,
-        error: 'Tipo de módulo inválido. Use: baby, mother ou professional'
+        error: `Tipo de módulo inválido. Use: ${ALL_MODULE_TYPES.join(', ')}`
       });
     }
     
@@ -269,10 +270,10 @@ exports.getPromptHistory = async (req, res) => {
   try {
     const { module_type } = req.params;
     
-    if (!['baby', 'mother', 'professional'].includes(module_type)) {
+    if (!ALL_MODULE_TYPES.includes(module_type)) {
       return res.status(400).json({
         success: false,
-        error: 'Tipo de módulo inválido. Use: baby, mother ou professional'
+        error: `Tipo de módulo inválido. Use: ${ALL_MODULE_TYPES.join(', ')}`
       });
     }
     

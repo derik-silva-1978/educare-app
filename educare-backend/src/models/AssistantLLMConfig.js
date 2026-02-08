@@ -3,9 +3,12 @@ const { sequelize } = require('../config/database');
 
 const AssistantLLMConfig = sequelize.define('AssistantLLMConfig', {
   module_type: {
-    type: DataTypes.ENUM('baby', 'mother', 'professional'),
+    type: DataTypes.STRING(50),
     primaryKey: true,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      isIn: [['baby', 'mother', 'professional', 'landing_chat', 'quiz_baby', 'quiz_mother', 'content_generator', 'curation_baby_quiz', 'curation_mother_quiz', 'curation_baby_content', 'curation_mother_content', 'media_metadata', 'nlp_biometric', 'nlp_sleep', 'nlp_appointment', 'nlp_vaccine']]
+    }
   },
   provider: {
     type: DataTypes.STRING(50),

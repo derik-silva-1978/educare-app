@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
+const promptService = require('../services/promptService');
 
 const publicChatLimiter = rateLimit({
   windowMs: 60 * 1000,
@@ -106,8 +107,19 @@ router.post('/', publicChatLimiter, async (req, res) => {
       });
     }
 
+    let systemPrompt = LANDING_SYSTEM_PROMPT;
+    try {
+      const centralPrompt = await promptService.getProcessedPrompt('landing_chat');
+      if (centralPrompt) {
+        systemPrompt = centralPrompt.systemPrompt;
+        console.log(`[LandingChat] Usando prompt da Central: v${centralPrompt.version}`);
+      }
+    } catch (err) {
+      console.warn('[LandingChat] Fallback para prompt local:', err.message);
+    }
+
     const chatMessages = [
-      { role: 'system', content: LANDING_SYSTEM_PROMPT + ragContext }
+      { role: 'system', content: systemPrompt + ragContext }
     ];
 
     for (const msg of history) {

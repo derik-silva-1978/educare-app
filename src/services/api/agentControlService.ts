@@ -2,12 +2,20 @@ import httpClient from './httpClient';
 import type { AssistantPrompt } from './assistantPromptService';
 import type { LLMConfig, LLMProviderInfo, ModuleType, ProviderType } from './llmConfigService';
 
+export interface AgentCategory {
+  name: string;
+  description: string;
+  icon: string;
+  order: number;
+}
+
 export interface AgentMeta {
   name: string;
   description: string;
   icon: string;
   color: string;
   kb: string;
+  category: string;
 }
 
 export interface AgentSummary {
@@ -38,6 +46,7 @@ export interface AgentSummary {
 export interface DashboardResponse {
   agents: AgentSummary[];
   providers: LLMProviderInfo[];
+  categories: Record<string, AgentCategory>;
 }
 
 export interface AgentDetail {

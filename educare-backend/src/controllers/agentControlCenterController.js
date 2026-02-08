@@ -2,36 +2,13 @@ const { AssistantPrompt, AssistantLLMConfig, User } = require('../models');
 const AgentModelRanking = require('../models/AgentModelRanking');
 const { providerRegistry } = require('../services/llmProviderRegistry');
 const llmConfigService = require('../services/llmConfigService');
-
-const AGENT_META = {
-  baby: {
-    name: 'TitiNauta',
-    description: 'Assistente de IA para pais e responsáveis sobre desenvolvimento infantil',
-    icon: 'baby',
-    color: '#8b5cf6',
-    kb: 'kb_baby'
-  },
-  mother: {
-    name: 'TitiNauta Materna',
-    description: 'Assistente de IA para saúde materna, gravidez e pós-parto',
-    icon: 'heart',
-    color: '#f43f5e',
-    kb: 'kb_mother'
-  },
-  professional: {
-    name: 'TitiNauta Especialista',
-    description: 'Assistente de IA para profissionais de saúde com protocolos clínicos',
-    icon: 'stethoscope',
-    color: '#14b8a6',
-    kb: 'kb_professional'
-  }
-};
+const { ALL_MODULE_TYPES, AGENT_META, AGENT_CATEGORIES } = require('../constants/agentModules');
 
 exports.getAgentsDashboard = async (req, res) => {
   try {
     const agents = [];
 
-    for (const moduleType of ['baby', 'mother', 'professional']) {
+    for (const moduleType of ALL_MODULE_TYPES) {
       const activePrompt = await AssistantPrompt.findOne({
         where: { module_type: moduleType, is_active: true },
         order: [['version', 'DESC']],
@@ -82,7 +59,7 @@ exports.getAgentsDashboard = async (req, res) => {
 
     return res.json({
       success: true,
-      data: { agents, providers }
+      data: { agents, providers, categories: AGENT_CATEGORIES }
     });
   } catch (error) {
     console.error('[AgentControlCenter] Erro ao carregar dashboard:', error);
@@ -97,10 +74,10 @@ exports.getAgentDetail = async (req, res) => {
   try {
     const { module_type } = req.params;
 
-    if (!['baby', 'mother', 'professional'].includes(module_type)) {
+    if (!ALL_MODULE_TYPES.includes(module_type)) {
       return res.status(400).json({
         success: false,
-        error: 'module_type inválido. Use: baby, mother ou professional'
+        error: `module_type inválido. Use: ${ALL_MODULE_TYPES.join(', ')}`
       });
     }
 
@@ -227,7 +204,7 @@ exports.getRankings = async (req, res) => {
   try {
     const { module_type } = req.params;
 
-    if (!['baby', 'mother', 'professional'].includes(module_type)) {
+    if (!ALL_MODULE_TYPES.includes(module_type)) {
       return res.status(400).json({
         success: false,
         error: 'module_type inválido'
@@ -258,7 +235,7 @@ exports.upsertRanking = async (req, res) => {
     const { provider, model_name, stars, notes, cost_rating, speed_rating, quality_rating } = req.body;
     const userId = req.user?.id;
 
-    if (!['baby', 'mother', 'professional'].includes(module_type)) {
+    if (!ALL_MODULE_TYPES.includes(module_type)) {
       return res.status(400).json({
         success: false,
         error: 'module_type inválido'

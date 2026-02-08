@@ -1,4 +1,5 @@
 const OpenAI = require('openai');
+const promptService = require('./promptService');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -7,19 +8,30 @@ const openai = new OpenAI({
 const nlpParserService = {
   async parseBiometrics(rawText) {
     try {
+      const fallbackBiometricPrompt = `Você é um parser de dados biométricos de bebês. Extraia peso (em kg) e altura (em cm) do texto.
+Retorne APENAS um JSON válido no formato: {"weight": number|null, "height": number|null, "head_circumference": number|null}
+Se não encontrar um valor, use null. Converta unidades se necessário (g para kg, m para cm).
+Exemplos:
+- "peso 8.5kg" → {"weight": 8.5, "height": null, "head_circumference": null}
+- "8500g altura 72cm" → {"weight": 8.5, "height": 72, "head_circumference": null}
+- "Bebê mede 68 centímetros e pesa 7,2 quilos" → {"weight": 7.2, "height": 68, "head_circumference": null}`;
+      let finalBiometricPrompt = fallbackBiometricPrompt;
+      try {
+        const centralPrompt = await promptService.getProcessedPrompt('nlp_biometric');
+        if (centralPrompt) {
+          finalBiometricPrompt = centralPrompt.systemPrompt;
+        }
+      } catch (err) {
+        console.warn('[NLPParser] Fallback biometric:', err.message);
+      }
+
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
         timeout: 30000,
         messages: [
           {
             role: 'system',
-            content: `Você é um parser de dados biométricos de bebês. Extraia peso (em kg) e altura (em cm) do texto.
-Retorne APENAS um JSON válido no formato: {"weight": number|null, "height": number|null, "head_circumference": number|null}
-Se não encontrar um valor, use null. Converta unidades se necessário (g para kg, m para cm).
-Exemplos:
-- "peso 8.5kg" → {"weight": 8.5, "height": null, "head_circumference": null}
-- "8500g altura 72cm" → {"weight": 8.5, "height": 72, "head_circumference": null}
-- "Bebê mede 68 centímetros e pesa 7,2 quilos" → {"weight": 7.2, "height": 68, "head_circumference": null}`
+            content: finalBiometricPrompt
           },
           {
             role: 'user',
@@ -44,20 +56,31 @@ Exemplos:
 
   async parseSleep(rawText) {
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        timeout: 30000,
-        messages: [
-          {
-            role: 'system',
-            content: `Você é um parser de registros de sono de bebês. Extraia horários e duração do texto.
+      const fallbackSleepPrompt = `Você é um parser de registros de sono de bebês. Extraia horários e duração do texto.
 Retorne APENAS um JSON válido no formato: 
 {"start_time": "HH:MM"|null, "end_time": "HH:MM"|null, "duration_minutes": number|null, "sleep_type": "night"|"nap"|"unknown", "quality": "good"|"regular"|"poor"|"unknown"}
 
 Exemplos:
 - "dormiu às 21h e acordou 6h30" → {"start_time": "21:00", "end_time": "06:30", "duration_minutes": 570, "sleep_type": "night", "quality": "unknown"}
 - "soneca de 2 horas" → {"start_time": null, "end_time": null, "duration_minutes": 120, "sleep_type": "nap", "quality": "unknown"}
-- "dormiu mal, acordou várias vezes" → {"start_time": null, "end_time": null, "duration_minutes": null, "sleep_type": "unknown", "quality": "poor"}`
+- "dormiu mal, acordou várias vezes" → {"start_time": null, "end_time": null, "duration_minutes": null, "sleep_type": "unknown", "quality": "poor"}`;
+      let finalSleepPrompt = fallbackSleepPrompt;
+      try {
+        const centralPrompt = await promptService.getProcessedPrompt('nlp_sleep');
+        if (centralPrompt) {
+          finalSleepPrompt = centralPrompt.systemPrompt;
+        }
+      } catch (err) {
+        console.warn('[NLPParser] Fallback sleep:', err.message);
+      }
+
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        timeout: 30000,
+        messages: [
+          {
+            role: 'system',
+            content: finalSleepPrompt
           },
           {
             role: 'user',
@@ -82,13 +105,7 @@ Exemplos:
 
   async parseAppointment(rawText) {
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        timeout: 30000,
-        messages: [
-          {
-            role: 'system',
-            content: `Você é um parser de agendamentos médicos. Extraia informações de consultas do texto.
+      const fallbackAppointmentPrompt = `Você é um parser de agendamentos médicos. Extraia informações de consultas do texto.
 Retorne APENAS um JSON válido no formato:
 {"doctor_name": string|null, "specialty": string|null, "appointment_date": "YYYY-MM-DD"|null, "appointment_time": "HH:MM"|null, "location": string|null}
 
@@ -97,7 +114,24 @@ Use a data atual como referência: ${new Date().toISOString().split('T')[0]}
 Exemplos:
 - "consulta com Dr. Silva pediatra dia 15" → {"doctor_name": "Dr. Silva", "specialty": "pediatra", "appointment_date": "2025-01-15", "appointment_time": null, "location": null}
 - "neurologista às 14h amanhã" → {"doctor_name": null, "specialty": "neurologista", "appointment_date": "2025-12-12", "appointment_time": "14:00", "location": null}
-- "exame de sangue na UBS Centro" → {"doctor_name": null, "specialty": "exame de sangue", "appointment_date": null, "appointment_time": null, "location": "UBS Centro"}`
+- "exame de sangue na UBS Centro" → {"doctor_name": null, "specialty": "exame de sangue", "appointment_date": null, "appointment_time": null, "location": "UBS Centro"}`;
+      let finalAppointmentPrompt = fallbackAppointmentPrompt;
+      try {
+        const centralPrompt = await promptService.getProcessedPrompt('nlp_appointment');
+        if (centralPrompt) {
+          finalAppointmentPrompt = centralPrompt.systemPrompt;
+        }
+      } catch (err) {
+        console.warn('[NLPParser] Fallback appointment:', err.message);
+      }
+
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        timeout: 30000,
+        messages: [
+          {
+            role: 'system',
+            content: finalAppointmentPrompt
           },
           {
             role: 'user',
@@ -122,12 +156,7 @@ Exemplos:
 
   async parseVaccine(rawText) {
     try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `Você é um parser de registros de vacinas. Extraia informações de vacinas do texto.
+      const fallbackVaccinePrompt = `Você é um parser de registros de vacinas. Extraia informações de vacinas do texto.
 Retorne APENAS um JSON válido no formato:
 {"vaccine_name": string|null, "dose_number": number|null, "taken_at": "YYYY-MM-DD"|null, "location": string|null, "batch_number": string|null}
 
@@ -136,7 +165,23 @@ Use a data atual como referência: ${new Date().toISOString().split('T')[0]}
 Exemplos:
 - "tomou BCG ontem" → {"vaccine_name": "BCG", "dose_number": 1, "taken_at": "2025-12-10", "location": null, "batch_number": null}
 - "segunda dose da pentavalente" → {"vaccine_name": "Pentavalente", "dose_number": 2, "taken_at": null, "location": null, "batch_number": null}
-- "hepatite B na maternidade" → {"vaccine_name": "Hepatite B", "dose_number": 1, "taken_at": null, "location": "maternidade", "batch_number": null}`
+- "hepatite B na maternidade" → {"vaccine_name": "Hepatite B", "dose_number": 1, "taken_at": null, "location": "maternidade", "batch_number": null}`;
+      let finalVaccinePrompt = fallbackVaccinePrompt;
+      try {
+        const centralPrompt = await promptService.getProcessedPrompt('nlp_vaccine');
+        if (centralPrompt) {
+          finalVaccinePrompt = centralPrompt.systemPrompt;
+        }
+      } catch (err) {
+        console.warn('[NLPParser] Fallback vaccine:', err.message);
+      }
+
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: finalVaccinePrompt
           },
           {
             role: 'user',

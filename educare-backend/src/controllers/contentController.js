@@ -1,5 +1,6 @@
 const { ContentItem, User } = require('../models');
 const { Op } = require('sequelize');
+const promptService = require('../services/promptService');
 
 const getPublishedContent = async (req, res) => {
   try {
@@ -464,7 +465,7 @@ const generateAIContent = async (req, res) => {
       ? `O tema principal deve ser: "${topic}".`
       : 'Escolha um tema relevante e atual sobre desenvolvimento infantil ou saude materna.';
 
-    const systemPrompt = `Voce e um redator de conteudo especializado para a plataforma Educare+, focada em desenvolvimento infantil (0-6 anos) e saude materna.
+    const fallbackSystemPrompt = `Voce e um redator de conteudo especializado para a plataforma Educare+, focada em desenvolvimento infantil (0-6 anos) e saude materna.
 
 Crie um conteudo do tipo "${typeLabels[type]}" direcionado para "${audienceLabels[target_audience]}".
 ${topicInstruction}
@@ -480,10 +481,20 @@ Retorne APENAS um JSON valido (sem markdown, sem code blocks) com a seguinte est
   "cta_text": "texto para o botao de acao (ex: Leia mais, Iniciar treinamento, Comece agora)"
 }`;
 
+    let finalSystemPrompt = fallbackSystemPrompt;
+    try {
+      const centralPrompt = await promptService.getProcessedPrompt('content_generator');
+      if (centralPrompt) {
+        finalSystemPrompt = centralPrompt.systemPrompt;
+      }
+    } catch (err) {
+      console.warn('[ContentGen] Fallback para prompt local:', err.message);
+    }
+
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: systemPrompt },
+        { role: 'system', content: finalSystemPrompt },
         { role: 'user', content: `Gere o conteudo conforme as instrucoes do sistema.` }
       ],
       temperature: 0.8,

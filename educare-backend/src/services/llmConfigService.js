@@ -6,11 +6,7 @@
 const AssistantLLMConfig = require('../models/AssistantLLMConfig');
 const { providerRegistry } = require('./llmProviderRegistry');
 
-const configCache = {
-  baby: { config: null, timestamp: 0 },
-  mother: { config: null, timestamp: 0 },
-  professional: { config: null, timestamp: 0 }
-};
+const configCache = {};
 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
 
@@ -23,6 +19,9 @@ const DEFAULT_CONFIG = {
 
 async function getConfig(moduleType) {
   const now = Date.now();
+  if (!configCache[moduleType]) {
+    configCache[moduleType] = { config: null, timestamp: 0 };
+  }
   const cached = configCache[moduleType];
   
   if (cached && cached.config && (now - cached.timestamp) < CACHE_TTL_MS) {

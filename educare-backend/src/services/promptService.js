@@ -5,16 +5,15 @@
 
 const AssistantPrompt = require('../models/AssistantPrompt');
 
-const promptCache = {
-  baby: { prompt: null, timestamp: 0 },
-  mother: { prompt: null, timestamp: 0 },
-  professional: { prompt: null, timestamp: 0 }
-};
+const promptCache = {};
 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutos
 
 async function getActivePrompt(moduleType) {
   const now = Date.now();
+  if (!promptCache[moduleType]) {
+    promptCache[moduleType] = { prompt: null, timestamp: 0 };
+  }
   const cached = promptCache[moduleType];
   
   if (cached && cached.prompt && (now - cached.timestamp) < CACHE_TTL_MS) {

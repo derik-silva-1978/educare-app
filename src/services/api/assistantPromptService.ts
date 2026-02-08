@@ -1,8 +1,9 @@
 import httpClient from './httpClient';
+import type { ModuleType } from './llmConfigService';
 
 export interface AssistantPrompt {
   id: string;
-  module_type: 'baby' | 'mother' | 'professional';
+  module_type: ModuleType;
   name: string;
   description?: string;
   system_prompt: string;
@@ -26,7 +27,7 @@ export interface AssistantPrompt {
 }
 
 export interface CreatePromptData {
-  module_type: 'baby' | 'mother' | 'professional';
+  module_type: ModuleType;
   name: string;
   description?: string;
   system_prompt: string;
@@ -69,7 +70,7 @@ class AssistantPromptService {
     return response.data;
   }
 
-  async getActivePromptByModule(moduleType: 'baby' | 'mother' | 'professional'): Promise<AssistantPrompt | null> {
+  async getActivePromptByModule(moduleType: ModuleType): Promise<AssistantPrompt | null> {
     const response = await httpClient.get<AssistantPrompt>(`/assistant-prompts/active/${moduleType}`, { requiresAuth: true });
     
     if (!response.success) {
@@ -79,7 +80,7 @@ class AssistantPromptService {
     return response.data || null;
   }
 
-  async getPromptHistory(moduleType: 'baby' | 'mother' | 'professional'): Promise<AssistantPrompt[]> {
+  async getPromptHistory(moduleType: ModuleType): Promise<AssistantPrompt[]> {
     const response = await httpClient.get<AssistantPrompt[]>(`/assistant-prompts/history/${moduleType}`, { requiresAuth: true });
     
     if (!response.success) {

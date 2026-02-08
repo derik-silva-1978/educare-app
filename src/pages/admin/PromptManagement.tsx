@@ -19,36 +19,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
-  Bot,
-  UserCog,
-  Save,
-  History,
-  Check,
-  AlertCircle,
-  Loader2,
-  RefreshCw,
-  Eye,
-  ChevronLeft,
-  Sparkles,
-  Settings2,
-  Cpu,
-  Heart,
-  Star,
-  Play,
-  Send,
-  ArrowRight,
-  Clock,
-  Zap,
-  DollarSign,
-  Award,
-  MessageSquare,
-  FileText,
-  Gauge,
-  CheckCircle,
-  XCircle,
-  Trash2,
-  Plus,
-  Stethoscope
+  Bot, Heart, Stethoscope, MessageCircle, Brain, HeartPulse,
+  FilePen, ListChecks, BookOpen, Image, Ruler, Moon,
+  Calendar, Syringe, Sparkles, Settings2, Cpu, Save,
+  History, Check, AlertCircle, Loader2, RefreshCw, Eye,
+  ChevronLeft, ChevronDown, ChevronRight, Star, Play, Send,
+  ArrowRight, Clock, Zap, DollarSign, Award, MessageSquare,
+  FileText, Gauge, CheckCircle, XCircle, Trash2, Plus,
+  Megaphone, Layers, Wrench
 } from 'lucide-react';
 import { assistantPromptService, type AssistantPrompt, type CreatePromptData } from '@/services/api/assistantPromptService';
 import { llmConfigService, type LLMConfig, type LLMProviderInfo, type ProviderType, type ModuleType } from '@/services/api/llmConfigService';
@@ -64,33 +42,30 @@ import {
 type ViewMode = 'dashboard' | 'detail';
 
 const AGENT_ICONS: Record<string, React.ReactNode> = {
-  baby: <Bot className="h-6 w-6" />,
-  mother: <Heart className="h-6 w-6" />,
-  professional: <Stethoscope className="h-6 w-6" />
+  baby: <Bot className="h-5 w-5" />,
+  mother: <Heart className="h-5 w-5" />,
+  professional: <Stethoscope className="h-5 w-5" />,
+  landing_chat: <MessageCircle className="h-5 w-5" />,
+  quiz_baby: <Brain className="h-5 w-5" />,
+  quiz_mother: <HeartPulse className="h-5 w-5" />,
+  content_generator: <FilePen className="h-5 w-5" />,
+  curation_baby_quiz: <ListChecks className="h-5 w-5" />,
+  curation_mother_quiz: <ListChecks className="h-5 w-5" />,
+  curation_baby_content: <BookOpen className="h-5 w-5" />,
+  curation_mother_content: <BookOpen className="h-5 w-5" />,
+  media_metadata: <Image className="h-5 w-5" />,
+  nlp_biometric: <Ruler className="h-5 w-5" />,
+  nlp_sleep: <Moon className="h-5 w-5" />,
+  nlp_appointment: <Calendar className="h-5 w-5" />,
+  nlp_vaccine: <Syringe className="h-5 w-5" />,
 };
 
-const AGENT_COLORS: Record<string, { bg: string; text: string; border: string; badge: string; gradient: string }> = {
-  baby: {
-    bg: 'bg-violet-500/10',
-    text: 'text-violet-600 dark:text-violet-400',
-    border: 'border-violet-500/30',
-    badge: 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300',
-    gradient: 'from-violet-500/20 to-violet-600/5'
-  },
-  mother: {
-    bg: 'bg-rose-500/10',
-    text: 'text-rose-600 dark:text-rose-400',
-    border: 'border-rose-500/30',
-    badge: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',
-    gradient: 'from-rose-500/20 to-rose-600/5'
-  },
-  professional: {
-    bg: 'bg-teal-500/10',
-    text: 'text-teal-600 dark:text-teal-400',
-    border: 'border-teal-500/30',
-    badge: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
-    gradient: 'from-teal-500/20 to-teal-600/5'
-  }
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  assistants: <Bot className="h-5 w-5" />,
+  sales: <Megaphone className="h-5 w-5" />,
+  generators: <Sparkles className="h-5 w-5" />,
+  curation: <Layers className="h-5 w-5" />,
+  utilities: <Wrench className="h-5 w-5" />,
 };
 
 const StarRating: React.FC<{ value: number; onChange?: (v: number) => void; size?: 'sm' | 'md' }> = ({ value, onChange, size = 'md' }) => {
@@ -180,6 +155,16 @@ const PromptManagement: React.FC = () => {
 
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [previewPrompt, setPreviewPrompt] = useState<AssistantPrompt | null>(null);
+
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+
+  const toggleCategory = (cat: string) => {
+    setCollapsedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat); else next.add(cat);
+      return next;
+    });
+  };
 
   const loadDashboard = useCallback(async () => {
     try {
@@ -387,6 +372,9 @@ const PromptManagement: React.FC = () => {
   }
 
   if (viewMode === 'dashboard') {
+    const categories = dashboardData?.categories || {};
+    const sortedCategories = Object.entries(categories).sort(([, a], [, b]) => a.order - b.order);
+
     return (
       <>
         <Helmet>
@@ -396,16 +384,55 @@ const PromptManagement: React.FC = () => {
         <div className="container mx-auto py-6 px-4 max-w-6xl">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-xl bg-primary/10">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500/20 to-blue-500/20">
                 <Sparkles className="h-7 w-7 text-primary" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">Central de Agentes IA</h1>
                 <p className="text-sm text-muted-foreground">
-                  Gerencie prompts, modelos e configurações dos assistentes TitiNauta
+                  Gerencie todos os {dashboardData?.agents?.length || 0} agentes de IA da plataforma — prompts, modelos e configurações
                 </p>
               </div>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+            <Card className="border-dashed">
+              <CardContent className="py-3 px-4 flex items-center gap-3">
+                <Bot className="h-5 w-5 text-violet-500" />
+                <div>
+                  <p className="text-2xl font-bold">{dashboardData?.agents?.length || 0}</p>
+                  <p className="text-xs text-muted-foreground">Agentes</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-dashed">
+              <CardContent className="py-3 px-4 flex items-center gap-3">
+                <CheckCircle className="h-5 w-5 text-emerald-500" />
+                <div>
+                  <p className="text-2xl font-bold">{dashboardData?.agents?.filter(a => a.prompt).length || 0}</p>
+                  <p className="text-xs text-muted-foreground">Configurados</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-dashed">
+              <CardContent className="py-3 px-4 flex items-center gap-3">
+                <FileText className="h-5 w-5 text-blue-500" />
+                <div>
+                  <p className="text-2xl font-bold">{dashboardData?.agents?.reduce((sum, a) => sum + (a.stats?.totalVersions || 0), 0) || 0}</p>
+                  <p className="text-xs text-muted-foreground">Versões</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-dashed">
+              <CardContent className="py-3 px-4 flex items-center gap-3">
+                <Cpu className="h-5 w-5 text-amber-500" />
+                <div>
+                  <p className="text-2xl font-bold">{dashboardData?.providers?.filter(p => p.available).length || 0}</p>
+                  <p className="text-xs text-muted-foreground">Provedores</p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {dashboardData && dashboardData.providers.length > 0 && (
@@ -439,68 +466,105 @@ const PromptManagement: React.FC = () => {
             </Card>
           )}
 
-          <div className="grid gap-5 md:grid-cols-3">
-            {(dashboardData?.agents || []).map((agent) => {
-              const colors = AGENT_COLORS[agent.module_type];
-              return (
+          {sortedCategories.map(([catKey, catMeta]) => {
+            const categoryAgents = (dashboardData?.agents || []).filter(a => a.meta.category === catKey);
+            const isCollapsed = collapsedCategories.has(catKey);
+
+            return (
+              <div key={catKey} className="mb-6">
+                <button
+                  onClick={() => toggleCategory(catKey)}
+                  className="w-full flex items-center gap-3 mb-3 group"
+                >
+                  <div className="p-1.5 rounded-lg bg-muted">
+                    {CATEGORY_ICONS[catKey] || <Bot className="h-5 w-5" />}
+                  </div>
+                  <div className="text-left flex-1">
+                    <h2 className="text-sm font-semibold">{catMeta.name}</h2>
+                    <p className="text-xs text-muted-foreground">{catMeta.description}</p>
+                  </div>
+                  <Badge variant="secondary" className="text-xs">{categoryAgents.length}</Badge>
+                  {isCollapsed ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+                </button>
+
+                {!isCollapsed && (
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {categoryAgents.map(agent => (
+                      <Card
+                        key={agent.module_type}
+                        className="cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 overflow-hidden"
+                        onClick={() => openAgentDetail(agent.module_type)}
+                      >
+                        <div className="h-1" style={{ backgroundColor: agent.meta.color }} />
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg" style={{ backgroundColor: agent.meta.color + '15' }}>
+                              <span style={{ color: agent.meta.color }}>
+                                {AGENT_ICONS[agent.module_type] || <Bot className="h-5 w-5" />}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-medium text-sm truncate">{agent.meta.name}</h3>
+                                {agent.prompt ? (
+                                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">v{agent.prompt.version}</Badge>
+                                ) : (
+                                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0 text-amber-600">Novo</Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{agent.meta.description}</p>
+                              <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                                <Cpu className="h-3 w-3" />
+                                <span className="truncate">{agent.llm.model_name}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {sortedCategories.length === 0 && (dashboardData?.agents || []).length > 0 && (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {(dashboardData?.agents || []).map(agent => (
                 <Card
                   key={agent.module_type}
-                  className={`relative overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 border ${colors.border}`}
+                  className="cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 overflow-hidden"
                   onClick={() => openAgentDetail(agent.module_type)}
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${colors.gradient} pointer-events-none`} />
-                  <CardHeader className="relative pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className={`p-2.5 rounded-xl ${colors.bg}`}>
-                        <span className={colors.text}>
-                          {AGENT_ICONS[agent.module_type]}
+                  <div className="h-1" style={{ backgroundColor: agent.meta.color }} />
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg" style={{ backgroundColor: agent.meta.color + '15' }}>
+                        <span style={{ color: agent.meta.color }}>
+                          {AGENT_ICONS[agent.module_type] || <Bot className="h-5 w-5" />}
                         </span>
                       </div>
-                      <Badge variant="outline" className={`text-xs ${colors.badge}`}>
-                        {agent.prompt ? `v${agent.prompt.version}` : 'Não configurado'}
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-lg mt-3">{agent.meta.name}</CardTitle>
-                    <CardDescription className="text-xs line-clamp-2">{agent.meta.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="relative pt-0">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-xs">
-                        <Cpu className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-muted-foreground">{agent.llm.providerName}</span>
-                        <span className="font-medium">{agent.llm.model_name}</span>
-                      </div>
-
-                      {agent.prompt && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Clock className="h-3.5 w-3.5" />
-                          <span>Atualizado {format(new Date(agent.prompt.updatedAt), "dd/MM 'às' HH:mm", { locale: ptBR })}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-sm truncate">{agent.meta.name}</h3>
+                          {agent.prompt ? (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">v{agent.prompt.version}</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 shrink-0 text-amber-600">Novo</Badge>
+                          )}
                         </div>
-                      )}
-
-                      <div className="flex items-center gap-3 pt-2">
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <FileText className="h-3 w-3" />
-                          <span>{agent.stats.totalVersions} versões</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Star className="h-3 w-3" />
-                          <span>{agent.stats.rankingsCount} rankings</span>
+                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{agent.meta.description}</p>
+                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                          <Cpu className="h-3 w-3" />
+                          <span className="truncate">{agent.llm.model_name}</span>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-center justify-end mt-4">
-                      <Button variant="ghost" size="sm" className="gap-1 text-xs">
-                        Configurar
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
 
           <Card className="mt-6 border-dashed">
             <CardContent className="py-4">
@@ -522,8 +586,8 @@ const PromptManagement: React.FC = () => {
     );
   }
 
-  const colors = AGENT_COLORS[selectedAgent];
   const meta = agentDetail?.meta;
+  const agentColor = meta?.color || '#8b5cf6';
 
   return (
     <>
@@ -539,9 +603,9 @@ const PromptManagement: React.FC = () => {
           </Button>
 
           <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-xl ${colors.bg}`}>
-              <span className={colors.text}>
-                {AGENT_ICONS[selectedAgent]}
+            <div className="p-3 rounded-xl" style={{ backgroundColor: agentColor + '15' }}>
+              <span style={{ color: agentColor }}>
+                {AGENT_ICONS[selectedAgent] || <Bot className="h-5 w-5" />}
               </span>
             </div>
             <div>
@@ -549,7 +613,7 @@ const PromptManagement: React.FC = () => {
               <p className="text-sm text-muted-foreground">{meta?.description}</p>
             </div>
             {agentDetail?.activePrompt && (
-              <Badge variant="outline" className={`ml-auto ${colors.badge}`}>
+              <Badge variant="outline" className="ml-auto" style={{ backgroundColor: agentColor + '15', color: agentColor }}>
                 <Check className="h-3 w-3 mr-1" />
                 v{agentDetail.activePrompt.version} publicada
               </Badge>

@@ -1,6 +1,6 @@
 import httpClient from './httpClient';
 
-export type ModuleType = 'baby' | 'mother' | 'professional';
+export type ModuleType = 'baby' | 'mother' | 'professional' | 'landing_chat' | 'quiz_baby' | 'quiz_mother' | 'content_generator' | 'curation_baby_quiz' | 'curation_mother_quiz' | 'curation_baby_content' | 'curation_mother_content' | 'media_metadata' | 'nlp_biometric' | 'nlp_sleep' | 'nlp_appointment' | 'nlp_vaccine';
 export type ProviderType = 'openai' | 'gemini' | 'deepseek' | 'groq' | 'xai' | 'anthropic' | 'together' | 'openrouter' | 'custom';
 
 export interface LLMModel {

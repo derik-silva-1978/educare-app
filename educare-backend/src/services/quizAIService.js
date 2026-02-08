@@ -1,4 +1,5 @@
 const OpenAI = require('openai');
+const promptService = require('./promptService');
 
 let openaiInstance = null;
 
@@ -58,9 +59,19 @@ async function autoFillQuizFields(quiz, trail, weekNumber) {
       };
     }
 
-    const systemPrompt = trail === 'baby'
+    const fallbackPrompt = trail === 'baby'
       ? 'Você é TitiNauta Infantil, especialista em desenvolvimento infantil da plataforma Educare+. Gere conteúdo acolhedor para quiz de desenvolvimento do bebê. NÃO existe resposta certa ou errada — são observações dos pais sobre o comportamento do bebê.'
       : 'Você é TitiNauta Materna, especialista em saúde materna da plataforma Educare+. Gere conteúdo acolhedor para quiz de saúde da mãe. NÃO existe resposta certa ou errada — são experiências reais da mãe.';
+    const moduleKey = trail === 'baby' ? 'quiz_baby' : 'quiz_mother';
+    let systemPrompt = fallbackPrompt;
+    try {
+      const centralPrompt = await promptService.getProcessedPrompt(moduleKey);
+      if (centralPrompt) {
+        systemPrompt = centralPrompt.systemPrompt;
+      }
+    } catch (err) {
+      console.warn(`[QuizAI] Fallback para prompt local (${moduleKey}):`, err.message);
+    }
 
     const trailLabel = trail === 'baby' ? 'Desenvolvimento do Bebê' : 'Saúde Materna';
 
@@ -172,14 +183,29 @@ async function generateQuizContent(params) {
     const ageDesc = getAgeDescription(month);
     const devContext = getDevStageContext(month, trail);
 
-    const systemPrompts = {
+    const fallbackPrompts = {
       'baby-quiz': `Você é TitiNauta Infantil, especialista em desenvolvimento infantil de 0 a 6 anos. Crie perguntas de quiz sobre desenvolvimento da criança para a plataforma Educare+. Adapte o conteúdo à faixa etária específica.`,
       'mother-quiz': `Você é TitiNauta Materna, especialista em saúde e bem-estar materno durante toda a jornada de criação dos filhos (0-6 anos). Crie perguntas de quiz sobre saúde materna para a plataforma Educare+.`,
       'baby-content': `Você é TitiNauta Infantil, especialista em desenvolvimento infantil de 0 a 6 anos. Crie conteúdo educativo sobre desenvolvimento da criança para a plataforma Educare+. Adapte o conteúdo à faixa etária específica.`,
       'mother-content': `Você é TitiNauta Materna, especialista em saúde e bem-estar materno durante toda a jornada de criação dos filhos (0-6 anos). Crie conteúdo educativo sobre saúde materna para a plataforma Educare+.`
     };
 
-    const systemPrompt = systemPrompts[axis];
+    const curationModuleMap = {
+      'baby-quiz': 'curation_baby_quiz',
+      'mother-quiz': 'curation_mother_quiz',
+      'baby-content': 'curation_baby_content',
+      'mother-content': 'curation_mother_content'
+    };
+
+    let systemPrompt = fallbackPrompts[axis];
+    try {
+      const centralPrompt = await promptService.getProcessedPrompt(curationModuleMap[axis]);
+      if (centralPrompt) {
+        systemPrompt = centralPrompt.systemPrompt;
+      }
+    } catch (err) {
+      console.warn(`[QuizAI] Fallback para prompt local (${axis}):`, err.message);
+    }
 
     const contextBlock = `CONTEXTO ETÁRIO: Mês ${month} do acompanhamento — criança com aproximadamente ${ageDesc}.
 ${devContext}`;

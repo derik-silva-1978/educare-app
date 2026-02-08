@@ -3,6 +3,7 @@ const { Op, Sequelize } = require('sequelize');
 const { sequelize } = require('../config/database');
 const path = require('path');
 const fs = require('fs').promises;
+const promptService = require('../services/promptService');
 
 /**
  * Controller para gerenciamento de recursos audiovisuais
@@ -404,12 +405,7 @@ class MediaResourceController {
       const OpenAI = require('openai');
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `Voce e um assistente da plataforma Educare+, especializado em desenvolvimento infantil e saude materna. Gere metadados para recursos audiovisuais da plataforma.
+      const fallbackMetaPrompt = `Voce e um assistente da plataforma Educare+, especializado em desenvolvimento infantil e saude materna. Gere metadados para recursos audiovisuais da plataforma.
 
 Responda SOMENTE com JSON valido (sem markdown), no formato:
 {
@@ -418,7 +414,24 @@ Responda SOMENTE com JSON valido (sem markdown), no formato:
   "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"]
 }
 
-Considere o tipo do recurso (${resource_type}) para adequar a descricao.`
+Considere o tipo do recurso (${resource_type}) para adequar a descricao.`;
+
+      let finalMetaPrompt = fallbackMetaPrompt;
+      try {
+        const centralPrompt = await promptService.getProcessedPrompt('media_metadata');
+        if (centralPrompt) {
+          finalMetaPrompt = centralPrompt.systemPrompt;
+        }
+      } catch (err) {
+        console.warn('[MediaMeta] Fallback para prompt local:', err.message);
+      }
+
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: finalMetaPrompt
           },
           {
             role: 'user',

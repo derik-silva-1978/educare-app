@@ -8,8 +8,11 @@ const AssistantPrompt = sequelize.define('AssistantPrompt', {
     primaryKey: true
   },
   module_type: {
-    type: DataTypes.ENUM('baby', 'mother', 'professional'),
-    allowNull: false
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    validate: {
+      isIn: [['baby', 'mother', 'professional', 'landing_chat', 'quiz_baby', 'quiz_mother', 'content_generator', 'curation_baby_quiz', 'curation_mother_quiz', 'curation_baby_content', 'curation_mother_content', 'media_metadata', 'nlp_biometric', 'nlp_sleep', 'nlp_appointment', 'nlp_vaccine']]
+    }
   },
   name: {
     type: DataTypes.STRING(100),
