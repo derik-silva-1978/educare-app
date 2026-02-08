@@ -1,302 +1,335 @@
-# Educare+ — Guia de Deploy com Docker Compose
+# Educare+ — Guia de Deploy via Portainer
 
-Este guia explica como publicar a aplicação Educare+ no seu servidor (VPS) usando Docker.
-
----
-
-## O que você vai precisar no servidor
-
-Antes de começar, certifique-se de que o servidor tem instalado:
-
-- **Docker** (versão 20.10+)
-- **Docker Compose** (versão 2.0+ — geralmente já vem com o Docker)
-- **Git** (para baixar o código)
-
-### Verificar se já estão instalados
-
-```bash
-docker --version
-docker compose version
-git --version
-```
-
-### Instalar Docker (se necessário)
-
-```bash
-curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
-# Saia e entre novamente no servidor para aplicar
-```
+Este guia explica como publicar a aplicação Educare+ no seu servidor (VPS) usando o **Portainer**.
 
 ---
 
-## Passo a Passo
+## Antes de Começar
 
-### 1. Copiar o projeto para o servidor
+Você vai precisar de:
 
-**Opção A — Via Git (recomendado):**
+- **Portainer** instalado e acessível no seu servidor (geralmente em `https://seu-servidor:9443`)
+- O código do Educare+ num **repositório Git** (GitHub, GitLab, etc.)
+- Se o repositório for privado: um **Personal Access Token** do GitHub/GitLab
 
-```bash
-cd /home/educare
-git clone https://seu-repositorio.git apps
-cd apps
-```
-
-**Opção B — Via upload manual (SCP):**
-
-```bash
-# No seu computador local:
-scp -r ./projeto usuario@seu-servidor:/home/educare/apps
-```
+> O PostgreSQL já deve estar rodando no seu servidor. Este deploy NÃO cria um banco de dados novo.
 
 ---
 
-### 2. Configurar as variáveis de ambiente
+## Passo 1: Preparar as Variáveis de Ambiente
 
-Crie o arquivo `.env` a partir do modelo:
+Antes de criar o Stack no Portainer, prepare os valores das variáveis de ambiente. Copie a lista abaixo e preencha com seus dados reais:
 
-```bash
-cd /home/educare/apps
-cp .env.example .env
-```
-
-Edite o arquivo com seus dados reais:
-
-```bash
-nano .env
-```
-
-**Variáveis obrigatórias que você DEVE preencher:**
-
-| Variável | O que é | Exemplo |
-|---|---|---|
-| `DB_HOST` | IP/endereço do banco de dados | `localhost` ou `10.0.0.5` |
-| `DB_USERNAME` | Usuário do banco | `educareuser` |
-| `DB_PASSWORD` | Senha do banco | `sua-senha-segura` |
-| `DB_DATABASE` | Nome do banco | `educareapp` |
-| `JWT_SECRET` | Chave secreta para login | `uma-string-longa-e-aleatoria` |
-| `FRONTEND_URL` | URL pública do site | `https://app.educare.com.br` |
-| `OPENAI_API_KEY` | Chave da OpenAI | `sk-...` |
-| `VITE_API_URL` | URL da API (igual ao domínio) | `https://app.educare.com.br` |
-| `CORS_ORIGINS` | Domínios permitidos | `https://app.educare.com.br` |
-
-> **Importante:** Se o PostgreSQL roda no mesmo servidor, use `DB_HOST=host.docker.internal` (Mac/Windows) ou o IP da interface `docker0` (Linux). Para encontrar no Linux:
-> ```bash
-> ip addr show docker0 | grep inet
-> ```
-
----
-
-### 3. Construir as imagens
-
-```bash
-docker compose build
-```
-
-Isso vai:
-1. Compilar o frontend (React → arquivos estáticos)
-2. Preparar o backend (Node.js com dependências de produção)
-3. Criar as imagens Docker otimizadas
-
-> **Primeira vez pode demorar** alguns minutos. Builds seguintes são mais rápidos.
-
----
-
-### 4. Iniciar a aplicação
-
-```bash
-docker compose up -d
-```
-
-O `-d` significa que roda em segundo plano (você pode fechar o terminal).
-
-**Verificar se está rodando:**
-
-```bash
-docker compose ps
-```
-
-Você deve ver algo como:
+### Variáveis Obrigatórias
 
 ```
-NAME                STATUS              PORTS
-educare-frontend    Up (healthy)        0.0.0.0:80->80/tcp
-educare-backend     Up (healthy)
+NODE_ENV=production
+PORT=5000
+FRONTEND_PORT=80
+
+DB_USERNAME=seu_usuario_banco
+DB_PASSWORD=sua_senha_banco
+DB_DATABASE=educareapp
+DB_HOST=172.17.0.1
+DB_PORT=5432
+DB_DIALECT=postgres
+DB_TIMEZONE=America/Sao_Paulo
+DB_SYNC_ENABLED=false
+
+JWT_SECRET=TROQUE_POR_UMA_STRING_LONGA_E_ALEATORIA
+JWT_EXPIRATION=24h
+
+FRONTEND_URL=https://seu-dominio.com.br
+BACKEND_URL=https://seu-dominio.com.br
+APP_URL=https://seu-dominio.com.br
+VITE_API_URL=https://seu-dominio.com.br
+CORS_ORIGINS=https://seu-dominio.com.br
+
+OPENAI_API_KEY=sk-sua-chave-openai
 ```
 
----
+> **Dica sobre DB_HOST:** Se o PostgreSQL roda no mesmo servidor que o Docker, use `172.17.0.1` (IP padrão do gateway Docker no Linux). Para descobrir o IP correto, rode no terminal do servidor: `ip addr show docker0 | grep inet`
 
-### 5. Verificar os logs
+### Variáveis Opcionais (preencha conforme usa)
 
-**Ver todos os logs:**
-
-```bash
-docker compose logs
 ```
+GEMINI_API_KEY=sua-chave-gemini
+ENABLE_GEMINI_RAG=true
 
-**Ver logs em tempo real:**
+QDRANT_URL=https://seu-qdrant.cloud.qdrant.io
+QDRANT_API_KEY=sua-chave-qdrant
+ENABLE_QDRANT_RAG=true
 
-```bash
-docker compose logs -f
-```
+STRIPE_SECRET_KEY=sk_live_sua-chave-stripe
+STRIPE_WEBHOOK_SECRET=whsec_seu-webhook-secret
 
-**Ver logs de um serviço específico:**
+EVOLUTION_API_URL=https://sua-evolution-api.com
+EVOLUTION_API_KEY=sua-chave-evolution
+EVOLUTION_INSTANCE_NAME=seu-instance
 
-```bash
-docker compose logs -f backend
-docker compose logs -f frontend
-```
+PHONE_VERIFICATION_WEBHOOK=https://seu-n8n.com/webhook/phone-verify
+PHONE_PASSWORD_WEBHOOK=https://seu-n8n.com/webhook/phone-password
+EMAIL_WEBHOOK=https://seu-n8n.com/webhook/email
+ESCALATION_WEBHOOK_URL=https://seu-n8n.com/webhook/escalation
+N8N_API_KEY=sua-chave-n8n
+N8N_REST_API_KEY=sua-chave-n8n-rest
 
-**Ver apenas as últimas 100 linhas:**
+EXTERNAL_API_KEY=sua-chave-api-externa
+API_BASE_URL=https://sua-api-base.com
+API_VERSION=v1
 
-```bash
-docker compose logs --tail=100
+OWNER_PHONE=5511999999999
+
+UPLOAD_PATH=./uploads
+KNOWLEDGE_UPLOAD_PATH=./knowledge_base
+BACKUP_PATH=./backups
+
+VIMEO_ACCESS_TOKEN=seu-token-vimeo
+
+RAG_PRIMARY_PROVIDER=openai
+ENABLE_SEGMENTED_KB=true
+KB_FALLBACK_ENABLED=false
+USE_LEGACY_FALLBACK_FOR_BABY=false
+USE_LEGACY_FALLBACK_FOR_MOTHER=false
+USE_LEGACY_FALLBACK_FOR_PROFESSIONAL=false
+KB_LOG_SELECTIONS=true
+KB_VERSIONING_ENABLED=true
+LEGACY_INGESTION_DISABLED=true
+
+RERANKING_ENABLED=true
+RERANKING_MODEL=gpt-4o-mini
+RERANKING_MAX_CANDIDATES=20
+RERANKING_TOP_K=5
+
+CONFIDENCE_HIGH_THRESHOLD=0.80
+CONFIDENCE_MEDIUM_THRESHOLD=0.50
+CONFIDENCE_LOW_THRESHOLD=0.30
+MIN_DOCS_HIGH_CONFIDENCE=3
+
+CHUNKING_ENABLED=true
+CHUNKING_LLM_ASSISTED=true
+MIN_CHUNK_SIZE=250
+MAX_CHUNK_SIZE=1200
+CHUNK_OVERLAP_SIZE=100
+
+AUGMENTATION_ENABLED=true
+AUGMENTATION_MODEL=gpt-4o-mini
+
+CONTEXT_SAFETY_ENABLED=true
+BLOCK_UNSAFE_CONTENT=false
+LOG_SAFETY_EVENTS=true
+
+RAG_FEEDBACK_ENABLED=true
+RAG_AUTO_ANALYSIS=true
+RAG_IMPROVEMENT_MODEL=gpt-4o-mini
+RAG_STORE_MAX_SIZE=10000
+RAG_USE_DB_PERSISTENCE=true
+REQUIRE_HUMAN_BELOW=0.30
+
+GUARDRAILS_STRICT_MODE=false
+LOG_GUARDRAILS_EVENTS=true
+LOG_LEVEL=info
 ```
 
 ---
 
-## Atualizações
+## Passo 2: Criar o Stack no Portainer
 
-Quando tiver uma nova versão do código:
+1. Abra o Portainer no navegador (ex: `https://seu-servidor:9443`)
 
-```bash
-cd /home/educare/apps
+2. No menu lateral, clique em **Stacks**
 
-# 1. Baixar o código atualizado
-git pull origin main
+3. Clique no botão **+ Add stack**
 
-# 2. Reconstruir as imagens
-docker compose build
+4. Preencha:
+   - **Name:** `educare` (ou o nome que preferir)
+   - **Build method:** Selecione **Git Repository**
 
-# 3. Reiniciar com as novas imagens
-docker compose up -d
-```
+5. Preencha os dados do repositório:
+
+   | Campo | O que colocar |
+   |---|---|
+   | **Authentication** | Ative se o repositório for privado |
+   | **Username** | Seu usuário do GitHub/GitLab |
+   | **Personal Access Token** | Seu token de acesso |
+   | **Repository URL** | `https://github.com/seu-usuario/educare.git` |
+   | **Repository reference** | `refs/heads/main` (ou a branch desejada) |
+   | **Compose path** | `docker-compose.yml` |
+
+6. Role para baixo até **Environment variables**
+
+7. Clique em **Advanced mode** para colar todas as variáveis de uma vez
+
+8. Cole todas as variáveis do Passo 1 (já preenchidas com seus dados)
+
+9. Clique em **Deploy the stack**
+
+> O primeiro deploy pode levar **5-10 minutos** pois precisa baixar as imagens base e compilar o frontend.
 
 ---
 
-## Rollback (voltar para versão anterior)
+## Passo 3: Verificar se Está Funcionando
+
+Após o deploy, você verá os 2 containers listados no Stack:
+
+| Container | Status esperado |
+|---|---|
+| `educare-frontend` | **Running (healthy)** |
+| `educare-backend` | **Running (healthy)** |
+
+### Ver os Logs
+
+1. Clique no nome do container (ex: `educare-backend`)
+2. Clique em **Logs** no menu superior
+3. Ative **Auto-refresh** para ver em tempo real
+
+### Testar
+
+- Abra `http://seu-servidor` (ou `https://seu-dominio.com.br` se já tiver SSL)
+- Você deve ver a tela de login do Educare+
+- Teste o login com suas credenciais
+
+---
+
+## Como Atualizar (Nova Versão)
+
+Quando tiver uma atualização no código:
+
+1. Faça o **commit e push** das alterações para o Git
+
+2. No Portainer, vá em **Stacks** → clique no stack **educare**
+
+3. Clique no botão **Pull and redeploy**
+
+4. Marque a opção **Re-pull image and redeploy** se quiser forçar rebuild
+
+5. Clique em **Update**
+
+> O Portainer vai baixar o código atualizado, reconstruir as imagens e reiniciar os containers automaticamente.
+
+### Atualização Automática (GitOps) — Opcional
+
+Você pode configurar o Portainer para atualizar sozinho quando detectar mudanças no Git:
+
+1. Edite o Stack
+2. Na seção **GitOps updates**, ative a opção
+3. Defina o intervalo (ex: a cada 5 minutos)
+4. O Portainer vai verificar o Git periodicamente e atualizar se houver mudanças
+
+---
+
+## Como Voltar para uma Versão Anterior (Rollback)
 
 Se algo der errado após uma atualização:
 
-```bash
-# 1. Parar os containers
-docker compose down
+1. **No Git:** Volte para o commit anterior
+   ```bash
+   git log --oneline -5              # ver os últimos commits
+   git revert HEAD                   # reverter o último commit
+   git push origin main              # enviar a reversão
+   ```
 
-# 2. Voltar o código para a versão anterior
-git log --oneline -5          # ver os últimos commits
-git checkout COMMIT_HASH      # substituir COMMIT_HASH pelo hash desejado
+2. **No Portainer:** Clique em **Pull and redeploy** no Stack
 
-# 3. Reconstruir e reiniciar
-docker compose build
-docker compose up -d
-```
+> O Portainer vai baixar o código revertido e reconstruir tudo.
 
 ---
 
-## Comandos Úteis
+## Configuração HTTPS (SSL)
 
-| O que fazer | Comando |
-|---|---|
-| Ver status | `docker compose ps` |
-| Parar tudo | `docker compose down` |
-| Reiniciar tudo | `docker compose restart` |
-| Reiniciar só o backend | `docker compose restart backend` |
-| Ver logs em tempo real | `docker compose logs -f` |
-| Entrar no container backend | `docker compose exec backend sh` |
-| Ver uso de recursos | `docker stats` |
-| Limpar imagens antigas | `docker image prune -f` |
+Para acessar via `https://`, você precisa de um proxy reverso com certificado SSL **fora** do Docker, ou usando Nginx/Traefik na mesma máquina.
 
----
+### Opção mais simples: Nginx no servidor
 
-## Configuração com HTTPS (SSL)
+Se já tem Nginx instalado no servidor:
 
-Para usar HTTPS com certificado gratuito (Let's Encrypt), existem duas opções:
+1. Instale o Certbot:
+   ```bash
+   sudo apt install certbot python3-certbot-nginx
+   ```
 
-### Opção A: Nginx Externo (mais simples)
+2. Crie a configuração do Nginx:
+   ```bash
+   sudo nano /etc/nginx/sites-available/educare
+   ```
 
-Se você já tem um Nginx instalado no servidor, configure-o como proxy reverso:
+   Cole:
+   ```nginx
+   server {
+       listen 80;
+       server_name seu-dominio.com.br;
 
-```nginx
-server {
-    listen 443 ssl;
-    server_name app.educare.com.br;
+       location / {
+           proxy_pass http://localhost:80;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
+           client_max_body_size 50M;
+       }
+   }
+   ```
 
-    ssl_certificate /etc/letsencrypt/live/app.educare.com.br/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/app.educare.com.br/privkey.pem;
+3. Ative e obtenha o certificado:
+   ```bash
+   sudo ln -s /etc/nginx/sites-available/educare /etc/nginx/sites-enabled/
+   sudo certbot --nginx -d seu-dominio.com.br
+   sudo systemctl reload nginx
+   ```
 
-    location / {
-        proxy_pass http://localhost:80;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        client_max_body_size 50M;
-    }
-}
-
-server {
-    listen 80;
-    server_name app.educare.com.br;
-    return 301 https://$host$request_uri;
-}
-```
-
-### Opção B: Traefik (via Docker Compose)
-
-O `docker-compose.yml` já inclui uma configuração comentada do Traefik.
-Para ativá-la, descomente a seção do Traefik e adicione labels nos serviços.
+> **Importante:** Se usar Nginx externo na porta 80, mude o `FRONTEND_PORT` nas variáveis de ambiente do Stack para outra porta (ex: `8080`) para não conflitar.
 
 ---
 
 ## Solução de Problemas
 
-### Container não inicia
+### "Container não inicia" ou status "Unhealthy"
 
-```bash
-# Ver logs de erro
-docker compose logs backend
+1. No Portainer, clique no container com problema
+2. Vá em **Logs** e procure mensagens de erro
+3. Problemas comuns:
+   - **Erro de conexão com banco:** Verifique `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`
+   - **Porta em uso:** Verifique se a porta 80 não está sendo usada por outro serviço
 
-# Verificar se a porta está em uso
-sudo lsof -i :80
-sudo lsof -i :5000
-```
+### "Backend não conecta ao PostgreSQL"
 
-### Backend não conecta ao banco de dados
+O PostgreSQL precisa aceitar conexões vindas do Docker:
 
-1. Verifique se o PostgreSQL está acessível:
-```bash
-docker compose exec backend sh -c "curl -v telnet://DB_HOST:5432"
-```
+1. Edite o `pg_hba.conf` do PostgreSQL:
+   ```bash
+   sudo nano /etc/postgresql/*/main/pg_hba.conf
+   ```
+   Adicione esta linha:
+   ```
+   host    all    all    172.16.0.0/12    md5
+   ```
 
-2. Se o PostgreSQL roda no mesmo servidor, verifique o `pg_hba.conf`:
-```bash
-# Adicionar esta linha para permitir conexões do Docker:
-# host    all    all    172.16.0.0/12    md5
-sudo nano /etc/postgresql/*/main/pg_hba.conf
-sudo systemctl restart postgresql
-```
+2. Edite o `postgresql.conf`:
+   ```bash
+   sudo nano /etc/postgresql/*/main/postgresql.conf
+   ```
+   Altere para:
+   ```
+   listen_addresses = '*'
+   ```
 
-3. Verifique se o PostgreSQL escuta em todas as interfaces:
-```bash
-# Em postgresql.conf, altere:
-# listen_addresses = '*'
-sudo nano /etc/postgresql/*/main/postgresql.conf
-sudo systemctl restart postgresql
-```
+3. Reinicie o PostgreSQL:
+   ```bash
+   sudo systemctl restart postgresql
+   ```
 
-### Frontend mostra página em branco
+### "Frontend mostra página em branco"
 
-1. Verifique se o build foi bem-sucedido:
-```bash
-docker compose logs frontend
-```
+1. Verifique se `VITE_API_URL` está correto nas variáveis de ambiente
+2. No Portainer, vá no Stack e clique **Pull and redeploy** (o VITE_API_URL é usado no momento do build)
 
-2. Verifique se `VITE_API_URL` está correto no `.env`
-3. Reconstrua o frontend:
-```bash
-docker compose build frontend
-docker compose up -d frontend
-```
+> **Importante:** O `VITE_API_URL` é "embutido" no frontend durante a compilação. Se você mudar essa variável depois, precisa clicar em **Pull and redeploy** para recompilar o frontend com o novo valor.
+
+### "Erro 502 Bad Gateway"
+
+O frontend não consegue se comunicar com o backend:
+1. Verifique se o container `educare-backend` está rodando e healthy
+2. Veja os logs do backend para identificar o erro
 
 ---
 
@@ -326,27 +359,28 @@ docker compose up -d frontend
 
 ---
 
-## Deploy Manual (sem Docker)
+## Comandos Úteis (Terminal do Servidor)
 
-Se preferir fazer deploy sem Docker, consulte as instruções anteriores usando PM2/systemd no final deste documento.
+Se precisar acessar o terminal do servidor diretamente:
 
-### Requisitos
+| O que fazer | Comando |
+|---|---|
+| Ver containers rodando | `docker ps` |
+| Ver logs do backend | `docker logs educare-backend -f --tail=100` |
+| Ver logs do frontend | `docker logs educare-frontend -f --tail=100` |
+| Entrar no container backend | `docker exec -it educare-backend sh` |
+| Ver uso de recursos | `docker stats` |
+| Limpar imagens antigas | `docker image prune -f` |
 
-- Node.js 20+ instalado
-- NPM 8+ instalado
+---
 
-### Build e Start
+## Arquivos de Configuração Docker
 
-```bash
-# Frontend
-npm install --legacy-peer-deps
-BROWSERSLIST_IGNORE_OLD_DATA=1 npx vite build
-
-# Backend
-cd educare-backend
-npm install --omit=dev
-NODE_ENV=production node src/server.js
-
-# Ou com PM2
-pm2 start src/server.js --name educare-backend
-```
+| Arquivo | Função |
+|---|---|
+| `docker-compose.yml` | Define os 2 containers e como se conectam |
+| `Dockerfile.backend` | Receita para criar a imagem do backend (Node.js) |
+| `Dockerfile.frontend` | Receita para criar a imagem do frontend (React + Nginx) |
+| `nginx.conf` | Configuração do servidor web (proxy + arquivos estáticos) |
+| `.env.example` | Modelo com todas as variáveis de ambiente |
+| `.dockerignore` | Lista de arquivos ignorados pelo Docker no build |
