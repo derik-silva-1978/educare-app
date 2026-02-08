@@ -121,10 +121,17 @@ const WhatsAppLandingPopup: React.FC = () => {
   };
 
   const handleWhatsApp = () => {
-    const lastUserMsg = messages.filter(m => m.role === 'user').pop();
-    const text = lastUserMsg
-      ? `Olá! Vim do site do Educare+ e gostaria de continuar a conversa. Minha última pergunta: ${lastUserMsg.content}`
-      : 'Olá! Vim do site do Educare+ e gostaria de falar com vocês.';
+    const userMessages = messages.filter(m => m.role === 'user');
+    let text: string;
+    if (userMessages.length > 0) {
+      const topics = userMessages.map(m => m.content).slice(-3).join('; ');
+      text = `Olá! Vim do site do Educare+ e gostaria de saber mais. Conversei pelo chat sobre: ${topics}`;
+    } else {
+      text = 'Olá! Vim do site do Educare+ e gostaria de saber mais sobre a plataforma.';
+    }
+    if (text.length > 250) {
+      text = text.substring(0, 247) + '...';
+    }
     window.open(`https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
