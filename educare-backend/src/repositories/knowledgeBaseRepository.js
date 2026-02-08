@@ -147,8 +147,10 @@ class KnowledgeBaseRepository {
         case 'professional':
           segmentedResult = await KbProfessional.create(segmentedData);
           break;
+        case 'landing':
+          segmentedResult = legacyResult;
+          break;
         default:
-          // If category is unknown, just use legacy
           return { 
             success: true, 
             data: { 
@@ -168,6 +170,73 @@ class KnowledgeBaseRepository {
       };
     } catch (error) {
       console.error('[KnowledgeBaseRepository] insertDualWithCategory error:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async insertMultiCategory(categories, legacyData, baseSegmentedData) {
+    try {
+      const legacyResult = await KnowledgeDocument.create(legacyData);
+      const segmentedResults = [];
+
+      for (const cat of categories) {
+        const segData = {
+          title: baseSegmentedData.title,
+          content: baseSegmentedData.content || '',
+          description: baseSegmentedData.description,
+          source_type: baseSegmentedData.source_type,
+          file_search_id: baseSegmentedData.file_search_id,
+          file_path: baseSegmentedData.file_path,
+          original_filename: baseSegmentedData.original_filename,
+          file_size: baseSegmentedData.file_size,
+          mime_type: baseSegmentedData.mime_type,
+          tags: baseSegmentedData.tags,
+          is_active: baseSegmentedData.is_active,
+          created_by: baseSegmentedData.created_by,
+          metadata: baseSegmentedData.metadata,
+          migrated_from: legacyResult.id,
+          domain: baseSegmentedData.domain
+        };
+
+        if (cat === 'baby') {
+          segData.age_range = baseSegmentedData.age_range;
+          segData.subcategory = baseSegmentedData.subcategory;
+        } else if (cat === 'mother') {
+          segData.trimester = baseSegmentedData.trimester;
+          segData.subcategory = baseSegmentedData.subcategory;
+        } else if (cat === 'professional') {
+          segData.specialty = baseSegmentedData.specialty;
+          segData.subcategory = baseSegmentedData.subcategory;
+        }
+
+        try {
+          let result = null;
+          switch (cat) {
+            case 'baby':
+              result = await KbBaby.create(segData);
+              break;
+            case 'mother':
+              result = await KbMother.create(segData);
+              break;
+            case 'professional':
+              result = await KbProfessional.create(segData);
+              break;
+            case 'landing':
+              result = legacyResult;
+              break;
+          }
+          if (result) segmentedResults.push({ category: cat, id: result.id });
+        } catch (segErr) {
+          console.warn(`[KnowledgeBaseRepository] insertMultiCategory - falha em ${cat}:`, segErr.message);
+        }
+      }
+
+      return {
+        success: true,
+        data: { legacy: legacyResult, segmented: segmentedResults }
+      };
+    } catch (error) {
+      console.error('[KnowledgeBaseRepository] insertMultiCategory error:', error.message);
       return { success: false, error: error.message };
     }
   }

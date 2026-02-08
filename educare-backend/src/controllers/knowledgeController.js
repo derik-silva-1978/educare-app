@@ -232,44 +232,89 @@ exports.uploadDocument = async (req, res) => {
     // Segmented data (optional, based on knowledge_category)
     let segmentedData = null;
 
-    if (process.env.ENABLE_SEGMENTED_KB === 'true' && category && ['baby', 'mother', 'professional'].includes(category)) {
-      segmentedData = {
-        title,
-        content: '',
-        description: description || null,
-        source_type,
-        file_search_id: null,
-        file_path: finalPath,
-        original_filename: req.file.originalname,
-        file_size: req.file.size,
-        mime_type: req.file.mimetype,
-        tags: parsedTags,
-        is_active: true,
-        created_by: req.user.id,
-        metadata: {
-          upload_timestamp: timestamp,
-          ingestion_status: INGESTION_STATUS.PENDING,
-          rag_providers: []
-        }
-      };
+    const validSegmentedCategories = ['baby', 'mother', 'professional', 'landing'];
+    const categories = knowledge_category
+      ? knowledge_category.split(',').map(c => c.trim()).filter(c => validSegmentedCategories.includes(c))
+      : (category && validSegmentedCategories.includes(category) ? [category] : []);
 
-      if (category === 'baby') {
-        segmentedData.age_range = age_range || null;
-        segmentedData.domain = domain || null;
-        segmentedData.subcategory = subdomain || null;
-      } else if (category === 'mother') {
-        segmentedData.trimester = trimester || null;
-        segmentedData.domain = domain || null;
-        segmentedData.subcategory = subdomain || null;
-      } else if (category === 'professional') {
-        segmentedData.specialty = specialty || null;
-        segmentedData.domain = domain || null;
-        segmentedData.subcategory = subdomain || null;
+    if (process.env.ENABLE_SEGMENTED_KB === 'true' && categories.length > 0) {
+      const segmentedResults = [];
+      for (const cat of categories) {
+        const catSegData = {
+          title,
+          content: '',
+          description: description || null,
+          source_type,
+          file_search_id: null,
+          file_path: finalPath,
+          original_filename: req.file.originalname,
+          file_size: req.file.size,
+          mime_type: req.file.mimetype,
+          tags: parsedTags,
+          is_active: true,
+          created_by: req.user.id,
+          metadata: {
+            upload_timestamp: timestamp,
+            ingestion_status: INGESTION_STATUS.PENDING,
+            rag_providers: []
+          }
+        };
+
+        if (cat === 'baby') {
+          catSegData.age_range = age_range || null;
+          catSegData.domain = domain || null;
+          catSegData.subcategory = subdomain || null;
+        } else if (cat === 'mother') {
+          catSegData.trimester = trimester || null;
+          catSegData.domain = domain || null;
+          catSegData.subcategory = subdomain || null;
+        } else if (cat === 'professional') {
+          catSegData.specialty = specialty || null;
+          catSegData.domain = domain || null;
+          catSegData.subcategory = subdomain || null;
+        }
+
+        segmentedResults.push({ category: cat, data: catSegData });
       }
+      segmentedData = segmentedResults.length === 1 ? segmentedResults[0].data : null;
     }
 
-    // Dual write: legacy + segmented
-    const result = await knowledgeBaseRepository.insertDualWithCategory(category, legacyData, segmentedData);
+    legacyData.metadata.knowledge_categories = categories;
+
+    if (categories.length > 1) {
+      const result = await knowledgeBaseRepository.insertMultiCategory(categories, legacyData, {
+        title, content: '', description: description || null, source_type,
+        file_search_id: null, file_path: finalPath,
+        original_filename: req.file.originalname, file_size: req.file.size,
+        mime_type: req.file.mimetype, tags: parsedTags, is_active: true,
+        created_by: req.user.id,
+        metadata: { upload_timestamp: timestamp, ingestion_status: INGESTION_STATUS.PENDING, rag_providers: [] },
+        age_range: age_range || null, domain: domain || null, subcategory: subdomain || null,
+        trimester: trimester || null, specialty: specialty || null
+      });
+      if (!result.success) {
+        return res.status(500).json({ success: false, error: result.error });
+      }
+      console.log(`[Knowledge:${requestId}] Documento criado: ${documentId} - ${title} (categorias: ${categories.join(', ')})`);
+
+      const ingestionMetadata = {
+        document_id: documentId, title, description, source_type, age_range,
+        domain, tags: parsedTags, knowledge_category: categories[0],
+        knowledge_categories: categories, file_path: finalPath,
+        original_filename: req.file.originalname, mime_type: req.file.mimetype
+      };
+      processIngestion(ingestionMetadata, requestId).catch(err => {
+        console.error(`[Knowledge:${requestId}] Erro na ingestão em background:`, err.message);
+      });
+
+      return res.status(201).json({
+        success: true, data: { id: documentId, title, status: 'processing', categories },
+        message: `Documento criado e ingestão iniciada para ${categories.length} bases`
+      });
+    }
+
+    // Dual write: legacy + segmented (single category)
+    const result = await knowledgeBaseRepository.insertDualWithCategory(categories[0] || category, legacyData, segmentedData);
 
     if (!result.success) {
       return res.status(500).json({

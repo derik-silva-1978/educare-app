@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Upload, Trash2, RefreshCw, CheckCircle, AlertCircle, FileText, X, Loader2, Database, Search, Filter, Zap, Brain, Cloud, ExternalLink } from 'lucide-react';
+import { Upload, Trash2, RefreshCw, CheckCircle, AlertCircle, FileText, X, Loader2, Database, Search, Filter, Zap, Brain, Cloud, ExternalLink, Check } from 'lucide-react';
 import CloudFileSelector from '@/components/knowledge-base/CloudFileSelector';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ interface KBDocument {
   title: string;
   description?: string;
   source_type: string;
+  knowledge_category?: string;
   file_search_id?: string;
   file_path?: string;
   original_filename?: string;
@@ -38,6 +39,7 @@ interface KBDocument {
     rag_providers?: string[];
     gemini_file_id?: string;
     qdrant_document_id?: string;
+    knowledge_categories?: string[];
   };
 }
 
@@ -45,7 +47,7 @@ interface UploadFormData {
   title: string;
   description: string;
   source_type: string;
-  knowledge_category: string;
+  knowledge_categories: string[];
   age_range: string;
   domain: string;
   tags: string;
@@ -60,9 +62,10 @@ const SOURCE_TYPES = [
 ];
 
 const KNOWLEDGE_CATEGORIES = [
-  { value: 'baby', label: 'Bebê (0-24 meses)', emoji: '👶' },
-  { value: 'mother', label: 'Mãe (Saúde Materna)', emoji: '👩' },
-  { value: 'professional', label: 'Profissional (Especialistas)', emoji: '👨‍⚕️' },
+  { value: 'baby', label: 'Desenvolvimento Infantil (0-6 anos)', emoji: '👶', description: 'Base do TitiNauta' },
+  { value: 'mother', label: 'Saúde Materna', emoji: '🤰', description: 'Base do TitiNauta Materna' },
+  { value: 'professional', label: 'Profissional (Especialistas)', emoji: '👨‍⚕️', description: 'Base do TitiNauta Especialista' },
+  { value: 'landing', label: 'Landing Page (Pré-vendas)', emoji: '🌐', description: 'Base do MyChat Pré-vendas' },
 ];
 
 const AGE_RANGES = [
@@ -70,6 +73,9 @@ const AGE_RANGES = [
   { value: '4-6', label: '4-6 meses' },
   { value: '7-12', label: '7-12 meses' },
   { value: '13-24', label: '13-24 meses' },
+  { value: '2-3', label: '2-3 anos' },
+  { value: '3-4', label: '3-4 anos' },
+  { value: '4-6y', label: '4-6 anos' },
   { value: 'all', label: 'Todas as idades' },
 ];
 
@@ -129,7 +135,7 @@ const KnowledgeBaseManagement: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [documents, setDocuments] = useState<KBDocument[]>([]);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [cloudFile, setCloudFile] = useState<{ name: string; url: string; size: number; source: 'google-drive' | 'onedrive' } | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
@@ -148,7 +154,7 @@ const KnowledgeBaseManagement: React.FC = () => {
     title: '',
     description: '',
     source_type: 'educare',
-    knowledge_category: 'baby',
+    knowledge_categories: ['baby'],
     age_range: 'all',
     domain: 'saude',
     tags: '',
@@ -325,18 +331,13 @@ const KnowledgeBaseManagement: React.FC = () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      processFile(file);
-    }
+    const files = Array.from(e.dataTransfer.files);
+    files.forEach(f => processFile(f));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      processFile(file);
-    }
+    const files = Array.from(e.target.files || []);
+    files.forEach(f => processFile(f));
   };
 
   const processFile = (file: File) => {
@@ -361,10 +362,12 @@ const KnowledgeBaseManagement: React.FC = () => {
       return;
     }
 
-    setSelectedFile(file);
-    setCloudFile(null); // Limpar arquivo de nuvem quando selecionar arquivo local
-    
-    if (!formData.title) {
+    setSelectedFiles(prev => {
+      if (prev.some(f => f.name === file.name && f.size === file.size)) return prev;
+      return [...prev, file];
+    });
+    setCloudFile(null);
+    if (!formData.title && selectedFiles.length === 0) {
       const titleFromFile = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
       setFormData(prev => ({ ...prev, title: titleFromFile }));
     }
@@ -375,10 +378,10 @@ const KnowledgeBaseManagement: React.FC = () => {
   };
 
   const validateForm = (): string | null => {
-    if (!selectedFile && !cloudFile) return 'Selecione um arquivo para enviar';
+    if (selectedFiles.length === 0 && !cloudFile) return 'Selecione um arquivo para enviar';
     if (!formData.title.trim()) return 'O título é obrigatório';
     if (!formData.source_type) return 'Selecione o tipo de fonte';
-    if (!formData.knowledge_category) return 'Selecione a categoria da base de conhecimento';
+    if (formData.knowledge_categories.length === 0) return 'Selecione ao menos uma base de conhecimento';
     return null;
   };
 
@@ -404,9 +407,8 @@ const KnowledgeBaseManagement: React.FC = () => {
     });
 
     try {
-      const formDataToSend = new FormData();
-      
-      // Se for arquivo da nuvem, baixar primeiro
+      const filesToUpload: File[] = [];
+
       if (cloudFile) {
         setUploadProgress(15);
         console.log('[KB Upload] Baixando arquivo da nuvem:', cloudFile.source);
@@ -435,7 +437,6 @@ const KnowledgeBaseManagement: React.FC = () => {
         
         const downloadData = await downloadResponse.json();
         
-        // Converter base64 para File
         const byteCharacters = atob(downloadData.content);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -445,89 +446,86 @@ const KnowledgeBaseManagement: React.FC = () => {
         const blob = new Blob([byteArray]);
         const file = new File([blob], cloudFile.name, { type: 'application/octet-stream' });
         
-        formDataToSend.append('file', file);
-        formDataToSend.append('cloud_source', cloudFile.source);
+        filesToUpload.push(file);
       } else {
-        formDataToSend.append('file', selectedFile!);
+        filesToUpload.push(...selectedFiles);
       }
-      
-      formDataToSend.append('title', formData.title.trim());
-      formDataToSend.append('description', formData.description.trim());
-      formDataToSend.append('source_type', formData.source_type);
-      formDataToSend.append('knowledge_category', formData.knowledge_category);
-      formDataToSend.append('age_range', formData.age_range);
-      formDataToSend.append('domain', formData.domain);
-      formDataToSend.append('tags', formData.tags);
 
-      setUploadProgress(30);
-      console.log('[KB Upload] Iniciando upload para /api/admin/knowledge/upload');
+      const totalFiles = filesToUpload.length;
+      let lastDocumentId: string | null = null;
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 120000);
+      for (let i = 0; i < totalFiles; i++) {
+        const file = filesToUpload[i];
+        const progressBase = 10 + ((i / totalFiles) * 80);
+        setUploadProgress(progressBase);
 
-      const response = await fetch('/api/admin/knowledge/upload', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('educare_auth_token')}`,
-        },
-        body: formDataToSend,
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-      console.log('[KB Upload] Resposta recebida:', response.status);
-      setUploadProgress(50);
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        const documentId = result.data?.id;
-        
-        if (documentId) {
-          setSelectedFile(null);
-          setCloudFile(null);
-          setFormData({
-            title: '',
-            description: '',
-            source_type: 'educare',
-            knowledge_category: 'baby',
-            age_range: 'all',
-            domain: 'saude',
-            tags: '',
-          });
-          
-          const fileInput = document.getElementById('file-input') as HTMLInputElement;
-          if (fileInput) fileInput.value = '';
-          
-          startPolling(documentId);
-        } else {
-          setUploadProgress(100);
-          toast({
-            title: '✨ Documento enviado!',
-            description: 'O documento foi salvo com sucesso.',
-          });
-          
-          setSelectedFile(null);
-          setCloudFile(null);
-          setFormData({
-            title: '',
-            description: '',
-            source_type: 'educare',
-            knowledge_category: 'baby',
-            age_range: 'all',
-            domain: 'saude',
-            tags: '',
-          });
-          
-          const fileInput = document.getElementById('file-input') as HTMLInputElement;
-          if (fileInput) fileInput.value = '';
-          
-          setUploading(false);
-          setUploadProgress(0);
-          await loadDocuments();
+        const formDataToSend = new FormData();
+        formDataToSend.append('file', file);
+        if (cloudFile) {
+          formDataToSend.append('cloud_source', cloudFile.source);
         }
+        formDataToSend.append('title', totalFiles > 1 ? `${formData.title.trim()} (${i + 1}/${totalFiles})` : formData.title.trim());
+        formDataToSend.append('description', formData.description.trim());
+        formDataToSend.append('source_type', formData.source_type);
+        formDataToSend.append('knowledge_category', formData.knowledge_categories.join(','));
+        formDataToSend.append('age_range', formData.age_range);
+        formDataToSend.append('domain', formData.domain);
+        formDataToSend.append('tags', formData.tags);
+
+        console.log(`[KB Upload] Enviando arquivo ${i + 1}/${totalFiles}: ${file.name}`);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+        const response = await fetch('/api/admin/knowledge/upload', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('educare_auth_token')}`,
+          },
+          body: formDataToSend,
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+        console.log(`[KB Upload] Resposta arquivo ${i + 1}:`, response.status);
+        setUploadProgress(progressBase + (80 / totalFiles));
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          lastDocumentId = result.data?.id || null;
+        } else {
+          throw new Error(result.error || result.message || `Erro ao fazer upload do arquivo ${file.name}`);
+        }
+      }
+
+      setSelectedFiles([]);
+      setCloudFile(null);
+      setFormData({
+        title: '',
+        description: '',
+        source_type: 'educare',
+        knowledge_categories: ['baby'],
+        age_range: 'all',
+        domain: 'saude',
+        tags: '',
+      });
+      
+      const fileInput = document.getElementById('file-input') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+      if (lastDocumentId && totalFiles === 1) {
+        startPolling(lastDocumentId);
       } else {
-        throw new Error(result.error || result.message || 'Erro ao fazer upload');
+        setUploadProgress(100);
+        toast({
+          title: `✨ ${totalFiles > 1 ? `${totalFiles} documentos enviados` : 'Documento enviado'}!`,
+          description: `${totalFiles > 1 ? 'Os documentos foram salvos' : 'O documento foi salvo'} com sucesso.`,
+        });
+        
+        setUploading(false);
+        setUploadProgress(0);
+        await loadDocuments();
       }
     } catch (error) {
       console.error('Erro ao fazer upload:', error);
@@ -625,7 +623,9 @@ const KnowledgeBaseManagement: React.FC = () => {
     const matchesSearch = !searchQuery || 
       doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doc.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = filterCategory === 'all' || doc.domain === filterCategory || doc.source_type === filterCategory;
+    const matchesCategory = filterCategory === 'all' || 
+      doc.metadata?.knowledge_categories?.includes(filterCategory) ||
+      doc.knowledge_category === filterCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -718,7 +718,7 @@ const KnowledgeBaseManagement: React.FC = () => {
                     <CloudFileSelector 
                       onFileSelect={(file) => {
                         setCloudFile(file);
-                        setSelectedFile(null);
+                        setSelectedFiles([]);
                         if (!formData.title) {
                           setFormData(prev => ({ ...prev, title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') }));
                         }
@@ -743,13 +743,14 @@ const KnowledgeBaseManagement: React.FC = () => {
                     <input
                       id="file-input"
                       type="file"
+                      multiple
                       onChange={handleFileChange}
                       accept=".pdf,.txt,.csv,.json,.md,.doc,.docx,.png,.jpg,.jpeg,.webp"
                       className="hidden"
                     />
                     <label htmlFor="file-input" className="cursor-pointer text-center">
                       <Upload className="h-8 w-8 mx-auto mb-2 text-blue-500" />
-                      <p className="font-semibold text-gray-700 dark:text-gray-300">Arraste seu arquivo aqui</p>
+                      <p className="font-semibold text-gray-700 dark:text-gray-300">Arraste seus arquivos aqui</p>
                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">ou clique para selecionar</p>
                     </label>
                   </div>
@@ -773,22 +774,25 @@ const KnowledgeBaseManagement: React.FC = () => {
                       </Button>
                     </div>
                   )}
-                  {selectedFile && (
-                    <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between border border-blue-200 dark:border-blue-900">
-                      <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">
-                        ✓ {selectedFile.name} ({formatFileSize(selectedFile.size)})
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedFile(null);
-                          const fileInput = document.getElementById('file-input') as HTMLInputElement;
-                          if (fileInput) fileInput.value = '';
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                  {selectedFiles.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      {selectedFiles.map((file, idx) => (
+                        <div key={`${file.name}-${idx}`} className="p-2.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-between border border-blue-200 dark:border-blue-900">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                            <span className="text-sm text-blue-700 dark:text-blue-300 font-medium truncate">{file.name}</span>
+                            <span className="text-xs text-blue-500 flex-shrink-0">({formatFileSize(file.size)})</span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 flex-shrink-0"
+                            onClick={() => setSelectedFiles(prev => prev.filter((_, i) => i !== idx))}
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -821,21 +825,40 @@ const KnowledgeBaseManagement: React.FC = () => {
               <div className="space-y-5">
                 <div>
                   <Label className="font-semibold">Base de Conhecimento *</Label>
-                  <Select
-                    value={formData.knowledge_category}
-                    onValueChange={(value) => handleInputChange('knowledge_category', value)}
-                  >
-                    <SelectTrigger className="mt-2 border-gray-300 dark:border-gray-600">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {KNOWLEDGE_CATEGORIES.map((cat) => (
-                        <SelectItem key={cat.value} value={cat.value}>
-                          {cat.emoji} {cat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1 mb-3">Selecione uma ou mais bases para ingestão</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {KNOWLEDGE_CATEGORIES.map((cat) => {
+                      const isSelected = formData.knowledge_categories.includes(cat.value);
+                      return (
+                        <div
+                          key={cat.value}
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              knowledge_categories: isSelected
+                                ? prev.knowledge_categories.filter(c => c !== cat.value)
+                                : [...prev.knowledge_categories, cat.value]
+                            }));
+                          }}
+                          className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                            isSelected
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                              isSelected ? 'bg-blue-500 border-blue-500' : 'border-gray-400'
+                            }`}>
+                              {isSelected && <Check className="w-3 h-3 text-white" />}
+                            </div>
+                            <span className="text-sm">{cat.emoji} {cat.label}</span>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground ml-6 mt-0.5">{cat.description}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div>
@@ -1021,7 +1044,7 @@ const KnowledgeBaseManagement: React.FC = () => {
             <div className="mt-6 flex justify-end">
               <Button
                 onClick={handleUpload}
-                disabled={uploading || !selectedFile}
+                disabled={uploading || (selectedFiles.length === 0 && !cloudFile)}
                 className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-8"
               >
                 {uploading ? (
@@ -1032,7 +1055,7 @@ const KnowledgeBaseManagement: React.FC = () => {
                 ) : (
                   <>
                     <Upload className="w-4 h-4 mr-2" />
-                    Enviar Documento
+                    {selectedFiles.length > 1 ? `Enviar ${selectedFiles.length} Documentos` : 'Enviar Documento'}
                   </>
                 )}
               </Button>
@@ -1055,6 +1078,19 @@ const KnowledgeBaseManagement: React.FC = () => {
                     className="pl-10 w-full sm:w-[220px] border-gray-300 dark:border-gray-600"
                   />
                 </div>
+                <Select value={filterCategory} onValueChange={setFilterCategory}>
+                  <SelectTrigger className="w-[180px] border-gray-300 dark:border-gray-600">
+                    <SelectValue placeholder="Todas as Bases" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas as Bases</SelectItem>
+                    {KNOWLEDGE_CATEGORIES.map((cat) => (
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {cat.emoji} {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardHeader>
@@ -1075,63 +1111,96 @@ const KnowledgeBaseManagement: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredDocs.map((doc) => (
-                  <div 
-                    key={doc.id} 
-                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md dark:hover:bg-gray-700/50 transition-all"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 dark:text-white truncate text-sm">{doc.title}</h3>
-                        {doc.description && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">{doc.description}</p>
-                        )}
-                      </div>
-                      <Badge variant="outline" className="text-xs flex-shrink-0 ml-2">
-                        {getSourceLabel(doc.source_type).substring(0, 8)}
-                      </Badge>
-                    </div>
+                {filteredDocs.map((doc) => {
+                  const categoryLabel = KNOWLEDGE_CATEGORIES.find(c => c.value === (doc.metadata?.knowledge_categories?.[0] || doc.knowledge_category));
+                  const kbBadgeColor: Record<string, string> = {
+                    baby: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+                    mother: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400',
+                    professional: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
+                    landing: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
+                  };
+                  const docCategories = doc.metadata?.knowledge_categories || (doc.knowledge_category ? [doc.knowledge_category] : []);
 
-                    {/* Providers */}
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {doc.metadata?.rag_providers?.map((provider) => (
-                        <ProviderBadge key={provider} provider={provider} />
-                      ))}
-                      {!doc.metadata?.rag_providers?.length && doc.file_search_id && (
-                        <ProviderBadge provider="openai" />
+                  return (
+                    <div 
+                      key={doc.id} 
+                      className="group p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:shadow-lg dark:hover:bg-gray-750 transition-all duration-200 bg-white dark:bg-gray-800"
+                    >
+                      {/* Header: Title + Status */}
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1 min-w-0 pr-2">
+                          <h3 className="font-semibold text-gray-900 dark:text-white text-sm leading-tight">{doc.title}</h3>
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          {doc.is_active ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                              Ativo
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                              Inativo
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Description / Summary */}
+                      {doc.description && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3">{doc.description}</p>
                       )}
-                    </div>
 
-                    {/* File Info */}
-                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-3 pb-3 border-b dark:border-gray-700">
-                      <span>{doc.original_filename}</span>
-                      <span>{formatFileSize(doc.file_size)}</span>
-                    </div>
-
-                    {/* Status & Actions */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {doc.is_active ? (
-                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs">
-                            ✓ Ativo
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="text-xs">
-                            Inativo
-                          </Badge>
-                        )}
-                        {doc.file_search_id || doc.metadata?.rag_providers?.length ? (
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                        ) : (
-                          <AlertCircle className="w-4 h-4 text-gray-400" />
+                      {/* Knowledge Base Badges */}
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {docCategories.map(cat => {
+                          const catInfo = KNOWLEDGE_CATEGORIES.find(c => c.value === cat);
+                          return (
+                            <span key={cat} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${kbBadgeColor[cat] || 'bg-gray-100 text-gray-700'}`}>
+                              {catInfo?.emoji} {catInfo?.label || cat}
+                            </span>
+                          );
+                        })}
+                        {docCategories.length === 0 && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                            Base Legada
+                          </span>
                         )}
                       </div>
-                      <div className="flex gap-1">
+
+                      {/* Storage Providers */}
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {doc.metadata?.rag_providers?.map((provider) => (
+                          <ProviderBadge key={provider} provider={provider} />
+                        ))}
+                        {!doc.metadata?.rag_providers?.length && doc.file_search_id && (
+                          <ProviderBadge provider="openai" />
+                        )}
+                        {!doc.metadata?.rag_providers?.length && !doc.file_search_id && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+                            Pendente
+                          </span>
+                        )}
+                      </div>
+
+                      {/* File Info Bar */}
+                      <div className="flex items-center gap-3 text-[11px] text-gray-400 dark:text-gray-500 mb-3 py-2 px-3 bg-gray-50 dark:bg-gray-900/40 rounded-lg">
+                        <div className="flex items-center gap-1">
+                          <FileText className="w-3 h-3" />
+                          <span className="truncate max-w-[140px]">{doc.original_filename}</span>
+                        </div>
+                        <span className="text-gray-300 dark:text-gray-600">|</span>
+                        <span>{formatFileSize(doc.file_size)}</span>
+                        <span className="text-gray-300 dark:text-gray-600">|</span>
+                        <span>{doc.source_type}</span>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center justify-end gap-1 pt-2 border-t border-gray-100 dark:border-gray-700/50">
                         <Button
                           onClick={() => handleToggleActive(doc.id, doc.is_active)}
                           variant="ghost"
                           size="sm"
-                          className="text-xs h-8"
+                          className="text-xs h-7 px-2"
                         >
                           {doc.is_active ? 'Desativar' : 'Ativar'}
                         </Button>
@@ -1139,14 +1208,14 @@ const KnowledgeBaseManagement: React.FC = () => {
                           onClick={() => handleDelete(doc.id, doc.title)}
                           variant="ghost"
                           size="sm"
-                          className="text-red-600 hover:text-red-700 h-8"
+                          className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-7 px-2"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </Button>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
