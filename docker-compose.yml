@@ -30,11 +30,24 @@ services:
       dockerfile: Dockerfile.backend
     container_name: educare-backend
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
-      - NODE_ENV=production
-      - PORT=5000
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${PORT:-5000}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_DIALECT=${DB_DIALECT:-postgres}
+      - DB_TIMEZONE=${DB_TIMEZONE:-America/Sao_Paulo}
+      - DB_SYNC_ENABLED=${DB_SYNC_ENABLED:-false}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-24h}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - BACKEND_URL=${BACKEND_URL}
+      - APP_URL=${APP_URL}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - uploads_data:/app/uploads
       - knowledge_data:/app/knowledge_base
