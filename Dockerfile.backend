@@ -1,0 +1,43 @@
+###############################################
+# Stage 1: Install production dependencies
+###############################################
+FROM node:20.20-alpine3.20 AS deps
+
+WORKDIR /app
+
+COPY educare-backend/package.json educare-backend/package-lock.json* ./
+
+RUN npm ci --omit=dev --ignore-scripts 2>/dev/null || npm install --omit=dev --ignore-scripts
+
+###############################################
+# Stage 2: Production runtime
+###############################################
+FROM node:20.20-alpine3.20 AS runtime
+
+RUN apk add --no-cache dumb-init curl
+
+ENV NODE_ENV=production
+ENV PORT=5000
+
+WORKDIR /app
+
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -S appuser -u 1001 -G appgroup
+
+COPY --from=deps --chown=appuser:appgroup /app/node_modules ./node_modules
+
+COPY --chown=appuser:appgroup educare-backend/package.json ./
+COPY --chown=appuser:appgroup educare-backend/src ./src
+
+RUN mkdir -p /app/uploads /app/knowledge_base /app/logs && \
+    chown -R appuser:appgroup /app/uploads /app/knowledge_base /app/logs
+
+USER appuser
+
+EXPOSE ${PORT}
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD curl -f http://localhost:${PORT}/health || exit 1
+
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "src/server.js"]

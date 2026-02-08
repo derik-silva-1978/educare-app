@@ -1,0 +1,99 @@
+version: "3.8"
+
+services:
+  # ─── Frontend (Nginx + React SPA) ──────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-}
+    container_name: educare-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - educare-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+  # ─── Backend (Node.js API) ─────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: educare-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+    volumes:
+      - uploads_data:/app/uploads
+      - knowledge_data:/app/knowledge_base
+    networks:
+      - educare-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    # ── Optional: Resource Limits (uncomment if needed) ──
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: "1.0"
+    #       memory: 1G
+    #     reservations:
+    #       cpus: "0.25"
+    #       memory: 256M
+
+  # ── Optional: Reverse Proxy with Traefik (uncomment if needed) ──
+  # traefik:
+  #   image: traefik:v3.2
+  #   container_name: educare-traefik
+  #   restart: unless-stopped
+  #   command:
+  #     - "--providers.docker=true"
+  #     - "--providers.docker.exposedbydefault=false"
+  #     - "--entrypoints.web.address=:80"
+  #     - "--entrypoints.websecure.address=:443"
+  #     - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+  #     - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}"
+  #     - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - letsencrypt_data:/letsencrypt
+  #   networks:
+  #     - educare-net
+
+networks:
+  educare-net:
+    driver: bridge
+
+volumes:
+  uploads_data:
+    driver: local
+  knowledge_data:
+    driver: local
+  # letsencrypt_data:
+  #   driver: local
+
+# ── Optional: Logging (uncomment for centralized logs) ──
+# x-logging: &default-logging
+#   driver: json-file
+#   options:
+#     max-size: "10m"
+#     max-file: "3"
