@@ -18,6 +18,13 @@ export interface AgentMeta {
   category: string;
 }
 
+export type KnowledgeBaseType = 'kb_baby' | 'kb_mother' | 'kb_professional' | 'landing';
+
+export interface RagConfig {
+  enabled: boolean;
+  knowledge_base: KnowledgeBaseType | null;
+}
+
 export interface AgentSummary {
   module_type: ModuleType;
   meta: AgentMeta;
@@ -37,6 +44,7 @@ export interface AgentSummary {
     temperature: number;
     max_tokens: number;
   };
+  rag: RagConfig;
   stats: {
     totalVersions: number;
     rankingsCount: number;
@@ -157,6 +165,21 @@ class AgentControlService {
     if (!response.success) {
       throw new Error(response.error || 'Erro ao remover ranking');
     }
+  }
+
+  async updateRagConfig(moduleType: ModuleType, data: { rag_enabled: boolean; rag_knowledge_base: KnowledgeBaseType | null }): Promise<RagConfig> {
+    const response = await httpClient.put<{ module_type: string; rag_enabled: boolean; rag_knowledge_base: KnowledgeBaseType | null }>(
+      `/agent-control/agent/${moduleType}/rag`,
+      data,
+      { requiresAuth: true }
+    );
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Erro ao atualizar configuração RAG');
+    }
+    return {
+      enabled: response.data.rag_enabled,
+      knowledge_base: response.data.rag_knowledge_base
+    };
   }
 }
 

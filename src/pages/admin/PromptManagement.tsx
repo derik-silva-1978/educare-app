@@ -18,6 +18,7 @@ import { Slider } from '@/components/ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Switch } from '@/components/ui/switch';
 import {
   Bot, Heart, Stethoscope, MessageCircle, Brain, HeartPulse,
   FilePen, ListChecks, BookOpen, Image, Ruler, Moon,
@@ -26,7 +27,7 @@ import {
   ChevronLeft, ChevronDown, ChevronRight, Star, Play, Send,
   ArrowRight, Clock, Zap, DollarSign, Award, MessageSquare,
   FileText, Gauge, CheckCircle, XCircle, Trash2, Plus,
-  Megaphone, Layers, Wrench
+  Megaphone, Layers, Wrench, Database, Search
 } from 'lucide-react';
 import { assistantPromptService, type AssistantPrompt, type CreatePromptData } from '@/services/api/assistantPromptService';
 import { llmConfigService, type LLMConfig, type LLMProviderInfo, type ProviderType, type ModuleType } from '@/services/api/llmConfigService';
@@ -36,7 +37,8 @@ import {
   type AgentDetail,
   type ModelRanking,
   type PlaygroundResponse,
-  type DashboardResponse
+  type DashboardResponse,
+  type KnowledgeBaseType
 } from '@/services/api/agentControlService';
 
 type ViewMode = 'dashboard' | 'detail';
@@ -66,6 +68,27 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   generators: <Sparkles className="h-5 w-5" />,
   curation: <Layers className="h-5 w-5" />,
   utilities: <Wrench className="h-5 w-5" />,
+};
+
+const KB_LABELS: Record<string, string> = {
+  kb_baby: 'Base Bebê',
+  kb_mother: 'Base Materna',
+  kb_professional: 'Base Profissional',
+  landing: 'Base Landing Page'
+};
+
+const KB_DESCRIPTIONS: Record<string, string> = {
+  kb_baby: 'Desenvolvimento infantil, marcos e cuidados com o bebê',
+  kb_mother: 'Saúde materna, gravidez e pós-parto',
+  kb_professional: 'Protocolos clínicos e referências profissionais',
+  landing: 'Informações sobre a plataforma e pré-vendas'
+};
+
+const KB_COLORS: Record<string, string> = {
+  kb_baby: '#8b5cf6',
+  kb_mother: '#f43f5e',
+  kb_professional: '#14b8a6',
+  landing: '#3b82f6'
 };
 
 const StarRating: React.FC<{ value: number; onChange?: (v: number) => void; size?: 'sm' | 'md' }> = ({ value, onChange, size = 'md' }) => {
@@ -156,6 +179,10 @@ const PromptManagement: React.FC = () => {
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [previewPrompt, setPreviewPrompt] = useState<AssistantPrompt | null>(null);
 
+  const [ragEnabled, setRagEnabled] = useState(false);
+  const [ragKnowledgeBase, setRagKnowledgeBase] = useState<KnowledgeBaseType | null>(null);
+  const [savingRag, setSavingRag] = useState(false);
+
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   const toggleCategory = (cat: string) => {
@@ -196,6 +223,10 @@ const PromptManagement: React.FC = () => {
       }
 
       setLlmConfig(data.llmConfig as LLMConfig);
+
+      const llmRaw = data.llmConfig as any;
+      setRagEnabled(llmRaw.rag_enabled || false);
+      setRagKnowledgeBase(llmRaw.rag_knowledge_base || null);
     } catch (error) {
       console.error('Erro ao carregar detalhe do agente:', error);
       toast({ title: 'Erro ao carregar', description: 'Não foi possível carregar os detalhes do agente.', variant: 'destructive' });
@@ -327,6 +358,27 @@ const PromptManagement: React.FC = () => {
     }
   };
 
+  const handleSaveRagConfig = async () => {
+    try {
+      setSavingRag(true);
+      await agentControlService.updateRagConfig(selectedAgent, {
+        rag_enabled: ragEnabled,
+        rag_knowledge_base: ragEnabled ? ragKnowledgeBase : null
+      });
+      toast({
+        title: 'Configuração RAG salva',
+        description: ragEnabled
+          ? `Base vetorial "${KB_LABELS[ragKnowledgeBase!] || ragKnowledgeBase}" configurada para ${agentDetail?.meta.name || selectedAgent}.`
+          : `RAG desativado para ${agentDetail?.meta.name || selectedAgent}.`
+      });
+      await loadAgentDetail(selectedAgent);
+    } catch (error) {
+      toast({ title: 'Erro ao salvar RAG', description: error instanceof Error ? error.message : 'Erro desconhecido.', variant: 'destructive' });
+    } finally {
+      setSavingRag(false);
+    }
+  };
+
   const loadHistory = async () => {
     try {
       setLoadingHistory(true);
@@ -396,7 +448,7 @@ const PromptManagement: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
             <Card className="border-dashed">
               <CardContent className="py-3 px-4 flex items-center gap-3">
                 <Bot className="h-5 w-5 text-violet-500" />
@@ -412,6 +464,15 @@ const PromptManagement: React.FC = () => {
                 <div>
                   <p className="text-2xl font-bold">{dashboardData?.agents?.filter(a => a.prompt).length || 0}</p>
                   <p className="text-xs text-muted-foreground">Configurados</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-dashed">
+              <CardContent className="py-3 px-4 flex items-center gap-3">
+                <Database className="h-5 w-5 text-cyan-500" />
+                <div>
+                  <p className="text-2xl font-bold">{dashboardData?.agents?.filter(a => a.rag?.enabled).length || 0}</p>
+                  <p className="text-xs text-muted-foreground">Com RAG</p>
                 </div>
               </CardContent>
             </Card>
@@ -516,6 +577,21 @@ const PromptManagement: React.FC = () => {
                               <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                                 <Cpu className="h-3 w-3" />
                                 <span className="truncate">{agent.llm.model_name}</span>
+                                {agent.rag?.enabled && (
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0 rounded-full text-[10px] font-medium bg-cyan-100 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-400 shrink-0">
+                                          <Database className="h-2.5 w-2.5" />
+                                          RAG
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p className="text-xs">Consulta: {KB_LABELS[agent.rag.knowledge_base!] || agent.rag.knowledge_base}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -612,12 +688,20 @@ const PromptManagement: React.FC = () => {
               <h1 className="text-2xl font-bold tracking-tight">{meta?.name || 'Carregando...'}</h1>
               <p className="text-sm text-muted-foreground">{meta?.description}</p>
             </div>
-            {agentDetail?.activePrompt && (
-              <Badge variant="outline" className="ml-auto" style={{ backgroundColor: agentColor + '15', color: agentColor }}>
-                <Check className="h-3 w-3 mr-1" />
-                v{agentDetail.activePrompt.version} publicada
-              </Badge>
-            )}
+            <div className="ml-auto flex items-center gap-2">
+              {ragEnabled && (
+                <Badge className="bg-cyan-100 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-400 border-0">
+                  <Database className="h-3 w-3 mr-1" />
+                  RAG: {KB_LABELS[ragKnowledgeBase!] || 'Ativo'}
+                </Badge>
+              )}
+              {agentDetail?.activePrompt && (
+                <Badge variant="outline" style={{ backgroundColor: agentColor + '15', color: agentColor }}>
+                  <Check className="h-3 w-3 mr-1" />
+                  v{agentDetail.activePrompt.version} publicada
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
 
@@ -627,7 +711,7 @@ const PromptManagement: React.FC = () => {
           </div>
         ) : (
           <Tabs value={detailTab} onValueChange={setDetailTab}>
-            <TabsList className="grid w-full grid-cols-5 mb-6">
+            <TabsList className="grid w-full grid-cols-6 mb-6">
               <TabsTrigger value="prompt" className="gap-1.5 text-xs sm:text-sm">
                 <FileText className="h-4 w-4" />
                 <span className="hidden sm:inline">Prompt</span>
@@ -635,6 +719,11 @@ const PromptManagement: React.FC = () => {
               <TabsTrigger value="model" className="gap-1.5 text-xs sm:text-sm">
                 <Cpu className="h-4 w-4" />
                 <span className="hidden sm:inline">Modelo</span>
+              </TabsTrigger>
+              <TabsTrigger value="rag" className="gap-1.5 text-xs sm:text-sm">
+                <Database className="h-4 w-4" />
+                <span className="hidden sm:inline">RAG</span>
+                {ragEnabled && <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-cyan-500" />}
               </TabsTrigger>
               <TabsTrigger value="ranking" className="gap-1.5 text-xs sm:text-sm">
                 <Star className="h-4 w-4" />
@@ -813,6 +902,130 @@ const PromptManagement: React.FC = () => {
                       </div>
                     </>
                   )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="rag">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Database className="h-5 w-5" />
+                    Configuração RAG
+                    {ragEnabled && (
+                      <Badge className="ml-2 bg-cyan-100 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-400 border-0">
+                        <Search className="h-3 w-3 mr-1" />
+                        Ativo
+                      </Badge>
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    Configure se este agente consulta uma base de conhecimento vetorial (RAG) para enriquecer suas respostas
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${ragEnabled ? 'bg-cyan-100 dark:bg-cyan-950/30' : 'bg-muted'}`}>
+                        <Database className={`h-5 w-5 ${ragEnabled ? 'text-cyan-600' : 'text-muted-foreground'}`} />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">Consulta a Base Vetorial (RAG)</p>
+                        <p className="text-xs text-muted-foreground">
+                          {ragEnabled
+                            ? 'Este agente consulta documentos da base de conhecimento para gerar respostas mais precisas'
+                            : 'Este agente responde apenas com base no prompt do sistema, sem consultar documentos'}
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={ragEnabled}
+                      onCheckedChange={(checked) => {
+                        setRagEnabled(checked);
+                        if (!checked) setRagKnowledgeBase(null);
+                        else if (!ragKnowledgeBase) setRagKnowledgeBase('kb_baby');
+                      }}
+                    />
+                  </div>
+
+                  {ragEnabled && (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-2">
+                          <Search className="h-4 w-4 text-muted-foreground" />
+                          Base de Conhecimento
+                        </Label>
+                        <Select
+                          value={ragKnowledgeBase || ''}
+                          onValueChange={(value) => setRagKnowledgeBase(value as KnowledgeBaseType)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione a base de conhecimento" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(KB_LABELS).map(([key, label]) => (
+                              <SelectItem key={key} value={key}>
+                                <div className="flex items-center gap-2">
+                                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: KB_COLORS[key] }} />
+                                  <div>
+                                    <span className="font-medium">{label}</span>
+                                    <span className="text-xs text-muted-foreground ml-2">{KB_DESCRIPTIONS[key]}</span>
+                                  </div>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {ragKnowledgeBase && (
+                        <div className="p-4 rounded-lg border border-cyan-200 dark:border-cyan-900 bg-cyan-50/50 dark:bg-cyan-950/20">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: KB_COLORS[ragKnowledgeBase] }} />
+                            <span className="font-medium text-sm">{KB_LABELS[ragKnowledgeBase]}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{KB_DESCRIPTIONS[ragKnowledgeBase]}</p>
+                          <div className="mt-3 flex items-center gap-2 text-xs text-cyan-700 dark:text-cyan-400">
+                            <Database className="h-3 w-3" />
+                            <span>Documentos desta base serão usados como contexto para as respostas do agente</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {!ragEnabled && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Database className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                      <p className="font-medium">RAG desativado</p>
+                      <p className="text-sm mt-1">Ative a consulta vetorial para que o agente use documentos da base de conhecimento</p>
+                    </div>
+                  )}
+
+                  <Separator />
+
+                  <div className="flex justify-end">
+                    <Button onClick={handleSaveRagConfig} disabled={savingRag || (ragEnabled && !ragKnowledgeBase)} className="gap-2">
+                      {savingRag ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                      Salvar Configuração RAG
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="mt-4 border-dashed">
+                <CardContent className="py-4">
+                  <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-medium mb-1">Como funciona o RAG</p>
+                      <p className="text-xs">
+                        Quando ativado, o agente consulta automaticamente a base vetorial selecionada antes de gerar uma resposta.
+                        Os documentos mais relevantes são usados como contexto adicional no prompt, permitindo respostas mais
+                        precisas e fundamentadas. A qualidade depende dos documentos carregados na base de conhecimento.
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

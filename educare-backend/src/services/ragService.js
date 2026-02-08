@@ -470,13 +470,66 @@ async function ask(question, options = {}) {
   const startTime = Date.now();
 
   try {
+    const moduleType = options.module_type || 'baby';
+
+    const ragConfig = await knowledgeBaseSelector.getRagConfigForModule(moduleType);
+    if (!ragConfig.rag_enabled) {
+      console.log(`[RAG] RAG desativado para módulo ${moduleType} (via config DB). Chamando LLM sem contexto RAG.`);
+
+      let customSystemPrompt = null;
+      try {
+        customSystemPrompt = await promptService.getProcessedPrompt(moduleType, options.variables || {});
+      } catch (promptErr) {
+        console.warn(`[RAG] Erro ao carregar prompt para ${moduleType}:`, promptErr.message);
+      }
+
+      const llmConfig = await llmConfigService.getConfig(moduleType);
+      const result = await callLLM(
+        customSystemPrompt || 'Você é um assistente útil.',
+        question,
+        {
+          provider: llmConfig.provider,
+          model: llmConfig.model_name,
+          temperature: llmConfig.temperature,
+          max_tokens: llmConfig.max_tokens
+        }
+      );
+
+      processingTime = Date.now() - startTime;
+
+      return {
+        success: result.success,
+        answer: result.content,
+        metadata: {
+          documents_found: 0,
+          documents_used: [],
+          file_search_used: false,
+          chunks_retrieved: 0,
+          model: result.model || llmConfig.model_name,
+          processing_time_ms: processingTime,
+          rag_disabled: true,
+          module_type: moduleType
+        }
+      };
+    }
+
+    const effectiveKb = ragConfig.rag_knowledge_base;
+    if (effectiveKb && effectiveKb !== 'none') {
+      const kbToModule = { kb_baby: 'baby', kb_mother: 'mother', kb_professional: 'professional', landing: 'landing_chat' };
+      const mappedModule = kbToModule[effectiveKb] || moduleType;
+      if (mappedModule !== moduleType) {
+        console.log(`[RAG] KB override: módulo ${moduleType} usando KB de ${mappedModule} (${effectiveKb})`);
+        options.module_type = mappedModule;
+      }
+    }
+
     const filters = {
       age_range: options.age_range,
       domain: options.domain,
       tags: options.tags,
       source_type: options.source_type,
       limit: options.document_limit || 5,
-      module_type: options.module_type || 'baby',  // Default para baby
+      module_type: options.module_type || 'baby',
       baby_id: options.baby_id,
       user_role: options.user_role,
       route_context: options.route_context,

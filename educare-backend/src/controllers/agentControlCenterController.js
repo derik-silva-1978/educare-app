@@ -48,6 +48,10 @@ exports.getAgentsDashboard = async (req, res) => {
           temperature: llmConfig.temperature,
           max_tokens: llmConfig.max_tokens
         },
+        rag: {
+          enabled: llmConfig.rag_enabled || false,
+          knowledge_base: llmConfig.rag_knowledge_base || null
+        },
         stats: {
           totalVersions,
           rankingsCount
@@ -282,6 +286,68 @@ exports.upsertRanking = async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Erro ao salvar ranking'
+    });
+  }
+};
+
+exports.updateRagConfig = async (req, res) => {
+  try {
+    const { module_type } = req.params;
+    const { rag_enabled, rag_knowledge_base } = req.body;
+    const userId = req.user?.id;
+
+    if (!ALL_MODULE_TYPES.includes(module_type)) {
+      return res.status(400).json({
+        success: false,
+        error: 'module_type inválido'
+      });
+    }
+
+    if (typeof rag_enabled !== 'boolean') {
+      return res.status(400).json({
+        success: false,
+        error: 'rag_enabled deve ser true ou false'
+      });
+    }
+
+    const validKBs = ['kb_baby', 'kb_mother', 'kb_professional', 'landing', null];
+    if (rag_enabled && !validKBs.includes(rag_knowledge_base)) {
+      return res.status(400).json({
+        success: false,
+        error: `rag_knowledge_base inválido. Use: ${validKBs.filter(Boolean).join(', ')}`
+      });
+    }
+
+    const config = await AssistantLLMConfig.findByPk(module_type);
+    if (!config) {
+      return res.status(404).json({
+        success: false,
+        error: 'Configuração não encontrada para este agente'
+      });
+    }
+
+    await config.update({
+      rag_enabled,
+      rag_knowledge_base: rag_enabled ? rag_knowledge_base : null,
+      updated_by: userId
+    });
+
+    llmConfigService.clearCache(module_type);
+
+    return res.json({
+      success: true,
+      data: {
+        module_type,
+        rag_enabled: config.rag_enabled,
+        rag_knowledge_base: config.rag_knowledge_base
+      },
+      message: `Configuração RAG ${rag_enabled ? 'ativada' : 'desativada'} para ${module_type}`
+    });
+  } catch (error) {
+    console.error('[AgentControlCenter] Erro ao atualizar config RAG:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Erro ao atualizar configuração RAG'
     });
   }
 };

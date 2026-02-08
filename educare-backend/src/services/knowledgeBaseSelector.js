@@ -7,6 +7,7 @@ const KbBaby = require('../models/KbBaby');
 const KbMother = require('../models/KbMother');
 const KbProfessional = require('../models/KbProfessional');
 const KnowledgeDocument = require('../models/KnowledgeDocument');
+const AssistantLLMConfig = require('../models/AssistantLLMConfig');
 
 // Master switch for segmented KB
 const ENABLE_SEGMENTED_KB = process.env.ENABLE_SEGMENTED_KB === 'true';
@@ -241,6 +242,24 @@ function isFallbackEnabled() {
   return KB_FALLBACK_ENABLED;
 }
 
+async function getRagConfigForModule(moduleType) {
+  try {
+    const config = await AssistantLLMConfig.findByPk(moduleType, {
+      attributes: ['rag_enabled', 'rag_knowledge_base']
+    });
+    if (config) {
+      return {
+        rag_enabled: config.rag_enabled || false,
+        rag_knowledge_base: config.rag_knowledge_base || null
+      };
+    }
+    return { rag_enabled: false, rag_knowledge_base: null };
+  } catch (error) {
+    console.warn(`[KnowledgeBaseSelector] Error reading RAG config for ${moduleType}:`, error.message);
+    return { rag_enabled: false, rag_knowledge_base: null };
+  }
+}
+
 module.exports = {
   select,
   getModel,
@@ -248,5 +267,6 @@ module.exports = {
   isFallbackEnabled,
   isLegacyFallbackEnabledForModule,
   getFallbackStatus,
+  getRagConfigForModule,
   MODELS
 };

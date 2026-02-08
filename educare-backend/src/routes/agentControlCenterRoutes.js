@@ -16,6 +16,8 @@ router.get('/agent/:module_type', verifyToken, isOwner, controller.getAgentDetai
 
 router.post('/playground', verifyToken, isOwner, playgroundLimiter, controller.playground);
 
+router.put('/agent/:module_type/rag', verifyToken, isOwner, controller.updateRagConfig);
+
 router.get('/rankings/:module_type', verifyToken, isOwner, controller.getRankings);
 router.post('/rankings/:module_type', verifyToken, isOwner, controller.upsertRanking);
 router.delete('/rankings/:id', verifyToken, isOwner, controller.deleteRanking);

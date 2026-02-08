@@ -107,6 +107,13 @@ function invalidateCache(moduleType = null) {
   }
 }
 
+function clearCache(moduleType) {
+  if (moduleType && configCache[moduleType]) {
+    delete configCache[moduleType];
+    console.log(`[LLMConfigService] Cache limpo para ${moduleType}`);
+  }
+}
+
 module.exports = {
   getConfig,
   getAllConfigs,
@@ -114,5 +121,6 @@ module.exports = {
   validateProviderKey,
   getAvailableProviders,
   invalidateCache,
+  clearCache,
   DEFAULT_CONFIG
 };

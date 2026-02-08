@@ -43,6 +43,20 @@ const AssistantLLMConfig = sequelize.define('AssistantLLMConfig', {
     defaultValue: {},
     comment: 'Provider-specific additional parameters like base_url for custom endpoints'
   },
+  rag_enabled: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    comment: 'Whether this agent uses RAG (vector database queries)'
+  },
+  rag_knowledge_base: {
+    type: DataTypes.STRING(50),
+    allowNull: true,
+    defaultValue: null,
+    validate: {
+      isIn: [['kb_baby', 'kb_mother', 'kb_professional', 'landing', null]]
+    },
+    comment: 'Which knowledge base this agent queries (null = none)'
+  },
   is_active: {
     type: DataTypes.BOOLEAN,
     defaultValue: true
