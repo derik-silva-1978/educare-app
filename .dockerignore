@@ -1,19 +1,18 @@
 node_modules
+educare-backend/node_modules
 npm-debug.log*
 .git
 .gitignore
 .env
 .env.*
 !.env.example
+!.env.production.template
 dist
 build
 .vscode
 .idea
 *.md
 !DEPLOY.md
-Dockerfile*
-docker-compose*
-.dockerignore
 coverage
 .nyc_output
 *.log
@@ -27,5 +26,7 @@ replit.md
 .local
 .agents
 attached_assets
+arquivos_da_vps
 .upm
 generated-icon.png
+educare-backend/titnautav2_para analise

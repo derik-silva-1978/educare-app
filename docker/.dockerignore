@@ -1,0 +1,20 @@
+node_modules
+.git
+.gitignore
+*.md
+.env
+.env.*
+!.env.production.template
+dist
+.vscode
+.idea
+logs
+*.log
+uploads
+.replit
+replit.nix
+replit.md
+attached_assets
+arquivos_da_vps
+docs
+titnautav2_para analise

@@ -1,0 +1,20 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache python3 make g++ curl
+
+COPY educare-backend/package*.json ./
+
+RUN npm ci --omit=dev --legacy-peer-deps
+
+COPY educare-backend/ .
+
+RUN mkdir -p uploads/knowledge uploads/media logs
+
+EXPOSE 5000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+  CMD curl -f http://localhost:5000/ || exit 1
+
+CMD ["node", "src/server.js"]

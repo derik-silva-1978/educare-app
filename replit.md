@@ -43,19 +43,45 @@ The frontend uses React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Tailwi
     - **Inactive User Reactivation**: Manages users with inactive subscriptions through a 3-stage reactivation funnel with an AI agent, Stripe integration, and opt-out detection.
 
 ### System Design Choices
-- **Scalability**: Designed for Digital Ocean cloud deployment with multiple droplets, PostgreSQL, and Redis.
+- **Scalability**: Designed for Contabo VPS with Docker containers, PostgreSQL, and internal networking.
 - **Modularity**: Distinct services for independent development.
 - **Observability**: Metrics and logging for RAG performance and system health.
 - **Controlled Rollout**: Uses feature flags for phased feature rollouts.
 
+## Deployment Architecture (Contabo VPS + Docker)
+
+### Infrastructure
+- **Server**: Contabo VPS with Docker + Portainer
+- **Containers**: 3 services (postgres, backend, frontend) on the same Docker bridge network
+- **Domains**: `educareapp.com.br` (frontend), `api.educareapp.com.br` (backend)
+- **Reverse Proxy**: Nginx Proxy Manager or Traefik (external to docker-compose) routes traffic to containers
+
+### Docker Files
+- `docker/Dockerfile.backend` - Node.js 20 Alpine, builds backend on port 5000
+- `docker/Dockerfile.frontend` - Multi-stage: Vite build + nginx serving on port 80
+- `docker/nginx.conf` - Frontend nginx config with SPA support and security headers
+- `docker-compose.yml` - Orchestrates all 3 services with health checks
+- `.env.production.template` - Template with all required environment variables
+
+### Deploy Process
+1. Push code to git repository
+2. On the server: `git pull && docker-compose build && docker-compose up -d`
+3. Backend auto-migrations run on startup (RAG columns, metadata backfill)
+
+### Port Mapping (internal)
+- PostgreSQL: 5432 (container) → 127.0.0.1:5432 (host)
+- Backend: 5000 (container) → 127.0.0.1:5000 (host)
+- Frontend: 80 (container) → 127.0.0.1:3000 (host)
+- External Nginx/Traefik proxies HTTPS → internal ports
+
 ## External Dependencies
 
-- **Database**: PostgreSQL
+- **Database**: PostgreSQL (Docker container on same server)
 - **Automation Platform**: n8n Workflow
 - **Messaging**: WhatsApp (via Evolution API)
 - **Payment Gateway**: Stripe
 - **AI/ML**: OpenAI API (File Search, LLM), Google Gemini (OCR, Embeddings)
 - **Vector Database**: Qdrant Cloud
-- **Cloud Provider**: Digital Ocean
+- **Cloud Provider**: Contabo VPS
 - **UI Libraries**: Radix UI, Tailwind CSS (via shadcn/ui)
 - **Frontend State Management**: `@tanstack/react-query`
