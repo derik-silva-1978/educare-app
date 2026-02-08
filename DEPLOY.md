@@ -1,80 +1,77 @@
 # Educare+ — Guia de Deploy via Portainer (Docker Swarm)
 
-Este guia explica como publicar a aplicação Educare+ no seu servidor (VPS) usando o **Portainer** com **Docker Swarm**.
+Este guia explica como publicar a aplicação Educare+ no seu servidor usando o **Portainer** com **Docker Swarm** e imagens do **Docker Hub**.
 
 ---
 
 ## Visão Geral do Fluxo
 
 ```
-1. git pull (no VPS)       → Baixar o código mais recente
-2. ./build.sh              → Compilar as imagens localmente
-3. Portainer (Stack)       → Fazer deploy usando as imagens locais
+1. git push (no seu computador)  → Envia código para o GitHub
+2. GitHub Actions (automático)    → Compila e publica imagens no Docker Hub
+3. Portainer (no navegador)       → Faz deploy usando as imagens do Docker Hub
 ```
 
-> O Docker Swarm não compila imagens — ele precisa delas prontas. Por isso usamos o script `build.sh` para compilar antes do deploy.
+> Tudo é automático após o `git push`. Você só precisa atualizar o Stack no Portainer.
 
 ---
 
-## Antes de Começar
+## Configuração Inicial (fazer uma vez)
 
-Você vai precisar de:
+### 1. Criar conta no Docker Hub
 
-- **Portainer** instalado e acessível (ex: `https://painel.educareapp.com.br`)
-- O código do Educare+ num **repositório Git** (GitHub, GitLab, etc.)
-- **Acesso SSH** ao servidor para rodar o script de build
-- **PostgreSQL** já rodando no servidor
+1. Acesse [hub.docker.com](https://hub.docker.com)
+2. Clique em **Sign Up** e crie sua conta (grátis)
+3. Anote seu **nome de usuário** (ex: `meunome`)
 
----
+### 2. Criar Access Token no Docker Hub
 
-## Passo 1: Clonar o Repositório no Servidor
+1. No Docker Hub, clique no seu avatar → **Account Settings**
+2. Vá em **Security** → **New Access Token**
+3. Nome: `github-actions`
+4. Permissões: **Read & Write**
+5. Clique em **Generate** e **copie o token** (só aparece uma vez!)
 
-Acesse o terminal do servidor via SSH e clone o repositório:
+### 3. Configurar Secrets no GitHub
+
+No repositório do GitHub:
+
+1. Vá em **Settings** → **Secrets and variables** → **Actions**
+2. Clique em **New repository secret** e adicione:
+
+| Nome do Secret | Valor |
+|---|---|
+| `DOCKERHUB_USERNAME` | Seu nome de usuário do Docker Hub (ex: `meunome`) |
+| `DOCKERHUB_TOKEN` | O Access Token que você copiou |
+| `VITE_API_URL` | `https://api.educareapp.com.br` |
+
+3. Pronto! A cada `git push` na branch `main`, as imagens serão compiladas e publicadas automaticamente.
+
+### 4. Primeiro build
+
+Faça um commit e push para disparar o primeiro build:
 
 ```bash
-cd /opt
-git clone https://github.com/seu-usuario/educare.git
-cd educare
+git add .
+git commit -m "configurar deploy automático"
+git push origin main
 ```
 
-> Se o repositório for privado, use um Personal Access Token:
-> `git clone https://SEU_TOKEN@github.com/seu-usuario/educare.git`
+No GitHub, vá em **Actions** para acompanhar o build. O primeiro pode levar 5-10 minutos.
 
 ---
 
-## Passo 2: Compilar as Imagens
+## Criar o Stack no Portainer
 
-Antes de fazer deploy no Portainer, compile as imagens no servidor:
-
-```bash
-cd /opt/educare
-
-# Defina a URL da API (obrigatório para o frontend)
-export VITE_API_URL=https://api.educareapp.com.br
-
-# Execute o build
-./build.sh
-```
-
-O script vai:
-- Compilar `educare-backend:latest` (Node.js)
-- Compilar `educare-frontend:latest` (React + Nginx)
-
-Ao final, você verá as imagens listadas. Isso confirma que estão prontas.
-
-> **Primeira vez?** O build pode levar 3-5 minutos para baixar as imagens base.
-
----
-
-## Passo 3: Criar o Stack no Portainer
-
-### 3.1 Preparar as Variáveis de Ambiente
+### Preparar as Variáveis de Ambiente
 
 Copie e preencha com seus dados reais:
 
 #### Variáveis Obrigatórias
 
 ```
+DOCKERHUB_USERNAME=seu_usuario_dockerhub
+
 NODE_ENV=production
 PORT=5000
 
@@ -125,7 +122,7 @@ RAG_PRIMARY_PROVIDER=openai
 ENABLE_SEGMENTED_KB=true
 ```
 
-### 3.2 Criar o Stack
+### Criar o Stack
 
 1. Abra o **Portainer** no navegador
 
@@ -135,25 +132,34 @@ ENABLE_SEGMENTED_KB=true
 
 4. Preencha:
    - **Name:** `educare`
-   - **Build method:** Selecione **Web editor**
+   - **Build method:** Selecione **Repository**
 
-5. Cole o conteúdo do arquivo `docker-compose.yml` no editor
+5. Preencha os dados do repositório:
+
+   | Campo | O que colocar |
+   |---|---|
+   | **Authentication** | Ative se o repositório for privado |
+   | **Username** | Seu usuário do GitHub |
+   | **Personal Access Token** | Seu token do GitHub |
+   | **Repository URL** | `https://github.com/seu-usuario/educare.git` |
+   | **Repository reference** | `refs/heads/main` |
+   | **Compose path** | `docker-compose.yml` |
 
 6. Role para baixo até **Environment variables**
 
 7. Clique em **Advanced mode**
 
-8. Cole todas as variáveis do passo 3.1 (já preenchidas)
+8. Cole todas as variáveis (já preenchidas)
 
 9. Clique em **Deploy the stack**
 
-> **Por que Web editor e não Git?** No modo Swarm, o Portainer não suporta `build` via Git. As imagens precisam estar prontas localmente (feito no Passo 2). Usamos Web editor para colar o compose diretamente.
+> As imagens serão baixadas do Docker Hub automaticamente. O deploy leva poucos segundos.
 
 ---
 
-## Passo 4: Verificar se Está Funcionando
+## Verificar se Está Funcionando
 
-Após o deploy, você verá os serviços listados no Stack:
+Após o deploy, os serviços aparecem no Stack:
 
 | Serviço | Status esperado |
 |---|---|
@@ -164,67 +170,54 @@ Após o deploy, você verá os serviços listados no Stack:
 
 1. No menu lateral, clique em **Services**
 2. Clique no serviço (ex: `educare_backend`)
-3. Clique em **Logs** para ver em tempo real
+3. Clique em **Logs**
 
 ### Testar
 
-- Abra `https://educareapp.com.br` (ou o IP do servidor)
+- Abra `https://educareapp.com.br`
 - Você deve ver a tela de login do Educare+
 
 ---
 
 ## Como Atualizar (Nova Versão)
 
-Quando tiver uma atualização no código:
+O processo é simples:
 
-### No terminal do servidor (SSH):
+1. **Faça `git push`** das alterações para o GitHub
 
-```bash
-cd /opt/educare
+2. **Espere o build** — Vá em GitHub → Actions para acompanhar (2-5 min)
 
-# 1. Baixar código atualizado
-git pull
+3. **No Portainer:**
+   - Vá em **Stacks** → **educare**
+   - Clique em **Pull and redeploy**
+   - Marque **Pull latest image versions**
+   - Clique em **Update**
 
-# 2. Recompilar as imagens
-export VITE_API_URL=https://api.educareapp.com.br
-./build.sh
-```
+> O Portainer vai baixar as imagens novas do Docker Hub e reiniciar os serviços.
 
-### No Portainer:
+### Atualização Automática (Opcional)
 
-3. Vá em **Stacks** → clique em **educare**
+Você pode configurar o Portainer para verificar novas imagens automaticamente:
 
-4. Clique em **Update the stack** → **Update**
-
-> O Portainer vai detectar que as imagens locais foram atualizadas e reiniciar os serviços com a versão nova.
-
-> **Lembre-se:** Se mudou o `VITE_API_URL`, precisa rodar o `./build.sh` novamente, pois esse valor é embutido no frontend durante a compilação.
+1. Edite o Stack
+2. Na seção **GitOps updates**, ative a opção
+3. Defina o intervalo (ex: a cada 5 minutos)
 
 ---
 
 ## Como Voltar para uma Versão Anterior (Rollback)
 
-Se algo der errado após uma atualização:
+Cada build gera uma tag com o hash do commit. Para voltar:
 
-### No terminal do servidor (SSH):
+1. No Docker Hub, veja as tags disponíveis da imagem
 
-```bash
-cd /opt/educare
+2. No Portainer, edite o Stack e troque `:latest` pela tag desejada:
+   ```
+   seuusuario/educare-frontend:abc1234
+   seuusuario/educare-backend:abc1234
+   ```
 
-# 1. Ver os últimos commits
-git log --oneline -5
-
-# 2. Voltar para o commit anterior
-git checkout HASH_DO_COMMIT_ANTERIOR -- .
-
-# 3. Recompilar
-export VITE_API_URL=https://api.educareapp.com.br
-./build.sh
-```
-
-### No Portainer:
-
-4. Vá em **Stacks** → **educare** → **Update the stack**
+3. Clique em **Update the stack**
 
 ---
 
@@ -248,15 +241,11 @@ O PostgreSQL precisa aceitar conexões vindas do Docker:
    ```
    Adicione:
    ```
-   host    all    all    172.16.0.0/12    md5
    host    all    all    10.0.0.0/8       md5
+   host    all    all    172.16.0.0/12    md5
    ```
 
 2. Edite o `postgresql.conf`:
-   ```bash
-   sudo nano /etc/postgresql/*/main/postgresql.conf
-   ```
-   Altere para:
    ```
    listen_addresses = '*'
    ```
@@ -266,35 +255,41 @@ O PostgreSQL precisa aceitar conexões vindas do Docker:
    sudo systemctl restart postgresql
    ```
 
-> **Nota Swarm:** Containers no Swarm usam a rede overlay (10.0.x.x), por isso adicionamos `10.0.0.0/8` além do range Docker padrão.
+> **Nota Swarm:** Containers no Swarm usam a rede overlay (10.0.x.x), por isso adicionamos `10.0.0.0/8`.
 
 ### "Frontend mostra página em branco"
 
-1. Verifique se compilou o frontend com `VITE_API_URL` correto
-2. Recompile: `export VITE_API_URL=https://api.educareapp.com.br && ./build.sh`
-3. No Portainer, atualize o Stack
+1. Verifique se o secret `VITE_API_URL` está correto no GitHub
+2. Refaça o build: GitHub → Actions → Run workflow
+3. No Portainer, atualize o Stack com **Pull latest image versions**
 
 ### "Erro 502 Bad Gateway"
 
-O frontend não consegue se comunicar com o backend:
 1. Verifique se o serviço `educare_backend` está rodando
-2. Veja os logs do backend para identificar o erro
+2. Veja os logs do backend
+
+### "Image not found" ou "manifest unknown"
+
+1. Verifique se o build do GitHub Actions passou (GitHub → Actions)
+2. Verifique se o `DOCKERHUB_USERNAME` está correto nas variáveis do Portainer
+3. Confirme que as imagens existem no Docker Hub: `hub.docker.com/u/seuusuario`
 
 ### Volumes e dados persistentes
 
-Os volumes (`uploads_data`, `knowledge_data`) são locais ao nó do Swarm onde o serviço roda. Por isso, usamos `placement.constraints` no compose para garantir que os serviços sempre rodem no mesmo nó (manager), preservando os dados.
-
-### "Imagem não encontrada"
-
-Se o Portainer mostrar erro de imagem:
-1. Verifique se rodou o `./build.sh` no servidor
-2. Confirme que as imagens existem: `docker images | grep educare`
+Os volumes (`uploads_data`, `knowledge_data`) são locais ao nó do Swarm. Usamos `placement.constraints` para garantir que os serviços sempre rodem no mesmo nó (manager), preservando os dados.
 
 ---
 
 ## Estrutura dos Serviços
 
 ```
+    GitHub Push
+         │
+         ▼
+  GitHub Actions ──▶ Docker Hub
+  (build & push)     (imagens)
+                         │
+                         ▼
                     ┌─────────────────┐
     Internet ──────▶│  Frontend       │
     (porta 80)      │  (Nginx)        │
@@ -318,27 +313,14 @@ Se o Portainer mostrar erro de imagem:
 
 ---
 
-## Comandos Úteis (Terminal do Servidor)
-
-| O que fazer | Comando |
-|---|---|
-| Ver serviços do Swarm | `docker service ls` |
-| Ver logs do backend | `docker service logs educare_backend -f --tail=100` |
-| Ver logs do frontend | `docker service logs educare_frontend -f --tail=100` |
-| Ver imagens locais | `docker images \| grep educare` |
-| Recompilar tudo | `./build.sh` |
-| Limpar imagens antigas | `docker image prune -f` |
-
----
-
-## Arquivos de Configuração Docker
+## Arquivos de Configuração
 
 | Arquivo | Função |
 |---|---|
-| `docker-compose.yml` | Define os serviços e como se conectam (formato Swarm) |
-| `Dockerfile.backend` | Receita para criar a imagem do backend (Node.js) |
-| `Dockerfile.frontend` | Receita para criar a imagem do frontend (React + Nginx) |
-| `nginx.conf` | Configuração do servidor web (proxy + arquivos estáticos) |
-| `build.sh` | Script para compilar as imagens localmente |
-| `.env.example` | Modelo com todas as variáveis de ambiente |
-| `.dockerignore` | Lista de arquivos ignorados pelo Docker no build |
+| `docker-compose.yml` | Define os serviços para Swarm |
+| `Dockerfile.backend` | Receita da imagem do backend |
+| `Dockerfile.frontend` | Receita da imagem do frontend |
+| `nginx.conf` | Proxy reverso e arquivos estáticos |
+| `.github/workflows/docker-build.yml` | Build automático via GitHub Actions |
+| `build.sh` | Build manual local (alternativa) |
+| `.env.example` | Modelo de variáveis de ambiente |
