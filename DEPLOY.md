@@ -22,7 +22,7 @@ Este guia explica como publicar a aplicação Educare+ no seu servidor usando o 
 
 1. Acesse [hub.docker.com](https://hub.docker.com)
 2. Clique em **Sign Up** e crie sua conta (grátis)
-3. Anote seu **nome de usuário** (ex: `meunome`)
+3. Anote seu **nome de usuário** (ex: `educaremais`)
 
 ### 2. Criar Access Token no Docker Hub
 
@@ -41,7 +41,7 @@ No repositório do GitHub:
 
 | Nome do Secret | Valor |
 |---|---|
-| `DOCKERHUB_USERNAME` | Seu nome de usuário do Docker Hub (ex: `meunome`) |
+| `DOCKERHUB_USERNAME` | `educaremais` |
 | `DOCKERHUB_TOKEN` | O Access Token que você copiou |
 | `VITE_API_URL` | `https://api.educareapp.com.br` |
 
@@ -70,7 +70,7 @@ Copie e preencha com seus dados reais:
 #### Variáveis Obrigatórias
 
 ```
-DOCKERHUB_USERNAME=seu_usuario_dockerhub
+DOCKERHUB_USERNAME=educaremais
 
 NODE_ENV=production
 PORT=5000
@@ -213,8 +213,8 @@ Cada build gera uma tag com o hash do commit. Para voltar:
 
 2. No Portainer, edite o Stack e troque `:latest` pela tag desejada:
    ```
-   seuusuario/educare-frontend:abc1234
-   seuusuario/educare-backend:abc1234
+   educaremais/educare-frontend:abc1234
+   educaremais/educare-backend:abc1234
    ```
 
 3. Clique em **Update the stack**
@@ -272,7 +272,7 @@ O PostgreSQL precisa aceitar conexões vindas do Docker:
 
 1. Verifique se o build do GitHub Actions passou (GitHub → Actions)
 2. Verifique se o `DOCKERHUB_USERNAME` está correto nas variáveis do Portainer
-3. Confirme que as imagens existem no Docker Hub: `hub.docker.com/u/seuusuario`
+3. Confirme que as imagens existem no Docker Hub: [hub.docker.com/u/educaremais](https://hub.docker.com/u/educaremais)
 
 ### Volumes e dados persistentes
 

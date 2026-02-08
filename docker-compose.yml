@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   frontend:
-    image: ${DOCKERHUB_USERNAME}/educare-frontend:latest
+    image: ${DOCKERHUB_USERNAME:-educaremais}/educare-frontend:latest
     ports:
       - "80:80"
     networks:
@@ -27,7 +27,7 @@ services:
       retries: 3
 
   backend:
-    image: ${DOCKERHUB_USERNAME}/educare-backend:latest
+    image: ${DOCKERHUB_USERNAME:-educaremais}/educare-backend:latest
     environment:
       - NODE_ENV=${NODE_ENV:-production}
       - PORT=${PORT:-5000}
