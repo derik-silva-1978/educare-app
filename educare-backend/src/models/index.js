@@ -60,6 +60,7 @@ const KbProfessional = require('./KbProfessional');
 // Modelo de Prompts dos Assistentes
 const AssistantPrompt = require('./AssistantPrompt');
 const AssistantLLMConfig = require('./AssistantLLMConfig');
+const AgentModelRanking = require('./AgentModelRanking');
 
 // Modelos de Saúde Materna
 const MaternalHealthProfile = require('./MaternalHealthProfile');
@@ -431,6 +432,10 @@ AssistantPrompt.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 User.hasMany(AssistantPrompt, { foreignKey: 'updated_by', as: 'updatedPrompts' });
 AssistantPrompt.belongsTo(User, { foreignKey: 'updated_by', as: 'updater' });
 
+// AgentModelRanking <-> User (rated_by)
+User.hasMany(AgentModelRanking, { foreignKey: 'rated_by', as: 'modelRankings' });
+AgentModelRanking.belongsTo(User, { foreignKey: 'rated_by', as: 'rater' });
+
 // Exportação dos modelos
 module.exports = {
   sequelize,
@@ -495,6 +500,7 @@ module.exports = {
   // Modelo de Prompts dos Assistentes
   AssistantPrompt,
   AssistantLLMConfig,
+  AgentModelRanking,
   // Modelos de Saúde Materna
   MaternalHealthProfile,
   MaternalDailyHealth,

@@ -1,7 +1,7 @@
 # Educare+ Platform
 
 ## Overview
-Educare+ is a digital platform designed for early childhood development and maternal health monitoring. It serves as a comprehensive hub connecting parents, caregivers, educators, and healthcare professionals to foster collaborative care. The platform offers interactive assessments, personalized guidance, and advanced communication tools, including an AI-powered assistant (TitiNauta) and WhatsApp integration for remote engagement. Its core mission is to leverage AI and seamless communication to empower stakeholders, improve developmental and health outcomes, and establish itself as a leading solution in the market through a multi-level SaaS subscription model.
+Educare+ is a digital platform for early childhood development and maternal health monitoring, connecting parents, caregivers, educators, and healthcare professionals. It provides interactive assessments, personalized guidance, and advanced communication tools, including an AI-powered assistant (TitiNauta) and WhatsApp integration. The platform aims to improve developmental and health outcomes through AI and seamless communication, establishing itself as a leading market solution via a multi-level SaaS subscription model.
 
 ## User Preferences
 - Preferred communication style: Simple, everyday language.
@@ -12,64 +12,47 @@ Educare+ is a digital platform designed for early childhood development and mate
 ## System Architecture
 
 ### UI/UX Decisions
-The frontend, built with React 18, TypeScript, and Vite, utilizes `shadcn/ui` (Radix UI + Tailwind CSS) to ensure a professional and WCAG-compliant user interface. Key components like `WelcomeHub` and `ProfessionalWelcomeHub` deliver dynamic, audience-filtered content and navigation.
+The frontend uses React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Tailwind CSS) for a professional, WCAG-compliant interface. Components like `WelcomeHub` and `ProfessionalWelcomeHub` provide dynamic, audience-filtered content.
 
 ### Technical Implementations
-- **Frontend**: React, `@tanstack/react-query`, React Router, `react-hook-form` with Zod for validation, and a custom JWT-based authentication context.
-- **Backend**: Node.js with Express.js, Sequelize ORM, a layered MVC architecture, and JWT-based authentication featuring access/refresh tokens and Row-Level Security (RLS). APIs are RESTful.
-- **AI/RAG Architecture**: An 11-phase Retrieval-Augmented Generation (RAG) system with segmented knowledge bases (`kb_baby`, `kb_mother`, `kb_professional`), dual ingestion/routing, neural re-ranking, confidence scoring, intelligent chunking, data augmentation, context safety, and KB versioning. This system also incorporates short and long-term child memory for personalized AI responses.
-- **Authentication**: Robust JWT-based authentication with role-based access control (Owner, Admin, Professional, Parent), supporting email and phone-based registration and password recovery via email or WhatsApp. JWT tokens include issuer/audience validation. Proper JWT_SECRET environment variable configured.
-- **API Security**: Rate limiting via `express-rate-limit` (general: 100 req/15min, auth: 10 req/15min, external/n8n: 30 req/min). CORS restricted to allowed origins in production. Helmet.js security headers. Payload size limits (10MB). Sanitized logging (no sensitive data in console output).
-- **Content Management**: Includes an Owner panel for managing knowledge base documents (with cloud storage uploads) and an Admin/Owner system for creating dynamic, audience-targeted content with rich text editing.
-- **AI Assistant (TitiNauta)**: A multimodal, masculine AI assistant integrated with the RAG system, offering contextual greetings, quick topic access, and a dedicated "Jornada do Desenvolvimento" experience. It supports child-specific context for personalized responses and suggestions. Includes three variants:
-    - **TitiNauta** (Parents): Child development focus with baby-specific memory context, accessing `kb_baby`
-    - **TitiNauta Materna**: Maternal health journey with pink/rose visual theme, accessing `kb_mother` with null child context for pregnancy, postpartum, nutrition, sleep, and mental health questions
-    - **TitiNauta Especialista** (Professionals): Clinical protocols and evidence-based practices, accessing `kb_professional`
-- **Baby & Mother Health Dashboards**: Real-time monitoring for babies (growth charts, vaccine checklists) and mothers (wellness metrics, appointments, mood tracking). The Maternal Health system uses 4 database tables (maternal_health_profiles, maternal_daily_health, maternal_mental_health, maternal_appointments) with full REST API at `/api/maternal-health/*`, React Query hooks, and functional Health Diary dialogs for symptom, sleep, meal, mood, and appointment logging.
-- **Admin Children Management**: Global admin panel for managing all children across users with search, detail view, and delete functionality (admin/owner only).
-- **Child Limit Upgrade Flow**: When child creation hits the subscription plan limit, a ChildLimitUpgradeDialog shows available Stripe plans for upgrade instead of a generic error.
-- **Dynamic Contextual FAQ**: A query-based FAQ system with suggestions adapted to a child's developmental stage.
-- **Professional Portal**: Provides tailored dashboards, child management features, a specialized `TitiNauta Especialista` (accessing `kb_professional`), and a professional qualification module.
-- **Training Content System**: A video-based platform with public browsing, admin management, Vimeo integration, and Stripe for one-time payments.
-- **AI Configuration Systems (Owner-exclusive)**:
-    - **Prompt Management**: Customization of AI assistant behavior with versioning and dynamic variable substitution.
-    - **LLM Configuration**: Extensible system for per-agent model selection across 9 providers (OpenAI, Google Gemini, DeepSeek, Groq, xAI, Anthropic, Together AI, OpenRouter, Custom) with configurable parameters.
-- **Journey V2 Content System**: A comprehensive content management system for educational maternal health and baby development content. Features two content types: educational topics (weeks 1-4 orientation) and interactive quizzes (week 5+). Organized by dual trails (baby/mother), 5 months, 20 weeks. Backend admin CRUD at `/api/admin/journey-v2/*` with server-side Week 5 rule enforcement and trail/domain consistency. Frontend admin page at `/admin/journey-questions` with tabs, filters, statistics, view/edit/create dialogs, and reimport. Database models: `JourneyV2`, `JourneyV2Week`, `JourneyV2Topic`, `JourneyV2Quiz`, `JourneyV2QuizDomain`, `JourneyV2Badge`. Import script at `educare-backend/scripts/importJourneyV2.js`. Source data in `conteudo_quiz/` folder.
-- **Journey V2 Curation System (4-Axis)**: A specialized curation and classification system for Journey V2 content, operating across 4 independent axes:
-    - **Baby Content** (topics): Classified by 6 baby dev domains (motor, cognitivo, linguagem, social, emocional, sensorial) using TitiNauta Criança
-    - **Mother Content** (topics): Classified by 6 maternal domains (nutricao, saude_mental, recuperacao, amamentacao, saude_fisica, autocuidado) using TitiNauta Materna
-    - **Baby Quiz** (week 5+): Same baby dev domains, linked to existing OfficialMilestone system via extended `milestone_mappings`
-    - **Mother Quiz** (week 5+): Same maternal domains, with independent `maternal_curation_mappings` table
-    - Backend REST API at `/api/admin/curation/*` with endpoints for classification, domain management, milestone mappings (baby), maternal mappings (mother), media linking, and batch import
-    - `domainClassifierService.js`: Rule-based heuristic classifier with keyword dictionaries for both baby (6 domains) and mother (6 domains), SHA-256 content hashing for anti-duplication
-    - Batch JSON Import: `POST /api/admin/curation/batch-import` accepts `{ axis, items }` for bulk content ingestion per axis. Resolves week_id from month+week (week is relative 1-5, some months have 5 weeks), auto-classifies, deduplicates, returns detailed report. Auto-creates JourneyV2 and JourneyV2Week records for months beyond the initial 5 that don't exist yet. Batch import dialog includes JSON validation preview showing valid/invalid item counts before import.
-    - AI Auto-Fill: `classifyAll` endpoint extended to auto-fill empty quiz fields via OpenAI (gpt-4o-mini). Generates 3 short contextual options (5-15 words), welcoming positive feedback, and respectful negative feedback without right/wrong judgment. Contextualizes by trail (baby/mother), domain, and week number. Detects string-array options and reformats them. Checks both PT and EN feedback keys to prevent overwrites. Backend service: `educare-backend/src/services/quizAIService.js`.
-    - AI Content Generator: `POST /api/admin/curation/generate-ai` endpoint generates quiz/content using OpenAI with TitiNauta Infantil (baby) and TitiNauta Materna (mother) personas. Supports full 0-6 year range (72 months) with age-appropriate developmental context via `getAgeDescription()` and `getDevStageContext()` helpers. Frontend: AI Generator dialog with Year (1-6) + Month (1-12) selectors, week buttons (1-5 relative), age info bar, domain filtering, custom instructions, editable JSON preview, and direct import via batch import.
-    - Frontend: `src/services/curationService.ts` connects to all curation endpoints with typed interfaces including `AIGenerateParams` and `AIGenerateResult`
-    - Frontend: `JourneyQuestionsManagement.tsx` fully restructured with 4-axis tabs, domain classification badges (colored), confidence indicators, inline domain editing, batch import dialog with JSON validation preview, AI Content Generator dialog, milestone ranking panel (baby quiz), maternal curation panel (mother quiz), MediaSelector for linking media resources, visual quiz option builder, and separated feedback fields
-    - New models: `MaternalCurationMapping`, `JourneyV2Media` (bridge to MediaResource)
-    - Extended models: `JourneyV2Quiz` and `JourneyV2Topic` (added `dev_domain`, `content_hash`, `classification_source`, `classification_confidence`), `MilestoneMapping` (added `journey_v2_quiz_id`, `source_type`)
-    - Audit document: `docs/ingestion-curation-audit.md`
-- **AI Report Generator**: Enables generation of customizable health and development reports for children across multiple categories, with an option to send reports via WhatsApp.
-- **WhatsApp Integration**: Direct integration with Evolution API for sending messages, including password recovery links, AI-generated reports, and user access approval notifications. It also includes a user recognition system for seamless interaction within n8n workflows.
-- **User Access Approval Workflow**: New users register with 'pending' status. Owner receives WhatsApp notification with approval link. Clicking the link activates the user (`GET /api/auth/approve-user/:token`), sends welcome WhatsApp message, and notifies owner of approval. Token expires after 30 days. Admin-created professionals/admins are auto-approved (skip pending). Login returns specific messages for pending users (403). Handles edge cases: already approved, expired token, invalid token.
-- **n8n Workflow System**: Two interconnected n8n workflows for WhatsApp message processing:
-    - **Educare app-chat** (`iLDio0CFRs2Qa1VM`): Main workflow with 41 nodes handling message ingestion from Evolution/Chatwoot, user verification, deterministic intent classification (v2.3 — biometrics, sleep, vaccine, appointment, question/RAG), and response routing. HTTP nodes migrated to v4.2 with SSL bypass. 30+ fixes applied across Phases 2-5.
-    - **Lead CRM** (`n6ZpQvp96iPCaIvG`): Sub-workflow (32 nodes) for unregistered users. Features: 3-stage sales funnel (discovery→interest→action), AI agent (GPT-4.1-mini) with structured output, PGVector RAG context, Postgres chat memory, Evolution API messaging. Database tables: `lead_context`, `lead_journey`, `lead_summary`. 10 fixes applied (credential unification, SQL injection, disabled nodes, dual-source support).
-    - **Inactive User Reactivation** (`jGZCuPWlkZa8v9OB`): Sub-workflow (29 nodes) for users with inactive subscriptions. Features: 3-stage reactivation funnel (reconnect→value_reminder→reactivate), AI agent (GPT-4.1-mini), Stripe checkout session generation, short-term JSONB state memory, long-term event log, follow-up queue, opt-out keyword detection (PARAR/STOP/SAIR/CANCELAR), message deduplication. Dedicated tables: `inactive_context`, `inactive_journey`, `inactive_summary`, `wa_dedup`, `mem_short`, `mem_long_events`, `followup_queue`. 29 fixes applied (credential unification, missing trigger node, placeholder URL, wrong tables, SQL parameters, AI prompt rewrite).
-    - Audit reports: `educare-backend/docs/phase5-report.md`, `educare-backend/docs/lead-crm-audit-report.md`, `educare-backend/docs/inactive-reactivation-audit-report.md`
+- **Frontend**: React, `@tanstack/react-query`, React Router, `react-hook-form` with Zod, and JWT-based authentication.
+- **Backend**: Node.js with Express.js, Sequelize ORM, MVC architecture, and JWT-based authentication with access/refresh tokens and Row-Level Security (RLS). APIs are RESTful.
+- **AI/RAG Architecture**: An 11-phase RAG system with segmented knowledge bases (`kb_baby`, `kb_mother`, `kb_professional`), neural re-ranking, confidence scoring, intelligent chunking, data augmentation, context safety, and KB versioning. It includes short and long-term child memory for personalized AI responses.
+- **Authentication**: Robust JWT-based authentication with role-based access control (Owner, Admin, Professional, Parent), supporting email/phone registration and password recovery.
+- **API Security**: Rate limiting, CORS restrictions, Helmet.js security headers, payload size limits, and sanitized logging.
+- **Content Management**: Owner panel for knowledge base document management (with cloud storage) and Admin/Owner system for dynamic, audience-targeted content creation.
+- **AI Assistant (TitiNauta)**: A multimodal, masculine AI assistant integrated with the RAG system, offering contextual greetings and quick topic access. Three variants exist:
+    - **TitiNauta** (Parents): Child development focus, `kb_baby`.
+    - **TitiNauta Materna**: Maternal health focus, `kb_mother`.
+    - **TitiNauta Especialista** (Professionals): Clinical protocols, `kb_professional`.
+- **Baby & Mother Health Dashboards**: Real-time monitoring for babies (growth, vaccines) and mothers (wellness, appointments, mood).
+- **Admin Children Management**: Global admin panel for managing all children across users.
+- **Child Limit Upgrade Flow**: Guides users to Stripe for subscription upgrades when child creation limits are reached.
+- **Dynamic Contextual FAQ**: Query-based FAQ system with suggestions adapted to a child's developmental stage.
+- **Professional Portal**: Tailored dashboards, child management, `TitiNauta Especialista`, and a professional qualification module.
+- **Training Content System**: Video-based platform with public browsing, admin management, Vimeo integration, and Stripe for payments.
+- **AI Agents Control Center (Owner-exclusive)**: Dashboard for managing TitiNauta AI agents, featuring prompt management with versioning, LLM configuration across multiple providers, model ranking, and a live prompt testing playground.
+- **Journey V2 Content System**: CMS for educational maternal health and baby development content, including topics and interactive quizzes. Organized by dual trails (baby/mother), 5 months, 20 weeks, with admin CRUD and server-side rule enforcement.
+- **Journey V2 Curation System (4-Axis)**: Specialized curation for Journey V2 content across baby topics (6 domains), mother topics (6 domains), baby quizzes (6 domains linked to OfficialMilestone), and mother quizzes (6 domains). Features a rule-based heuristic classifier, batch JSON import, and AI auto-fill/content generation for quizzes using OpenAI.
+- **AI Report Generator**: Generates customizable health and development reports for children, with WhatsApp delivery.
+- **WhatsApp Integration**: Direct integration with Evolution API for messages, password recovery, AI reports, and user access approval notifications, including a user recognition system for n8n workflows.
+- **User Access Approval Workflow**: New users are 'pending' until an Owner approves via a WhatsApp link.
+- **n8n Workflow System**: Interconnected workflows for WhatsApp message processing:
+    - **Educare app-chat**: Handles message ingestion, user verification, intent classification, and response routing.
+    - **Lead CRM**: Manages unregistered users through a 3-stage sales funnel with an AI agent.
+    - **Inactive User Reactivation**: Manages users with inactive subscriptions through a 3-stage reactivation funnel with an AI agent, Stripe integration, and opt-out detection.
 
 ### System Design Choices
-- **Scalability**: Designed for cloud deployment on Digital Ocean using multiple droplets, PostgreSQL, and Redis.
-- **Modularity**: Distinct services to facilitate independent development and deployment.
-- **Observability**: Comprehensive metrics and logging for RAG performance and system health.
-- **Controlled Rollout**: Utilizes feature flags for safe, phased feature rollouts and easy rollbacks.
+- **Scalability**: Designed for Digital Ocean cloud deployment with multiple droplets, PostgreSQL, and Redis.
+- **Modularity**: Distinct services for independent development.
+- **Observability**: Metrics and logging for RAG performance and system health.
+- **Controlled Rollout**: Uses feature flags for phased feature rollouts.
 
 ## External Dependencies
 
 - **Database**: PostgreSQL
-- **Automation Platform**: n8n Workflow (for WhatsApp ingestion, AI processing, context management, and response delivery)
-- **Messaging**: WhatsApp (via Evolution API at api.educareapp.com.br, instance: educare-chat)
+- **Automation Platform**: n8n Workflow
+- **Messaging**: WhatsApp (via Evolution API)
 - **Payment Gateway**: Stripe
 - **AI/ML**: OpenAI API (File Search, LLM), Google Gemini (OCR, Embeddings)
 - **Vector Database**: Qdrant Cloud

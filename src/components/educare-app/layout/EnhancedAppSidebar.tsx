@@ -165,7 +165,7 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         icon: Baby,
       },
       {
-        title: "Prompts dos Assistentes",
+        title: "Central de Agentes IA",
         url: "/educare-app/owner/prompt-management",
         icon: Bot,
       },

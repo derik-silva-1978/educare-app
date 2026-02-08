@@ -238,6 +238,10 @@ app.use('/api/assistant-prompts', assistantPromptRoutes);
 const llmConfigRoutes = require('./routes/llmConfigRoutes');
 app.use('/api/llm-configs', llmConfigRoutes);
 
+// AI Agents Control Center routes (Owner only)
+const agentControlCenterRoutes = require('./routes/agentControlCenterRoutes');
+app.use('/api/agent-control', agentControlCenterRoutes);
+
 // Training content routes (FASE 2)
 const trainingRoutes = require('./routes/trainingRoutes');
 app.use('/api/trainings', trainingRoutes);
