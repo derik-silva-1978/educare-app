@@ -250,6 +250,50 @@ app.use('/api/trainings', trainingRoutes);
 const vimeoRoutes = require('./routes/vimeoRoutes');
 app.use('/api/vimeo', vimeoRoutes);
 
+// Database migration endpoint (protected by EXTERNAL_API_KEY)
+app.post('/api/admin/run-migrations', (req, res) => {
+  const apiKey = req.query.api_key || req.headers['x-api-key'];
+  if (!apiKey || apiKey !== process.env.EXTERNAL_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { exec } = require('child_process');
+  res.setHeader('Content-Type', 'application/json');
+
+  exec('npx sequelize-cli db:migrate --env production 2>&1', { cwd: '/app', timeout: 60000 }, (error, stdout, stderr) => {
+    res.json({
+      success: !error,
+      exitCode: error ? error.code : 0,
+      output: stdout || '',
+      error: stderr || (error ? error.message : '')
+    });
+  });
+});
+
+// Database schema diagnostic endpoint (protected by EXTERNAL_API_KEY)
+app.get('/api/admin/db-status', async (req, res) => {
+  const apiKey = req.query.api_key || req.headers['x-api-key'];
+  if (!apiKey || apiKey !== process.env.EXTERNAL_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const { sequelize } = require('./config/database');
+    const [usersColumns] = await sequelize.query(
+      "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'users' ORDER BY ordinal_position"
+    );
+    const [subsColumns] = await sequelize.query(
+      "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'subscriptions' ORDER BY ordinal_position"
+    );
+    const [migrations] = await sequelize.query(
+      "SELECT name FROM \"SequelizeMeta\" ORDER BY name DESC LIMIT 10"
+    );
+    res.json({ users_columns: usersColumns, subscriptions_columns: subsColumns, recent_migrations: migrations });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Rotas de health check (sem prefixo /api para acesso direto)
 app.use('/health', healthRoutes);
 
