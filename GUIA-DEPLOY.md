@@ -2,12 +2,16 @@
 
 ## O que vamos fazer
 
-Vamos colocar o Educare+ no ar em 3 etapas simples:
-1. Criar o subdomínio da API no Registro.br
-2. Subir a aplicação no Portainer
-3. Verificar se está tudo funcionando
+Vamos colocar o Educare+ no ar em 2 etapas simples:
+1. Subir a aplicacao no Portainer
+2. Verificar se esta tudo funcionando
 
-Configurações do Traefik já confirmadas:
+**Nao precisa criar subdominio!** O frontend e o backend funcionam no mesmo
+endereco `educareapp.com.br`. O Traefik direciona automaticamente:
+- `educareapp.com.br` → Abre o site (frontend)
+- `educareapp.com.br/api/*` → Vai para o servidor (backend)
+
+Configuracoes do Traefik ja confirmadas:
 - Entrypoints: `web` (porta 80) e `websecure` (porta 443)
 - Cert Resolver: `letsencryptresolver`
 - Rede: `educarenet`
@@ -15,61 +19,47 @@ Configurações do Traefik já confirmadas:
 
 ---
 
-## ETAPA 1 — Criar o subdomínio no Registro.br
+## ETAPA 1 — Subir a aplicacao no Portainer
 
-O site principal já funciona em `educareapp.com.br`. Agora precisamos que
-`api.educareapp.com.br` também aponte para o mesmo servidor.
+### Passo 1.1 — Criar os volumes necessarios
 
-### Passo a passo:
+Antes de subir a stack, precisamos criar os volumes para armazenar os dados.
 
-1. Acesse: https://registro.br
-2. Faça login com sua conta
-3. Clique no domínio **educareapp.com.br**
-4. No menu, procure por **"DNS"** ou **"Editar Zona"** e clique
-5. Clique no botão **"Nova entrada"** ou **"Adicionar registro"**
-6. Preencha os campos assim:
+1. No Portainer, no menu lateral, clique em **"Volumes"**
+2. Crie os 3 volumes abaixo (clique em **"Add volume"** para cada um):
 
-   | Campo         | O que preencher                          |
-   |---------------|------------------------------------------|
-   | **Tipo**      | `A`                                      |
-   | **Nome**      | `api`                                    |
-   | **Dados/IP**  | O mesmo IP do seu servidor Contabo       |
+   | Nome do Volume    |
+   |-------------------|
+   | `postgres_data`   |
+   | `uploads_data`    |
+   | `backend_logs`    |
 
-7. Clique em **Salvar**
+   Para cada um: digite o nome, deixe o driver como **"local"** e clique em **"Create the volume"**.
 
-Para encontrar o IP do servidor: é o mesmo número que aparece no registro `A`
-do `educareapp.com.br` (algo como `123.456.789.10`).
-
-Aguarde de 10 minutos a 2 horas para o subdomínio funcionar.
-
----
-
-## ETAPA 2 — Subir a aplicação no Portainer
-
-### Passo 2.1 — Abrir a tela de Stacks
+### Passo 1.2 — Abrir a tela de Stacks
 
 1. Acesse o Portainer no navegador
 2. No menu lateral, clique em **"Stacks"**
-3. Clique no botão **"+ Add stack"** (Adicionar stack)
+3. Clique no botao **"+ Add stack"** (Adicionar stack)
 
-### Passo 2.2 — Configurar a Stack
+### Passo 1.3 — Configurar a Stack
 
 1. No campo **"Name"** (Nome), digite: `educare`
 
 2. Em **"Build method"**, selecione: **"Repository"**
 
-3. Preencha os campos do repositório:
+3. Preencha os campos do repositorio:
 
    | Campo                    | O que preencher                                          |
    |--------------------------|----------------------------------------------------------|
-   | **Repository URL**       | O link do seu repositório no GitHub                      |
+   | **Repository URL**       | O link do seu repositorio no GitHub                      |
    | **Repository reference** | `refs/heads/main` (ou o nome da sua branch principal)    |
    | **Compose path**         | `docker-compose.yml`                                     |
 
-4. Se o repositório for **privado**, ative a opção **"Authentication"** e
-   coloque seu nome de usuário do GitHub e um token de acesso.
+4. Se o repositorio for **privado**, ative a opcao **"Authentication"** e
+   coloque seu nome de usuario do GitHub e um token de acesso.
 
-### Passo 2.3 — Criar o Token do GitHub (se o repositório for privado)
+### Passo 1.4 — Criar o Token do GitHub (se o repositorio for privado)
 
 Se precisar criar um token de acesso do GitHub:
 
@@ -77,14 +67,14 @@ Se precisar criar um token de acesso do GitHub:
 2. Clique em **"Generate new token (classic)"**
 3. Em **"Note"**, escreva: `portainer-educare`
 4. Em **"Expiration"**, escolha **"No expiration"** (ou uma data que preferir)
-5. Marque a opção: **repo** (acesso completo ao repositório)
+5. Marque a opcao: **repo** (acesso completo ao repositorio)
 6. Clique em **"Generate token"**
-7. Copie o token gerado (ele só aparece uma vez!)
-8. Volte ao Portainer e cole no campo de autenticação
+7. Copie o token gerado (ele so aparece uma vez!)
+8. Volte ao Portainer e cole no campo de autenticacao
 
-### Passo 2.4 — Preencher as Variáveis de Ambiente
+### Passo 1.5 — Preencher as Variaveis de Ambiente
 
-Role a tela para baixo até a seção **"Environment variables"**.
+Role a tela para baixo ate a secao **"Environment variables"**.
 
 Clique em **"Advanced mode"** para poder colar tudo de uma vez.
 
@@ -101,9 +91,9 @@ JWT_REFRESH_SECRET=[CRIE_OUTRA_FRASE_LONGA_DIFERENTE]
 JWT_REFRESH_EXPIRES_IN=7d
 
 FRONTEND_URL=https://educareapp.com.br
-BACKEND_URL=https://api.educareapp.com.br
+BACKEND_URL=https://educareapp.com.br
 APP_URL=https://educareapp.com.br
-VITE_API_URL=https://api.educareapp.com.br
+VITE_API_URL=
 CORS_ORIGINS=https://educareapp.com.br,https://www.educareapp.com.br
 
 OPENAI_API_KEY=[SUA_CHAVE_OPENAI]
@@ -127,6 +117,9 @@ EXTERNAL_API_KEY=[SUA_CHAVE_EXTERNAL_API]
 OWNER_PHONE=[SEU_NUMERO_COM_DDI_E_DDD]
 ```
 
+**IMPORTANTE:** A variavel `VITE_API_URL` deve ficar VAZIA (sem valor).
+Isso faz o frontend usar caminhos relativos, que e o correto para esta arquitetura.
+
 **Onde encontrar cada chave:**
 
 | Variavel               | Onde encontrar                                           |
@@ -148,72 +141,70 @@ OWNER_PHONE=[SEU_NUMERO_COM_DDI_E_DDD]
 | EXTERNAL_API_KEY       | Crie uma chave aleatoria para comunicacao entre servicos |
 | OWNER_PHONE            | Seu numero de WhatsApp (ex: `5511999998888`)              |
 
-### Passo 2.5 — Criar a Stack
+### Passo 1.6 — Criar a Stack
 
-1. Revise se todas as variáveis estão preenchidas
-2. Na parte inferior, se aparecer a opção **"Enable relative path volumes"**,
+1. Revise se todas as variaveis estao preenchidas
+2. Na parte inferior, se aparecer a opcao **"Enable relative path volumes"**,
    deixe desabilitada
-3. Clique no botão **"Deploy the stack"** (Implantar a stack)
+3. Clique no botao **"Deploy the stack"** (Implantar a stack)
 4. Aguarde — pode levar de 5 a 15 minutos na primeira vez (o Portainer vai
-   baixar o código do GitHub, construir as imagens e iniciar tudo)
-5. Quando aparecer tudo verde (status "running"), está pronto!
+   baixar o codigo do GitHub, construir as imagens e iniciar tudo)
+5. Quando aparecer tudo verde (status "running"), esta pronto!
 
-**Se aparecer um erro dizendo que a imagem não foi encontrada:**
+**Se aparecer um erro dizendo que a imagem nao foi encontrada:**
 Me mande uma captura de tela do erro que eu te ajudo a resolver.
 
 ---
 
-## ETAPA 3 — Verificar se está funcionando
+## ETAPA 2 — Verificar se esta funcionando
 
-### Verificar os serviços
+### Verificar os servicos
 
-No Portainer, vá em **"Services"** (menu lateral) e verifique se os 3 serviços
-da stack "educare" estão com status **"running 1/1"**:
+No Portainer, va em **"Services"** (menu lateral) e verifique se os 3 servicos
+da stack "educare" estao com status **"running 1/1"**:
 
 - `educare_postgres` — Banco de dados
-- `educare_backend` — Servidor da aplicação
-- `educare_frontend` — Site que os usuários acessam
+- `educare_backend` — Servidor da aplicacao
+- `educare_frontend` — Site que os usuarios acessam
 
-### Testar os endereços
+### Testar os enderecos
 
 Abra no navegador:
 
 1. **https://educareapp.com.br** — Deve mostrar a tela de login do Educare+
-2. **https://api.educareapp.com.br** — Deve mostrar uma mensagem de resposta
-   do servidor
+2. **https://educareapp.com.br/api/auth** — Deve mostrar uma resposta do servidor (confirma que o backend esta funcionando)
+3. **https://educareapp.com.br/health** — Deve mostrar o status de saude do servidor
 
 ### Se algo der errado
 
-- **Serviço com "0/1" (não está rodando):** Clique no nome do serviço e depois
+- **Servico com "0/1" (nao esta rodando):** Clique no nome do servico e depois
   em **"Service logs"** para ver o que aconteceu. Me mande uma captura de tela.
-- **Site não carrega:** Verifique se o subdomínio do Registro.br já propagou
-  (pode levar até 2 horas).
 - **Erro de certificado HTTPS:** O Traefik pode levar alguns minutos para gerar
   o certificado. Aguarde 5 minutos e tente novamente.
-- **Erro 404 ou "Bad Gateway":** Verifique se os serviços estão rodando e se
-  os domínios estão apontando para o IP correto do servidor.
+- **Erro 404 ou "Bad Gateway":** Verifique se os servicos estao rodando no
+  Portainer. Se o frontend carrega mas o `/api` nao, verifique os logs do backend.
 
 ---
 
-## ATUALIZAÇÕES FUTURAS
+## ATUALIZACOES FUTURAS
 
-Quando fizer mudanças no código e quiser atualizar o site:
+Quando fizer mudancas no codigo e quiser atualizar o site:
 
-1. No Portainer, vá em **"Stacks"**
+1. No Portainer, va em **"Stacks"**
 2. Clique na stack **"educare"**
-3. Clique no botão **"Pull and redeploy"** (Puxar e reimplantar)
-4. Marque a opção **"Re-pull image and redeploy"**
+3. Clique no botao **"Pull and redeploy"** (Puxar e reimplantar)
+4. Marque a opcao **"Re-pull image and redeploy"**
 5. Clique em **"Update"**
 
-Pronto! O Portainer vai baixar o código mais recente e atualizar automaticamente.
+Pronto! O Portainer vai baixar o codigo mais recente e atualizar automaticamente.
 
 ---
 
-## INFORMAÇÕES CONFIRMADAS DO SEU SERVIDOR
+## INFORMACOES CONFIRMADAS DO SEU SERVIDOR
 
-Estas configurações foram verificadas diretamente do seu Portainer:
+Estas configuracoes foram verificadas diretamente do seu Portainer:
 
-- **Traefik versão:** v3.4.0
+- **Traefik versao:** v3.4.0
 - **Modo:** Docker Swarm
 - **Rede compartilhada:** `educarenet`
 - **Entrypoint HTTP:** `web` (porta 80, redireciona para HTTPS)
@@ -221,4 +212,22 @@ Estas configurações foram verificadas diretamente do seu Portainer:
 - **Certificados:** Let's Encrypt via resolver `letsencryptresolver`
 - **E-mail certificados:** monitor.call@gmail.com
 
-O docker-compose.yml já está configurado com todos esses dados corretos.
+O docker-compose.yml ja esta configurado com todos esses dados corretos.
+
+---
+
+## COMO FUNCIONA O ROTEAMENTO (para referencia)
+
+```
+educareapp.com.br
+      |
+   Traefik
+      |
+      |--- /api/*      → Backend (porta 5000)
+      |--- /uploads/*   → Backend (porta 5000)
+      |--- /health      → Backend (porta 5000)
+      |--- tudo mais    → Frontend (porta 80)
+```
+
+O Traefik usa "prioridade" para decidir: rotas com `/api`, `/uploads` e `/health`
+tem prioridade mais alta e vao para o backend. Todo o restante vai para o frontend.

@@ -48,31 +48,34 @@ The frontend uses React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Tailwi
 - **Observability**: Metrics and logging for RAG performance and system health.
 - **Controlled Rollout**: Uses feature flags for phased feature rollouts.
 
-## Deployment Architecture (Contabo VPS + Docker)
+## Deployment Architecture (Contabo VPS + Docker Swarm)
 
 ### Infrastructure
-- **Server**: Contabo VPS with Docker + Portainer
-- **Containers**: 3 services (postgres, backend, frontend) on the same Docker bridge network
-- **Domains**: `educareapp.com.br` (frontend), `api.educareapp.com.br` (backend)
-- **Reverse Proxy**: Nginx Proxy Manager or Traefik (external to docker-compose) routes traffic to containers
+- **Server**: Contabo VPS with Docker Swarm + Portainer
+- **Containers**: 3 services (postgres, backend, frontend) on `educarenet` overlay network
+- **Domain**: `educareapp.com.br` (single domain, path-based routing)
+- **Reverse Proxy**: Traefik v3.4.0 (Docker Swarm mode) with automatic HTTPS via Let's Encrypt
+- **Routing**: Traefik routes `/api/*`, `/uploads/*`, `/health` to backend; everything else to frontend
 
 ### Docker Files
 - `docker/Dockerfile.backend` - Node.js 20 Alpine, builds backend on port 5000
 - `docker/Dockerfile.frontend` - Multi-stage: Vite build + nginx serving on port 80
 - `docker/nginx.conf` - Frontend nginx config with SPA support and security headers
-- `docker-compose.yml` - Orchestrates all 3 services with health checks
+- `docker-compose.yml` - Docker Swarm stack with Traefik labels, health checks, resource limits
 - `.env.production.template` - Template with all required environment variables
+- `GUIA-DEPLOY.md` - Step-by-step deployment guide in Portuguese
 
 ### Deploy Process
 1. Push code to git repository
-2. On the server: `git pull && docker-compose build && docker-compose up -d`
+2. In Portainer: Add Stack from Repository (or Pull and Redeploy for updates)
 3. Backend auto-migrations run on startup (RAG columns, metadata backfill)
 
-### Port Mapping (internal)
-- PostgreSQL: 5432 (container) → 127.0.0.1:5432 (host)
-- Backend: 5000 (container) → 127.0.0.1:5000 (host)
-- Frontend: 80 (container) → 127.0.0.1:3000 (host)
-- External Nginx/Traefik proxies HTTPS → internal ports
+### Traefik Configuration (confirmed from server)
+- Entrypoints: `web` (80), `websecure` (443)
+- Cert Resolver: `letsencryptresolver`
+- Network: `educarenet` (external overlay)
+- Backend priority: 10 (PathPrefix: /api, /uploads, /health)
+- Frontend priority: 1 (catch-all)
 
 ## External Dependencies
 
