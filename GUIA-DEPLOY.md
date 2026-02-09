@@ -7,6 +7,12 @@ Vamos colocar o Educare+ no ar em 3 etapas simples:
 2. Subir a aplicação no Portainer
 3. Verificar se está tudo funcionando
 
+Configurações do Traefik já confirmadas:
+- Entrypoints: `web` (porta 80) e `websecure` (porta 443)
+- Cert Resolver: `letsencryptresolver`
+- Rede: `educarenet`
+- Modo: Docker Swarm
+
 ---
 
 ## ETAPA 1 — Criar o subdomínio no Registro.br
@@ -39,21 +45,6 @@ Aguarde de 10 minutos a 2 horas para o subdomínio funcionar.
 ---
 
 ## ETAPA 2 — Subir a aplicação no Portainer
-
-### ANTES DE COMEÇAR — Verificar o Traefik (muito importante!)
-
-Precisamos confirmar que os nomes das configurações do Traefik estão corretos.
-Faça o seguinte:
-
-1. No Portainer, vá em **"Stacks"**
-2. Clique na stack do **Traefik**
-3. Procure no código algo parecido com:
-   - `--entrypoints.` seguido de um nome (como `web`, `websecure`, `https`)
-   - `--certificatesresolvers.` seguido de um nome (como `letsencrypt`, `le`, `myresolver`)
-4. Me mande uma captura de tela dessa parte que eu confirmo se está tudo certo
-
-Se os nomes forem diferentes de `websecure` e `letsencrypt`, eu ajusto
-o arquivo antes de você fazer o deploy.
 
 ### Passo 2.1 — Abrir a tela de Stacks
 
@@ -138,10 +129,10 @@ OWNER_PHONE=[SEU_NUMERO_COM_DDI_E_DDD]
 
 **Onde encontrar cada chave:**
 
-| Variável               | Onde encontrar                                           |
+| Variavel               | Onde encontrar                                           |
 |------------------------|----------------------------------------------------------|
-| DB_PASSWORD            | Crie uma senha forte (ex: `Educ@re2025!Segura`)          |
-| JWT_SECRET             | Crie uma frase longa (ex: `minha-chave-secreta-educare-2025-muito-longa`) |
+| DB_PASSWORD            | Crie uma senha forte (ex: `Educ@re2026!Segura`)          |
+| JWT_SECRET             | Crie uma frase longa (ex: `minha-chave-secreta-educare-2026-muito-longa`) |
 | JWT_REFRESH_SECRET     | Crie outra frase diferente da anterior                   |
 | OPENAI_API_KEY         | https://platform.openai.com/api-keys                     |
 | GEMINI_API_KEY         | https://aistudio.google.com/apikey                       |
@@ -150,32 +141,38 @@ OWNER_PHONE=[SEU_NUMERO_COM_DDI_E_DDD]
 | STRIPE_SECRET_KEY      | https://dashboard.stripe.com/apikeys                     |
 | STRIPE_PUBLISHABLE_KEY | https://dashboard.stripe.com/apikeys                     |
 | STRIPE_WEBHOOK_SECRET  | https://dashboard.stripe.com/webhooks                    |
-| EVOLUTION_API_URL      | URL da sua instância Evolution API                       |
+| EVOLUTION_API_URL      | URL da sua instancia Evolution API                       |
 | EVOLUTION_API_KEY      | Painel da Evolution API                                  |
-| N8N_API_KEY            | Configurações do n8n                                     |
-| N8N_REST_API_KEY       | Configurações do n8n                                     |
-| EXTERNAL_API_KEY       | Crie uma chave aleatória para comunicação entre serviços |
-| OWNER_PHONE            | Seu número de WhatsApp (ex: `5511999998888`)              |
+| N8N_API_KEY            | Configuracoes do n8n                                     |
+| N8N_REST_API_KEY       | Configuracoes do n8n                                     |
+| EXTERNAL_API_KEY       | Crie uma chave aleatoria para comunicacao entre servicos |
+| OWNER_PHONE            | Seu numero de WhatsApp (ex: `5511999998888`)              |
 
 ### Passo 2.5 — Criar a Stack
 
 1. Revise se todas as variáveis estão preenchidas
-2. Clique no botão **"Deploy the stack"** (Implantar a stack)
-3. Aguarde — pode levar de 3 a 10 minutos na primeira vez
-4. Quando aparecer tudo verde (status "running"), está pronto!
+2. Na parte inferior, se aparecer a opção **"Enable relative path volumes"**,
+   deixe desabilitada
+3. Clique no botão **"Deploy the stack"** (Implantar a stack)
+4. Aguarde — pode levar de 5 a 15 minutos na primeira vez (o Portainer vai
+   baixar o código do GitHub, construir as imagens e iniciar tudo)
+5. Quando aparecer tudo verde (status "running"), está pronto!
+
+**Se aparecer um erro dizendo que a imagem não foi encontrada:**
+Me mande uma captura de tela do erro que eu te ajudo a resolver.
 
 ---
 
 ## ETAPA 3 — Verificar se está funcionando
 
-### Verificar os containers
+### Verificar os serviços
 
-No Portainer, vá em **"Containers"** e verifique se os 3 containers estão com
-status **"running"** (em execução):
+No Portainer, vá em **"Services"** (menu lateral) e verifique se os 3 serviços
+da stack "educare" estão com status **"running 1/1"**:
 
-- `educare-postgres` — Banco de dados
-- `educare-backend` — Servidor da aplicação
-- `educare-frontend` — Site que os usuários acessam
+- `educare_postgres` — Banco de dados
+- `educare_backend` — Servidor da aplicação
+- `educare_frontend` — Site que os usuários acessam
 
 ### Testar os endereços
 
@@ -183,36 +180,18 @@ Abra no navegador:
 
 1. **https://educareapp.com.br** — Deve mostrar a tela de login do Educare+
 2. **https://api.educareapp.com.br** — Deve mostrar uma mensagem de resposta
-   do servidor (algo como "API running" ou similar)
+   do servidor
 
 ### Se algo der errado
 
-- **Container vermelho ou reiniciando:** Clique no nome do container e depois
-  em **"Logs"** para ver o que aconteceu. Me mande uma captura de tela dos logs.
+- **Serviço com "0/1" (não está rodando):** Clique no nome do serviço e depois
+  em **"Service logs"** para ver o que aconteceu. Me mande uma captura de tela.
 - **Site não carrega:** Verifique se o subdomínio do Registro.br já propagou
   (pode levar até 2 horas).
 - **Erro de certificado HTTPS:** O Traefik pode levar alguns minutos para gerar
   o certificado. Aguarde 5 minutos e tente novamente.
-
----
-
-## NOTA IMPORTANTE — Sobre o Traefik
-
-O docker-compose.yml já vem configurado com as instruções para o Traefik
-reconhecer automaticamente os containers e criar as rotas:
-
-- `educareapp.com.br` → container do frontend
-- `api.educareapp.com.br` → container do backend
-
-Os nomes usados nas configurações do Traefik são:
-- Entrypoint: `websecure`
-- Cert Resolver: `letsencrypt`
-
-Se o seu Traefik usar nomes diferentes, me avise que eu ajusto.
-Para verificar, no Portainer:
-1. Vá em **Stacks** → clique na stack do **Traefik**
-2. Procure por `--entrypoints` e `--certificatesresolvers` no comando
-3. Me mande uma captura de tela se não tiver certeza
+- **Erro 404 ou "Bad Gateway":** Verifique se os serviços estão rodando e se
+  os domínios estão apontando para o IP correto do servidor.
 
 ---
 
@@ -227,3 +206,19 @@ Quando fizer mudanças no código e quiser atualizar o site:
 5. Clique em **"Update"**
 
 Pronto! O Portainer vai baixar o código mais recente e atualizar automaticamente.
+
+---
+
+## INFORMAÇÕES CONFIRMADAS DO SEU SERVIDOR
+
+Estas configurações foram verificadas diretamente do seu Portainer:
+
+- **Traefik versão:** v3.4.0
+- **Modo:** Docker Swarm
+- **Rede compartilhada:** `educarenet`
+- **Entrypoint HTTP:** `web` (porta 80, redireciona para HTTPS)
+- **Entrypoint HTTPS:** `websecure` (porta 443)
+- **Certificados:** Let's Encrypt via resolver `letsencryptresolver`
+- **E-mail certificados:** monitor.call@gmail.com
+
+O docker-compose.yml já está configurado com todos esses dados corretos.

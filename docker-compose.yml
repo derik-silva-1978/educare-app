@@ -3,8 +3,6 @@ version: "3.8"
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: educare-postgres
-    restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -19,16 +17,16 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      restart_policy:
+        condition: any
+        delay: 5s
 
   backend:
+    image: educare-backend:latest
     build:
       context: .
       dockerfile: docker/Dockerfile.backend
-    container_name: educare-backend
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
     environment:
       - NODE_ENV=production
       - PORT=5000
@@ -69,44 +67,49 @@ services:
       - backend_logs:/app/logs
     networks:
       - educarenet
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=educarenet"
-      - "traefik.http.routers.educare-backend.rule=Host(`api.educareapp.com.br`)"
-      - "traefik.http.routers.educare-backend.entrypoints=websecure"
-      - "traefik.http.routers.educare-backend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.educare-backend.loadbalancer.server.port=5000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/"]
       interval: 30s
       timeout: 10s
       start_period: 15s
       retries: 3
+    deploy:
+      restart_policy:
+        condition: any
+        delay: 5s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=educarenet"
+        - "traefik.http.routers.educare-backend.rule=Host(`api.educareapp.com.br`)"
+        - "traefik.http.routers.educare-backend.entrypoints=websecure"
+        - "traefik.http.routers.educare-backend.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.educare-backend.loadbalancer.server.port=5000"
 
   frontend:
+    image: educare-frontend:latest
     build:
       context: .
       dockerfile: docker/Dockerfile.frontend
       args:
         VITE_API_URL: ${VITE_API_URL}
-    container_name: educare-frontend
-    restart: unless-stopped
-    depends_on:
-      - backend
     networks:
       - educarenet
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=educarenet"
-      - "traefik.http.routers.educare-frontend.rule=Host(`educareapp.com.br`)"
-      - "traefik.http.routers.educare-frontend.entrypoints=websecure"
-      - "traefik.http.routers.educare-frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.educare-frontend.loadbalancer.server.port=80"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
       interval: 30s
       timeout: 5s
       retries: 3
+    deploy:
+      restart_policy:
+        condition: any
+        delay: 5s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=educarenet"
+        - "traefik.http.routers.educare-frontend.rule=Host(`educareapp.com.br`)"
+        - "traefik.http.routers.educare-frontend.entrypoints=websecure"
+        - "traefik.http.routers.educare-frontend.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.educare-frontend.loadbalancer.server.port=80"
 
 networks:
   educarenet:
