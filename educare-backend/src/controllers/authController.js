@@ -243,24 +243,40 @@ exports.register = async (req, res) => {
     if (ownerPhone && approvalToken) {
       try {
         let approvalBaseUrl = '';
-        if (process.env.BACKEND_URL) {
-          approvalBaseUrl = process.env.BACKEND_URL.replace(/\/$/, '');
-        } else if (process.env.REPLIT_DOMAINS) {
+        if (process.env.REPLIT_DOMAINS) {
           approvalBaseUrl = `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+        } else if (process.env.BACKEND_URL) {
+          approvalBaseUrl = process.env.BACKEND_URL.replace(/\/$/, '');
         } else if (process.env.FRONTEND_URL) {
           approvalBaseUrl = process.env.FRONTEND_URL.replace(/\/educare-app$/, '');
         }
         if (!approvalBaseUrl) approvalBaseUrl = 'http://localhost:5000';
 
-        const approvalLink = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}`;
+        const link7 = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}?days=7`;
+        const link14 = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}?days=14`;
+        const link30 = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}?days=30`;
+
         const roleLabel = { user: 'Pai/Mãe', professional: 'Profissional', admin: 'Administrador' };
+
+        let planLabel = 'Plano Gratuito';
+        if (selectedPlanId) {
+          try {
+            const selectedPlan = await SubscriptionPlan.findByPk(selectedPlanId);
+            if (selectedPlan) planLabel = selectedPlan.name;
+          } catch (e) { /* ignore */ }
+        }
+
         const notifMessage = `📋 *Novo Cadastro Educare+*\n\n` +
           `👤 *Nome:* ${name}\n` +
           `📧 *Email:* ${email || 'Não informado'}\n` +
           `📱 *Telefone:* ${phoneToSave || 'Não informado'}\n` +
-          `🏷️ *Tipo:* ${roleLabel[mappedRole] || mappedRole || 'Pai/Mãe'}\n\n` +
-          `✅ *Para aprovar o acesso, clique no link abaixo:*\n${approvalLink}\n\n` +
-          `⏰ Link válido por 30 dias.`;
+          `🏷️ *Tipo:* ${roleLabel[mappedRole] || mappedRole || 'Pai/Mãe'}\n` +
+          `📦 *Plano:* ${planLabel}\n\n` +
+          `✅ *Selecione o período de acesso gratuito:*\n\n` +
+          `▶️ *7 dias:*\n${link7}\n\n` +
+          `▶️ *14 dias:*\n${link14}\n\n` +
+          `▶️ *30 dias:*\n${link30}\n\n` +
+          `⏰ Links válidos por 30 dias.`;
 
         WhatsappService.sendMessage(ownerPhone, notifMessage)
           .then(() => console.log(`Notificação de novo registro enviada ao Owner`))
@@ -284,41 +300,90 @@ exports.register = async (req, res) => {
   }
 };
 
+// Gerar página HTML de resposta para aprovação
+const approvalHtmlPage = (title, emoji, message, details, color) => {
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title} - Educare+</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f0f4ff 0%, #e8f5e9 100%); padding: 20px; }
+    .card { background: white; border-radius: 16px; padding: 40px 32px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .emoji { font-size: 64px; margin-bottom: 16px; }
+    .title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 12px; }
+    .message { font-size: 16px; color: #4a5568; line-height: 1.6; margin-bottom: 20px; }
+    .details { background: #f7fafc; border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: left; }
+    .detail-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+    .detail-label { color: #718096; }
+    .detail-value { color: #2d3748; font-weight: 600; }
+    .badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; color: white; background: ${color}; }
+    .footer { margin-top: 20px; font-size: 13px; color: #a0aec0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="emoji">${emoji}</div>
+    <div class="title">${title}</div>
+    <div class="message">${message}</div>
+    ${details}
+    <div class="footer">Educare+ &copy; ${new Date().getFullYear()}</div>
+  </div>
+</body>
+</html>`;
+};
+
 // Aprovar acesso de usuário (via link de aprovação)
 exports.approveUser = async (req, res) => {
   try {
     const { token } = req.params;
+    const days = parseInt(req.query.days) || 30;
+    const validDays = [7, 14, 30].includes(days) ? days : 30;
 
     if (!token) {
-      return res.status(400).json({ error: 'Token de aprovação inválido' });
+      return res.status(400).send(approvalHtmlPage(
+        'Link Inválido', '⚠️',
+        'O link de aprovação é inválido. Verifique se copiou o link completo.',
+        '', '#e53e3e'
+      ));
     }
 
-    const { Op } = require('sequelize');
     const user = await User.findOne({
       where: { reset_token: token }
     });
 
-    const getFrontendUrl = () => {
-      let baseUrl = process.env.FRONTEND_URL;
-      if (!baseUrl && process.env.REPLIT_DOMAINS) {
-        baseUrl = `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
-      }
-      return baseUrl || 'http://localhost:5173';
-    };
-
     if (!user) {
-      return res.redirect(`${getFrontendUrl()}/educare-app/auth/login?approved=invalid`);
+      return res.status(404).send(approvalHtmlPage(
+        'Link Inválido', '❌',
+        'Este link de aprovação não foi encontrado ou já foi utilizado.',
+        '', '#e53e3e'
+      ));
     }
 
     if (user.status === 'active') {
-      return res.redirect(`${getFrontendUrl()}/educare-app/auth/login?approved=already`);
+      return res.status(200).send(approvalHtmlPage(
+        'Já Aprovado', '✅',
+        `O usuário ${user.name} já teve seu acesso aprovado anteriormente.`,
+        `<div class="details">
+          <div class="detail-row"><span class="detail-label">Nome</span><span class="detail-value">${user.name}</span></div>
+          <div class="detail-row"><span class="detail-label">Contato</span><span class="detail-value">${user.email || user.phone}</span></div>
+        </div>
+        <span class="badge" style="background:#38a169">Já Ativo</span>`,
+        '#38a169'
+      ));
     }
 
     if (user.reset_token_expires && new Date() > new Date(user.reset_token_expires)) {
       user.reset_token = null;
       user.reset_token_expires = null;
       await user.save();
-      return res.redirect(`${getFrontendUrl()}/educare-app/auth/login?approved=expired`);
+      return res.status(410).send(approvalHtmlPage(
+        'Link Expirado', '⏰',
+        'Este link de aprovação expirou. O usuário precisará solicitar um novo cadastro.',
+        '', '#dd6b20'
+      ));
     }
 
     user.status = 'active';
@@ -326,25 +391,56 @@ exports.approveUser = async (req, res) => {
     user.reset_token_expires = null;
     await user.save();
 
-    console.log(`Usuário aprovado: ${user.name} (${user.email || user.phone})`);
+    const { Subscription } = require('../models');
+    const subscription = await Subscription.findOne({ where: { userId: user.id } });
+    let subscriptionInfo = '';
+    if (subscription) {
+      const now = new Date();
+      const endDate = new Date(now);
+      endDate.setDate(endDate.getDate() + validDays);
+      subscription.status = 'trial';
+      subscription.startDate = now;
+      subscription.endDate = endDate;
+      subscription.nextBillingDate = endDate;
+      await subscription.save();
 
-    // Enviar mensagem de boas-vindas via WhatsApp
+      const formattedEnd = endDate.toLocaleDateString('pt-BR');
+      subscriptionInfo = `
+        <div class="detail-row"><span class="detail-label">Período liberado</span><span class="detail-value">${validDays} dias</span></div>
+        <div class="detail-row"><span class="detail-label">Válido até</span><span class="detail-value">${formattedEnd}</span></div>
+      `;
+    }
+
+    console.log(`Usuário aprovado: ${user.name} (${user.email || user.phone}) - ${validDays} dias de acesso`);
+
     if (user.phone) {
       try {
-        const loginUrl = process.env.BACKEND_URL
-          ? `${process.env.BACKEND_URL.replace(/\/$/, '')}/educare-app/auth/login`
-          : `${getFrontendUrl()}/educare-app/auth/login`;
+        let loginUrl = '';
+        if (process.env.BACKEND_URL) {
+          loginUrl = `${process.env.BACKEND_URL.replace(/\/$/, '')}/educare-app/auth/login`;
+        } else if (process.env.REPLIT_DOMAINS) {
+          loginUrl = `https://${process.env.REPLIT_DOMAINS.split(',')[0]}/educare-app/auth/login`;
+        } else if (process.env.FRONTEND_URL) {
+          loginUrl = `${process.env.FRONTEND_URL}/auth/login`;
+        } else {
+          loginUrl = 'http://localhost:5000/educare-app/auth/login';
+        }
+
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + validDays);
+        const formattedEnd = endDate.toLocaleDateString('pt-BR');
 
         const welcomeMessage = `🎉 *Bem-vindo(a) ao Educare+!*\n\n` +
           `Olá, *${user.name}*! 👋\n\n` +
           `Seu acesso à plataforma Educare+ foi *aprovado com sucesso*! ✅\n\n` +
-          `Agora você tem acesso a diversas funcionalidades pensadas para apoiar o desenvolvimento do seu filho:\n\n` +
-          `🧒 *Acompanhamento do Desenvolvimento* — Monitore marcos importantes do crescimento e desenvolvimento infantil\n\n` +
-          `🤖 *TitiNauta (Assistente IA)* — Tire dúvidas sobre saúde, comportamento e rotina do seu bebê a qualquer momento\n\n` +
-          `🤰 *Saúde Materna* — Diário de saúde, humor, sono, alimentação e acompanhamento do bem-estar da mãe\n\n` +
-          `📊 *Relatórios Inteligentes* — Relatórios personalizados sobre a evolução do seu filho, gerados por inteligência artificial\n\n` +
-          `📚 *Jornada do Desenvolvimento* — Conteúdos educativos semanais e quizzes interativos sobre cada fase\n\n` +
-          `💉 *Vacinas e Crescimento* — Checklist de vacinas e gráficos de crescimento atualizados\n\n` +
+          `📅 *Período de acesso:* ${validDays} dias (até ${formattedEnd})\n\n` +
+          `Agora você tem acesso a diversas funcionalidades:\n\n` +
+          `🧒 *Acompanhamento do Desenvolvimento*\n` +
+          `🤖 *TitiNauta (Assistente IA)*\n` +
+          `🤰 *Saúde Materna*\n` +
+          `📊 *Relatórios Inteligentes*\n` +
+          `📚 *Jornada do Desenvolvimento*\n` +
+          `💉 *Vacinas e Crescimento*\n\n` +
           `🔗 *Acesse a plataforma agora:*\n${loginUrl}\n\n` +
           `Faça login com o e-mail e senha que você cadastrou.\n\n` +
           `Qualquer dúvida, estamos aqui para ajudar! 💙`;
@@ -357,20 +453,33 @@ exports.approveUser = async (req, res) => {
       }
     }
 
-    // Notificar Owner que a aprovação foi concluída
     const ownerPhone = process.env.OWNER_PHONE;
     if (ownerPhone) {
       const confirmMsg = `✅ *Acesso Aprovado*\n\n` +
-        `Usuário *${user.name}* (${user.email || user.phone}) foi ativado com sucesso.`;
+        `Usuário *${user.name}* (${user.email || user.phone}) foi ativado com sucesso.\n` +
+        `📅 Período: ${validDays} dias`;
       WhatsappService.sendMessage(ownerPhone, confirmMsg)
         .catch(err => console.error(`Erro ao confirmar aprovação ao Owner: ${err.message}`));
     }
 
-    // Redirecionar para a página de login com mensagem de sucesso
-    return res.redirect(`${getFrontendUrl()}/educare-app/auth/login?approved=success&name=${encodeURIComponent(user.name)}`);
+    return res.status(200).send(approvalHtmlPage(
+      'Acesso Aprovado!', '🎉',
+      `O acesso de ${user.name} foi aprovado com sucesso. Uma mensagem de boas-vindas foi enviada.`,
+      `<div class="details">
+        <div class="detail-row"><span class="detail-label">Nome</span><span class="detail-value">${user.name}</span></div>
+        <div class="detail-row"><span class="detail-label">Contato</span><span class="detail-value">${user.email || user.phone || 'N/A'}</span></div>
+        ${subscriptionInfo}
+      </div>
+      <span class="badge">Aprovado</span>`,
+      '#7c3aed'
+    ));
   } catch (error) {
     console.error('Erro ao aprovar usuário:', error);
-    return res.status(500).json({ error: 'Erro ao aprovar usuário' });
+    return res.status(500).send(approvalHtmlPage(
+      'Erro no Sistema', '⚠️',
+      'Ocorreu um erro ao processar a aprovação. Tente novamente mais tarde.',
+      '', '#e53e3e'
+    ));
   }
 };
 
