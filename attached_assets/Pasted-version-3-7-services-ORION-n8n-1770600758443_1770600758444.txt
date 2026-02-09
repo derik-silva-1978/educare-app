@@ -1,0 +1,369 @@
+version: "3.7"
+services:
+
+## --------------------------- ORION --------------------------- ##
+
+  n8n_editor:
+    image: n8nio/n8n:2.6.3 ## Versão do N8N
+    command: start
+    networks:
+      - educarenet ## Nome da rede interna
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+    environment:
+    ## 🗄️ Banco de Dados (PostgreSQL)
+      - N8N_FIX_MIGRATIONS=true 
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_DATABASE=n8n_queue
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_USER=postgres
+      - DB_POSTGRESDB_PASSWORD=aa035df803290ae11196c14d556d991b
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - EDUCARE_API_URL=https://1d35ed6a-d635-41d2-8d11-7db8db84ce29-00-28ylqytrll200.picard.replit.dev
+      - EDUCARE_EXTERNAL_API_KEY=educare_external_api_key_2025
+      - N8N_AI_OPENAI_API_KEY=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
+
+    ## 🔐 Criptografia
+      - N8N_ENCRYPTION_KEY=c8a02f4cd265ba536144ca85efcfbc88
+
+    ## 🌐 URLs e Configurações de Acesso
+      - N8N_HOST=n8n.educareapp.com.br
+      - N8N_EDITOR_BASE_URL=https://n8n.educareapp.com.br
+      - WEBHOOK_URL=https://webhook.educareapp.com.br/webhook
+      - N8N_PROTOCOL=https
+      - N8N_ONBOARDING_FLOW_DISABLED=true
+    # ✅ TRUST PROXY (Traefik/Cloudflare) — corrige X-Forwarded-For
+      - N8N_TRUST_PROXY=true
+      - N8N_PROXY_HOPS=2
+
+    ## ⚙️ Ambiente de Execução
+      - NODE_ENV=production
+      - EXECUTIONS_MODE=queue
+      - EXECUTIONS_TIMEOUT=3600
+      - EXECUTIONS_TIMEOUT_MAX=7200
+      - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_RUNNERS_MODE=internal
+      - N8N_RUNNERS_MAX_CONCURRENCY=5
+
+    ## 📦 Pacotes e Nós Comunitários
+      - N8N_REINSTALL_MISSING_PACKAGES=true
+      - N8N_COMMUNITY_PACKAGES_ENABLED=true
+      - N8N_NODE_PATH=/home/node/.n8n/nodes
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+
+    ## 📧 SMTP (Envio de E-mails)
+      - N8N_EMAIL_MODE=smtp
+      - N8N_SMTP_SENDER=derik@educaremais.com.br
+      - N8N_SMTP_USER=derik@educaremais.com.br
+      - N8N_SMTP_PASS=bmcdcgmmdoafzcls
+      - N8N_SMTP_HOST=smtp.gmail.com
+      - N8N_SMTP_PORT=587
+      - N8N_SMTP_SSL=false
+      - N8N_SMTP_TLS=true
+
+    # 🔐 Cookies seguros (HTTPS / Cloudflare)
+      - N8N_SECURE_COOKIE=true
+    
+    ## 🔁 Redis (Fila de Execução)
+      - QUEUE_BULL_REDIS_HOST=n8n_redis
+      - QUEUE_BULL_REDIS_PORT=6379
+      - QUEUE_BULL_REDIS_DB=1
+
+    ## 📊 Métricas
+      - N8N_METRICS=true
+
+    ## ⏱️ Execuções e Limpeza
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=336
+
+    ## 🧠 Recursos de IA
+      - N8N_AI_ENABLED=false
+      - N8N_AI_PROVIDER=openai
+      
+
+    ## 🧰 Permissões em Funções Personalizadas
+      - NODE_FUNCTION_ALLOW_BUILTIN=*
+      - NODE_FUNCTION_ALLOW_EXTERNAL=moment,lodash
+
+    ## 🕒 Fuso Horário
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - TZ=America/Sao_Paulo
+      #- N8N_DEFAULT_LOCALE=pt-BR
+
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.n8n_editor.rule=Host(`n8n.educareapp.com.br`) ## Url do Editor do N8N
+        - traefik.http.routers.n8n_editor.entrypoints=websecure
+        - traefik.http.routers.n8n_editor.priority=1
+        - traefik.http.routers.n8n_editor.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.n8n_editor.service=n8n_editor
+        - traefik.http.services.n8n_editor.loadbalancer.server.port=5678
+        - traefik.http.services.n8n_editor.loadbalancer.passHostHeader=1
+
+## --------------------------- ORION --------------------------- ##
+
+  n8n_webhook:
+    image: n8nio/n8n:2.6.3 ## Versão do N8N
+    command: webhook
+
+    networks:
+      - educarenet ## Nome da rede interna
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+    environment:
+      ## 🗄️ Banco de Dados (PostgreSQL)
+      - N8N_FIX_MIGRATIONS=true 
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_DATABASE=n8n_queue
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_USER=postgres
+      - DB_POSTGRESDB_PASSWORD=aa035df803290ae11196c14d556d991b
+      - N8N_AI_OPENAI_API_KEY=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
+
+      ## 🔐 Criptografia
+      - N8N_ENCRYPTION_KEY=c8a02f4cd265ba536144ca85efcfbc88
+
+      ## 🌐 URLs e Configurações de Acesso
+      - N8N_HOST=n8n.educareapp.com.br
+      - N8N_EDITOR_BASE_URL=https://n8n.educareapp.com.br
+      - WEBHOOK_URL=https://webhook.educareapp.com.br/webhook
+      - N8N_PROTOCOL=https
+      - N8N_ONBOARDING_FLOW_DISABLED=true
+      # ✅ TRUST PROXY (Traefik/Cloudflare) — corrige X-Forwarded-For
+      - N8N_TRUST_PROXY=true
+      - N8N_PROXY_HOPS=2
+
+      ## ⚙️ Ambiente de Execução
+      - NODE_ENV=production
+      - EXECUTIONS_MODE=queue
+      - EXECUTIONS_TIMEOUT=3600
+      - EXECUTIONS_TIMEOUT_MAX=7200
+      - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_RUNNERS_MODE=internal
+
+      ## 📦 Pacotes e Nós Comunitários
+      - N8N_REINSTALL_MISSING_PACKAGES=true
+      - N8N_COMMUNITY_PACKAGES_ENABLED=true
+      - N8N_NODE_PATH=/home/node/.n8n/nodes
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+
+      ## 📧 SMTP (Envio de E-mails)
+      - N8N_EMAIL_MODE=smtp
+      - N8N_SMTP_SENDER=derik@educaremais.com.br
+      - N8N_SMTP_USER=derik@educaremais.com.br
+      - N8N_SMTP_PASS=bmcdcgmmdoafzcls
+      - N8N_SMTP_HOST=smtp.gmail.com
+      - N8N_SMTP_PORT=587
+      - N8N_SMTP_SSL=false
+      - N8N_SMTP_TLS=true
+
+      # 🔐 Cookies seguros (HTTPS / Cloudflare)
+      - N8N_SECURE_COOKIE=true
+
+      ## 🔁 Redis (Fila de Execução)
+      - QUEUE_BULL_REDIS_HOST=n8n_redis
+      - QUEUE_BULL_REDIS_PORT=6379
+      - QUEUE_BULL_REDIS_DB=1
+
+      ## 📊 Métricas
+      - N8N_METRICS=true
+
+      ## ⏱️ Execuções e Limpeza
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=336
+
+      ## 🧠 Recursos de IA
+      - N8N_AI_ENABLED=false
+      - N8N_AI_PROVIDER=openai
+      - N8N_AI_OPENAI_API_KEY=
+
+      ## 🧰 Permissões em Funções Personalizadas
+      - NODE_FUNCTION_ALLOW_BUILTIN=*
+      - NODE_FUNCTION_ALLOW_EXTERNAL=moment,lodash
+
+      ## 🕒 Fuso Horário
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - TZ=America/Sao_Paulo
+      #- N8N_DEFAULT_LOCALE=pt-BR
+      
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.n8n_webhook.rule=(Host(`webhook.educareapp.com.br`) && PathPrefix(`/webhook`)) ## Url do Webhook do N8N
+        - traefik.http.routers.n8n_webhook.entrypoints=websecure
+        - traefik.http.routers.n8n_webhook.priority=1
+        - traefik.http.routers.n8n_webhook.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.n8n_webhook.service=n8n_webhook
+        - traefik.http.services.n8n_webhook.loadbalancer.server.port=5678
+        - traefik.http.services.n8n_webhook.loadbalancer.passHostHeader=1
+
+## --------------------------- ORION --------------------------- ##
+
+  n8n_worker:
+    image: n8nio/n8n:2.6.3 ## Versão do N8N
+    command: worker --concurrency=10
+
+    networks:
+      - educarenet ## Nome da rede interna
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+    environment:
+      ## 🗄️ Banco de Dados (PostgreSQL)
+      - N8N_FIX_MIGRATIONS=true 
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_DATABASE=n8n_queue
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_USER=postgres
+      - DB_POSTGRESDB_PASSWORD=aa035df803290ae11196c14d556d991b
+      - N8N_AI_OPENAI_API_KEY=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
+
+      ## 🔐 Criptografia
+      - N8N_ENCRYPTION_KEY=c8a02f4cd265ba536144ca85efcfbc88
+
+      ## 🌐 URLs e Configurações de Acesso
+      - N8N_HOST=n8n.educareapp.com.br
+      - N8N_EDITOR_BASE_URL=https://n8n.educareapp.com.br
+      - WEBHOOK_URL=https://webhook.educareapp.com.br/webhook
+      - N8N_PROTOCOL=https
+      - N8N_ONBOARDING_FLOW_DISABLED=true
+      # ✅ TRUST PROXY (Traefik/Cloudflare) — corrige X-Forwarded-For
+      - N8N_TRUST_PROXY=true
+      - N8N_PROXY_HOPS=2
+
+      ## ⚙️ Ambiente de Execução
+      - NODE_ENV=production
+      - EXECUTIONS_MODE=queue
+      - EXECUTIONS_TIMEOUT=3600
+      - EXECUTIONS_TIMEOUT_MAX=7200
+      - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_RUNNERS_MODE=internal
+
+      ## 📦 Pacotes e Nós Comunitários
+      - N8N_REINSTALL_MISSING_PACKAGES=true
+      - N8N_COMMUNITY_PACKAGES_ENABLED=true
+      - N8N_NODE_PATH=/home/node/.n8n/nodes
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+
+      ## 📧 SMTP (Envio de E-mails)
+      - N8N_EMAIL_MODE=smtp
+      - N8N_SMTP_SENDER=derik@educaremais.com.br
+      - N8N_SMTP_USER=derik@educaremais.com.br
+      - N8N_SMTP_PASS=bmcdcgmmdoafzcls
+      - N8N_SMTP_HOST=smtp.gmail.com
+      - N8N_SMTP_PORT=587
+      - N8N_SMTP_SSL=false
+      - N8N_SMTP_TLS=true
+
+      # 🔐 Cookies seguros (HTTPS / Cloudflare)
+      - N8N_SECURE_COOKIE=true
+
+      ## 🔁 Redis (Fila de Execução)
+      - QUEUE_BULL_REDIS_HOST=n8n_redis
+      - QUEUE_BULL_REDIS_PORT=6379
+      - QUEUE_BULL_REDIS_DB=1
+
+      ## 📊 Métricas
+      - N8N_METRICS=true
+
+      ## ⏱️ Execuções e Limpeza
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=336
+
+      ## 🧠 Recursos de IA
+      - N8N_AI_ENABLED=false
+      - N8N_AI_PROVIDER=openai
+      - N8N_AI_OPENAI_API_KEY=
+
+      ## 🧰 Permissões em Funções Personalizadas
+      - NODE_FUNCTION_ALLOW_BUILTIN=*
+      - NODE_FUNCTION_ALLOW_EXTERNAL=moment,lodash
+
+      ## 🕒 Fuso Horário
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      - TZ=America/Sao_Paulo
+      #- N8N_DEFAULT_LOCALE=pt-BR
+      
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+
+## --------------------------- ORION --------------------------- ##
+
+  n8n_redis:
+    image: redis:latest  ## Versão do Redis
+    command: [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--port",
+        "6379"
+      ]
+
+    volumes:
+      - n8n_redis:/data
+
+    networks:
+      - educarenet ## Nome da rede interna
+
+    ## Descomente as linhas abaixo para uso externo
+    #ports:
+    #  - 6379:6379
+
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+
+## --------------------------- ORION --------------------------- ##
+
+volumes:
+  n8n_redis:
+    external: true
+    name: n8n_redis
+  n8n_data:
+    external: true
+    name: n8n_data
+
+networks:
+  educarenet: ## Nome da rede interna
+    external: true
+    name: educarenet ## Nome da rede interna
