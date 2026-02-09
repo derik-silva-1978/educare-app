@@ -401,28 +401,9 @@ exports.login = async (req, res) => {
         include: [{ model: Profile, as: 'profile' }]
       });
     } else if (phone) {
-      // Primeiro tenta com o telefone exatamente como recebido
-      user = await User.findOne({ 
-        where: { phone },
+      user = await findUserByPhone(User, phone, {
         include: [{ model: Profile, as: 'profile' }]
       });
-      
-      // Se não encontrar e for telefone com +, tenta sem o +
-      if (!user && phone.startsWith('+')) {
-        const phoneWithoutPlus = phone.substring(1);
-        console.log(`Tentando login com telefone sem o +: ${phoneWithoutPlus}`);
-        
-        user = await User.findOne({ 
-          where: { phone: phoneWithoutPlus },
-          include: [{ model: Profile, as: 'profile' }]
-        });
-        
-        // Se encontrou, atualiza o telefone para incluir o +
-        if (user) {
-          console.log(`Usuário encontrado com telefone sem o +: ${phoneWithoutPlus}`);
-          await user.update({ phone });
-        }
-      }
     }
 
     // Se não encontramos o usuário pelo método fornecido, verificamos se é uma tentativa
