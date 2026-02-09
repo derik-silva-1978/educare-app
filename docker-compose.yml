@@ -12,10 +12,8 @@ services:
       TZ: America/Sao_Paulo
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "127.0.0.1:5432:5432"
     networks:
-      - educare-network
+      - educarenet
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
       interval: 10s
@@ -69,10 +67,15 @@ services:
     volumes:
       - uploads_data:/app/uploads
       - backend_logs:/app/logs
-    ports:
-      - "127.0.0.1:5000:5000"
     networks:
-      - educare-network
+      - educarenet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=educarenet"
+      - "traefik.http.routers.educare-backend.rule=Host(`api.educareapp.com.br`)"
+      - "traefik.http.routers.educare-backend.entrypoints=websecure"
+      - "traefik.http.routers.educare-backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.educare-backend.loadbalancer.server.port=5000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/"]
       interval: 30s
@@ -90,19 +93,24 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-    ports:
-      - "127.0.0.1:3000:80"
     networks:
-      - educare-network
+      - educarenet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=educarenet"
+      - "traefik.http.routers.educare-frontend.rule=Host(`educareapp.com.br`)"
+      - "traefik.http.routers.educare-frontend.entrypoints=websecure"
+      - "traefik.http.routers.educare-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.educare-frontend.loadbalancer.server.port=80"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/"]
       interval: 30s
       timeout: 5s
       retries: 3
 
 networks:
-  educare-network:
-    driver: bridge
+  educarenet:
+    external: true
 
 volumes:
   postgres_data:
