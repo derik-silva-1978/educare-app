@@ -251,23 +251,77 @@ const vimeoRoutes = require('./routes/vimeoRoutes');
 app.use('/api/vimeo', vimeoRoutes);
 
 // Database migration endpoint (protected by EXTERNAL_API_KEY)
-app.post('/api/admin/run-migrations', (req, res) => {
+// Bootstraps SequelizeMeta for tables created via sync, then runs pending migrations
+app.post('/api/admin/run-migrations', async (req, res) => {
   const apiKey = req.query.api_key || req.headers['x-api-key'];
   if (!apiKey || apiKey !== process.env.EXTERNAL_API_KEY) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const { exec } = require('child_process');
-  res.setHeader('Content-Type', 'application/json');
+  try {
+    const { sequelize } = require('./config/database');
+    const bootstrapLog = [];
 
-  exec('npx sequelize-cli db:migrate --env production 2>&1', { cwd: '/app', timeout: 60000 }, (error, stdout, stderr) => {
-    res.json({
-      success: !error,
-      exitCode: error ? error.code : 0,
-      output: stdout || '',
-      error: stderr || (error ? error.message : '')
+    await sequelize.query(`CREATE TABLE IF NOT EXISTS "SequelizeMeta" (name VARCHAR(255) NOT NULL PRIMARY KEY)`);
+
+    const migrationToTable = {
+      '01-create-users.js': 'users',
+      '02-create-profiles.js': 'profiles',
+      '03-create-children.js': 'children',
+      '04-create-subscription-plans.js': 'subscription_plans',
+      '05-create-subscriptions.js': 'subscriptions',
+      '06-create-teams.js': 'teams',
+      '07-create-team-members.js': 'team_members',
+      '08-create-quizzes.js': 'quizzes',
+      '09-create-questions.js': 'questions',
+      '10-create-quiz-sessions.js': 'quiz_sessions',
+      '11-create-answers.js': 'answers',
+      '12-create-journeys.js': 'journeys',
+      '13-create-user-journeys.js': 'user_journeys',
+      '14-create-achievements.js': 'achievements',
+      '15-create-user-achievements.js': 'user_achievements',
+      '16-create-licenses.js': 'licenses',
+      '17-fix-children-special-needs.js': 'children',
+      '18-create-journey-v2.js': 'journey_v2_trails',
+      '19-create-journey-v2-weeks.js': 'journey_v2_weeks',
+      '20-create-journey-v2-topics.js': 'journey_v2_topics',
+      '21-create-journey-v2-quizzes.js': 'journey_v2_quizzes',
+      '22-create-journey-v2-badges.js': 'journey_v2_badges',
+      '23-create-user-journey-v2-progress.js': 'user_journey_v2_progress',
+      '24-create-user-journey-v2-badges.js': 'user_journey_v2_badges',
+      '25-add-dev-domain-content-hash-to-v2.js': 'journey_v2_quizzes',
+    };
+
+    for (const [migration, table] of Object.entries(migrationToTable)) {
+      const [already] = await sequelize.query(
+        `SELECT 1 FROM "SequelizeMeta" WHERE name = :name`, { replacements: { name: migration } }
+      );
+      if (already.length > 0) continue;
+
+      const [exists] = await sequelize.query(
+        `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = :table)`,
+        { replacements: { table } }
+      );
+      if (exists[0].exists) {
+        await sequelize.query(`INSERT INTO "SequelizeMeta" (name) VALUES (:name)`, { replacements: { name: migration } });
+        bootstrapLog.push(`Bootstrapped: ${migration}`);
+      }
+    }
+
+    const { exec } = require('child_process');
+    exec('npx sequelize-cli db:migrate --env production 2>&1', { cwd: process.cwd(), timeout: 60000 }, (error, stdout, stderr) => {
+      res.json({
+        success: !error,
+        exitCode: error ? error.code : 0,
+        bootstrap: bootstrapLog,
+        output: stdout || '',
+        error: stderr || (error ? error.message : '')
+      });
     });
-  });
+
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // Database schema diagnostic endpoint (protected by EXTERNAL_API_KEY)

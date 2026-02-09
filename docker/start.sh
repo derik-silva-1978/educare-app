@@ -13,6 +13,9 @@ until pg_isready -h "$DB_HOST" -p "${DB_PORT:-5432}" -U "$DB_USERNAME" -d "$DB_D
   sleep 2
 done
 
+echo ">>> Bootstrapping SequelizeMeta for existing tables..."
+node src/database/bootstrap-migrations.js 2>&1 || echo "WARNING: Bootstrap had issues, continuing..."
+
 echo ">>> Running database migrations..."
 npx sequelize-cli db:migrate --env production 2>&1 || echo "WARNING: Migrations had issues, continuing..."
 

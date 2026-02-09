@@ -2,6 +2,14 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
+    const [tableExists] = await queryInterface.sequelize.query(
+      `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'milestone_mappings')`
+    );
+    if (!tableExists[0].exists) {
+      console.log('Table milestone_mappings does not exist, skipping migration 26.');
+      return;
+    }
+
     const transaction = await queryInterface.sequelize.transaction();
     try {
       const [columns] = await queryInterface.sequelize.query(
@@ -32,7 +40,7 @@ module.exports = {
       await queryInterface.sequelize.query(
         `ALTER TABLE milestone_mappings ALTER COLUMN journey_question_id DROP NOT NULL`,
         { transaction }
-      );
+      ).catch(() => {});
 
       await queryInterface.sequelize.query(
         `ALTER TABLE milestone_mappings DROP CONSTRAINT IF EXISTS unique_milestone_question_mapping`,
@@ -76,6 +84,11 @@ module.exports = {
   },
 
   async down(queryInterface) {
+    const [tableExists] = await queryInterface.sequelize.query(
+      `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'milestone_mappings')`
+    );
+    if (!tableExists[0].exists) return;
+
     const transaction = await queryInterface.sequelize.transaction();
     try {
       await queryInterface.sequelize.query(
