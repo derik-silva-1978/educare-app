@@ -26,10 +26,7 @@ services:
         delay: 5s
 
   backend:
-    image: educare-backend:latest
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.backend
+    image: ghcr.io/derik-silva-1978/educare-backend:latest
     environment:
       - NODE_ENV=production
       - PORT=5000
@@ -98,12 +95,7 @@ services:
         - "traefik.http.services.educare-backend.loadbalancer.passHostHeader=1"
 
   frontend:
-    image: educare-frontend:latest
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.frontend
-      args:
-        VITE_API_URL: ""
+    image: ghcr.io/derik-silva-1978/educare-frontend:latest
     networks:
       - educarenet
     healthcheck:
