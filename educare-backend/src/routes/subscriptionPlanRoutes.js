@@ -267,6 +267,137 @@ router.delete('/:id', isAdminOrOwner, subscriptionPlanController.deletePlan);
 // Rota para comparar planos de assinatura
 router.get('/compare', subscriptionPlanController.comparePlans);
 
+router.get('/diagnose-db', async (req, res) => {
+  try {
+    const authHeader = req.headers['x-seed-key'];
+    if (authHeader !== process.env.OPENAI_API_KEY) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const { sequelize } = require('../config/database');
+    const results = {};
+
+    const tables = ['users', 'profiles', 'subscription_plans', 'subscriptions'];
+    for (const table of tables) {
+      try {
+        const [cols] = await sequelize.query(`SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = '${table}' ORDER BY ordinal_position`);
+        results[table] = { exists: true, columns: cols };
+      } catch (e) {
+        results[table] = { exists: false, error: e.message };
+      }
+    }
+
+    try {
+      const [enums] = await sequelize.query(`SELECT t.typname, e.enumlabel FROM pg_type t JOIN pg_enum e ON t.oid = e.enumtypid ORDER BY t.typname, e.enumsortorder`);
+      results.enums = enums;
+    } catch (e) {
+      results.enums_error = e.message;
+    }
+
+    return res.json(results);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/test-register', async (req, res) => {
+  try {
+    const authHeader = req.headers['x-seed-key'];
+    if (authHeader !== process.env.OPENAI_API_KEY) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const { User, Profile, SubscriptionPlan, Subscription } = require('../models');
+    const bcrypt = require('bcryptjs');
+    const { normalizePhoneNumber } = require('../utils/phoneUtils');
+    const crypto = require('crypto');
+
+    const { email, phone, password, name, role, plan_id } = req.body;
+    const steps = [];
+
+    try {
+      steps.push('1. Normalizing phone');
+      const phoneToSave = phone ? normalizePhoneNumber(phone) : null;
+      steps.push(`   Phone normalized: ${phoneToSave}`);
+
+      steps.push('2. Creating user');
+      const approvalToken = crypto.randomBytes(24).toString('hex');
+      const user = await User.create({
+        email,
+        phone: phoneToSave,
+        password,
+        name,
+        role: role === 'parent' ? 'user' : role,
+        status: 'pending',
+        reset_token: approvalToken,
+        reset_token_expires: new Date(Date.now() + 30 * 24 * 3600000)
+      });
+      steps.push(`   User created: ${user.id}`);
+
+      steps.push('3. Creating profile');
+      await Profile.create({
+        user_id: user.id,
+        name: name,
+        type: 'parent',
+        phone: phoneToSave
+      });
+      steps.push('   Profile created');
+
+      steps.push('4. Finding plan');
+      let selectedPlanId = plan_id;
+      if (!plan_id) {
+        const freePlan = await SubscriptionPlan.findOne({
+          where: { is_active: true, is_public: true },
+          order: [['price', 'ASC']]
+        });
+        selectedPlanId = freePlan ? freePlan.id : null;
+      }
+      steps.push(`   Plan ID: ${selectedPlanId}`);
+
+      if (selectedPlanId) {
+        steps.push('5. Creating subscription');
+        const plan = await SubscriptionPlan.findByPk(selectedPlanId);
+        if (plan) {
+          const startDate = new Date();
+          const endDate = new Date(startDate);
+          endDate.setMonth(endDate.getMonth() + 1);
+          await Subscription.create({
+            userId: user.id,
+            planId: selectedPlanId,
+            status: plan.trial_days > 0 ? 'trial' : 'active',
+            startDate,
+            endDate,
+            nextBillingDate: new Date(endDate),
+            autoRenew: true,
+            childrenCount: 0,
+            usageStats: {},
+            paymentDetails: {}
+          });
+          steps.push('   Subscription created');
+        }
+      }
+
+      steps.push('6. Cleaning up test user');
+      await Subscription.destroy({ where: { userId: user.id } });
+      await Profile.destroy({ where: { user_id: user.id } });
+      await User.destroy({ where: { id: user.id }, force: true });
+      steps.push('   Test user cleaned up');
+
+      return res.json({ success: true, steps });
+    } catch (innerError) {
+      steps.push(`ERROR: ${innerError.message}`);
+      steps.push(`STACK: ${innerError.stack?.split('\n').slice(0, 5).join(' | ')}`);
+      if (innerError.parent) {
+        steps.push(`SQL ERROR: ${innerError.parent.message}`);
+        steps.push(`SQL DETAIL: ${innerError.parent.detail || 'none'}`);
+      }
+      return res.json({ success: false, steps, error: innerError.message });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: error.message, stack: error.stack?.split('\n').slice(0, 5) });
+  }
+});
+
 router.post('/seed-initial', async (req, res) => {
   try {
     const authHeader = req.headers['x-seed-key'];
