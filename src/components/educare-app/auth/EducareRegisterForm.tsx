@@ -225,7 +225,7 @@ const EducareRegisterForm: React.FC<EducareRegisterFormProps> = ({ redirectPath 
         
         <Button 
           onClick={() => navigate('/educare-app/auth?action=login')} 
-          className="w-full"
+          className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-medium shadow-md"
         >
           Voltar ao Login
         </Button>
@@ -568,7 +568,7 @@ const EducareRegisterForm: React.FC<EducareRegisterFormProps> = ({ redirectPath 
 
           <Button 
             type="submit" 
-            className="w-full" 
+            className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-medium shadow-md" 
             disabled={isLoading}
           >
             {isLoading ? (

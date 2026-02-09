@@ -298,7 +298,7 @@ const EducareLoginForm: React.FC<EducareLoginFormProps> = ({ redirectPath }) => 
 
           <Button 
             type="submit" 
-            className="w-full" 
+            className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-medium shadow-md" 
             disabled={isLoading}
           >
             {isLoading ? (

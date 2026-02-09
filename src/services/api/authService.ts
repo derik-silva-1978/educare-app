@@ -270,6 +270,24 @@ export const forgotPassword = async (email: string): Promise<ApiResponse> => {
   }
 };
 
+export const forgotPasswordByPhone = async (phone: string): Promise<ApiResponse> => {
+  try {
+    const digits = phone.replace(/\D/g, '');
+    const normalizedPhone = digits.startsWith('55') ? digits : `55${digits}`;
+    console.log(`Solicitando recuperação de senha via WhatsApp para: ${normalizedPhone}`);
+    const response = await httpClient.post('/api/auth/forgot-password-by-phone', { phone: normalizedPhone }, { requiresAuth: false });
+    
+    console.log('Resposta da recuperação via WhatsApp:', response);
+    return response;
+  } catch (error) {
+    console.error('Erro ao solicitar recuperação via WhatsApp:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Erro desconhecido ao solicitar recuperação via WhatsApp'
+    };
+  }
+};
+
 /**
  * Redefinição de senha com token
  */
