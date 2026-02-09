@@ -68,16 +68,21 @@ export interface PhoneCodeVerificationData {
 /**
  * Login com email e senha
  */
-export const signInWithEmail = async (email: string, password: string): Promise<AuthResult> => {
+export const signInWithEmail = async (identifier: string, password: string): Promise<AuthResult> => {
   try {
-    console.log(`signInWithEmail: Tentando login com email: ${email}`);
+    console.log(`signInWithEmail: Tentando login com: ${identifier}`);
     
-    // Fazer a requisição de login
+    const digits = identifier.replace(/\D/g, '');
+    const isPhone = digits.length >= 10 && digits.length <= 13 && !identifier.includes('@');
+    const payload = isPhone
+      ? { phone: digits.startsWith('55') ? digits : `55${digits}`, password }
+      : { email: identifier, password };
+
     const response = await httpClient.post<{
       user: AuthUser;
       token: string;
       refreshToken: string;
-    }>('/api/auth/login', { email, password }, { requiresAuth: false });
+    }>('/api/auth/login', payload, { requiresAuth: false });
 
     console.log('signInWithEmail: Resposta completa:', response);
     console.log('signInWithEmail: response.success:', response.success);
@@ -148,7 +153,7 @@ export const signInWithEmail = async (email: string, password: string): Promise<
     
     // Verificar se é um problema com senha temporária
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao fazer login';
-    const isPossiblyTempPasswordIssue = email.includes('edcuareapp') || (password && password.includes('@'));
+    const isPossiblyTempPasswordIssue = identifier.includes('edcuareapp') || (password && password.includes('@'));
     
     if (isPossiblyTempPasswordIssue) {
       return {

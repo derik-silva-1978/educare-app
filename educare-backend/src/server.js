@@ -250,8 +250,6 @@ app.use('/api/trainings', trainingRoutes);
 const vimeoRoutes = require('./routes/vimeoRoutes');
 app.use('/api/vimeo', vimeoRoutes);
 
-// Database migration endpoint (protected by EXTERNAL_API_KEY)
-// Bootstraps SequelizeMeta for tables created via sync, then runs pending migrations
 app.post('/api/admin/run-migrations', async (req, res) => {
   const apiKey = req.query.api_key || req.headers['x-api-key'];
   if (!apiKey || apiKey !== process.env.EXTERNAL_API_KEY) {
@@ -260,7 +258,11 @@ app.post('/api/admin/run-migrations', async (req, res) => {
 
   try {
     const { sequelize } = require('./config/database');
-    const bootstrapLog = [];
+    const { Sequelize } = require('sequelize');
+    const log = [];
+
+    await sequelize.authenticate();
+    log.push('DB connection OK');
 
     await sequelize.query(`CREATE TABLE IF NOT EXISTS "SequelizeMeta" (name VARCHAR(255) NOT NULL PRIMARY KEY)`);
 
@@ -304,20 +306,39 @@ app.post('/api/admin/run-migrations', async (req, res) => {
       );
       if (exists[0].exists) {
         await sequelize.query(`INSERT INTO "SequelizeMeta" (name) VALUES (:name)`, { replacements: { name: migration } });
-        bootstrapLog.push(`Bootstrapped: ${migration}`);
+        log.push(`Bootstrapped: ${migration}`);
       }
     }
 
-    const { exec } = require('child_process');
-    exec('npx sequelize-cli db:migrate --env production 2>&1', { cwd: process.cwd(), timeout: 60000 }, (error, stdout, stderr) => {
-      res.json({
-        success: !error,
-        exitCode: error ? error.code : 0,
-        bootstrap: bootstrapLog,
-        output: stdout || '',
-        error: stderr || (error ? error.message : '')
-      });
-    });
+    const fs = require('fs');
+    const pathModule = require('path');
+    const migrationDir = pathModule.join(__dirname, 'database/migrations');
+    const allMigrationFiles = fs.readdirSync(migrationDir)
+      .filter(f => f.endsWith('.js'))
+      .sort();
+
+    const queryInterface = sequelize.getQueryInterface();
+    let hasFailure = false;
+
+    for (const migrationFile of allMigrationFiles) {
+      const [already] = await sequelize.query(
+        `SELECT 1 FROM "SequelizeMeta" WHERE name = :name`, { replacements: { name: migrationFile } }
+      );
+      if (already.length > 0) continue;
+
+      try {
+        const migration = require(pathModule.join(migrationDir, migrationFile));
+        await migration.up(queryInterface, Sequelize);
+        await sequelize.query(`INSERT INTO "SequelizeMeta" (name) VALUES (:name)`, { replacements: { name: migrationFile } });
+        log.push(`Applied: ${migrationFile}`);
+      } catch (migErr) {
+        log.push(`FAILED: ${migrationFile} - ${migErr.message}`);
+        hasFailure = true;
+        break;
+      }
+    }
+
+    res.json({ success: !hasFailure, log });
 
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

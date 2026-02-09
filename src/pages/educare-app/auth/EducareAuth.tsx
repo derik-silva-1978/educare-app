@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 import { motion } from 'framer-motion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import EducareLoginForm from '@/components/educare-app/auth/EducareLoginForm';
 import EducareRegisterForm from '@/components/educare-app/auth/EducareRegisterForm';
 import AuthSlideshow from '@/components/educare-app/auth/AuthSlideshow';
@@ -60,8 +59,8 @@ const EducareAuth: React.FC = () => {
     }
   }, [user, isLoading, isInitialized, navigate, redirectParam]);
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab as 'login' | 'register');
+  const handleTabChange = (tab: 'login' | 'register') => {
+    setActiveTab(tab);
     
     const newUrl = `/educare-app/auth?action=${tab}`;
     navigate(newUrl, { replace: true });
@@ -136,27 +135,43 @@ const EducareAuth: React.FC = () => {
             )}
             
             <Card className="border-0 shadow-lg">
-              <Tabs value={activeTab} onValueChange={handleTabChange}>
-                <TabsList className="w-full rounded-t-lg rounded-b-none grid grid-cols-2 h-12">
-                  <TabsTrigger value="login" className="text-sm font-medium">
-                    Entrar
-                  </TabsTrigger>
-                  <TabsTrigger value="register" className="text-sm font-medium">
-                    Criar Conta
-                  </TabsTrigger>
-                </TabsList>
-                
-                <CardContent className="p-6">
-                  <TabsContent value="login" className="mt-0">
-                    <EducareLoginForm redirectPath={redirectParam} />
-                  </TabsContent>
-                  
-                  <TabsContent value="register" className="mt-0">
-                    <EducareRegisterForm redirectPath={redirectParam} />
-                  </TabsContent>
-                </CardContent>
-              </Tabs>
+              <CardContent className="p-6">
+                <h2 className="text-lg font-semibold text-center mb-4">
+                  {activeTab === 'login' ? 'Entrar' : 'Criar Conta'}
+                </h2>
+                {activeTab === 'login' ? (
+                  <EducareLoginForm redirectPath={redirectParam} />
+                ) : (
+                  <EducareRegisterForm redirectPath={redirectParam} />
+                )}
+              </CardContent>
             </Card>
+
+            <div className="text-center text-sm">
+              {activeTab === 'login' ? (
+                <p className="text-muted-foreground">
+                  Novo aqui?{' '}
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange('register')}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    Criar conta
+                  </button>
+                </p>
+              ) : (
+                <p className="text-muted-foreground">
+                  Já tem conta?{' '}
+                  <button
+                    type="button"
+                    onClick={() => handleTabChange('login')}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    Entrar
+                  </button>
+                </p>
+              )}
+            </div>
             
             <div className="text-center text-xs text-muted-foreground">
               <p>
