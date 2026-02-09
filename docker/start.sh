@@ -10,9 +10,9 @@ npx sequelize-cli db:migrate --env production 2>&1 || {
   echo "WARNING: Migrations failed or already applied, continuing..."
 }
 
-echo ">>> Running database seeders..."
-npx sequelize-cli db:seed:all --env production 2>&1 || {
-  echo "WARNING: Seeders failed or already applied, continuing..."
+echo ">>> Seeding subscription plans (if empty)..."
+node src/database/seed-plans.js 2>&1 || {
+  echo "WARNING: Plan seeding failed, continuing..."
 }
 
 echo ">>> Starting server..."
