@@ -459,6 +459,236 @@ const conversationController = {
       console.error('[Conversation] resolveButton error:', error.message);
       return res.status(500).json({ success: false, error: 'Erro interno ao resolver botão' });
     }
+  },
+
+  async setAudioPreference(req, res) {
+    try {
+      const { phone, preference } = req.body;
+
+      if (!phone || !preference) {
+        return res.status(400).json({ success: false, error: 'Parâmetros phone e preference são obrigatórios' });
+      }
+
+      if (!['text', 'audio'].includes(preference)) {
+        return res.status(400).json({ success: false, error: 'Preferência deve ser "text" ou "audio"' });
+      }
+
+      await pgvectorService.updateConversationState(phone, { audio_preference: preference });
+      return res.json({ success: true, phone, audio_preference: preference });
+    } catch (error) {
+      console.error('[Conversation] setAudioPreference error:', error.message);
+      return res.status(500).json({ success: false, error: 'Erro interno' });
+    }
+  },
+
+  async getAudioPreference(req, res) {
+    try {
+      const { phone } = req.query;
+
+      if (!phone) {
+        return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
+      }
+
+      const stateResult = await pgvectorService.getConversationState(phone);
+      const preference = stateResult.success && stateResult.state
+        ? stateResult.state.audio_preference || 'text'
+        : 'text';
+
+      return res.json({ success: true, phone, audio_preference: preference });
+    } catch (error) {
+      console.error('[Conversation] getAudioPreference error:', error.message);
+      return res.status(500).json({ success: false, error: 'Erro interno' });
+    }
+  },
+
+  async ttsForWhatsApp(req, res) {
+    try {
+      const { text, phone, check_preference } = req.body;
+
+      if (!text) {
+        return res.status(400).json({ success: false, error: 'Parâmetro text é obrigatório' });
+      }
+
+      if (check_preference && phone) {
+        const stateResult = await pgvectorService.getConversationState(phone);
+        const pref = stateResult.success && stateResult.state
+          ? stateResult.state.audio_preference || 'text'
+          : 'text';
+
+        if (pref === 'text') {
+          return res.json({ success: true, action: 'skip_audio', reason: 'Usuário prefere texto', audio_preference: 'text' });
+        }
+      }
+
+      const result = await elevenLabsService.textToSpeech(text);
+
+      if (!result.success) {
+        return res.json({ success: false, fallback: 'text', error: result.error });
+      }
+
+      const baseUrl = process.env.BASE_URL || process.env.BACKEND_URL || `https://${req.get('host')}`;
+      const audioUrl = `${baseUrl}/api/conversation/tts/audio/${result.hash}`;
+
+      return res.json({
+        success: true,
+        audio_url: audioUrl,
+        hash: result.hash,
+        cached: result.cached,
+        processing_time_ms: result.processing_time_ms,
+        send_via: 'evolution_api',
+        media_type: 'audio/mpeg'
+      });
+    } catch (error) {
+      console.error('[Conversation] ttsForWhatsApp error:', error.message);
+      return res.status(500).json({ success: false, error: 'Erro interno ao gerar áudio', fallback: 'text' });
+    }
+  },
+
+  async getContextualMenu(req, res) {
+    try {
+      const { phone } = req.query;
+
+      if (!phone) {
+        return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
+      }
+
+      const stateResult = await pgvectorService.getConversationState(phone);
+      const state = stateResult.success && stateResult.state ? stateResult.state : null;
+      const currentState = state?.state || 'ENTRY';
+      const activeContext = state?.active_context || null;
+
+      const stateMessage = stateMachineService.getStateMessage(currentState);
+
+      let menuButtons = [];
+      let menuText = 'Como posso te ajudar agora? ✨';
+
+      if (currentState === 'FREE_CONVERSATION' || currentState === 'CONTENT_FLOW' || currentState === 'QUIZ_FLOW') {
+        menuButtons = [
+          { id: 'action_content', text: '📚 Ver conteúdos da jornada' },
+          { id: 'action_quiz', text: '🧩 Responder um quiz' },
+          { id: 'action_log', text: '📝 Registrar informações' },
+          { id: 'action_support', text: '🛠️ Reportar problema' }
+        ];
+
+        if (activeContext) {
+          menuButtons.push({ id: 'action_change', text: '🔄 Mudar contexto' });
+        }
+      } else if (currentState === 'ENTRY' || currentState === 'CONTEXT_SELECTION') {
+        menuText = 'Sobre o que você quer falar agora? 💬';
+        menuButtons = [
+          { id: 'ctx_child', text: '👶 Sobre meu bebê' },
+          { id: 'ctx_mother', text: '💚 Sobre mim' }
+        ];
+      } else if (currentState === 'LOG_FLOW') {
+        menuText = 'O que você gostaria de registrar? 📝';
+        menuButtons = [
+          { id: 'log_biometrics', text: '📏 Peso/altura' },
+          { id: 'log_sleep', text: '🌙 Sono' },
+          { id: 'log_vaccine', text: '💉 Vacina' }
+        ];
+      } else if (currentState === 'SUPPORT') {
+        menuText = 'Como posso ajudar? 🛠️';
+        menuButtons = [
+          { id: 'support_problem', text: '⚠️ Reportar problema' },
+          { id: 'support_suggestion', text: '💡 Sugerir melhoria' },
+          { id: 'support_back', text: '↩️ Voltar' }
+        ];
+      } else if (currentState === 'FEEDBACK') {
+        menuText = 'Como foi sua experiência até agora? ⭐';
+        menuButtons = [
+          { id: 'fb_1', text: '⭐ 1-2 estrelas' },
+          { id: 'fb_3', text: '⭐⭐⭐ 3 estrelas' },
+          { id: 'fb_5', text: '⭐⭐⭐⭐⭐ 4-5' }
+        ];
+      }
+
+      return res.json({
+        success: true,
+        phone,
+        current_state: currentState,
+        active_context: activeContext,
+        assistant_name: state?.assistant_name || null,
+        state_message: stateMessage,
+        contextual_menu: {
+          text: menuText,
+          buttons: menuButtons
+        }
+      });
+    } catch (error) {
+      console.error('[Conversation] getContextualMenu error:', error.message);
+      return res.status(500).json({ success: false, error: 'Erro interno' });
+    }
+  },
+
+  async getWelcome(req, res) {
+    try {
+      const { phone } = req.query;
+
+      if (!phone) {
+        return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
+      }
+
+      const stateResult = await pgvectorService.getConversationState(phone);
+      const hasExistingState = stateResult.success && stateResult.state;
+      const state = hasExistingState ? stateResult.state : null;
+
+      const isReturning = hasExistingState && state.correlation_id !== null;
+      let userName = null;
+
+      const { findUserByPhone } = require('../utils/phoneUtils');
+      const user = await findUserByPhone(phone);
+      if (user) {
+        userName = user.name?.split(' ')[0] || null;
+      }
+
+      if (!isReturning) {
+        const welcomeText = userName
+          ? `Oi, ${userName}! Eu sou o TitiNauta 🚀👶\nVou te acompanhar na jornada de desenvolvimento, passo a passo.\n\nAqui você pode:\n✨ acompanhar o desenvolvimento\n✨ responder quizzes rápidos\n✨ receber dicas personalizadas\n\nPra começar, me conta:`
+          : 'Oi! Eu sou o TitiNauta 🚀👶\nVou te acompanhar na jornada de desenvolvimento, passo a passo.\n\nAqui você pode:\n✨ acompanhar o desenvolvimento\n✨ responder quizzes rápidos\n✨ receber dicas personalizadas\n\nPra começar, me conta:';
+
+        return res.json({
+          success: true,
+          type: 'first_visit',
+          text: welcomeText,
+          buttons: [
+            { id: 'ctx_child', text: '👶 Sobre meu bebê' },
+            { id: 'ctx_mother', text: '💚 Sobre mim' }
+          ]
+        });
+      }
+
+      const activeContext = state?.active_context;
+      const contextLabel = activeContext === 'child' ? 'seu bebê 👶' : activeContext === 'mother' ? 'você 💚' : null;
+
+      let welcomeBack = userName ? `Que bom te ver de volta, ${userName}! 💙` : 'Que bom te ver de volta! 💙';
+
+      if (contextLabel) {
+        welcomeBack += `\nDa última vez estávamos falando sobre ${contextLabel}`;
+        return res.json({
+          success: true,
+          type: 'returning_with_context',
+          text: welcomeBack + '\n\nQuer continuar ou mudar de assunto?',
+          active_context: activeContext,
+          buttons: [
+            { id: 'action_continue', text: '▶️ Continuar' },
+            { id: 'action_change', text: '🔄 Mudar contexto' }
+          ]
+        });
+      }
+
+      return res.json({
+        success: true,
+        type: 'returning_no_context',
+        text: welcomeBack + '\n\nSobre o que você quer falar agora?',
+        buttons: [
+          { id: 'ctx_child', text: '👶 Sobre meu bebê' },
+          { id: 'ctx_mother', text: '💚 Sobre mim' }
+        ]
+      });
+    } catch (error) {
+      console.error('[Conversation] getWelcome error:', error.message);
+      return res.status(500).json({ success: false, error: 'Erro interno' });
+    }
   }
 };
 

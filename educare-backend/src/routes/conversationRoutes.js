@@ -25,8 +25,15 @@ router.post('/report', conversationController.saveReport);
 router.get('/reports', conversationController.getReports);
 
 router.post('/tts', conversationController.textToSpeech);
+router.post('/tts/whatsapp', conversationController.ttsForWhatsApp);
 router.get('/tts/audio/:hash', conversationController.getTTSAudio);
 router.get('/tts/status', conversationController.getTTSStatus);
+
+router.get('/audio-preference', conversationController.getAudioPreference);
+router.post('/audio-preference', conversationController.setAudioPreference);
+
+router.get('/menu', conversationController.getContextualMenu);
+router.get('/welcome', conversationController.getWelcome);
 
 router.post('/buttons/format', conversationController.formatButtons);
 router.post('/buttons/send', conversationController.sendButtons);

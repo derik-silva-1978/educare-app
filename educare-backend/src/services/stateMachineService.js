@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const pgvectorService = require('./pgvectorService');
 
 const VALID_STATES = [
@@ -138,7 +139,14 @@ async function transition(userPhone, toState, additionalUpdates = {}) {
     updated_at: new Date().toISOString()
   };
 
-  if (toState === 'ENTRY' || toState === 'EXIT') {
+  if (toState === 'ENTRY') {
+    updates.active_context = null;
+    updates.assistant_name = null;
+    updates.quiz_session_id = null;
+    updates.correlation_id = crypto.randomUUID();
+  }
+
+  if (toState === 'EXIT') {
     updates.active_context = null;
     updates.assistant_name = null;
     updates.quiz_session_id = null;
@@ -191,6 +199,7 @@ function resolveActionButton(buttonId) {
     action_exit: { to_state: 'PAUSE' },
     action_log: { to_state: 'LOG_FLOW' },
     action_support: { to_state: 'SUPPORT' },
+    action_continue: { action: 'continue_conversation' },
     content_view: { action: 'view_content' },
     content_quiz: { to_state: 'QUIZ_FLOW' },
     content_pause: { to_state: 'PAUSE' },
