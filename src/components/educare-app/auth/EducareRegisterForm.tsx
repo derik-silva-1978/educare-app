@@ -180,10 +180,6 @@ const EducareRegisterForm: React.FC<EducareRegisterFormProps> = ({ redirectPath 
           title: "Cadastro realizado!",
           description: "Seu acesso está sendo analisado. Você receberá uma notificação no WhatsApp quando for aprovado.",
         });
-        
-        setTimeout(() => {
-          navigate('/educare-app/auth?action=login');
-        }, 2000);
       }
     } catch (error: unknown) {
       console.error('Registration failed:', error);

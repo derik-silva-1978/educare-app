@@ -349,6 +349,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       const result = await signUpWithEmail(email, password, name, finalRole, finalPhone, finalPlanId);
       
+      if (result.success && result.pendingApproval) {
+        return { pendingApproval: true } as any;
+      }
+      
       if (result.success && result.user) {
         const convertedUser = convertApiUser(result.user);
         setUser(convertedUser);

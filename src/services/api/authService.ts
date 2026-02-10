@@ -26,6 +26,7 @@ export interface AuthResult {
   error?: string;
   token?: string;
   refreshToken?: string;
+  pendingApproval?: boolean;
 }
 
 export interface LoginCredentials {
@@ -198,6 +199,7 @@ export const signUpWithEmail = async (
       user: AuthUser;
       token: string;
       refreshToken: string;
+      pendingApproval?: boolean;
     }>('/api/auth/register', requestBody, { requiresAuth: false });
 
     if (!response.success || !response.data) {
@@ -207,9 +209,16 @@ export const signUpWithEmail = async (
       };
     }
 
-    const { user, token, refreshToken } = response.data;
+    const { user, token, refreshToken, pendingApproval } = response.data;
 
-    // Armazena os dados de autenticação
+    if (pendingApproval) {
+      return {
+        success: true,
+        user,
+        pendingApproval: true
+      };
+    }
+
     setStoredAuthToken(token);
     setStoredRefreshToken(refreshToken);
     setStoredUserData(user);
