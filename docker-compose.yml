@@ -60,6 +60,7 @@ services:
       - N8N_REST_API_KEY=${N8N_REST_API_KEY}
       - EXTERNAL_API_KEY=${EXTERNAL_API_KEY}
       - OWNER_PHONE=${OWNER_PHONE}
+      - AUTO_SEED_ENABLED=${AUTO_SEED_ENABLED:-true}
       - UPLOAD_PATH=/app/uploads
       - KNOWLEDGE_UPLOAD_PATH=/app/uploads/knowledge
     volumes:

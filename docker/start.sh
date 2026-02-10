@@ -19,8 +19,5 @@ node src/database/bootstrap-migrations.js 2>&1 || echo "WARNING: Bootstrap had i
 echo ">>> Running database migrations..."
 npx sequelize-cli db:migrate --env production 2>&1 || echo "WARNING: Migrations had issues, continuing..."
 
-echo ">>> Seeding subscription plans..."
-node src/database/seed-plans.js 2>&1 || echo "WARNING: Seeding had issues, continuing..."
-
-echo ">>> Starting server..."
+echo ">>> Starting server (auto-seed runs during startup)..."
 exec node src/server.js

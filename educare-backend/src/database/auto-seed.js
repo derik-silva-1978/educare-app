@@ -64,3 +64,15 @@ async function runAutoSeed() {
 }
 
 module.exports = { runAutoSeed };
+
+if (require.main === module) {
+  runAutoSeed()
+    .then(() => {
+      console.log('[AutoSeed] Finalizado.');
+      process.exit(0);
+    })
+    .catch((err) => {
+      console.error('[AutoSeed] Erro fatal:', err.message);
+      process.exit(1);
+    });
+}
