@@ -192,7 +192,7 @@ app.use('/api/admin/migration', migrationRoutes); // Migração de documentos (S
 app.use('/api/admin', adminRoutes); // FASE 09: Legacy shutdown management (Super Admin)
 app.use('/api/guardrails', guardrailsRoutes); // Guardrails para n8n/WhatsApp
 
-// Hybrid RAG routes (Gemini + Qdrant)
+// Hybrid RAG routes (Gemini + PgVector)
 const hybridRagRoutes = require('./routes/hybridRagRoutes');
 app.use('/api/hybrid-rag', hybridRagRoutes);
 
