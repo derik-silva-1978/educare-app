@@ -414,6 +414,51 @@ const conversationController = {
       console.error('[Conversation] getStateMachine error:', error.message);
       return res.status(500).json({ success: false, error: 'Erro interno' });
     }
+  },
+
+  async resolveButton(req, res) {
+    try {
+      const { phone, button_id } = req.body;
+
+      if (!phone || !button_id) {
+        return res.status(400).json({ success: false, error: 'Parâmetros phone e button_id são obrigatórios' });
+      }
+
+      const contextResult = stateMachineService.resolveContextSelection(button_id);
+      if (contextResult) {
+        const transitionResult = await stateMachineService.transition(phone, 'FREE_CONVERSATION', contextResult);
+        return res.json({ ...transitionResult, action: 'context_selected', context: contextResult });
+      }
+
+      const feedbackScore = stateMachineService.resolveFeedbackScore(button_id);
+      if (feedbackScore !== null) {
+        const stateResult = await pgvectorService.getConversationState(phone);
+        const state = stateResult.success ? stateResult.state : {};
+        await pgvectorService.saveFeedback({
+          user_phone: phone,
+          score: feedbackScore,
+          state: state.state,
+          active_context: state.active_context,
+          assistant_name: state.assistant_name,
+          journey_week: state.journey_week
+        });
+        return res.json({ success: true, action: 'feedback_saved', score: feedbackScore });
+      }
+
+      const actionResult = stateMachineService.resolveActionButton(button_id);
+      if (actionResult) {
+        if (actionResult.to_state) {
+          const transitionResult = await stateMachineService.transition(phone, actionResult.to_state);
+          return res.json({ ...transitionResult, action: 'state_transition', button_action: actionResult });
+        }
+        return res.json({ success: true, action: actionResult.action, button_action: actionResult });
+      }
+
+      return res.json({ success: false, error: 'Botão não reconhecido', button_id });
+    } catch (error) {
+      console.error('[Conversation] resolveButton error:', error.message);
+      return res.status(500).json({ success: false, error: 'Erro interno ao resolver botão' });
+    }
   }
 };
 

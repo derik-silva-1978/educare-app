@@ -229,6 +229,9 @@ app.use('/api/n8n', externalLimiter, n8nRoutes);
 const conversationRoutes = require('./routes/conversationRoutes');
 app.use('/api/conversation', conversationRoutes);
 
+const whatsappFlowRoutes = require('./routes/whatsappFlowRoutes');
+app.use('/api/whatsapp-flow', externalLimiter, whatsappFlowRoutes);
+
 // Cloud file integration routes (Google Drive, OneDrive)
 const cloudRoutes = require('./routes/cloudRoutes');
 app.use('/api/cloud', cloudRoutes);

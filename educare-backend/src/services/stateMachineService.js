@@ -50,6 +50,34 @@ const CONTEXT_MESSAGES = {
       { id: 'action_exit', text: '👋 Sair' }
     ]
   },
+  CONTENT_FLOW: {
+    text: 'Separei um conteúdo especial para esta semana 🌱\nÉ rapidinho e pode te ajudar bastante.',
+    buttons: [
+      { id: 'content_view', text: '▶️ Ver conteúdo' },
+      { id: 'content_quiz', text: '🧩 Fazer um quiz' },
+      { id: 'content_pause', text: '⏸️ Voltar depois' }
+    ]
+  },
+  QUIZ_FLOW: {
+    text: 'Vamos lá! 🧩\nVou te fazer algumas perguntas rápidas.\n\nNão existe resposta certa ou errada 💙',
+    buttons: []
+  },
+  LOG_FLOW: {
+    text: 'Vamos anotar isso rapidinho 📝\nO que você gostaria de registrar?',
+    buttons: [
+      { id: 'log_biometrics', text: '📏 Peso/altura' },
+      { id: 'log_sleep', text: '🌙 Sono' },
+      { id: 'log_vaccine', text: '💉 Vacina' }
+    ]
+  },
+  SUPPORT: {
+    text: 'Se algo não funcionou como esperado, você pode me contar 🛠️',
+    buttons: [
+      { id: 'support_problem', text: '⚠️ Reportar problema' },
+      { id: 'support_suggestion', text: '💡 Sugerir melhoria' },
+      { id: 'support_back', text: '↩️ Voltar' }
+    ]
+  },
   FEEDBACK: {
     text: 'Antes de você sair, como foi sua experiência até agora? ⭐',
     buttons: [
@@ -59,11 +87,11 @@ const CONTEXT_MESSAGES = {
     ]
   },
   PAUSE: {
-    text: 'Tudo bem! Estarei aqui quando quiser voltar. 💜\n\nÉ só me mandar uma mensagem!',
+    text: 'Tudo bem 💙\nQuando quiser, é só me chamar.',
     buttons: []
   },
   EXIT: {
-    text: 'Obrigado por usar o Educare+! 💜\n\nFoi ótimo conversar com você. Até a próxima! 👋',
+    text: 'Estarei por aqui sempre que precisar 🌷',
     buttons: []
   }
 };
@@ -155,6 +183,27 @@ function resolveFeedbackScore(buttonId) {
   return mapping[buttonId] || null;
 }
 
+function resolveActionButton(buttonId) {
+  const mapping = {
+    action_quiz: { to_state: 'QUIZ_FLOW' },
+    action_content: { to_state: 'CONTENT_FLOW' },
+    action_change: { to_state: 'CONTEXT_SELECTION' },
+    action_exit: { to_state: 'PAUSE' },
+    action_log: { to_state: 'LOG_FLOW' },
+    action_support: { to_state: 'SUPPORT' },
+    content_view: { action: 'view_content' },
+    content_quiz: { to_state: 'QUIZ_FLOW' },
+    content_pause: { to_state: 'PAUSE' },
+    log_biometrics: { action: 'collect_log', log_type: 'biometrics' },
+    log_sleep: { action: 'collect_log', log_type: 'sleep' },
+    log_vaccine: { action: 'collect_log', log_type: 'vaccine' },
+    support_problem: { action: 'collect_report', report_type: 'problem' },
+    support_suggestion: { action: 'collect_report', report_type: 'suggestion' },
+    support_back: { to_state: 'FREE_CONVERSATION' }
+  };
+  return mapping[buttonId] || null;
+}
+
 module.exports = {
   VALID_STATES,
   TRANSITIONS,
@@ -163,5 +212,6 @@ module.exports = {
   getStateMessage,
   transition,
   resolveContextSelection,
-  resolveFeedbackScore
+  resolveFeedbackScore,
+  resolveActionButton
 };

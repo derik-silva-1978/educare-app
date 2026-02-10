@@ -30,5 +30,6 @@ router.get('/tts/status', conversationController.getTTSStatus);
 
 router.post('/buttons/format', conversationController.formatButtons);
 router.post('/buttons/send', conversationController.sendButtons);
+router.post('/buttons/resolve', conversationController.resolveButton);
 
 module.exports = router;
