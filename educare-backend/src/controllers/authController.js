@@ -16,6 +16,25 @@ const generateToken = (userId) => {
   });
 };
 
+const generateRefreshToken = (userId) => {
+  return jwt.sign({ id: userId, type: 'refresh' }, authConfig.refreshSecret, {
+    expiresIn: authConfig.refreshExpiresIn,
+    issuer: authConfig.issuer,
+    audience: authConfig.audience
+  });
+};
+
+const validatePasswordStrength = (password) => {
+  if (!password) return { valid: false, message: 'Senha é obrigatória' };
+  if (password.length < authConfig.passwordPolicy.minLength) {
+    return { valid: false, message: `Senha deve ter no mínimo ${authConfig.passwordPolicy.minLength} caracteres` };
+  }
+  if (password.length > authConfig.passwordPolicy.maxLength) {
+    return { valid: false, message: `Senha deve ter no máximo ${authConfig.passwordPolicy.maxLength} caracteres` };
+  }
+  return { valid: true };
+};
+
 // Registrar novo usuário
 exports.register = async (req, res) => {
   try {
@@ -44,13 +63,19 @@ exports.register = async (req, res) => {
     let finalPassword = password;
     if (!password && mappedRole === 'professional' && req.headers.authorization) {
       // Gerar senha temporária de 16 caracteres
-      finalPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+      const crypto2 = require('crypto');
+      finalPassword = crypto2.randomBytes(12).toString('base64url').slice(0, 16);
       console.log('Senha temporária gerada para profissional (user registration)');
     }
     
     // Verificar se temos senha (fornecida ou gerada)
     if (!finalPassword) {
       return res.status(400).json({ error: 'Senha é obrigatória' });
+    }
+
+    const pwCheck = validatePasswordStrength(finalPassword);
+    if (!pwCheck.valid) {
+      return res.status(400).json({ error: pwCheck.message });
     }
 
     // Verificar se pelo menos email ou telefone foi fornecido
@@ -218,7 +243,7 @@ exports.register = async (req, res) => {
 
     // Gerar token JWT
     const token = generateToken(user.id);
-    const refreshToken = generateToken(user.id); // Por enquanto, mesmo token (pode ser melhorado)
+    const refreshToken = generateRefreshToken(user.id);
 
     // Preparar resposta
     const response = {
@@ -667,7 +692,7 @@ exports.login = async (req, res) => {
 
     // Gerar token JWT
     const token = generateToken(user.id);
-    const refreshToken = generateToken(user.id); // Por enquanto, mesmo token (pode ser melhorado)
+    const refreshToken = generateRefreshToken(user.id);
 
     // Retornar dados do usuário (sem a senha), token e refreshToken
     return res.status(200).json({
@@ -927,6 +952,11 @@ exports.resetPassword = async (req, res) => {
     
     console.log(`Usuário encontrado: ${user.email}. Atualizando senha...`);
 
+    const pwCheck = validatePasswordStrength(password);
+    if (!pwCheck.valid) {
+      return res.status(400).json({ error: pwCheck.message, success: false });
+    }
+
     // Atualizar senha
     user.password = password;
     user.reset_token = null;
@@ -1001,41 +1031,34 @@ exports.logout = async (req, res) => {
 
 // Função auxiliar para gerar senha temporária segura
 const generateSecurePassword = () => {
-  // Definir conjuntos de caracteres
+  const crypto = require('crypto');
   const uppercaseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const lowercaseChars = 'abcdefghijklmnopqrstuvwxyz';
   const numberChars = '0123456789';
   const specialChars = '@';
   
-  // Garantir pelo menos 2 maiúsculas
+  const randomChar = (chars) => chars.charAt(crypto.randomInt(chars.length));
+  
   let password = '';
-  for (let i = 0; i < 2; i++) {
-    password += uppercaseChars.charAt(Math.floor(Math.random() * uppercaseChars.length));
-  }
-  
-  // Garantir pelo menos um @
+  password += randomChar(uppercaseChars);
+  password += randomChar(uppercaseChars);
   password += specialChars;
+  password += randomChar(numberChars);
+  password += randomChar(lowercaseChars);
   
-  // Garantir pelo menos um número
-  password += numberChars.charAt(Math.floor(Math.random() * numberChars.length));
-  
-  // Garantir pelo menos uma letra minúscula
-  password += lowercaseChars.charAt(Math.floor(Math.random() * lowercaseChars.length));
-  
-  // Adicionar caracteres aleatórios para completar 6 dígitos se necessário
-  const remainingLength = 6 - password.length;
   const allChars = uppercaseChars + lowercaseChars + numberChars;
-  
+  const remainingLength = 8 - password.length;
   for (let i = 0; i < remainingLength; i++) {
-    password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+    password += randomChar(allChars);
   }
   
-  // Embaralhar a senha para não ter um padrão previsível
-  const shuffled = password.split('').sort(() => 0.5 - Math.random()).join('');
+  const arr = password.split('');
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = crypto.randomInt(i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
   
-  console.log('Senha temporária gerada para recuperação de conta');
-  
-  return shuffled;
+  return arr.join('');
 };
 
 // Login por telefone com senha temporária
@@ -1155,7 +1178,7 @@ exports.sendPhoneVerification = async (req, res) => {
     console.log(`Tentando verificar telefone: ${phone} (normalizado: ${normalizedPhone})`);
 
     // Gerar código de verificação de 6 dígitos
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCode = String(require('crypto').randomInt(100000, 999999));
     
     // Definir data de expiração (30 minutos)
     const expiresAt = new Date();
@@ -1178,7 +1201,7 @@ exports.sendPhoneVerification = async (req, res) => {
         phone_verification_expires: expiresAt,
         status: 'pending',
         name: 'Usuário Temporário',
-        password: Math.random().toString(36).slice(-12) // Senha temporária aleatória (hash automático)
+        password: require('crypto').randomBytes(12).toString('base64url')
       });
     }
 
@@ -1243,9 +1266,7 @@ exports.verifyPhoneCode = async (req, res) => {
 
     // Gerar token JWT
     const token = generateToken(user.id);
-    const refreshToken = jwt.sign({ id: user.id }, authConfig.refreshSecret, {
-      expiresIn: authConfig.refreshExpiresIn
-    });
+    const refreshToken = generateRefreshToken(user.id);
 
     return res.status(200).json({
       message: 'Telefone verificado com sucesso',
@@ -1277,7 +1298,10 @@ exports.refreshToken = async (req, res) => {
     // Verificar e decodificar o refresh token
     let decoded;
     try {
-      decoded = jwt.verify(refreshToken, process.env.JWT_SECRET || 'your-secret-key');
+      decoded = jwt.verify(refreshToken, authConfig.refreshSecret, {
+        issuer: authConfig.issuer,
+        audience: authConfig.audience
+      });
     } catch (error) {
       return res.status(401).json({ error: 'Refresh token inválido ou expirado' });
     }
@@ -1298,7 +1322,7 @@ exports.refreshToken = async (req, res) => {
 
     // Gerar novos tokens
     const newToken = generateToken(user.id);
-    const newRefreshToken = generateToken(user.id); // Por enquanto, mesmo token (pode ser melhorado)
+    const newRefreshToken = generateRefreshToken(user.id);
 
     // Retornar dados do usuário (sem a senha) e novos tokens
     return res.status(200).json({
@@ -1339,7 +1363,7 @@ exports.googleLogin = async (req, res) => {
       console.log(`Usuário existente logado via Google: ${email}`);
     } else {
       // Criar novo usuário (o hook beforeCreate do modelo faz o hash automaticamente)
-      const randomPassword = Math.random().toString(36).slice(-16);
+      const randomPassword = require('crypto').randomBytes(16).toString('base64url');
 
       user = await User.create({
         email,
@@ -1364,7 +1388,7 @@ exports.googleLogin = async (req, res) => {
 
     // Gerar tokens
     const token = generateToken(user.id);
-    const refreshToken = generateToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
 
     return res.status(200).json({
       user: {

@@ -554,4 +554,15 @@ app.listen(PORT, async () => {
   }
 });
 
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[UNHANDLED_REJECTION]', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('[UNCAUGHT_EXCEPTION]', error);
+  if (error.code === 'EADDRINUSE') {
+    process.exit(1);
+  }
+});
+
 module.exports = app;

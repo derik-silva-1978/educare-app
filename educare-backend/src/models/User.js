@@ -172,9 +172,7 @@ const User = sequelize.define('User', {
 // Método para verificar senha
 User.prototype.checkPassword = async function(password) {
   try {
-    console.log(`Verificando senha para usuário: ${this.email || this.phone}`);
-    console.log(`Comprimento da senha fornecida: ${password ? password.length : 'senha vazia'}`);
-    console.log(`Primeiros caracteres da senha: ${password ? password.substring(0, 2) + '...' : 'N/A'}`);
+    console.log(`Verificando senha para usuário: ${this.id}`);
     
     if (!password || !this.password) {
       console.log('Senha fornecida ou hash armazenado está vazio');
@@ -183,7 +181,6 @@ User.prototype.checkPassword = async function(password) {
     
     // Usar bcrypt.compare para verificar a senha
     const match = await bcrypt.compare(password, this.password);
-    console.log(`Resultado da verificação de senha: ${match ? 'Sucesso' : 'Falha'}`);
     return match;
   } catch (error) {
     console.error('Erro ao verificar senha:', error);
