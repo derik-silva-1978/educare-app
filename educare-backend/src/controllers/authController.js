@@ -286,6 +286,26 @@ exports.register = async (req, res) => {
       }
     }
 
+    // Enviar confirmação de cadastro ao próprio usuário via WhatsApp
+    if (phoneToSave) {
+      try {
+        const userConfirmMessage = `✅ *Cadastro Recebido - Educare+*\n\n` +
+          `Olá, *${name}*! 👋\n\n` +
+          `Seu cadastro na plataforma *Educare+* foi recebido com sucesso!\n\n` +
+          `📋 *Status:* Aguardando aprovação\n` +
+          `📧 *Email:* ${email || 'Não informado'}\n\n` +
+          `Assim que seu acesso for aprovado, você receberá uma notificação aqui no WhatsApp.\n\n` +
+          `Enquanto isso, se tiver dúvidas, estamos à disposição! 💜\n\n` +
+          `_Equipe Educare+_`;
+
+        WhatsappService.sendMessage(phoneToSave, userConfirmMessage)
+          .then(() => console.log(`Confirmação de cadastro enviada ao usuário: ${phoneToSave}`))
+          .catch(err => console.error(`Erro ao enviar confirmação ao usuário: ${err.message}`));
+      } catch (userNotifError) {
+        console.error('Erro ao preparar confirmação ao usuário:', userNotifError.message);
+      }
+    }
+
     // Retornar dados do usuário
     if (!response.message) {
       response.message = isAdminCreated

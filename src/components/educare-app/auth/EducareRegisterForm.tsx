@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { useCustomAuth as useAuth } from '@/hooks/useCustomAuth';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, CheckCircle, Phone, CreditCard, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Loader2, CheckCircle, Phone, CreditCard, AlertCircle, Eye, EyeOff, MessageCircle } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -210,24 +210,49 @@ const EducareRegisterForm: React.FC<EducareRegisterFormProps> = ({ redirectPath 
 
   if (registrationSuccess) {
     return (
-      <div className="space-y-4">
-        <Alert>
-          <CheckCircle className="h-4 w-4" />
-          <AlertDescription>
-            <div className="space-y-2">
-              <p className="font-medium">Cadastro realizado com sucesso!</p>
-              <p className="text-sm text-muted-foreground">
-                Seu acesso está aguardando aprovação. Você receberá uma notificação no WhatsApp quando for aprovado.
-              </p>
+      <div className="flex flex-col items-center text-center space-y-6 py-4">
+        <div className="relative">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center animate-[bounceIn_0.5s_ease-out]">
+            <CheckCircle className="h-10 w-10 text-green-600" />
+          </div>
+          <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+            <span className="text-white text-xs font-bold">!</span>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h3 className="text-xl font-bold text-foreground">Cadastro Realizado!</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
+            Seu cadastro foi recebido com sucesso. Seu acesso está sendo analisado pela nossa equipe.
+          </p>
+        </div>
+
+        <div className="w-full rounded-xl border border-green-200 bg-green-50/50 dark:bg-green-950/20 dark:border-green-800 p-4 space-y-3">
+          <div className="flex items-start gap-3 text-left">
+            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center shrink-0 mt-0.5">
+              <MessageCircle className="h-4 w-4 text-green-600" />
             </div>
-          </AlertDescription>
-        </Alert>
-        
+            <div>
+              <p className="text-sm font-medium text-green-900 dark:text-green-100">Confirma\u00e7\u00e3o via WhatsApp</p>
+              <p className="text-xs text-green-700 dark:text-green-300">Voc\u00ea receber\u00e1 uma mensagem no WhatsApp confirmando seu cadastro.</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 text-left">
+            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center shrink-0 mt-0.5">
+              <CheckCircle className="h-4 w-4 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-blue-900 dark:text-blue-100">Aprova\u00e7\u00e3o do Acesso</p>
+              <p className="text-xs text-blue-700 dark:text-blue-300">Quando seu acesso for aprovado, voc\u00ea ser\u00e1 notificado pelo WhatsApp.</p>
+            </div>
+          </div>
+        </div>
+
         <Button 
           onClick={() => navigate('/educare-app/auth?action=login')} 
-          className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-medium shadow-md"
+          className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-medium shadow-md h-11"
         >
-          Voltar ao Login
+          Ir para o Login
         </Button>
       </div>
     );
@@ -583,14 +608,6 @@ const EducareRegisterForm: React.FC<EducareRegisterFormProps> = ({ redirectPath 
         </form>
       </Form>
 
-      {registrationSuccess && (
-        <Alert className="bg-green-50 border-green-200 mt-4">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">
-            Cadastro realizado com sucesso! Verifique seu email para confirmar sua conta.
-          </AlertDescription>
-        </Alert>
-      )}
     </div>
   );
 };
