@@ -37,6 +37,7 @@ The frontend utilizes React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Ta
     - **Auth Security Hardening (Phase 10)**: Separate JWT refresh token with dedicated secret, reduced access token TTL (24h→1h), increased bcrypt salt rounds (10→12), password strength validation (min 6 chars), crypto-secure random generation replacing all `Math.random()` calls, removed password info logging.
     - **Production Error Handling (Phase 10)**: Global `unhandledRejection` and `uncaughtException` handlers in server.js. Graceful degradation for non-critical service failures.
     - **Production Deployment Guide (Phase 10)**: Comprehensive deployment documentation covering environment variables, Docker setup, n8n webhook configuration, monitoring checklist, and database index reference.
+    - **URL Link Shortener (Phase 10)**: Integrated is.gd link shortener into registration approval messages and welcome messages sent via WhatsApp. Approval links (7/14/30 days) and login URLs are shortened for better mobile UX. Falls back to original URL on failure.
 
 ### System Design Choices
 - **Scalability**: Designed for Contabo VPS with Docker containers, PostgreSQL, and internal networking.
