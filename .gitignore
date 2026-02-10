@@ -18,6 +18,9 @@ dist
 dist-ssr
 *.local
 
+# Attached assets (may contain pasted secrets)
+attached_assets/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
