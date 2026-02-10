@@ -6,6 +6,7 @@ const { validationResult } = require('express-validator');
 const { OAuth2Client } = require('google-auth-library');
 const { normalizePhoneNumber, findUserByPhone } = require('../utils/phoneUtils');
 const WhatsappService = require('../services/whatsappService');
+const { shortenMultiple, shortenUrl } = require('../utils/urlShortener');
 
 // Função para gerar token JWT
 const generateToken = (userId) => {
@@ -277,9 +278,11 @@ exports.register = async (req, res) => {
         }
         if (!approvalBaseUrl) approvalBaseUrl = 'http://localhost:5000';
 
-        const link7 = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}?days=7`;
-        const link14 = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}?days=14`;
-        const link30 = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}?days=30`;
+        const rawLink7 = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}?days=7`;
+        const rawLink14 = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}?days=14`;
+        const rawLink30 = `${approvalBaseUrl}/api/auth/approve-user/${approvalToken}?days=30`;
+
+        const [link7, link14, link30] = await shortenMultiple([rawLink7, rawLink14, rawLink30]);
 
         const roleLabel = { user: 'Pai/Mãe', professional: 'Profissional', admin: 'Administrador' };
 
@@ -298,9 +301,9 @@ exports.register = async (req, res) => {
           `🏷️ *Tipo:* ${roleLabel[mappedRole] || mappedRole || 'Pai/Mãe'}\n` +
           `📦 *Plano:* ${planLabel}\n\n` +
           `✅ *Selecione o período de acesso gratuito:*\n\n` +
-          `▶️ *7 dias:*\n${link7}\n\n` +
-          `▶️ *14 dias:*\n${link14}\n\n` +
-          `▶️ *30 dias:*\n${link30}\n\n` +
+          `▶️ *7 dias:* ${link7}\n\n` +
+          `▶️ *14 dias:* ${link14}\n\n` +
+          `▶️ *30 dias:* ${link30}\n\n` +
           `⏰ Links válidos por 30 dias.`;
 
         WhatsappService.sendMessage(ownerPhone, notifMessage)
@@ -483,6 +486,8 @@ exports.approveUser = async (req, res) => {
         endDate.setDate(endDate.getDate() + validDays);
         const formattedEnd = endDate.toLocaleDateString('pt-BR');
 
+        const shortLoginUrl = await shortenUrl(loginUrl);
+
         const welcomeMessage = `🎉 *Bem-vindo(a) ao Educare+!*\n\n` +
           `Olá, *${user.name}*! 👋\n\n` +
           `Seu acesso à plataforma Educare+ foi *aprovado com sucesso*! ✅\n\n` +
@@ -494,7 +499,7 @@ exports.approveUser = async (req, res) => {
           `📊 *Relatórios Inteligentes*\n` +
           `📚 *Jornada do Desenvolvimento*\n` +
           `💉 *Vacinas e Crescimento*\n\n` +
-          `🔗 *Acesse a plataforma agora:*\n${loginUrl}\n\n` +
+          `🔗 *Acesse a plataforma agora:*\n${shortLoginUrl}\n\n` +
           `Faça login com o e-mail e senha que você cadastrou.\n\n` +
           `Qualquer dúvida, estamos aqui para ajudar! 💙`;
 
