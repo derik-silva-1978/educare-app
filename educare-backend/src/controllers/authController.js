@@ -352,7 +352,10 @@ exports.register = async (req, res) => {
     return res.status(201).json(response);
   } catch (error) {
     console.error('Erro ao registrar usuário:', error);
-    return res.status(500).json({ error: 'Erro ao registrar usuário' });
+    const errorDetail = process.env.NODE_ENV === 'production' 
+      ? error.message 
+      : error.stack;
+    return res.status(500).json({ error: 'Erro ao registrar usuário', detail: errorDetail });
   }
 };
 
