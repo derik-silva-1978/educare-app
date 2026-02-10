@@ -53,11 +53,9 @@ const CONTEXT_MESSAGES = {
   FEEDBACK: {
     text: 'Antes de você sair, como foi sua experiência até agora? ⭐',
     buttons: [
-      { id: 'fb_1', text: '⭐ 1' },
-      { id: 'fb_2', text: '⭐⭐ 2' },
-      { id: 'fb_3', text: '⭐⭐⭐ 3' },
-      { id: 'fb_4', text: '⭐⭐⭐⭐ 4' },
-      { id: 'fb_5', text: '⭐⭐⭐⭐⭐ 5' }
+      { id: 'fb_1', text: '⭐ 1-2 estrelas' },
+      { id: 'fb_3', text: '⭐⭐⭐ 3 estrelas' },
+      { id: 'fb_5', text: '⭐⭐⭐⭐⭐ 4-5' }
     ]
   },
   PAUSE: {
