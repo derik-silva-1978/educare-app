@@ -1,6 +1,7 @@
 const { SubscriptionPlan, User, Profile, Child, Subscription } = require('../models');
 const bcrypt = require('bcryptjs');
 const logger = require('../utils/logger');
+const { findUserByPhone, extractPhoneVariants } = require('../utils/phoneUtils');
 
 /**
  * @swagger
@@ -729,27 +730,30 @@ exports.searchUser = async (req, res) => {
     // Construir filtro de busca
     const whereClause = {};
     
+    let user = null;
+    
     if (phone) {
-      // Remover caracteres não numéricos do telefone para busca flexível
-      const cleanPhone = phone.replace(/[^\d+]/g, '');
-      whereClause.phone = cleanPhone;
-    }
-    
-    if (cpf_cnpj) {
-      // Remover caracteres não numéricos do CPF/CNPJ para busca flexível
-      const cleanCpfCnpj = cpf_cnpj.replace(/[^\d]/g, '');
-      whereClause.cpf_cnpj = cleanCpfCnpj;
-    }
-    
-    console.log('Buscando usuário com filtro:', whereClause);
-    
-    // Buscar usuário
-    const user = await User.findOne({
-      where: whereClause,
-      attributes: { 
-        exclude: ['password', 'reset_token', 'reset_token_expires', 'phone_verification_code', 'phone_verification_expires'] 
+      const { Op } = require('sequelize');
+      const variants = extractPhoneVariants(phone);
+      if (variants.length > 0) {
+        user = await User.findOne({
+          where: { phone: { [Op.in]: variants } },
+          attributes: { 
+            exclude: ['password', 'reset_token', 'reset_token_expires', 'phone_verification_code', 'phone_verification_expires'] 
+          }
+        });
       }
-    });
+    }
+    
+    if (!user && cpf_cnpj) {
+      const cleanCpfCnpj = cpf_cnpj.replace(/[^\d]/g, '');
+      user = await User.findOne({
+        where: { cpf_cnpj: cleanCpfCnpj },
+        attributes: { 
+          exclude: ['password', 'reset_token', 'reset_token_expires', 'phone_verification_code', 'phone_verification_expires'] 
+        }
+      });
+    }
     
     if (!user) {
       return res.status(404).json({
@@ -920,26 +924,26 @@ exports.searchUserChildren = async (req, res) => {
       });
     }
     
-    // Construir filtro de busca
-    const whereClause = {};
+    let user = null;
     
     if (phone) {
-      const cleanPhone = phone.replace(/[^\d+]/g, '');
-      whereClause.phone = cleanPhone;
+      const { Op } = require('sequelize');
+      const variants = extractPhoneVariants(phone);
+      if (variants.length > 0) {
+        user = await User.findOne({
+          where: { phone: { [Op.in]: variants } },
+          attributes: ['id', 'name', 'email', 'phone', 'cpf_cnpj', 'role', 'status']
+        });
+      }
     }
     
-    if (cpf_cnpj) {
+    if (!user && cpf_cnpj) {
       const cleanCpfCnpj = cpf_cnpj.replace(/[^\d]/g, '');
-      whereClause.cpf_cnpj = cleanCpfCnpj;
+      user = await User.findOne({
+        where: { cpf_cnpj: cleanCpfCnpj },
+        attributes: ['id', 'name', 'email', 'phone', 'cpf_cnpj', 'role', 'status']
+      });
     }
-    
-    console.log('Buscando usuário com filtro:', whereClause);
-    
-    // Buscar usuário
-    const user = await User.findOne({
-      where: whereClause,
-      attributes: ['id', 'name', 'email', 'phone', 'cpf_cnpj', 'role', 'status']
-    });
     
     if (!user) {
       return res.status(404).json({
@@ -1359,7 +1363,7 @@ exports.getUnansweredQuestions = async (req, res) => {
     logger.info('Criança encontrada', { childId: child.id });
     
     // Calcular idade em meses
-    const birthDate = new Date(child.birth_date);
+    const birthDate = new Date(child.birthDate || child.birth_date);
     const today = new Date();
     const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + 
                         (today.getMonth() - birthDate.getMonth());
@@ -1684,20 +1688,13 @@ exports.getActiveChildByPhone = async (req, res) => {
     logger.info('API Externa - Buscar Criança Ativa');
     const { phone } = req.params;
     
-    // Limpar telefone
-    const cleanPhone = phone.replace(/[^\d+]/g, '');
-    
-    // Buscar usuário
-    const user = await User.findOne({
-      where: { phone: cleanPhone },
-      attributes: ['id', 'name', 'email', 'phone']
-    });
+    const user = await findUserByPhone(User, phone);
     
     if (!user) {
       return res.status(404).json({
         success: false,
         error: 'Usuário não encontrado',
-        phone: cleanPhone
+        phone
       });
     }
     
@@ -1739,26 +1736,32 @@ exports.getActiveChildByPhone = async (req, res) => {
     
     // Calcular idade e progresso de cada criança
     const childrenWithDetails = await Promise.all(children.map(async (child) => {
-      const birthDate = new Date(child.birth_date);
+      const birthDate = new Date(child.birthDate || child.birth_date);
       const today = new Date();
       const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + 
                           (today.getMonth() - birthDate.getMonth());
       
-      // Buscar perguntas disponíveis para a idade
-      const { JourneyQuestion } = require('../models');
-      const { Op } = require('sequelize');
-      const totalQuestions = await JourneyQuestion.count({
-        where: {
-          meta_min_months: { [Op.lte]: ageInMonths },
-          meta_max_months: { [Op.gte]: ageInMonths }
+      let totalQuestions = 0;
+      let answeredQuestions = 0;
+      try {
+        const models = require('../models');
+        const { Op } = require('sequelize');
+        if (models.JourneyQuestion) {
+          totalQuestions = await models.JourneyQuestion.count({
+            where: {
+              meta_min_months: { [Op.lte]: ageInMonths },
+              meta_max_months: { [Op.gte]: ageInMonths }
+            }
+          });
         }
-      });
-      
-      // Buscar respostas dadas
-      const { JourneyBotResponse } = require('../models');
-      const answeredQuestions = await JourneyBotResponse.count({
-        where: { child_id: child.id }
-      });
+        if (models.JourneyBotResponse) {
+          answeredQuestions = await models.JourneyBotResponse.count({
+            where: { child_id: child.id }
+          });
+        }
+      } catch (e) {
+        console.warn('[getActiveChildByPhone] Journey models not available:', e.message);
+      }
       
       const progressPercentage = totalQuestions > 0 
         ? Math.round((answeredQuestions / totalQuestions) * 100) 
@@ -1766,14 +1769,14 @@ exports.getActiveChildByPhone = async (req, res) => {
       
       return {
         id: child.id,
-        first_name: child.first_name,
-        last_name: child.last_name,
-        full_name: `${child.first_name} ${child.last_name}`,
-        birth_date: child.birth_date,
+        first_name: child.firstName || child.first_name,
+        last_name: child.lastName || child.last_name,
+        full_name: `${child.firstName || child.first_name || ''} ${child.lastName || child.last_name || ''}`.trim(),
+        birth_date: child.birthDate || child.birth_date,
         age_months: ageInMonths,
         age_display: formatAge(ageInMonths),
         gender: child.gender,
-        avatar_url: child.avatar_url,
+        avatar_url: child.avatarUrl || child.avatar_url,
         progress: {
           total_questions: totalQuestions,
           answered_questions: answeredQuestions,
@@ -1854,13 +1857,7 @@ exports.selectChildByPhone = async (req, res) => {
     logger.info('API Externa - Selecionar Criança');
     const { phone, childId } = req.params;
     
-    // Limpar telefone
-    const cleanPhone = phone.replace(/[^\d+]/g, '');
-    
-    // Buscar usuário
-    const user = await User.findOne({
-      where: { phone: cleanPhone }
-    });
+    const user = await findUserByPhone(User, phone);
     
     if (!user) {
       return res.status(404).json({
@@ -1891,7 +1888,7 @@ exports.selectChildByPhone = async (req, res) => {
     }
     
     // Calcular idade
-    const birthDate = new Date(child.birth_date);
+    const birthDate = new Date(child.birthDate || child.birth_date);
     const today = new Date();
     const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + 
                         (today.getMonth() - birthDate.getMonth());
@@ -1963,7 +1960,7 @@ exports.getChildProgress = async (req, res) => {
     // Calcular idade em meses (tratar caso de birth_date null/undefined)
     let ageInMonths = null;
     if (child.birth_date) {
-      const birthDate = new Date(child.birth_date);
+      const birthDate = new Date(child.birthDate || child.birth_date);
       const today = new Date();
       ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + 
                     (today.getMonth() - birthDate.getMonth());
@@ -2119,7 +2116,7 @@ exports.getQuizResponses = async (req, res) => {
       };
     });
     
-    const birthDate = new Date(child.birth_date);
+    const birthDate = new Date(child.birthDate || child.birth_date);
     const today = new Date();
     const ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12 + 
                         (today.getMonth() - birthDate.getMonth());

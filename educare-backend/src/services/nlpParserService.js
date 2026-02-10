@@ -27,7 +27,6 @@ Exemplos:
 
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
-        timeout: 30000,
         messages: [
           {
             role: 'system',
@@ -40,7 +39,7 @@ Exemplos:
         ],
         temperature: 0,
         max_tokens: 100
-      });
+      }, { timeout: 30000 });
 
       const content = response.choices[0].message.content.trim();
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -76,7 +75,6 @@ Exemplos:
 
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
-        timeout: 30000,
         messages: [
           {
             role: 'system',
@@ -89,7 +87,7 @@ Exemplos:
         ],
         temperature: 0,
         max_tokens: 150
-      });
+      }, { timeout: 30000 });
 
       const content = response.choices[0].message.content.trim();
       const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -127,7 +125,6 @@ Exemplos:
 
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
-        timeout: 30000,
         messages: [
           {
             role: 'system',
@@ -140,7 +137,7 @@ Exemplos:
         ],
         temperature: 0,
         max_tokens: 150
-      });
+      }, { timeout: 30000 });
 
       const content = response.choices[0].message.content.trim();
       const jsonMatch = content.match(/\{[\s\S]*\}/);

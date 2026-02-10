@@ -69,6 +69,13 @@ The frontend uses React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Tailwi
 1. Push code to git repository
 2. In Portainer: Add Stack from Repository (or Pull and Redeploy for updates)
 3. Backend auto-migrations run on startup (RAG columns, metadata backfill)
+4. Auto-seed runs on startup: populates empty `subscription_plans` and `content_items` tables (disable with `AUTO_SEED_ENABLED=false`)
+
+### Phone Search Standardization
+- All n8n and external API endpoints use `findUserByPhone()` from `src/utils/phoneUtils.js`
+- `extractPhoneVariants()` generates all format variations (+55, with/without 9th digit, etc.)
+- Phone normalization is opt-in via `{ normalize: true }` option to avoid side effects in read endpoints
+- Seeder `04-content-items.js` preserves 15 WelcomeHub content items for fresh deploys
 
 ### Traefik Configuration (confirmed from server)
 - Entrypoints: `web` (80), `websecure` (443)

@@ -507,6 +507,14 @@ app.listen(PORT, async () => {
   } catch (error) {
     console.error('Error initializing Stripe:', error.message);
   }
+
+  // Auto-seed initial data if tables are empty (non-blocking)
+  try {
+    const { runAutoSeed } = require('./database/auto-seed');
+    await runAutoSeed();
+  } catch (error) {
+    console.warn('[AutoSeed] Erro (não-fatal):', error.message);
+  }
 });
 
 module.exports = app;

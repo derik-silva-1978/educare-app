@@ -1,6 +1,7 @@
 const { User, Profile, Child, Subscription, SubscriptionPlan, BiometricsLog, SleepLog, Appointment, VaccineHistory, ContentItem } = require('../models');
 const nlpParserService = require('../services/nlpParserService');
 const { Op } = require('sequelize');
+const { findUserByPhone } = require('../utils/phoneUtils');
 
 const SBP_VACCINE_CALENDAR = [
   { vaccine: 'BCG', weeks: 0, dose: 1 },
@@ -41,14 +42,7 @@ const n8nController = {
         });
       }
 
-      const cleanPhone = phone.replace(/\D/g, '');
-
-      const user = await User.findOne({
-        where: {
-          phone: {
-            [Op.or]: [cleanPhone, `+${cleanPhone}`, phone]
-          }
-        },
+      const user = await findUserByPhone(User, phone, {
         include: [{
           model: Subscription,
           as: 'subscriptions',
@@ -141,12 +135,7 @@ const n8nController = {
       const cleanPhone = phoneNumber.replace(/\D/g, '');
       console.log(`[n8n] Reconhecimento WhatsApp - Buscando usuário: ${cleanPhone}`);
 
-      const user = await User.findOne({
-        where: {
-          phone: {
-            [Op.or]: [cleanPhone, `+${cleanPhone}`, `+55${cleanPhone}`, phoneNumber]
-          }
-        },
+      const user = await findUserByPhone(User, phoneNumber, {
         include: [{
           model: Subscription,
           as: 'subscriptions',

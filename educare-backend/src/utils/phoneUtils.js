@@ -85,6 +85,7 @@ const extractPhoneVariants = (phone) => {
 
 const findUserByPhone = async (User, phone, options = {}) => {
   const { Op } = require('sequelize');
+  const { normalize = false, ...queryOptions } = options;
   
   const variants = extractPhoneVariants(phone);
   
@@ -99,14 +100,14 @@ const findUserByPhone = async (User, phone, options = {}) => {
     where: {
       phone: { [Op.in]: variants }
     },
-    ...options
+    ...queryOptions
   });
   
-  if (user) {
-    const normalized = normalizePhoneNumber(phone);
-    if (normalized && user.phone !== normalized) {
-      console.log(`Normalizando telefone de ${user.phone} para ${normalized}`);
-      await user.update({ phone: normalized });
+  if (user && normalize) {
+    const normalizedPhone = normalizePhoneNumber(phone);
+    if (normalizedPhone && user.phone !== normalizedPhone) {
+      console.log(`Normalizando telefone de ${user.phone} para ${normalizedPhone}`);
+      await user.update({ phone: normalizedPhone });
     }
   }
   
