@@ -549,28 +549,44 @@ async function saveConversationMemory(data) {
   try {
     await ensureTables();
 
-    const embeddingStr = data.embedding ? `[${data.embedding.join(',')}]` : null;
+    const hasEmbedding = data.embedding && Array.isArray(data.embedding) && data.embedding.length > 0;
+    const embeddingStr = hasEmbedding ? `[${data.embedding.join(',')}]` : null;
     const castType = pgvectorAvailable ? '::vector' : '::FLOAT8[]';
 
-    const [result] = await sequelize.query(`
-      INSERT INTO conversation_memory (user_phone, user_id, role, content, embedding, interaction_type, active_context, assistant_name, domain, journey_week, emotional_tone, metadata, created_at)
-      VALUES ($1, $2, $3, $4, ${embeddingStr ? `$5${castType}` : 'NULL'}, $6, $7, $8, $9, $10, $11, $12, NOW())
-      RETURNING id
-    `, {
-      bind: [
-        data.user_phone,
-        data.user_id || null,
-        data.role,
-        data.content,
+    let bindParams;
+    let sql;
+
+    if (hasEmbedding) {
+      sql = `
+        INSERT INTO conversation_memory (user_phone, user_id, role, content, embedding, interaction_type, active_context, assistant_name, domain, journey_week, emotional_tone, metadata, created_at)
+        VALUES ($1, $2, $3, $4, $5${castType}, $6, $7, $8, $9, $10, $11, $12, NOW())
+        RETURNING id
+      `;
+      bindParams = [
+        data.user_phone, data.user_id || null, data.role, data.content,
         embeddingStr,
-        data.interaction_type || 'conversation',
-        data.active_context || null,
-        data.assistant_name || null,
-        data.domain || null,
-        data.journey_week || null,
-        data.emotional_tone || null,
+        data.interaction_type || 'conversation', data.active_context || null,
+        data.assistant_name || null, data.domain || null,
+        data.journey_week || null, data.emotional_tone || null,
         JSON.stringify(data.metadata || {})
-      ],
+      ];
+    } else {
+      sql = `
+        INSERT INTO conversation_memory (user_phone, user_id, role, content, embedding, interaction_type, active_context, assistant_name, domain, journey_week, emotional_tone, metadata, created_at)
+        VALUES ($1, $2, $3, $4, NULL, $5, $6, $7, $8, $9, $10, $11, NOW())
+        RETURNING id
+      `;
+      bindParams = [
+        data.user_phone, data.user_id || null, data.role, data.content,
+        data.interaction_type || 'conversation', data.active_context || null,
+        data.assistant_name || null, data.domain || null,
+        data.journey_week || null, data.emotional_tone || null,
+        JSON.stringify(data.metadata || {})
+      ];
+    }
+
+    const [result] = await sequelize.query(sql, {
+      bind: bindParams,
       type: QueryTypes.SELECT
     });
 
