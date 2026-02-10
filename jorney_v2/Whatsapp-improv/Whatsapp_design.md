@@ -306,14 +306,4 @@ Estarei por aqui sempre que precisar 🌷
 ---
 
 **Documento de UX conversacional pronto para orientar design e implementação no WhatsApp via n8n + Evolution API.**
-
-
 ⸻
-
-Quando quiser, o próximo documento natural é o Prompt Master para o Replit, onde eu amarro:
-  •	PRD
-  •	Mapa de Estados
-  •	UX Conversacional
-em uma única instrução executável.
-
-É só mandar 👍
