@@ -150,6 +150,7 @@ async function transition(userPhone, toState, additionalUpdates = {}) {
     updates.active_context = null;
     updates.assistant_name = null;
     updates.quiz_session_id = null;
+    updates.metadata = { ...(updates.metadata || {}), session_ended_at: new Date().toISOString() };
   }
 
   if (toState === 'CONTEXT_SELECTION') {

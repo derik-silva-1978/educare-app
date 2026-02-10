@@ -229,5 +229,6 @@ module.exports = {
   getRecentMemory,
   getUserProfile,
   getChildData,
+  getFeedbackStats,
   formatContextForPrompt
 };

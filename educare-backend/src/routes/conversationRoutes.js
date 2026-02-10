@@ -17,10 +17,14 @@ router.post('/buffer', conversationController.addToBuffer);
 router.get('/buffer/:phone', conversationController.getBuffer);
 router.post('/buffer/consume', conversationController.consumeBuffer);
 
+router.get('/context/enriched', conversationController.getEnrichedContext);
 router.get('/context/:phone', conversationController.getContext);
 router.get('/context/:phone/prompt', conversationController.getContextPrompt);
 
+router.get('/feedback/trigger', conversationController.checkFeedbackTrigger);
+router.post('/feedback/contextual', conversationController.saveFeedbackWithContext);
 router.post('/feedback', conversationController.saveFeedback);
+
 router.post('/report', conversationController.saveReport);
 router.get('/reports', conversationController.getReports);
 
@@ -38,5 +42,9 @@ router.get('/welcome', conversationController.getWelcome);
 router.post('/buttons/format', conversationController.formatButtons);
 router.post('/buttons/send', conversationController.sendButtons);
 router.post('/buttons/resolve', conversationController.resolveButton);
+
+router.post('/session/summary', conversationController.saveSessionSummary);
+
+router.get('/analytics', conversationController.getAnalytics);
 
 module.exports = router;

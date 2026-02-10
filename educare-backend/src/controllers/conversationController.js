@@ -689,6 +689,363 @@ const conversationController = {
       console.error('[Conversation] getWelcome error:', error.message);
       return res.status(500).json({ success: false, error: 'Erro interno' });
     }
+  },
+
+  async checkFeedbackTrigger(req, res) {
+    try {
+      const { phone, trigger_event } = req.query;
+
+      if (!phone) {
+        return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
+      }
+
+      const stateResult = await pgvectorService.getConversationState(phone);
+      const state = stateResult.success && stateResult.state ? stateResult.state : null;
+
+      const feedbackStats = await conversationContextService.getFeedbackStats
+        ? await (async () => {
+            const { sequelize } = require('../config/database');
+            const [results] = await sequelize.query(
+              `SELECT COUNT(*)::INTEGER AS total, MAX(created_at) AS last_at
+               FROM ux_feedback WHERE user_phone = $1`, { bind: [phone] }
+            );
+            return results[0] || { total: 0, last_at: null };
+          })()
+        : { total: 0, last_at: null };
+
+      const hoursSinceLastFeedback = feedbackStats.last_at
+        ? (Date.now() - new Date(feedbackStats.last_at).getTime()) / (1000 * 60 * 60)
+        : null;
+
+      const MIN_HOURS_BETWEEN_FEEDBACK = 24;
+      const tooRecent = hoursSinceLastFeedback !== null && hoursSinceLastFeedback < MIN_HOURS_BETWEEN_FEEDBACK;
+
+      const TRIGGER_EVENTS = ['quiz_completed', 'content_viewed', 'exit', 'pause', 'session_long'];
+      const event = trigger_event || null;
+
+      let shouldTrigger = false;
+      let triggerReason = null;
+
+      if (!tooRecent && event && TRIGGER_EVENTS.includes(event)) {
+        if (event === 'quiz_completed' && feedbackStats.total < 3) {
+          shouldTrigger = true;
+          triggerReason = 'Feedback após conclusão de quiz';
+        } else if (event === 'content_viewed' && feedbackStats.total === 0) {
+          shouldTrigger = true;
+          triggerReason = 'Primeiro feedback após visualizar conteúdo';
+        } else if ((event === 'exit' || event === 'pause') && (hoursSinceLastFeedback === null || hoursSinceLastFeedback > 72)) {
+          shouldTrigger = true;
+          triggerReason = 'Feedback na saída (sem feedback recente)';
+        } else if (event === 'session_long' && feedbackStats.total < 5) {
+          shouldTrigger = true;
+          triggerReason = 'Sessão longa, coleta de feedback';
+        }
+      }
+
+      return res.json({
+        success: true,
+        should_trigger: shouldTrigger,
+        trigger_reason: triggerReason,
+        too_recent: tooRecent,
+        hours_since_last: hoursSinceLastFeedback !== null ? Math.round(hoursSinceLastFeedback) : null,
+        total_feedbacks: feedbackStats.total,
+        feedback_message: shouldTrigger ? {
+          text: 'Antes de seguir, posso te perguntar uma coisinha? ⭐\n\nComo você avalia sua experiência até agora?',
+          buttons: [
+            { id: 'fb_1', text: '⭐' },
+            { id: 'fb_2', text: '⭐⭐' },
+            { id: 'fb_3', text: '⭐⭐⭐' },
+            { id: 'fb_4', text: '⭐⭐⭐⭐' },
+            { id: 'fb_5', text: '⭐⭐⭐⭐⭐' }
+          ]
+        } : null
+      });
+    } catch (error) {
+      console.error('[Conversation] checkFeedbackTrigger error:', error.message);
+      return res.status(500).json({ success: false, error: 'Erro interno' });
+    }
+  },
+
+  async saveFeedbackWithContext(req, res) {
+    try {
+      const { phone, score, comment, trigger_event } = req.body;
+
+      if (!phone || !score) {
+        return res.status(400).json({ success: false, error: 'Parâmetros phone e score são obrigatórios' });
+      }
+
+      if (score < 1 || score > 5) {
+        return res.status(400).json({ success: false, error: 'Score deve ser entre 1 e 5' });
+      }
+
+      const stateResult = await pgvectorService.getConversationState(phone);
+      const state = stateResult.success ? stateResult.state : {};
+
+      await pgvectorService.saveFeedback({
+        user_phone: phone,
+        score: parseInt(score),
+        state: state.state,
+        active_context: state.active_context,
+        assistant_name: state.assistant_name,
+        journey_week: state.journey_week,
+        comment: comment || null,
+        metadata: { trigger_event: trigger_event || 'manual' }
+      });
+
+      let responseText;
+      if (score >= 4) {
+        responseText = 'Que bom saber disso 💙\nObrigada por compartilhar.';
+      } else if (score === 3) {
+        responseText = 'Obrigada pelo feedback 💙\nVamos continuar melhorando!';
+      } else {
+        responseText = 'Obrigada por me contar 🤍\nSe quiser, pode me dizer o que posso melhorar.';
+      }
+
+      return res.json({
+        success: true,
+        score,
+        response_text: responseText,
+        ask_comment: score <= 2
+      });
+    } catch (error) {
+      console.error('[Conversation] saveFeedbackWithContext error:', error.message);
+      return res.status(500).json({ success: false, error: 'Erro interno' });
+    }
+  },
+
+  async getEnrichedContext(req, res) {
+    try {
+      const { phone } = req.query;
+
+      if (!phone) {
+        return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
+      }
+
+      const memoryLimit = req.query.memory_limit ? parseInt(req.query.memory_limit) : 5;
+      const context = await conversationContextService.getFullContext(phone, { limit: memoryLimit });
+
+      if (!context.success) {
+        return res.json(context);
+      }
+
+      const activeContext = context.state?.active_context || null;
+      const filteredContext = { ...context };
+      if (activeContext && filteredContext.memory?.recent) {
+        const filtered = filteredContext.memory.recent.filter(m =>
+          !m.active_context || m.active_context === activeContext
+        );
+        filteredContext.memory = { recent: filtered, count: filtered.length };
+      }
+
+      const contextPrompt = conversationContextService.formatContextForPrompt(filteredContext);
+
+      let personalizations = [];
+      if (context.child) {
+        if (context.child.age_months !== null && context.child.age_months !== undefined) {
+          personalizations.push(`Bebê com ${context.child.age_months} meses`);
+        }
+        if (context.child.milestones?.length > 0) {
+          const delayed = context.child.milestones.filter(m => m.status === 'delayed');
+          if (delayed.length > 0) {
+            personalizations.push(`Atenção em: ${delayed.map(m => m.domain).join(', ')}`);
+          }
+        }
+      }
+      if (context.feedback?.avg_score && parseFloat(context.feedback.avg_score) < 3) {
+        personalizations.push('Usuário com experiência abaixo da média - priorizar empatia');
+      }
+
+      const enrichedPrompt = contextPrompt +
+        (personalizations.length > 0 ? '\n\nPERSONALIZAÇÕES: ' + personalizations.join(' | ') : '');
+
+      return res.json({
+        success: true,
+        prompt: enrichedPrompt,
+        context_summary: {
+          has_user: !!context.user,
+          user_name: context.user?.name || null,
+          has_child: !!context.child,
+          child_age_months: context.child?.age_months || null,
+          memory_count: context.memory?.count || 0,
+          state: context.state?.current_state || null,
+          active_context: context.state?.active_context || null,
+          assistant_name: context.state?.assistant_name || null,
+          audio_preference: context.state?.audio_preference || 'text',
+          correlation_id: context.state?.correlation_id || null,
+          personalizations
+        }
+      });
+    } catch (error) {
+      console.error('[Conversation] getEnrichedContext error:', error.message);
+      return res.status(500).json({ success: false, error: 'Erro interno' });
+    }
+  },
+
+  async saveSessionSummary(req, res) {
+    try {
+      const { phone } = req.body;
+
+      if (!phone) {
+        return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
+      }
+
+      const stateResult = await pgvectorService.getConversationState(phone);
+      const state = stateResult.success ? stateResult.state : null;
+
+      if (!state || !state.correlation_id) {
+        return res.json({ success: true, skipped: true, reason: 'Sem sessão ativa para resumir' });
+      }
+
+      const { sequelize } = require('../config/database');
+
+      const sessionStart = state.created_at || state.last_interaction_at;
+
+      const [interactions] = await sequelize.query(`
+        SELECT role, content, interaction_type, active_context, created_at
+        FROM conversation_memory
+        WHERE user_phone = $1
+          AND created_at >= $2::timestamptz
+        ORDER BY created_at DESC
+        LIMIT 30
+      `, { bind: [phone, sessionStart] });
+
+      if (!interactions || interactions.length === 0) {
+        return res.json({ success: true, skipped: true, reason: 'Sem interações nesta sessão' });
+      }
+
+      const reversed = [...interactions].reverse();
+
+      const topics = new Set();
+      const contexts = new Set();
+      let userMessageCount = 0;
+      let assistantMessageCount = 0;
+
+      reversed.forEach(i => {
+        if (i.role === 'user_message') userMessageCount++;
+        if (i.role === 'assistant_response') assistantMessageCount++;
+        if (i.active_context) contexts.add(i.active_context);
+        if (i.interaction_type && i.interaction_type !== 'conversation') topics.add(i.interaction_type);
+      });
+
+      const lastMessages = reversed.slice(-6).map(i => {
+        const role = i.role === 'user_message' ? 'U' : 'A';
+        return `${role}: ${i.content.substring(0, 80)}`;
+      });
+
+      const summary = {
+        correlation_id: state.correlation_id,
+        contexts_used: Array.from(contexts),
+        interaction_types: Array.from(topics),
+        message_counts: { user: userMessageCount, assistant: assistantMessageCount },
+        last_exchange_preview: lastMessages.join('\n'),
+        active_context_at_end: state.active_context || null,
+        assistant_at_end: state.assistant_name || null
+      };
+
+      await pgvectorService.saveConversationMemory({
+        user_phone: phone,
+        role: 'assistant_response',
+        content: `[SESSION_SUMMARY] Sessão ${state.correlation_id}: ${userMessageCount} msgs do usuário, contextos: ${Array.from(contexts).join(',')}. Tópicos: ${Array.from(topics).join(',') || 'conversa livre'}.`,
+        interaction_type: 'conversation',
+        active_context: state.active_context,
+        assistant_name: state.assistant_name,
+        metadata: { type: 'session_summary', ...summary }
+      });
+
+      return res.json({
+        success: true,
+        summary
+      });
+    } catch (error) {
+      console.error('[Conversation] saveSessionSummary error:', error.message);
+      return res.status(500).json({ success: false, error: 'Erro interno' });
+    }
+  },
+
+  async getAnalytics(req, res) {
+    try {
+      const { phone } = req.query;
+
+      if (!phone) {
+        return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
+      }
+
+      const { sequelize } = require('../config/database');
+
+      const [memoryStats] = await sequelize.query(`
+        SELECT
+          COUNT(*)::INTEGER AS total_interactions,
+          COUNT(CASE WHEN role = 'user_message' THEN 1 END)::INTEGER AS user_messages,
+          COUNT(CASE WHEN role = 'assistant_response' THEN 1 END)::INTEGER AS assistant_messages,
+          COUNT(DISTINCT active_context)::INTEGER AS contexts_used,
+          COUNT(CASE WHEN interaction_type = 'quiz' THEN 1 END)::INTEGER AS quiz_interactions,
+          COUNT(CASE WHEN interaction_type = 'journey' THEN 1 END)::INTEGER AS journey_interactions,
+          COUNT(CASE WHEN interaction_type = 'feedback' THEN 1 END)::INTEGER AS feedback_interactions,
+          MIN(created_at) AS first_interaction,
+          MAX(created_at) AS last_interaction
+        FROM conversation_memory
+        WHERE user_phone = $1
+      `, { bind: [phone] });
+
+      const [feedbackStats] = await sequelize.query(`
+        SELECT
+          COUNT(*)::INTEGER AS total_feedbacks,
+          ROUND(AVG(score), 2) AS avg_score,
+          MIN(score)::INTEGER AS min_score,
+          MAX(score)::INTEGER AS max_score,
+          MAX(created_at) AS last_feedback
+        FROM ux_feedback
+        WHERE user_phone = $1
+      `, { bind: [phone] });
+
+      const [reportStats] = await sequelize.query(`
+        SELECT
+          COUNT(*)::INTEGER AS total_reports,
+          COUNT(CASE WHEN type = 'problem' THEN 1 END)::INTEGER AS problems,
+          COUNT(CASE WHEN type = 'suggestion' THEN 1 END)::INTEGER AS suggestions,
+          COUNT(CASE WHEN status = 'open' THEN 1 END)::INTEGER AS open_reports
+        FROM support_reports
+        WHERE user_phone = $1
+      `, { bind: [phone] });
+
+      const stateResult = await pgvectorService.getConversationState(phone);
+      const state = stateResult.success ? stateResult.state : null;
+
+      let sessionDuration = null;
+      if (state?.correlation_id && state?.created_at) {
+        const [sessionTiming] = await sequelize.query(`
+          SELECT
+            MIN(created_at) AS session_start,
+            MAX(created_at) AS session_end
+          FROM conversation_memory
+          WHERE user_phone = $1 AND created_at >= $2::timestamptz
+        `, { bind: [phone, state.created_at] });
+
+        if (sessionTiming[0]?.session_start && sessionTiming[0]?.session_end) {
+          const start = new Date(sessionTiming[0].session_start);
+          const end = new Date(sessionTiming[0].session_end);
+          sessionDuration = Math.max(0, Math.round((end - start) / 1000 / 60));
+        }
+      }
+
+      return res.json({
+        success: true,
+        phone,
+        current_session: {
+          state: state?.state || null,
+          active_context: state?.active_context || null,
+          correlation_id: state?.correlation_id || null,
+          session_duration_minutes: sessionDuration,
+          audio_preference: state?.audio_preference || 'text'
+        },
+        interactions: memoryStats[0] || {},
+        feedback: feedbackStats[0] || {},
+        reports: reportStats[0] || {}
+      });
+    } catch (error) {
+      console.error('[Conversation] getAnalytics error:', error.message);
+      return res.status(500).json({ success: false, error: 'Erro interno' });
+    }
   }
 };
 
