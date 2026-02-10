@@ -226,6 +226,9 @@ app.use('/api/development-reports', developmentReportRoutes);
 const n8nRoutes = require('./routes/n8nRoutes');
 app.use('/api/n8n', externalLimiter, n8nRoutes);
 
+const conversationRoutes = require('./routes/conversationRoutes');
+app.use('/api/conversation', conversationRoutes);
+
 // Cloud file integration routes (Google Drive, OneDrive)
 const cloudRoutes = require('./routes/cloudRoutes');
 app.use('/api/cloud', cloudRoutes);
@@ -415,18 +418,41 @@ const { sequelize } = require('./config/database');
 // ALTER TABLE nome_tabela OWNER TO educareapp; (para todas as tabelas)
 // Ou use: GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO educareapp;
 if (process.env.DB_SYNC_ENABLED === 'true') {
-  sequelize.sync({ alter: true })
-    .then(() => {
+  (async () => {
+    try {
+      await sequelize.query('CREATE EXTENSION IF NOT EXISTS vector;');
+      console.log('✓ pgvector extension enabled');
+    } catch (pgvErr) {
+      console.warn('⚠ pgvector extension not available:', pgvErr.message);
+    }
+
+    try {
+      await sequelize.sync({ alter: true });
       console.log('Banco de dados sincronizado');
-    })
-    .catch(err => {
+    } catch (err) {
       console.error('Erro ao sincronizar banco de dados:', err);
-    });
+    }
+
+    try {
+      const pgvectorService = require('./services/pgvectorService');
+      await pgvectorService.ensureTables();
+      console.log('✓ pgvector tables ready');
+    } catch (pgvErr) {
+      console.warn('⚠ pgvector tables creation failed:', pgvErr.message);
+    }
+  })();
 } else {
   console.log('Sincronização do banco de dados desativada (DB_SYNC_ENABLED != true)');
   sequelize.authenticate()
     .then(async () => {
       console.log('Conexão com o banco de dados estabelecida com sucesso.');
+
+      try {
+        await sequelize.query('CREATE EXTENSION IF NOT EXISTS vector;');
+        console.log('✓ pgvector extension enabled');
+      } catch (pgvErr) {
+        console.warn('⚠ pgvector extension not available:', pgvErr.message);
+      }
       try {
         const [results] = await sequelize.query(
           `SELECT column_name FROM information_schema.columns WHERE table_name = 'assistant_llm_configs' AND column_name = 'rag_enabled'`
@@ -483,6 +509,14 @@ if (process.env.DB_SYNC_ENABLED === 'true') {
         }
       } catch (backfillErr) {
         console.warn('[AutoMigration] Aviso ao backfill metadata:', backfillErr.message);
+      }
+
+      try {
+        const pgvectorService = require('./services/pgvectorService');
+        await pgvectorService.ensureTables();
+        console.log('✓ pgvector tables ready');
+      } catch (pgvErr) {
+        console.warn('⚠ pgvector tables creation failed:', pgvErr.message);
       }
     })
     .catch(err => {

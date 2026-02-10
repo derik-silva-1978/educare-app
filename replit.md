@@ -41,6 +41,7 @@ The frontend uses React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Tailwi
     - **Educare app-chat**: Handles message ingestion, user verification, intent classification, and response routing.
     - **Lead CRM**: Manages unregistered users through a 3-stage sales funnel with an AI agent.
     - **Inactive User Reactivation**: Manages users with inactive subscriptions through a 3-stage reactivation funnel with an AI agent, Stripe integration, and opt-out detection.
+- **WhatsApp Conversation State Machine (pgvector)**: 10-state conversation machine (ENTRY → CONTEXT_SELECTION → FREE_CONVERSATION → specialized flows) with vector-based long-term memory. New tables: `knowledge_embeddings` (RAG KB, replaces Qdrant), `conversation_memory` (vectorial long-term memory), `conversation_states` (WhatsApp state machine), `ux_feedback`, `support_reports`. Service: `pgvectorService.js` with pgvector native support and FLOAT8[] fallback + `cosine_similarity_float8()` SQL function for PostgreSQL 12 compatibility. API: `/api/conversation/*` endpoints (state, feedback, reports, memory search) with API key auth. Phase 1 complete (Feb 2026).
 
 ### System Design Choices
 - **Scalability**: Designed for Contabo VPS with Docker containers, PostgreSQL, and internal networking.
@@ -91,7 +92,7 @@ The frontend uses React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Tailwi
 - **Messaging**: WhatsApp (via Evolution API)
 - **Payment Gateway**: Stripe
 - **AI/ML**: OpenAI API (File Search, LLM), Google Gemini (OCR, Embeddings)
-- **Vector Database**: Qdrant Cloud
+- **Vector Database**: pgvector (PostgreSQL native, migrating from Qdrant Cloud)
 - **Cloud Provider**: Contabo VPS
 - **UI Libraries**: Radix UI, Tailwind CSS (via shadcn/ui)
 - **Frontend State Management**: `@tanstack/react-query`
