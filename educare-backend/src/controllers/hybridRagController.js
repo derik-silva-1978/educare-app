@@ -92,7 +92,7 @@ exports.ingest = async (req, res) => {
       chunks_indexed: result.chunks_indexed,
       ingestion_time_ms: result.ingestion_time_ms,
       gemini: result.gemini,
-      qdrant: result.qdrant
+      pgvector: result.pgvector
     });
   } catch (error) {
     console.error('[HybridRAG:Controller] Erro no endpoint /ingest:', error);
@@ -112,7 +112,7 @@ exports.healthCheck = async (req, res) => {
       status: activeProviders.length > 0 ? 'operational' : 'no_providers',
       active_providers: activeProviders,
       gemini_configured: process.env.GEMINI_API_KEY ? true : false,
-      qdrant_configured: process.env.QDRANT_URL && process.env.QDRANT_API_KEY ? true : false,
+      pgvector_configured: true,
       primary_provider: process.env.RAG_PRIMARY_PROVIDER || 'gemini',
       timestamp: new Date().toISOString()
     });

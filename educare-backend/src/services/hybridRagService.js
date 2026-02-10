@@ -1,9 +1,9 @@
 const geminiFileSearchService = require('./geminiFileSearchService');
-const qdrantService = require('./qdrantService');
+const pgvectorService = require('./pgvectorService');
 const hybridIngestionService = require('./hybridIngestionService');
 
 const ENABLE_GEMINI = process.env.ENABLE_GEMINI_RAG !== 'false';
-const ENABLE_QDRANT = process.env.ENABLE_QDRANT_RAG !== 'false';
+const ENABLE_PGVECTOR = process.env.ENABLE_PGVECTOR_RAG !== 'false' && process.env.ENABLE_QDRANT_RAG !== 'false';
 const PRIMARY_PROVIDER = process.env.RAG_PRIMARY_PROVIDER || 'gemini';
 
 async function query(userQuery, options = {}) {
@@ -58,8 +58,8 @@ function determineQueryOrder(options) {
   if (options.preferred_provider) {
     if (options.preferred_provider === 'gemini' && ENABLE_GEMINI && geminiFileSearchService.isConfigured()) {
       providers.push('gemini');
-    } else if (options.preferred_provider === 'qdrant' && ENABLE_QDRANT && qdrantService.isConfigured()) {
-      providers.push('qdrant');
+    } else if (options.preferred_provider === 'pgvector' && ENABLE_PGVECTOR && pgvectorService.isConfigured()) {
+      providers.push('pgvector');
     }
   }
 
@@ -67,12 +67,12 @@ function determineQueryOrder(options) {
     if (ENABLE_GEMINI && geminiFileSearchService.isConfigured() && !providers.includes('gemini')) {
       providers.push('gemini');
     }
-    if (ENABLE_QDRANT && qdrantService.isConfigured() && !providers.includes('qdrant')) {
-      providers.push('qdrant');
+    if (ENABLE_PGVECTOR && pgvectorService.isConfigured() && !providers.includes('pgvector')) {
+      providers.push('pgvector');
     }
   } else {
-    if (ENABLE_QDRANT && qdrantService.isConfigured() && !providers.includes('qdrant')) {
-      providers.push('qdrant');
+    if (ENABLE_PGVECTOR && pgvectorService.isConfigured() && !providers.includes('pgvector')) {
+      providers.push('pgvector');
     }
     if (ENABLE_GEMINI && geminiFileSearchService.isConfigured() && !providers.includes('gemini')) {
       providers.push('gemini');
@@ -85,8 +85,8 @@ function determineQueryOrder(options) {
 async function queryProvider(provider, userQuery, options) {
   if (provider === 'gemini') {
     return await queryGemini(userQuery, options);
-  } else if (provider === 'qdrant') {
-    return await queryQdrant(userQuery, options);
+  } else if (provider === 'pgvector') {
+    return await queryPgvector(userQuery, options);
   }
   
   return { success: false, error: 'Provedor desconhecido' };
@@ -118,14 +118,14 @@ async function queryGemini(userQuery, options) {
   return result;
 }
 
-async function queryQdrant(userQuery, options) {
+async function queryPgvector(userQuery, options) {
   const embeddingResult = await hybridIngestionService.generateEmbedding(userQuery);
   
   if (!embeddingResult.success) {
     return { success: false, error: embeddingResult.error };
   }
 
-  const searchResult = await qdrantService.search(embeddingResult.embedding, {
+  const searchResult = await pgvectorService.search(embeddingResult.embedding, {
     knowledge_category: options.knowledge_category,
     source_type: options.source_type,
     domain: options.domain,
@@ -162,7 +162,7 @@ async function queryQdrant(userQuery, options) {
       title: r.payload.title,
       id: r.id,
       score: r.score,
-      provider: 'qdrant'
+      provider: 'pgvector'
     })),
     query_time_ms: searchResult.search_time_ms
   };
@@ -226,5 +226,5 @@ module.exports = {
   getProviderStatus,
   getActiveProviders,
   queryGemini,
-  queryQdrant
+  queryPgvector
 };

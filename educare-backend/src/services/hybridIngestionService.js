@@ -1,17 +1,15 @@
 const geminiFileSearchService = require('./geminiFileSearchService');
-const qdrantService = require('./qdrantService');
+const pgvectorService = require('./pgvectorService');
 const ragMetricsService = require('./ragMetricsService');
 const { v4: uuidv4 } = require('uuid');
 
 const ENABLE_GEMINI = process.env.ENABLE_GEMINI_RAG !== 'false';
-const ENABLE_QDRANT = process.env.ENABLE_QDRANT_RAG !== 'false';
+const ENABLE_PGVECTOR = process.env.ENABLE_PGVECTOR_RAG !== 'false' && process.env.ENABLE_QDRANT_RAG !== 'false';
 
-// Timeouts em ms
-const GEMINI_OCR_TIMEOUT = 120000; // 2 minutos para OCR
-const GEMINI_EMBEDDING_TIMEOUT = 30000; // 30 segundos por embedding
-const INGESTION_TOTAL_TIMEOUT = 600000; // 10 minutos total
+const GEMINI_OCR_TIMEOUT = 120000;
+const GEMINI_EMBEDDING_TIMEOUT = 30000;
+const INGESTION_TOTAL_TIMEOUT = 600000;
 
-// Promisecom timeout
 function withTimeout(promise, timeoutMs, operationName) {
   return Promise.race([
     promise,
@@ -43,7 +41,6 @@ async function generateEmbedding(text) {
       'Gemini embedding'
     );
 
-    // Handle different response formats from Gemini API
     const embedding = result.embeddings?.[0]?.values || result.embedding?.values;
     
     if (!embedding || !Array.isArray(embedding)) {
@@ -154,7 +151,7 @@ async function ingestDocument(filePath, fileName, metadata = {}) {
   const startTime = Date.now();
   const results = {
     gemini: null,
-    qdrant: null,
+    pgvector: null,
     success: false,
     providers: [],
     chunks_indexed: 0
@@ -163,7 +160,6 @@ async function ingestDocument(filePath, fileName, metadata = {}) {
   console.log(`[HybridIngestion] Iniciando ingestão: ${fileName}`);
 
   try {
-    // Timeout geral para toda a ingestão
     await withTimeout(
       (async () => {
         if (ENABLE_GEMINI && geminiFileSearchService.isConfigured()) {
@@ -182,9 +178,9 @@ async function ingestDocument(filePath, fileName, metadata = {}) {
           }
         }
 
-        if (ENABLE_QDRANT && qdrantService.isConfigured()) {
+        if (ENABLE_PGVECTOR && pgvectorService.isConfigured()) {
           try {
-            console.log(`[HybridIngestion] → Qdrant embeddings com extração de texto...`);
+            console.log(`[HybridIngestion] → PgVector embeddings com extração de texto...`);
             
             const parentDocumentId = metadata.document_id || uuidv4();
             const mimeType = metadata.mime_type || 'application/pdf';
@@ -193,7 +189,7 @@ async function ingestDocument(filePath, fileName, metadata = {}) {
             
             if (!extractionResult.success) {
               console.warn(`[HybridIngestion] Extração de texto falhou: ${extractionResult.error}`);
-              results.qdrant = { success: false, error: extractionResult.error };
+              results.pgvector = { success: false, error: extractionResult.error };
             } else {
               const extractedText = extractionResult.text;
               console.log(`[HybridIngestion] Texto extraído: ${extractedText.length} caracteres`);
@@ -229,26 +225,26 @@ async function ingestDocument(filePath, fileName, metadata = {}) {
               }
               
               if (documentsToIndex.length > 0) {
-                const batchResult = await qdrantService.batchUpsert(documentsToIndex);
+                const batchResult = await pgvectorService.batchUpsert(documentsToIndex);
                 
                 if (batchResult.success) {
-                  results.providers.push('qdrant');
+                  results.providers.push('pgvector');
                   results.chunks_indexed = documentsToIndex.length;
-                  results.qdrant = { 
+                  results.pgvector = { 
                     success: true, 
                     chunks_count: documentsToIndex.length,
                     parent_document_id: parentDocumentId
                   };
                 } else {
-                  results.qdrant = batchResult;
+                  results.pgvector = batchResult;
                 }
               } else {
-                results.qdrant = { success: false, error: 'Nenhum chunk pôde ser indexado' };
+                results.pgvector = { success: false, error: 'Nenhum chunk pôde ser indexado' };
               }
             }
           } catch (error) {
-            console.error('[HybridIngestion] Erro no Qdrant:', error.message);
-            results.qdrant = { success: false, error: error.message };
+            console.error('[HybridIngestion] Erro no PgVector:', error.message);
+            results.pgvector = { success: false, error: error.message };
           }
         }
       })(),
@@ -259,7 +255,7 @@ async function ingestDocument(filePath, fileName, metadata = {}) {
     console.error('[HybridIngestion] Timeout na ingestão:', timeoutError.message);
     results.success = results.providers.length > 0;
     if (results.providers.length === 0) {
-      results.qdrant = { success: false, error: timeoutError.message };
+      results.pgvector = { success: false, error: timeoutError.message };
     }
   }
 
@@ -277,7 +273,7 @@ async function ingestDocument(filePath, fileName, metadata = {}) {
     chunks_indexed: results.chunks_indexed,
     providers: results.providers,
     file_size: metadata.file_size || 0,
-    error: results.success ? null : (results.qdrant?.error || results.gemini?.error || 'Falha desconhecida')
+    error: results.success ? null : (results.pgvector?.error || results.gemini?.error || 'Falha desconhecida')
   });
 
   return results;
@@ -286,7 +282,7 @@ async function ingestDocument(filePath, fileName, metadata = {}) {
 async function deleteDocument(metadata) {
   const results = {
     gemini: null,
-    qdrant: null,
+    pgvector: null,
     success: false
   };
 
@@ -294,12 +290,12 @@ async function deleteDocument(metadata) {
     results.gemini = await geminiFileSearchService.deleteDocument(metadata.gemini_file_id);
   }
 
-  if (metadata.document_id && qdrantService.isConfigured()) {
-    results.qdrant = await qdrantService.deleteDocument(metadata.document_id);
+  if (metadata.document_id && pgvectorService.isConfigured()) {
+    results.pgvector = await pgvectorService.deleteDocument(metadata.document_id);
   }
 
   results.success = (results.gemini?.success || !metadata.gemini_file_id) && 
-                    (results.qdrant?.success || !metadata.document_id);
+                    (results.pgvector?.success || !metadata.document_id);
 
   return results;
 }
@@ -311,9 +307,9 @@ async function getSystemStatus() {
       enabled: ENABLE_GEMINI,
       stats: null
     },
-    qdrant: {
-      configured: qdrantService.isConfigured(),
-      enabled: ENABLE_QDRANT,
+    pgvector: {
+      configured: pgvectorService.isConfigured(),
+      enabled: ENABLE_PGVECTOR,
       stats: null
     }
   };
@@ -326,11 +322,11 @@ async function getSystemStatus() {
     }
   }
 
-  if (status.qdrant.configured && status.qdrant.enabled) {
+  if (status.pgvector.configured && status.pgvector.enabled) {
     try {
-      status.qdrant.stats = await qdrantService.getCollectionStats();
+      status.pgvector.stats = await pgvectorService.getCollectionStats();
     } catch (error) {
-      status.qdrant.error = error.message;
+      status.pgvector.error = error.message;
     }
   }
 
@@ -344,8 +340,8 @@ function getActiveProviders() {
     providers.push('gemini');
   }
   
-  if (ENABLE_QDRANT && qdrantService.isConfigured()) {
-    providers.push('qdrant');
+  if (ENABLE_PGVECTOR && pgvectorService.isConfigured()) {
+    providers.push('pgvector');
   }
   
   return providers;

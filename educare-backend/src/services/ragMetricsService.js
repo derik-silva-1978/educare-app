@@ -35,7 +35,7 @@ const metricsStorage = {
     total_chunks_indexed: 0,
     providers_used: {
       gemini: 0,
-      qdrant: 0,
+      pgvector: 0,
       openai: 0
     },
     last_upload: null
@@ -526,7 +526,7 @@ function reset() {
     successful_uploads: 0,
     failed_uploads: 0,
     total_chunks_indexed: 0,
-    providers_used: { gemini: 0, qdrant: 0, openai: 0 },
+    providers_used: { gemini: 0, pgvector: 0, openai: 0 },
     last_upload: null
   };
   console.log('[RAGMetrics] Métricas resetadas');

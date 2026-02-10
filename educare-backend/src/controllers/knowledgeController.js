@@ -55,7 +55,7 @@ async function processIngestionInBackground(documentId, finalPath, originalFilen
     const activeProviders = hybridIngestionService.getActiveProviders();
     let hybridProviders = [];
     let geminiFileId = null;
-    let qdrantDocumentId = null;
+    let pgvectorDocumentId = null;
     let fileSearchError = null;
     
     if (activeProviders.length > 0) {
@@ -76,8 +76,8 @@ async function processIngestionInBackground(documentId, finalPath, originalFilen
           geminiFileId = ingestionResult.gemini.gemini_file_id;
         }
         
-        if (ingestionResult.qdrant?.success) {
-          qdrantDocumentId = metadata.document_id;
+        if (ingestionResult.pgvector?.success) {
+          pgvectorDocumentId = metadata.document_id;
         }
         
         console.log(`[Knowledge:${requestId}] [BG] ✓ Ingestão OK: providers=[${hybridProviders.join(', ')}] (${ingestionResult.ingestion_time_ms}ms)`);
@@ -121,7 +121,7 @@ async function processIngestionInBackground(documentId, finalPath, originalFilen
           ingestion_time_ms: processingTime,
           rag_providers: hybridProviders,
           gemini_file_id: geminiFileId,
-          qdrant_document_id: qdrantDocumentId,
+          pgvector_document_id: pgvectorDocumentId,
           file_search_error: fileSearchError
         }
       },
@@ -437,7 +437,7 @@ exports.getIngestionStatus = async (req, res) => {
         ingestion_status: status,
         rag_providers: metadata.rag_providers || [],
         gemini_file_id: metadata.gemini_file_id || null,
-        qdrant_document_id: metadata.qdrant_document_id || null,
+        pgvector_document_id: metadata.pgvector_document_id || null,
         ingestion_started_at: metadata.ingestion_started_at || null,
         ingestion_completed_at: metadata.ingestion_completed_at || null,
         ingestion_time_ms: metadata.ingestion_time_ms || null,
@@ -567,11 +567,11 @@ exports.deleteDocument = async (req, res) => {
     const metadata = document.metadata || {};
     let hybridDeleteHandled = false;
 
-    if (metadata.gemini_file_id || metadata.qdrant_document_id) {
+    if (metadata.gemini_file_id || metadata.pgvector_document_id) {
       try {
-        console.log(`[Knowledge] Deletando do RAG híbrido: id=${id}, gemini=${metadata.gemini_file_id}, qdrant=${metadata.qdrant_document_id}`);
+        console.log(`[Knowledge] Deletando do RAG híbrido: id=${id}, gemini=${metadata.gemini_file_id}, pgvector=${metadata.pgvector_document_id}`);
         const hybridDeleteResult = await hybridIngestionService.deleteDocument({
-          document_id: metadata.qdrant_document_id || null,
+          document_id: metadata.pgvector_document_id || null,
           gemini_file_id: metadata.gemini_file_id || null
         });
         
