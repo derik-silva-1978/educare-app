@@ -93,6 +93,43 @@ Webhook (Unified Entry)
 - **AFTER** Prepare Response — save conversation summary
 - POST /api/conversation/memory
 
+## Phase 4 Implementation Status (2026-02-10)
+
+### Nodes Added to Educare app-chat (16 new → 57 total):
+
+| Node | Type | Purpose |
+|------|------|---------|
+| API: Get State | HTTP GET | Fetch conversation state from backend |
+| State Router | Code | Route by state (entry/normal/feedback/exit) |
+| Router: State Flow | Switch | 4-way routing based on state |
+| API: Entry Transition | HTTP POST | Transition ENTRY → CONTEXT_SELECTION |
+| API: Send Context Buttons | HTTP POST | Send context selection buttons |
+| API: Save Feedback | HTTP POST | Save feedback rating from state route |
+| Feedback: Thank You | Code | Prepare thank-you message |
+| Exit: Reset State | HTTP POST | Transition to EXIT state |
+| Exit: Goodbye | Code | Prepare goodbye message |
+| API: Get Context Prompt | HTTP GET | Get context-enriched prompt |
+| Merge: Context + RAG | Code | Merge context with RAG data |
+| API: Save Memory | HTTP POST | Persist conversation to long-term memory |
+| API: Send Feedback Buttons | HTTP POST | Send feedback buttons after response |
+| Gate: Is Feedback? | IF | Detect fb_ button callbacks early |
+| Feedback: Direct Save | HTTP POST | Save inline feedback |
+| Feedback: Send Ack | HTTP POST | Send thank-you via Evolution API |
+
+### New Flow Paths:
+1. **ENTRY** → Context selection buttons (waits for next message)
+2. **NORMAL** → Existing flow preserved (Engine: Calc Weeks → Intent → API → Response)
+3. **FEEDBACK** → Save + Thank You → Response routing
+4. **EXIT** → Reset state + Goodbye → Response routing
+5. **Inline Feedback** → Early detection of fb_* → Direct save + Ack
+6. **Context-Aware RAG** → Context prompt before RAG queries
+7. **Memory Persistence** → Parallel save after response preparation
+8. **Feedback Buttons** → Sent after Evolution text response
+
+### Sub-workflow Compatibility: VERIFIED
+- Lead CRM path: UNCHANGED (Gate: User Exists? [FALSE] → ... → Call Lead CRM)
+- Inactive Reactivation path: UNCHANGED (Gate: Active Sub? [FALSE] → ... → Call Inactive Reactivation)
+
 ## New Conversation API Endpoints (Phase 3)
 Base: {EDUCARE_API_URL}/api/conversation
 Auth: x-api-key header

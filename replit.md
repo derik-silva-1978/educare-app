@@ -41,7 +41,8 @@ The frontend uses React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Tailwi
     - **Educare app-chat**: Handles message ingestion, user verification, intent classification, and response routing.
     - **Lead CRM**: Manages unregistered users through a 3-stage sales funnel with an AI agent.
     - **Inactive User Reactivation**: Manages users with inactive subscriptions through a 3-stage reactivation funnel with an AI agent, Stripe integration, and opt-out detection.
-- **WhatsApp Conversation State Machine (pgvector)**: 10-state conversation machine (ENTRY → CONTEXT_SELECTION → FREE_CONVERSATION → specialized flows) with vector-based long-term memory. New tables: `knowledge_embeddings` (RAG KB, replaces Qdrant), `conversation_memory` (vectorial long-term memory), `conversation_states` (WhatsApp state machine), `ux_feedback`, `support_reports`. Service: `pgvectorService.js` with pgvector native support and FLOAT8[] fallback + `cosine_similarity_float8()` SQL function for PostgreSQL 12 compatibility. API: `/api/conversation/*` endpoints (state, feedback, reports, memory search) with API key auth. Phase 1 complete (Feb 2026).
+- **WhatsApp Conversation State Machine (pgvector)**: 10-state conversation machine (ENTRY → CONTEXT_SELECTION → FREE_CONVERSATION → specialized flows) with vector-based long-term memory. New tables: `knowledge_embeddings` (RAG KB, replaces Qdrant), `conversation_memory` (vectorial long-term memory), `conversation_states` (WhatsApp state machine), `ux_feedback`, `support_reports`. Service: `pgvectorService.js` with pgvector native support and FLOAT8[] fallback + `cosine_similarity_float8()` SQL function for PostgreSQL 12 compatibility. API: `/api/conversation/*` endpoints (state, feedback, reports, memory search) with API key auth. Phase 3 complete (Feb 2026).
+- **n8n Workflow Integration (Phase 4)**: Updated "Educare app-chat" workflow from 41 to 57 nodes. Added 16 nodes for: state machine routing (API: Get State → State Router → Router: State Flow with 4-way routing), ENTRY state handling (transition + context selection buttons), inline feedback detection (Gate: Is Feedback? short-circuits fb_* callbacks), context-aware RAG (API: Get Context Prompt → Merge: Context + RAG before TitiNauta), memory persistence (API: Save Memory parallel with response routing), feedback buttons (API: Send Feedback Buttons after Evo: Send Text), and exit handling. Sub-workflow compatibility VERIFIED (Lead CRM and Inactive Reactivation paths unchanged). Phase 4 complete (Feb 2026).
 
 ### System Design Choices
 - **Scalability**: Designed for Contabo VPS with Docker containers, PostgreSQL, and internal networking.
@@ -91,7 +92,7 @@ The frontend uses React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Tailwi
 - **Automation Platform**: n8n Workflow
 - **Messaging**: WhatsApp (via Evolution API)
 - **Payment Gateway**: Stripe
-- **AI/ML**: OpenAI API (File Search, LLM), Google Gemini (OCR, Embeddings)
+- **AI/ML**: OpenAI API (File Search, LLM), Google Gemini (OCR, Embeddings), ElevenLabs (Text-to-Speech)
 - **Vector Database**: pgvector (PostgreSQL native, migrating from Qdrant Cloud)
 - **Cloud Provider**: Contabo VPS
 - **UI Libraries**: Radix UI, Tailwind CSS (via shadcn/ui)
