@@ -132,26 +132,19 @@ class HttpClient {
       if (data.success !== undefined) {
         console.log('✅ DEBUG: Backend retorna success, mantendo estrutura original');
         
-        // Caso especial para login - verificar se temos user e token diretamente na resposta
         if (data.success === true && data.user && data.token) {
-          console.log('✅ DEBUG: Detectada resposta de login bem-sucedido');
-          console.log('✅ DEBUG: Retornando dados de login:', { 
-            hasUser: !!data.user, 
-            hasToken: !!data.token,
-            hasRefreshToken: !!data.refreshToken 
-          });
-          
-          // Usar unknown e depois fazer cast para o tipo esperado
-          const loginData = {
+          const authData = {
             user: data.user,
             token: data.token,
-            refreshToken: data.refreshToken || data.token
+            refreshToken: data.refreshToken || data.token,
+            ...(data.pendingApproval !== undefined && { pendingApproval: data.pendingApproval }),
+            ...(data.temporaryPassword !== undefined && { temporaryPassword: data.temporaryPassword }),
           } as unknown as T;
           
           return {
             success: true,
-            data: loginData,
-            message: 'Login bem-sucedido'
+            data: authData,
+            message: data.message || (data.pendingApproval ? 'Cadastro realizado' : 'Login bem-sucedido')
           };
         }
         

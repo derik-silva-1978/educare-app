@@ -3,6 +3,8 @@ const router = express.Router();
 const conversationController = require('../controllers/conversationController');
 const apiKeyMiddleware = require('../middlewares/apiKey');
 
+router.get('/health', conversationController.healthCheck);
+
 router.use(apiKeyMiddleware.validateApiKey);
 
 router.get('/state', conversationController.getState);

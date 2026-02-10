@@ -595,27 +595,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     isInitialized,
     isAuthenticated: !!user,
-    signIn: async (email: string, password: string, rememberMe = false): Promise<{error?: {message: string}} | null> => {
+    signIn: async (email: string, password: string, rememberMe = false): Promise<User | null> => {
       try {
-        const user = await handleLogin(email, password, rememberMe);
-        if (user) {
-          return { error: null };
-        } else {
-          return { error: { message: 'Falha ao fazer login' } };
-        }
+        return await handleLogin(email, password, rememberMe);
       } catch (error) {
-        return { error: { message: error instanceof Error ? error.message : 'Erro desconhecido' } };
+        console.error('signIn error:', error);
+        return null;
       }
     },
-    // Adaptador para compatibilidade com a interface AuthContextType
-    signUp: (email: string, password: string, metadata?: Record<string, unknown>): Promise<User | null> => {
-      const name = metadata?.name as string || email.split('@')[0];
-      const role = metadata?.role as UserRole || 'parent';
-      const agreeTerms = metadata?.agreeTerms as boolean || true;
-      const phone = metadata?.phone as string | undefined;
-      const plan_id = metadata?.plan_id as string | undefined;
-      
-      return handleRegister(name, email, password, role, agreeTerms, phone, plan_id);
+    signUp: (name: string, email: string, password: string, role: UserRole = 'parent', agreeTerms = true): Promise<User | null> => {
+      return handleRegister(name, email, password, role, agreeTerms);
     },
     signOut: handleLogout,
     hasRole,
@@ -623,7 +612,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getRoleName,
     currentUser: user,
     login: handleLogin,
-    register: handleRegister,
+    register: (email: string, password: string, metadata?: Record<string, unknown>): Promise<User | null> => {
+      const name = metadata?.name as string || email.split('@')[0];
+      const role = metadata?.role as UserRole || 'parent';
+      const agreeTerms = metadata?.agreeTerms as boolean || true;
+      const phone = metadata?.phone as string | undefined;
+      const plan_id = metadata?.plan_id as string | undefined;
+      return handleRegister(name, email, password, role, agreeTerms, phone, plan_id);
+    },
     logout: handleLogout,
     handleLogin,
     handleRegister,

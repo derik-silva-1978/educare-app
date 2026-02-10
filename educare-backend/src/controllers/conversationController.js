@@ -5,6 +5,18 @@ const conversationContextService = require('../services/conversationContextServi
 const elevenLabsService = require('../services/elevenLabsService');
 const whatsappButtonsService = require('../services/whatsappButtonsService');
 
+const sanitizePhone = (phone) => {
+  if (!phone) return null;
+  let clean = String(phone).replace(/\D/g, '');
+  if (clean.length >= 10 && clean.length <= 11 && !clean.startsWith('55')) {
+    clean = '55' + clean;
+  }
+  if (clean.length >= 12 && !clean.startsWith('+')) {
+    clean = '+' + clean;
+  }
+  return clean || null;
+};
+
 const conversationController = {
   async getState(req, res) {
     try {
@@ -14,7 +26,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
-      const result = await pgvectorService.getConversationState(phone);
+      const cleanPhone = sanitizePhone(phone);
+      const result = await pgvectorService.getConversationState(cleanPhone);
       return res.json(result);
     } catch (error) {
       console.error('[Conversation] getState error:', error.message);
@@ -30,7 +43,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
-      const result = await pgvectorService.updateConversationState(phone, updates);
+      const cleanPhone = sanitizePhone(phone);
+      const result = await pgvectorService.updateConversationState(cleanPhone, updates);
       return res.json(result);
     } catch (error) {
       console.error('[Conversation] updateState error:', error.message);
@@ -46,7 +60,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetros phone e to_state são obrigatórios' });
       }
 
-      const result = await stateMachineService.transition(phone, to_state, additionalUpdates);
+      const cleanPhone = sanitizePhone(phone);
+      const result = await stateMachineService.transition(cleanPhone, to_state, additionalUpdates);
 
       if (!result.success) {
         return res.status(400).json(result);
@@ -67,8 +82,9 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetros phone e score são obrigatórios' });
       }
 
+      const cleanPhone = sanitizePhone(phone);
       const result = await pgvectorService.saveFeedback({
-        user_phone: phone,
+        user_phone: cleanPhone,
         score,
         state,
         active_context,
@@ -92,8 +108,9 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetros phone e content são obrigatórios' });
       }
 
+      const cleanPhone = sanitizePhone(phone);
       const result = await pgvectorService.saveReport({
-        user_phone: phone,
+        user_phone: cleanPhone,
         type,
         content,
         state,
@@ -111,9 +128,10 @@ const conversationController = {
   async getReports(req, res) {
     try {
       const { phone, type, status, limit, offset } = req.query;
+      const cleanPhone = sanitizePhone(phone);
 
       const result = await pgvectorService.getReports({
-        user_phone: phone,
+        user_phone: cleanPhone || phone,
         type,
         status,
         limit: limit ? parseInt(limit) : undefined,
@@ -135,7 +153,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetros phone e query_embedding são obrigatórios' });
       }
 
-      const result = await pgvectorService.searchConversationMemory(query_embedding, phone, {
+      const cleanPhone = sanitizePhone(phone);
+      const result = await pgvectorService.searchConversationMemory(query_embedding, cleanPhone, {
         active_context,
         limit: limit || 10
       });
@@ -155,8 +174,9 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetros phone, role e content são obrigatórios' });
       }
 
+      const cleanPhone = sanitizePhone(phone);
       const result = await pgvectorService.saveConversationMemory({
-        user_phone: phone,
+        user_phone: cleanPhone,
         role,
         content,
         embedding: embedding || null,
@@ -184,7 +204,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetros phone e message são obrigatórios' });
       }
 
-      const result = await messageBufferService.addMessage(phone, message);
+      const cleanPhone = sanitizePhone(phone);
+      const result = await messageBufferService.addMessage(cleanPhone, message);
       return res.json(result);
     } catch (error) {
       console.error('[Conversation] addToBuffer error:', error.message);
@@ -200,7 +221,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
-      const result = await messageBufferService.getBuffer(phone);
+      const cleanPhone = sanitizePhone(phone);
+      const result = await messageBufferService.getBuffer(cleanPhone);
       return res.json(result);
     } catch (error) {
       console.error('[Conversation] getBuffer error:', error.message);
@@ -216,7 +238,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
-      const result = await messageBufferService.consumeBuffer(phone);
+      const cleanPhone = sanitizePhone(phone);
+      const result = await messageBufferService.consumeBuffer(cleanPhone);
       return res.json(result);
     } catch (error) {
       console.error('[Conversation] consumeBuffer error:', error.message);
@@ -232,8 +255,9 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
+      const cleanPhone = sanitizePhone(phone);
       const limit = req.query.memory_limit ? parseInt(req.query.memory_limit) : undefined;
-      const result = await conversationContextService.getFullContext(phone, { limit });
+      const result = await conversationContextService.getFullContext(cleanPhone, { limit });
       return res.json(result);
     } catch (error) {
       console.error('[Conversation] getContext error:', error.message);
@@ -249,7 +273,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
-      const context = await conversationContextService.getFullContext(phone);
+      const cleanPhone = sanitizePhone(phone);
+      const context = await conversationContextService.getFullContext(cleanPhone);
       const prompt = conversationContextService.formatContextForPrompt(context);
 
       return res.json({
@@ -473,7 +498,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Preferência deve ser "text" ou "audio"' });
       }
 
-      await pgvectorService.updateConversationState(phone, { audio_preference: preference });
+      const cleanPhone = sanitizePhone(phone);
+      await pgvectorService.updateConversationState(cleanPhone, { audio_preference: preference });
       return res.json({ success: true, phone, audio_preference: preference });
     } catch (error) {
       console.error('[Conversation] setAudioPreference error:', error.message);
@@ -489,7 +515,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
-      const stateResult = await pgvectorService.getConversationState(phone);
+      const cleanPhone = sanitizePhone(phone);
+      const stateResult = await pgvectorService.getConversationState(cleanPhone);
       const preference = stateResult.success && stateResult.state
         ? stateResult.state.audio_preference || 'text'
         : 'text';
@@ -509,8 +536,9 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro text é obrigatório' });
       }
 
+      const cleanPhone = sanitizePhone(phone);
       if (check_preference && phone) {
-        const stateResult = await pgvectorService.getConversationState(phone);
+        const stateResult = await pgvectorService.getConversationState(cleanPhone);
         const pref = stateResult.success && stateResult.state
           ? stateResult.state.audio_preference || 'text'
           : 'text';
@@ -552,7 +580,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
-      const stateResult = await pgvectorService.getConversationState(phone);
+      const cleanPhone = sanitizePhone(phone);
+      const stateResult = await pgvectorService.getConversationState(cleanPhone);
       const state = stateResult.success && stateResult.state ? stateResult.state : null;
       const currentState = state?.state || 'ENTRY';
       const activeContext = state?.active_context || null;
@@ -628,7 +657,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
-      const stateResult = await pgvectorService.getConversationState(phone);
+      const cleanPhone = sanitizePhone(phone);
+      const stateResult = await pgvectorService.getConversationState(cleanPhone);
       const hasExistingState = stateResult.success && stateResult.state;
       const state = hasExistingState ? stateResult.state : null;
 
@@ -636,7 +666,7 @@ const conversationController = {
       let userName = null;
 
       const { findUserByPhone } = require('../utils/phoneUtils');
-      const user = await findUserByPhone(phone);
+      const user = await findUserByPhone(cleanPhone);
       if (user) {
         userName = user.name?.split(' ')[0] || null;
       }
@@ -699,7 +729,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
-      const stateResult = await pgvectorService.getConversationState(phone);
+      const cleanPhone = sanitizePhone(phone);
+      const stateResult = await pgvectorService.getConversationState(cleanPhone);
       const state = stateResult.success && stateResult.state ? stateResult.state : null;
 
       const feedbackStats = await conversationContextService.getFeedbackStats
@@ -707,7 +738,7 @@ const conversationController = {
             const { sequelize } = require('../config/database');
             const [results] = await sequelize.query(
               `SELECT COUNT(*)::INTEGER AS total, MAX(created_at) AS last_at
-               FROM ux_feedback WHERE user_phone = $1`, { bind: [phone] }
+               FROM ux_feedback WHERE user_phone = $1`, { bind: [cleanPhone] }
             );
             return results[0] || { total: 0, last_at: null };
           })()
@@ -778,11 +809,12 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Score deve ser entre 1 e 5' });
       }
 
-      const stateResult = await pgvectorService.getConversationState(phone);
+      const cleanPhone = sanitizePhone(phone);
+      const stateResult = await pgvectorService.getConversationState(cleanPhone);
       const state = stateResult.success ? stateResult.state : {};
 
       await pgvectorService.saveFeedback({
-        user_phone: phone,
+        user_phone: cleanPhone,
         score: parseInt(score),
         state: state.state,
         active_context: state.active_context,
@@ -821,8 +853,9 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
+      const cleanPhone = sanitizePhone(phone);
       const memoryLimit = req.query.memory_limit ? parseInt(req.query.memory_limit) : 5;
-      const context = await conversationContextService.getFullContext(phone, { limit: memoryLimit });
+      const context = await conversationContextService.getFullContext(cleanPhone, { limit: memoryLimit });
 
       if (!context.success) {
         return res.json(context);
@@ -889,7 +922,8 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
-      const stateResult = await pgvectorService.getConversationState(phone);
+      const cleanPhone = sanitizePhone(phone);
+      const stateResult = await pgvectorService.getConversationState(cleanPhone);
       const state = stateResult.success ? stateResult.state : null;
 
       if (!state || !state.correlation_id) {
@@ -907,7 +941,7 @@ const conversationController = {
           AND created_at >= $2::timestamptz
         ORDER BY created_at DESC
         LIMIT 30
-      `, { bind: [phone, sessionStart] });
+      `, { bind: [cleanPhone, sessionStart] });
 
       if (!interactions || interactions.length === 0) {
         return res.json({ success: true, skipped: true, reason: 'Sem interações nesta sessão' });
@@ -943,7 +977,7 @@ const conversationController = {
       };
 
       await pgvectorService.saveConversationMemory({
-        user_phone: phone,
+        user_phone: cleanPhone,
         role: 'assistant_response',
         content: `[SESSION_SUMMARY] Sessão ${state.correlation_id}: ${userMessageCount} msgs do usuário, contextos: ${Array.from(contexts).join(',')}. Tópicos: ${Array.from(topics).join(',') || 'conversa livre'}.`,
         interaction_type: 'conversation',
@@ -970,6 +1004,7 @@ const conversationController = {
         return res.status(400).json({ success: false, error: 'Parâmetro phone é obrigatório' });
       }
 
+      const cleanPhone = sanitizePhone(phone);
       const { sequelize } = require('../config/database');
 
       const [memoryStats] = await sequelize.query(`
@@ -985,7 +1020,7 @@ const conversationController = {
           MAX(created_at) AS last_interaction
         FROM conversation_memory
         WHERE user_phone = $1
-      `, { bind: [phone] });
+      `, { bind: [cleanPhone] });
 
       const [feedbackStats] = await sequelize.query(`
         SELECT
@@ -996,7 +1031,7 @@ const conversationController = {
           MAX(created_at) AS last_feedback
         FROM ux_feedback
         WHERE user_phone = $1
-      `, { bind: [phone] });
+      `, { bind: [cleanPhone] });
 
       const [reportStats] = await sequelize.query(`
         SELECT
@@ -1006,9 +1041,9 @@ const conversationController = {
           COUNT(CASE WHEN status = 'open' THEN 1 END)::INTEGER AS open_reports
         FROM support_reports
         WHERE user_phone = $1
-      `, { bind: [phone] });
+      `, { bind: [cleanPhone] });
 
-      const stateResult = await pgvectorService.getConversationState(phone);
+      const stateResult = await pgvectorService.getConversationState(cleanPhone);
       const state = stateResult.success ? stateResult.state : null;
 
       let sessionDuration = null;
@@ -1019,7 +1054,7 @@ const conversationController = {
             MAX(created_at) AS session_end
           FROM conversation_memory
           WHERE user_phone = $1 AND created_at >= $2::timestamptz
-        `, { bind: [phone, state.created_at] });
+        `, { bind: [cleanPhone, state.created_at] });
 
         if (sessionTiming[0]?.session_start && sessionTiming[0]?.session_end) {
           const start = new Date(sessionTiming[0].session_start);
@@ -1045,6 +1080,69 @@ const conversationController = {
     } catch (error) {
       console.error('[Conversation] getAnalytics error:', error.message);
       return res.status(500).json({ success: false, error: 'Erro interno' });
+    }
+  },
+
+  async healthCheck(req, res) {
+    try {
+      const { sequelize } = require('../config/database');
+      const services = {};
+
+      try {
+        await sequelize.query('SELECT 1');
+        services.database = { status: 'ok' };
+      } catch (err) {
+        services.database = { status: 'error', detail: err.message };
+      }
+
+      try {
+        const [stateTable] = await sequelize.query(
+          `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'conversation_states') AS exists`
+        );
+        services.state_machine = {
+          status: stateTable[0]?.exists ? 'ok' : 'error',
+          detail: stateTable[0]?.exists ? 'conversation_states table exists' : 'conversation_states table not found'
+        };
+      } catch (err) {
+        services.state_machine = { status: 'error', detail: err.message };
+      }
+
+      try {
+        const [memoryTable] = await sequelize.query(
+          `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'conversation_memory') AS exists`
+        );
+        services.memory = {
+          status: memoryTable[0]?.exists ? 'ok' : 'error',
+          detail: memoryTable[0]?.exists ? 'conversation_memory table exists' : 'conversation_memory table not found'
+        };
+      } catch (err) {
+        services.memory = { status: 'error', detail: err.message };
+      }
+
+      try {
+        const configured = elevenLabsService.isConfigured();
+        services.tts = {
+          status: configured ? 'ok' : 'error',
+          detail: configured ? 'ElevenLabs configured' : 'ElevenLabs API key not set'
+        };
+      } catch (err) {
+        services.tts = { status: 'error', detail: err.message };
+      }
+
+      services.buffer = { status: 'ok', detail: 'Message buffer service available' };
+
+      return res.json({
+        success: true,
+        services,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('[Conversation] healthCheck error:', error.message);
+      return res.status(500).json({
+        success: false,
+        error: 'Health check failed',
+        timestamp: new Date().toISOString()
+      });
     }
   }
 };

@@ -31,6 +31,9 @@ The frontend utilizes React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Ta
     - **Multimodal, Menu & Observability**: API endpoints for Text-to-Speech (TTS), user audio preferences, contextual menus, and personalized welcome messages. Implements `CorrelationId` for conversation-level observability.
     - **Feedback Triggers, Enriched Context, Session Summary & Analytics**: APIs for smart feedback triggers, saving contextual feedback, generating enriched context for TitiNauta, creating session summaries, and user conversation analytics.
     - **Message Buffer & n8n Workflow Wiring**: Integration of a message buffer with TTL-based concatenation and intent detection.
+    - **Input Validation & Phone Sanitization (Phase 9)**: Comprehensive validation middleware for phone numbers (Brazilian format normalization with +55 prefix), scores (1-5), states (10 valid values), contexts, and audio preferences. Phone sanitization applied to 22+ conversation endpoints.
+    - **Health Check & Monitoring (Phase 9)**: `GET /api/conversation/health` endpoint (public, no auth) validating database connectivity, table existence (conversation_states, conversation_memory), TTS configuration, and buffer service availability.
+    - **End-to-End API Test Suite (Phase 9)**: 40-test comprehensive script (`conversation-api-test.js`) covering state machine, state CRUD, validation, phone sanitization, buffer, memory, context, feedback, buttons, audio preferences, welcome/menu, TTS, reports, session summary, and analytics endpoints.
 
 ### System Design Choices
 - **Scalability**: Designed for Contabo VPS with Docker containers, PostgreSQL, and internal networking.

@@ -312,7 +312,15 @@ exports.register = async (req, res) => {
         ? 'Usuário criado com sucesso.'
         : 'Cadastro realizado com sucesso! Aguarde a aprovação do seu acesso.';
     }
+    response.success = true;
     response.pendingApproval = !isAdminCreated;
+    
+    console.log('=== REGISTRO - Resposta enviada ===');
+    console.log('pendingApproval:', response.pendingApproval);
+    console.log('user.id:', response.user?.id);
+    console.log('user.status:', user.status);
+    console.log('isAdminCreated:', isAdminCreated);
+    
     return res.status(201).json(response);
   } catch (error) {
     console.error('Erro ao registrar usuário:', error);
