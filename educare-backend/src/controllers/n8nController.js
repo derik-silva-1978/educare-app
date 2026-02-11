@@ -1,7 +1,24 @@
 const { User, Profile, Child, Subscription, SubscriptionPlan, BiometricsLog, SleepLog, Appointment, VaccineHistory, ContentItem } = require('../models');
 const nlpParserService = require('../services/nlpParserService');
 const { Op } = require('sequelize');
-const { findUserByPhone } = require('../utils/phoneUtils');
+const { sequelize } = require('../config/database');
+const { findUserByPhone, extractPhoneVariants } = require('../utils/phoneUtils');
+
+const findUserViaProfile = async (phone) => {
+  const variants = extractPhoneVariants(phone);
+  if (variants.length === 0) return null;
+  try {
+    const profile = await Profile.findOne({
+      where: { phone: { [Op.in]: variants } }
+    });
+    if (!profile) return null;
+    const userId = profile.user_id || profile.userId;
+    return await User.findByPk(userId);
+  } catch (err) {
+    console.error('[n8n] findUserViaProfile failed:', err.message);
+    return null;
+  }
+};
 
 const SBP_VACCINE_CALENDAR = [
   { vaccine: 'BCG', weeks: 0, dose: 1 },
@@ -60,7 +77,12 @@ const n8nController = {
         });
       } catch (queryErr) {
         console.error('[n8n] Erro na query com include, tentando busca simples:', queryErr.message);
-        user = await findUserByPhone(User, phone);
+        try {
+          user = await findUserByPhone(User, phone);
+        } catch (simplErr) {
+          console.error('[n8n] Busca simples falhou, tentando via profiles:', simplErr.message);
+          user = await findUserViaProfile(phone);
+        }
       }
 
       if (!user) {
@@ -179,7 +201,12 @@ const n8nController = {
         });
       } catch (queryErr) {
         console.error('[n8n] Erro na query recognize com include, tentando busca simples:', queryErr.message);
-        user = await findUserByPhone(User, phoneNumber);
+        try {
+          user = await findUserByPhone(User, phoneNumber);
+        } catch (simplErr) {
+          console.error('[n8n] Busca simples falhou em recognize, tentando via profiles:', simplErr.message);
+          user = await findUserViaProfile(phoneNumber);
+        }
       }
 
       if (!user) {
