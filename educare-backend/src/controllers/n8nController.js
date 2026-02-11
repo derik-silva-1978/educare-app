@@ -42,20 +42,26 @@ const n8nController = {
         });
       }
 
-      const user = await findUserByPhone(User, phone, {
-        include: [{
-          model: Subscription,
-          as: 'subscriptions',
-          where: { status: { [Op.in]: ['active', 'trial', 'pending'] } },
-          required: false,
-          order: [['createdAt', 'DESC']],
-          limit: 1,
+      let user;
+      try {
+        user = await findUserByPhone(User, phone, {
           include: [{
-            model: SubscriptionPlan,
-            as: 'plan'
+            model: Subscription,
+            as: 'subscriptions',
+            where: { status: { [Op.in]: ['active', 'trial', 'pending'] } },
+            required: false,
+            order: [['createdAt', 'DESC']],
+            limit: 1,
+            include: [{
+              model: SubscriptionPlan,
+              as: 'plan'
+            }]
           }]
-        }]
-      });
+        });
+      } catch (queryErr) {
+        console.error('[n8n] Erro na query com include, tentando busca simples:', queryErr.message);
+        user = await findUserByPhone(User, phone);
+      }
 
       if (!user) {
         return res.json({
@@ -65,45 +71,63 @@ const n8nController = {
         });
       }
 
-      const profile = await Profile.findOne({
-        where: { userId: user.id },
-        include: [{
-          model: Child,
-          as: 'children',
-          where: { isActive: true },
-          required: false,
+      let subscriptionStatus = 'inactive';
+      let planName = null;
+      try {
+        const subs = user.subscriptions || await Subscription.findAll({
+          where: { userId: user.id, status: { [Op.in]: ['active', 'trial', 'pending'] } },
+          include: [{ model: SubscriptionPlan, as: 'plan' }],
           order: [['createdAt', 'DESC']],
           limit: 1
-        }]
-      });
-
-      const subscription = user.subscriptions?.[0];
-      let subscriptionStatus = 'inactive';
-      
-      if (subscription) {
-        const statusMap = {
-          'active': 'active',
-          'trial': 'trialing',
-          'pending': 'pending',
-          'canceled': 'canceled',
-          'expired': 'past_due'
-        };
-        subscriptionStatus = statusMap[subscription.status] || subscription.status;
+        });
+        const subscription = Array.isArray(subs) ? subs[0] : null;
+        if (subscription) {
+          const statusMap = {
+            'active': 'active',
+            'trial': 'trialing',
+            'pending': 'pending',
+            'canceled': 'canceled',
+            'expired': 'past_due'
+          };
+          subscriptionStatus = statusMap[subscription.status] || subscription.status;
+          planName = subscription.plan?.name || null;
+        }
+      } catch (subErr) {
+        console.error('[n8n] Erro ao buscar subscription:', subErr.message);
       }
 
-      const child = profile?.children?.[0];
-      
+      let child = null;
+      try {
+        const profile = await Profile.findOne({
+          where: { userId: user.id },
+          include: [{
+            model: Child,
+            as: 'children',
+            where: { isActive: true },
+            required: false,
+            order: [['createdAt', 'DESC']],
+            limit: 1
+          }]
+        });
+        const childData = profile?.children?.[0];
+        if (childData) {
+          child = {
+            id: childData.id,
+            name: `${childData.firstName} ${childData.lastName}`.trim(),
+            dob: childData.birthDate
+          };
+        }
+      } catch (profileErr) {
+        console.error('[n8n] Erro ao buscar profile/child:', profileErr.message);
+      }
+
       const response = {
         exists: true,
         user_id: user.id,
         user_name: user.name,
         subscription_status: subscriptionStatus,
-        plan_name: subscription?.plan?.name || null,
-        child: child ? {
-          id: child.id,
-          name: `${child.firstName} ${child.lastName}`.trim(),
-          dob: child.birthDate
-        } : null
+        plan_name: planName,
+        child
       };
 
       if (subscriptionStatus === 'past_due' || subscriptionStatus === 'canceled') {
@@ -115,7 +139,9 @@ const n8nController = {
       console.error('[n8n] Erro em checkUser:', error);
       return res.status(500).json({
         exists: false,
-        error: 'Erro interno ao verificar usuário'
+        error: 'Erro interno ao verificar usuário',
+        debug_message: error.message,
+        debug_type: error.name
       });
     }
   },
@@ -135,20 +161,26 @@ const n8nController = {
       const cleanPhone = phoneNumber.replace(/\D/g, '');
       console.log(`[n8n] Reconhecimento WhatsApp - Buscando usuário: ${cleanPhone}`);
 
-      const user = await findUserByPhone(User, phoneNumber, {
-        include: [{
-          model: Subscription,
-          as: 'subscriptions',
-          where: { status: { [Op.in]: ['active', 'trial', 'pending'] } },
-          required: false,
-          order: [['createdAt', 'DESC']],
-          limit: 1,
+      let user;
+      try {
+        user = await findUserByPhone(User, phoneNumber, {
           include: [{
-            model: SubscriptionPlan,
-            as: 'plan'
+            model: Subscription,
+            as: 'subscriptions',
+            where: { status: { [Op.in]: ['active', 'trial', 'pending'] } },
+            required: false,
+            order: [['createdAt', 'DESC']],
+            limit: 1,
+            include: [{
+              model: SubscriptionPlan,
+              as: 'plan'
+            }]
           }]
-        }]
-      });
+        });
+      } catch (queryErr) {
+        console.error('[n8n] Erro na query recognize com include, tentando busca simples:', queryErr.message);
+        user = await findUserByPhone(User, phoneNumber);
+      }
 
       if (!user) {
         console.log(`[n8n] Usuário não encontrado para ${cleanPhone}`);
@@ -160,18 +192,36 @@ const n8nController = {
         });
       }
 
-      const profile = await Profile.findOne({
-        where: { userId: user.id },
-        include: [{
-          model: Child,
-          as: 'children',
-          where: { isActive: true },
-          required: false,
-          order: [['createdAt', 'DESC']]
-        }]
-      });
+      let profile = null;
+      try {
+        profile = await Profile.findOne({
+          where: { userId: user.id },
+          include: [{
+            model: Child,
+            as: 'children',
+            where: { isActive: true },
+            required: false,
+            order: [['createdAt', 'DESC']]
+          }]
+        });
+      } catch (profileErr) {
+        console.error('[n8n] Erro ao buscar profile em recognize:', profileErr.message);
+      }
 
-      const subscription = user.subscriptions?.[0];
+      let subscription = user.subscriptions?.[0];
+      if (!subscription) {
+        try {
+          const subs = await Subscription.findAll({
+            where: { userId: user.id, status: { [Op.in]: ['active', 'trial', 'pending'] } },
+            include: [{ model: SubscriptionPlan, as: 'plan' }],
+            order: [['createdAt', 'DESC']],
+            limit: 1
+          });
+          subscription = subs[0] || null;
+        } catch (subErr) {
+          console.error('[n8n] Erro ao buscar subscription em recognize:', subErr.message);
+        }
+      }
       const subscriptionActive = subscription && ['active', 'trial'].includes(subscription.status);
 
       const children = profile?.children || [];
