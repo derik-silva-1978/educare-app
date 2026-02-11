@@ -661,6 +661,55 @@ app.get('/api/admin/db-status', async (req, res) => {
   }
 });
 
+app.get('/api/admin/pool-status', async (req, res) => {
+  const apiKey = req.query.api_key || req.headers['x-api-key'];
+  if (!apiKey || apiKey !== process.env.EXTERNAL_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const poolStatus = getPoolStatus();
+    const dbUser = process.env.DB_USERNAME || 'postgres';
+    const dbHost = process.env.DB_HOST || 'localhost';
+    const dbName = process.env.DB_DATABASE || 'educare';
+
+    let dbConnected = false;
+    let dbLatency = null;
+    try {
+      const start = Date.now();
+      await sequelize.query('SELECT 1');
+      dbLatency = Date.now() - start;
+      dbConnected = true;
+    } catch (e) {
+      dbConnected = false;
+    }
+
+    let activeConnections = null;
+    try {
+      const [result] = await sequelize.query(
+        "SELECT count(*) as total, count(*) FILTER (WHERE state = 'active') as active, count(*) FILTER (WHERE state = 'idle') as idle FROM pg_stat_activity WHERE datname = current_database()"
+      );
+      activeConnections = result[0];
+    } catch (e) {}
+
+    res.json({
+      success: true,
+      connection: {
+        user: dbUser,
+        host: dbHost,
+        database: dbName,
+        connected: dbConnected,
+        latency_ms: dbLatency
+      },
+      pool: poolStatus,
+      pg_connections: activeConnections,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Rotas de health check (sem prefixo /api para acesso direto)
 app.use('/health', healthRoutes);
 
@@ -699,7 +748,7 @@ app.use((err, req, res, next) => {
 });
 
 // Inicialização do banco de dados
-const { sequelize } = require('./config/database');
+const { sequelize, testConnectionWithRetry, getPoolStatus } = require('./config/database');
 
 // Sincronizar modelos com o banco de dados
 // NOTA: sync desativado pois o usuário 'educareapp' não é owner das tabelas
@@ -732,9 +781,13 @@ if (process.env.DB_SYNC_ENABLED === 'true') {
   })();
 } else {
   console.log('Sincronização do banco de dados desativada (DB_SYNC_ENABLED != true)');
-  sequelize.authenticate()
-    .then(async () => {
-      console.log('Conexão com o banco de dados estabelecida com sucesso.');
+  testConnectionWithRetry(5, 3000)
+    .then(async (connected) => {
+      if (!connected) {
+        console.error('[DB] Servidor iniciando SEM conexão com o banco. Algumas funcionalidades estarão indisponíveis.');
+        return;
+      }
+      console.log('[DB] Pool status:', JSON.stringify(getPoolStatus()));
 
       try {
         await sequelize.query('CREATE EXTENSION IF NOT EXISTS vector;');
