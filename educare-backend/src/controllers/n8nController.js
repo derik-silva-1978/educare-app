@@ -155,6 +155,7 @@ const n8nController = {
         exists: true,
         user_id: user.id,
         user_name: user.name,
+        phone: user.phone || phone,
         subscription_status: subscriptionStatus,
         plan_name: planName,
         child
