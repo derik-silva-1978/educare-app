@@ -104,23 +104,29 @@ const n8nController = {
 
       let subscriptionStatus = 'inactive';
       let planName = null;
-      try {
-        const { sequelize } = require('../config/database');
-        const [subs] = await sequelize.query(
-          `SELECT s.status, sp.name as plan_name 
-           FROM subscriptions s 
-           LEFT JOIN subscription_plans sp ON sp.id = s.plan_id 
-           WHERE s.user_id = $1 AND s.status IN ('active', 'trial', 'pending')
-           ORDER BY s.created_at DESC LIMIT 1`,
-          { bind: [user.id] }
-        );
-        if (subs.length > 0) {
-          const statusMap = { 'active': 'active', 'trial': 'trialing', 'pending': 'pending', 'canceled': 'canceled', 'expired': 'past_due' };
-          subscriptionStatus = statusMap[subs[0].status] || subs[0].status;
-          planName = subs[0].plan_name;
+
+      if (user.role === 'owner' || user.role === 'admin') {
+        subscriptionStatus = 'active';
+        planName = 'Owner/Admin Access';
+      } else {
+        try {
+          const { sequelize } = require('../config/database');
+          const [subs] = await sequelize.query(
+            `SELECT s.status, sp.name as plan_name 
+             FROM subscriptions s 
+             LEFT JOIN subscription_plans sp ON sp.id = s.plan_id 
+             WHERE s.user_id = $1 AND s.status IN ('active', 'trial', 'pending')
+             ORDER BY s.created_at DESC LIMIT 1`,
+            { bind: [user.id] }
+          );
+          if (subs.length > 0) {
+            const statusMap = { 'active': 'active', 'trial': 'trialing', 'pending': 'pending', 'canceled': 'canceled', 'expired': 'past_due' };
+            subscriptionStatus = statusMap[subs[0].status] || subs[0].status;
+            planName = subs[0].plan_name;
+          }
+        } catch (subErr) {
+          console.error('[n8n] Erro ao buscar subscription:', subErr.message);
         }
-      } catch (subErr) {
-        console.error('[n8n] Erro ao buscar subscription:', subErr.message);
       }
 
       let child = null;
