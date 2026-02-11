@@ -517,10 +517,23 @@ app.post('/api/admin/create-user', async (req, res) => {
       { bind: [email] }
     );
     if (existing.length > 0) {
-      await sequelize.query(
-        `UPDATE users SET phone = $1, name = $2 WHERE email = $3`,
-        { bind: [phone, name, email] }
-      );
+      let updateSQL = `UPDATE users SET phone = $1, name = $2`;
+      const binds = [phone, name];
+      let bindIdx = 3;
+
+      if (role) {
+        updateSQL += `, role = $${bindIdx}::"enum_users_role"`;
+        binds.push(role);
+        bindIdx++;
+      }
+      updateSQL += `, status = $${bindIdx}::"enum_users_status"`;
+      binds.push('active');
+      bindIdx++;
+
+      updateSQL += ` WHERE email = $${bindIdx}`;
+      binds.push(email);
+
+      await sequelize.query(updateSQL, { bind: binds });
       const [updated] = await sequelize.query(
         `SELECT id, name, email, phone, role, status FROM users WHERE email = $1`,
         { bind: [email] }
