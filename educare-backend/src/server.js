@@ -515,6 +515,61 @@ if (process.env.DB_SYNC_ENABLED === 'true') {
       }
 
       try {
+        const [phoneCol] = await sequelize.query(
+          `SELECT column_name FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'phone'`
+        );
+        if (phoneCol.length === 0) {
+          console.log('[AutoMigration] Adding missing columns to users table...');
+          await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(255) UNIQUE`);
+          await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS cpf_cnpj VARCHAR(18) UNIQUE`);
+          await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_verification_code VARCHAR(255)`);
+          await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_verification_expires TIMESTAMP WITH TIME ZONE`);
+          await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255)`);
+          await sequelize.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_subscription_id VARCHAR(255)`);
+          console.log('[AutoMigration] Users table columns added successfully.');
+        }
+      } catch (userColErr) {
+        console.warn('[AutoMigration] Warning adding users columns:', userColErr.message);
+      }
+
+      try {
+        const [subCols] = await sequelize.query(
+          `SELECT column_name FROM information_schema.columns WHERE table_name = 'subscriptions' AND column_name = 'next_billing_date'`
+        );
+        if (subCols.length === 0) {
+          console.log('[AutoMigration] Adding missing columns to subscriptions table...');
+          await sequelize.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS next_billing_date TIMESTAMP WITH TIME ZONE`);
+          await sequelize.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS last_billing_date TIMESTAMP WITH TIME ZONE`);
+          await sequelize.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS auto_renew BOOLEAN DEFAULT true`);
+          await sequelize.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS children_count INTEGER DEFAULT 0`);
+          await sequelize.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS usage_stats JSONB DEFAULT '{}'::jsonb`);
+          await sequelize.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS payment_details JSONB DEFAULT '{}'::jsonb`);
+          await sequelize.query(`ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS payment_method VARCHAR(255)`);
+          console.log('[AutoMigration] Subscriptions table columns added successfully.');
+        }
+      } catch (subColErr) {
+        console.warn('[AutoMigration] Warning adding subscriptions columns:', subColErr.message);
+      }
+
+      try {
+        await sequelize.query(`
+          DO $$ BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'curator' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'enum_users_role')) THEN
+              ALTER TYPE "enum_users_role" ADD VALUE 'curator';
+            END IF;
+          END $$;
+        `);
+      } catch (enumErr) {
+        console.warn('[AutoMigration] Warning adding curator enum:', enumErr.message);
+      }
+
+      try {
+        await sequelize.query(`ALTER TABLE users ALTER COLUMN email DROP NOT NULL`);
+      } catch (emailErr) {
+        console.warn('[AutoMigration] Warning making email nullable:', emailErr.message);
+      }
+
+      try {
         const pgvectorService = require('./services/pgvectorService');
         await pgvectorService.ensureTables();
         console.log('✓ pgvector tables ready');
