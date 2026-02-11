@@ -44,7 +44,7 @@ export const EmailSettings = ({ onSave, isLoading, onTestEmail }: EmailSettingsP
         <Label htmlFor="smtp-user">Usuário SMTP</Label>
         <Input
           id="smtp-user"
-          defaultValue="noreply@educareplus.com.br"
+          defaultValue="noreply@educareapp.com.br"
           placeholder="Email de envio"
         />
       </div>

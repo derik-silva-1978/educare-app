@@ -44,7 +44,7 @@ export const GeneralSettings = ({ onSave, isLoading }: GeneralSettingsProps) => 
         <Input
           id="support-email"
           type="email"
-          defaultValue="suporte@educareplus.com.br"
+          defaultValue="suporte@educareapp.com.br"
           placeholder="Email para contato de suporte"
         />
       </div>

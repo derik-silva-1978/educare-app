@@ -742,7 +742,7 @@ const PaymentPage: React.FC = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">E-mail:</span> suporte@educareplus.com.br</p>
+                      <p><span className="font-medium">E-mail:</span> suporte@educareapp.com.br</p>
                       <p><span className="font-medium">Telefone:</span> (11) 3456-7890</p>
                       <p><span className="font-medium">Horário:</span> Seg-Sex, 9h às 18h</p>
                     </div>

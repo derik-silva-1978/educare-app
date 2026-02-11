@@ -6,7 +6,15 @@ const { validationResult } = require('express-validator');
 const { OAuth2Client } = require('google-auth-library');
 const { normalizePhoneNumber, findUserByPhone } = require('../utils/phoneUtils');
 const WhatsappService = require('../services/whatsappService');
-const { shortenMultiple, shortenUrl } = require('../utils/urlShortener');
+let shortenMultiple, shortenUrl;
+try {
+  const urlShortener = require('../utils/urlShortener');
+  shortenMultiple = urlShortener.shortenMultiple;
+  shortenUrl = urlShortener.shortenUrl;
+} catch (e) {
+  shortenUrl = async (url) => url;
+  shortenMultiple = async (urls) => urls;
+}
 
 // Função para gerar token JWT
 const generateToken = (userId) => {

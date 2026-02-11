@@ -46,9 +46,12 @@ The frontend utilizes React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Ta
 - **Controlled Rollout**: Uses feature flags for phased feature rollouts.
 
 ### Deployment Architecture
+- **Production Domain**: `educareapp.com.br` (NOT educareplus.com.br)
 - **Infrastructure**: Contabo VPS with Docker Swarm and Portainer.
-- **Containers**: Three services (postgres, backend, frontend) on an overlay network.
+- **Containers**: Three services (postgres, backend, frontend) on an overlay network, plus Traefik reverse proxy.
 - **Reverse Proxy**: Traefik v3.4.0 with automatic HTTPS via Let's Encrypt, routing API and static file requests to the backend, and all other traffic to the frontend.
+- **External API Key**: `EXTERNAL_API_KEY` env var required for external API access (e.g., n8n webhooks).
+- **Production Bug Fix (Feb 2026)**: URL shortener import made safe with try/catch fallback to prevent auth controller crash when utility not deployed.
 
 ## External Dependencies
 

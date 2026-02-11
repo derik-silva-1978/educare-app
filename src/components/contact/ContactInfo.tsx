@@ -18,8 +18,8 @@ const ContactInfo: React.FC = () => {
         <ContactCard 
           icon={<Mail className="h-5 w-5 text-educare-600" />}
           title="Email"
-          description="contato@educareplus.com.br"
-          link="mailto:contato@educareplus.com.br"
+          description="contato@educareapp.com.br"
+          link="mailto:contato@educareapp.com.br"
         />
         
         <ContactCard 
