@@ -351,6 +351,140 @@ app.post('/api/admin/run-migrations', async (req, res) => {
   }
 });
 
+// Superuser migration endpoint - runs ALTER TABLE as postgres superuser
+app.post('/api/admin/superuser-migrate', async (req, res) => {
+  const apiKey = req.query.api_key || req.headers['x-api-key'];
+  if (!apiKey || apiKey !== process.env.EXTERNAL_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const superuserPassword = process.env.POSTGRES_SUPERUSER_PASSWORD;
+  if (!superuserPassword) {
+    return res.status(500).json({ error: 'POSTGRES_SUPERUSER_PASSWORD not configured' });
+  }
+
+  const { Sequelize } = require('sequelize');
+  let superSequelize;
+
+  try {
+    superSequelize = new Sequelize(
+      process.env.DB_DATABASE,
+      'postgres',
+      superuserPassword,
+      {
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT || 5432,
+        dialect: 'postgres',
+        logging: false
+      }
+    );
+
+    await superSequelize.authenticate();
+    const log = [];
+
+    const [usersCols] = await superSequelize.query(
+      "SELECT column_name FROM information_schema.columns WHERE table_name = 'users'"
+    );
+    const existingCols = usersCols.map(c => c.column_name);
+
+    if (!existingCols.includes('phone')) {
+      await superSequelize.query(`ALTER TABLE users ADD COLUMN phone VARCHAR(20)`);
+      log.push('Added phone column to users table');
+    } else {
+      log.push('phone column already exists in users table');
+    }
+
+    if (!existingCols.includes('phone_verified')) {
+      await superSequelize.query(`ALTER TABLE users ADD COLUMN phone_verified BOOLEAN DEFAULT false`);
+      log.push('Added phone_verified column to users table');
+    } else {
+      log.push('phone_verified column already exists');
+    }
+
+    try {
+      await superSequelize.query(`CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone)`);
+      log.push('Created index on users.phone');
+    } catch (idxErr) {
+      log.push('Index creation skipped: ' + idxErr.message);
+    }
+
+    const dbUser = process.env.DB_USERNAME || 'educareapp';
+    try {
+      await superSequelize.query(`GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO ${dbUser}`);
+      await superSequelize.query(`GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO ${dbUser}`);
+      log.push(`Granted privileges to ${dbUser}`);
+    } catch (grantErr) {
+      log.push('Grant skipped: ' + grantErr.message);
+    }
+
+    res.json({ success: true, log });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    if (superSequelize) {
+      try { await superSequelize.close(); } catch (e) {}
+    }
+  }
+});
+
+// Update user phone number (protected by EXTERNAL_API_KEY)
+app.post('/api/admin/set-user-phone', async (req, res) => {
+  const apiKey = req.query.api_key || req.headers['x-api-key'];
+  if (!apiKey || apiKey !== process.env.EXTERNAL_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { email, phone } = req.body;
+  if (!email || !phone) {
+    return res.status(400).json({ error: 'email and phone are required' });
+  }
+
+  try {
+    const { sequelize } = require('./config/database');
+
+    const [users] = await sequelize.query(
+      `SELECT id, name, email, phone FROM users WHERE email = $1 LIMIT 1`,
+      { bind: [email] }
+    );
+
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'User not found with that email' });
+    }
+
+    await sequelize.query(
+      `UPDATE users SET phone = $1 WHERE email = $2`,
+      { bind: [phone, email] }
+    );
+
+    const [updated] = await sequelize.query(
+      `SELECT id, name, email, phone FROM users WHERE email = $1 LIMIT 1`,
+      { bind: [email] }
+    );
+
+    res.json({ success: true, user: updated[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// List users (admin diagnostic, protected by EXTERNAL_API_KEY)
+app.get('/api/admin/list-users', async (req, res) => {
+  const apiKey = req.query.api_key || req.headers['x-api-key'];
+  if (!apiKey || apiKey !== process.env.EXTERNAL_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const { sequelize } = require('./config/database');
+    const [users] = await sequelize.query(
+      `SELECT id, name, email, phone, role, status FROM users ORDER BY created_at DESC LIMIT 20`
+    );
+    res.json({ count: users.length, users });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Database schema diagnostic endpoint (protected by EXTERNAL_API_KEY)
 app.get('/api/admin/db-status', async (req, res) => {
   const apiKey = req.query.api_key || req.headers['x-api-key'];
