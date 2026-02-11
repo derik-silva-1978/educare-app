@@ -1,23 +1,56 @@
 const { User, Profile, Child, Subscription, SubscriptionPlan, BiometricsLog, SleepLog, Appointment, VaccineHistory, ContentItem } = require('../models');
 const nlpParserService = require('../services/nlpParserService');
 const { Op } = require('sequelize');
-const { sequelize } = require('../config/database');
 const { findUserByPhone, extractPhoneVariants } = require('../utils/phoneUtils');
 
-const findUserViaProfile = async (phone) => {
+const findUserByPhoneRobust = async (phone) => {
   const variants = extractPhoneVariants(phone);
   if (variants.length === 0) return null;
+  
+  const { sequelize } = require('../config/database');
+  const placeholders = variants.map((_, i) => `$${i + 1}`).join(', ');
+  
   try {
-    const profile = await Profile.findOne({
-      where: { phone: { [Op.in]: variants } }
-    });
-    if (!profile) return null;
-    const userId = profile.user_id || profile.userId;
-    return await User.findByPk(userId);
-  } catch (err) {
-    console.error('[n8n] findUserViaProfile failed:', err.message);
-    return null;
+    const [rows] = await sequelize.query(
+      `SELECT u.id, u.name, u.email, u.role, u.status 
+       FROM users u 
+       WHERE u.phone IN (${placeholders})
+       LIMIT 1`,
+      { bind: variants }
+    );
+    if (rows.length > 0) return rows[0];
+  } catch (e1) {
+    console.log('[n8n] users.phone query failed, trying profiles.phone:', e1.message);
   }
+
+  try {
+    const [rows] = await sequelize.query(
+      `SELECT u.id, u.name, u.email, u.role, u.status 
+       FROM profiles p 
+       JOIN users u ON u.id = p.user_id 
+       WHERE p.phone IN (${placeholders})
+       LIMIT 1`,
+      { bind: variants }
+    );
+    if (rows.length > 0) return rows[0];
+  } catch (e2) {
+    console.log('[n8n] profiles.phone query failed, trying email:', e2.message);
+  }
+
+  try {
+    const [rows] = await sequelize.query(
+      `SELECT u.id, u.name, u.email, u.role, u.status 
+       FROM users u 
+       WHERE u.email LIKE $1
+       LIMIT 1`,
+      { bind: [`%${variants[0].slice(-8)}%`] }
+    );
+    if (rows.length > 0) return rows[0];
+  } catch (e3) {
+    console.error('[n8n] All user lookup methods failed:', e3.message);
+  }
+
+  return null;
 };
 
 const SBP_VACCINE_CALENDAR = [
@@ -59,31 +92,7 @@ const n8nController = {
         });
       }
 
-      let user;
-      try {
-        user = await findUserByPhone(User, phone, {
-          include: [{
-            model: Subscription,
-            as: 'subscriptions',
-            where: { status: { [Op.in]: ['active', 'trial', 'pending'] } },
-            required: false,
-            order: [['createdAt', 'DESC']],
-            limit: 1,
-            include: [{
-              model: SubscriptionPlan,
-              as: 'plan'
-            }]
-          }]
-        });
-      } catch (queryErr) {
-        console.error('[n8n] Erro na query com include, tentando busca simples:', queryErr.message);
-        try {
-          user = await findUserByPhone(User, phone);
-        } catch (simplErr) {
-          console.error('[n8n] Busca simples falhou, tentando via profiles:', simplErr.message);
-          user = await findUserViaProfile(phone);
-        }
-      }
+      const user = await findUserByPhoneRobust(phone);
 
       if (!user) {
         return res.json({
@@ -96,23 +105,19 @@ const n8nController = {
       let subscriptionStatus = 'inactive';
       let planName = null;
       try {
-        const subs = user.subscriptions || await Subscription.findAll({
-          where: { userId: user.id, status: { [Op.in]: ['active', 'trial', 'pending'] } },
-          include: [{ model: SubscriptionPlan, as: 'plan' }],
-          order: [['createdAt', 'DESC']],
-          limit: 1
-        });
-        const subscription = Array.isArray(subs) ? subs[0] : null;
-        if (subscription) {
-          const statusMap = {
-            'active': 'active',
-            'trial': 'trialing',
-            'pending': 'pending',
-            'canceled': 'canceled',
-            'expired': 'past_due'
-          };
-          subscriptionStatus = statusMap[subscription.status] || subscription.status;
-          planName = subscription.plan?.name || null;
+        const { sequelize } = require('../config/database');
+        const [subs] = await sequelize.query(
+          `SELECT s.status, sp.name as plan_name 
+           FROM subscriptions s 
+           LEFT JOIN subscription_plans sp ON sp.id = s.plan_id 
+           WHERE s.user_id = $1 AND s.status IN ('active', 'trial', 'pending')
+           ORDER BY s.created_at DESC LIMIT 1`,
+          { bind: [user.id] }
+        );
+        if (subs.length > 0) {
+          const statusMap = { 'active': 'active', 'trial': 'trialing', 'pending': 'pending', 'canceled': 'canceled', 'expired': 'past_due' };
+          subscriptionStatus = statusMap[subs[0].status] || subs[0].status;
+          planName = subs[0].plan_name;
         }
       } catch (subErr) {
         console.error('[n8n] Erro ao buscar subscription:', subErr.message);
@@ -120,27 +125,24 @@ const n8nController = {
 
       let child = null;
       try {
-        const profile = await Profile.findOne({
-          where: { userId: user.id },
-          include: [{
-            model: Child,
-            as: 'children',
-            where: { isActive: true },
-            required: false,
-            order: [['createdAt', 'DESC']],
-            limit: 1
-          }]
-        });
-        const childData = profile?.children?.[0];
-        if (childData) {
+        const { sequelize } = require('../config/database');
+        const [children] = await sequelize.query(
+          `SELECT c.id, c.first_name, c.last_name, c.birth_date 
+           FROM profiles p 
+           JOIN children c ON c.profile_id = p.id 
+           WHERE p.user_id = $1 AND c.is_active = true
+           ORDER BY c.created_at DESC LIMIT 1`,
+          { bind: [user.id] }
+        );
+        if (children.length > 0) {
           child = {
-            id: childData.id,
-            name: `${childData.firstName} ${childData.lastName}`.trim(),
-            dob: childData.birthDate
+            id: children[0].id,
+            name: `${children[0].first_name} ${children[0].last_name || ''}`.trim(),
+            dob: children[0].birth_date
           };
         }
       } catch (profileErr) {
-        console.error('[n8n] Erro ao buscar profile/child:', profileErr.message);
+        console.error('[n8n] Erro ao buscar child:', profileErr.message);
       }
 
       const response = {
@@ -183,31 +185,7 @@ const n8nController = {
       const cleanPhone = phoneNumber.replace(/\D/g, '');
       console.log(`[n8n] Reconhecimento WhatsApp - Buscando usuário: ${cleanPhone}`);
 
-      let user;
-      try {
-        user = await findUserByPhone(User, phoneNumber, {
-          include: [{
-            model: Subscription,
-            as: 'subscriptions',
-            where: { status: { [Op.in]: ['active', 'trial', 'pending'] } },
-            required: false,
-            order: [['createdAt', 'DESC']],
-            limit: 1,
-            include: [{
-              model: SubscriptionPlan,
-              as: 'plan'
-            }]
-          }]
-        });
-      } catch (queryErr) {
-        console.error('[n8n] Erro na query recognize com include, tentando busca simples:', queryErr.message);
-        try {
-          user = await findUserByPhone(User, phoneNumber);
-        } catch (simplErr) {
-          console.error('[n8n] Busca simples falhou em recognize, tentando via profiles:', simplErr.message);
-          user = await findUserViaProfile(phoneNumber);
-        }
-      }
+      const user = await findUserByPhoneRobust(phoneNumber);
 
       if (!user) {
         console.log(`[n8n] Usuário não encontrado para ${cleanPhone}`);
@@ -219,48 +197,51 @@ const n8nController = {
         });
       }
 
-      let profile = null;
+      const { sequelize } = require('../config/database');
+
+      let subscriptionActive = false;
+      let subStatus = 'inactive';
+      let subPlanName = null;
       try {
-        profile = await Profile.findOne({
-          where: { userId: user.id },
-          include: [{
-            model: Child,
-            as: 'children',
-            where: { isActive: true },
-            required: false,
-            order: [['createdAt', 'DESC']]
-          }]
-        });
-      } catch (profileErr) {
-        console.error('[n8n] Erro ao buscar profile em recognize:', profileErr.message);
-      }
-
-      let subscription = user.subscriptions?.[0];
-      if (!subscription) {
-        try {
-          const subs = await Subscription.findAll({
-            where: { userId: user.id, status: { [Op.in]: ['active', 'trial', 'pending'] } },
-            include: [{ model: SubscriptionPlan, as: 'plan' }],
-            order: [['createdAt', 'DESC']],
-            limit: 1
-          });
-          subscription = subs[0] || null;
-        } catch (subErr) {
-          console.error('[n8n] Erro ao buscar subscription em recognize:', subErr.message);
+        const [subs] = await sequelize.query(
+          `SELECT s.status, sp.name as plan_name 
+           FROM subscriptions s 
+           LEFT JOIN subscription_plans sp ON sp.id = s.plan_id 
+           WHERE s.user_id = $1 AND s.status IN ('active', 'trial', 'pending')
+           ORDER BY s.created_at DESC LIMIT 1`,
+          { bind: [user.id] }
+        );
+        if (subs.length > 0) {
+          subStatus = subs[0].status;
+          subPlanName = subs[0].plan_name;
+          subscriptionActive = ['active', 'trial'].includes(subStatus);
         }
+      } catch (subErr) {
+        console.error('[n8n] Erro ao buscar subscription em recognize:', subErr.message);
       }
-      const subscriptionActive = subscription && ['active', 'trial'].includes(subscription.status);
 
-      const children = profile?.children || [];
-      const primaryChild = children[0];
+      let childrenList = [];
+      try {
+        const [rows] = await sequelize.query(
+          `SELECT c.id, c.first_name, c.last_name, c.birth_date, c.gender
+           FROM profiles p 
+           JOIN children c ON c.profile_id = p.id 
+           WHERE p.user_id = $1 AND c.is_active = true
+           ORDER BY c.created_at DESC`,
+          { bind: [user.id] }
+        );
+        childrenList = rows;
+      } catch (childErr) {
+        console.error('[n8n] Erro ao buscar children em recognize:', childErr.message);
+      }
 
+      const primaryChild = childrenList[0] || null;
       let basicContext = null;
-
       if (primaryChild) {
-        const birthDate = new Date(primaryChild.birthDate);
+        const birthDate = new Date(primaryChild.birth_date);
         const ageMonths = Math.floor((Date.now() - birthDate) / (1000 * 60 * 60 * 24 * 30.44));
         basicContext = {
-          name: primaryChild.firstName,
+          name: primaryChild.first_name,
           age_months: ageMonths,
           gender: primaryChild.gender
         };
@@ -275,27 +256,27 @@ const n8nController = {
         },
         subscription: {
           active: subscriptionActive,
-          status: subscription?.status || 'inactive',
-          plan_name: subscription?.plan?.name || null
+          status: subStatus,
+          plan_name: subPlanName
         },
-        children: children.map(c => ({
+        children: childrenList.map(c => ({
           id: c.id,
-          name: c.firstName,
+          name: c.first_name,
           is_primary: c.id === primaryChild?.id
         })),
         primary_child: primaryChild ? {
           id: primaryChild.id,
-          name: primaryChild.firstName,
+          name: primaryChild.first_name,
           age_months: basicContext?.age_months,
           gender: primaryChild.gender
         } : null,
         basic_context: basicContext,
         greeting: primaryChild 
-          ? `Olá ${user.name.split(' ')[0]}! Estou aqui para ajudar com o desenvolvimento de ${primaryChild.firstName}.`
+          ? `Olá ${user.name.split(' ')[0]}! Estou aqui para ajudar com o desenvolvimento de ${primaryChild.first_name}.`
           : `Olá ${user.name.split(' ')[0]}! Como posso ajudar você hoje?`
       };
 
-      console.log(`[n8n] Usuário reconhecido: ${user.name} (${user.id}), ${children.length} criança(s)`);
+      console.log(`[n8n] Usuário reconhecido: ${user.name} (${user.id}), ${childrenList.length} criança(s)`);
       return res.json(response);
     } catch (error) {
       console.error('[n8n] Erro em recognizeWhatsAppUser:', error);
