@@ -495,6 +495,117 @@ app.post('/api/admin/set-user-phone', async (req, res) => {
   }
 });
 
+// Create user directly via raw SQL (bypasses ORM profile requirements)
+app.post('/api/admin/create-user', async (req, res) => {
+  const apiKey = req.query.api_key || req.headers['x-api-key'];
+  if (!apiKey || apiKey !== process.env.EXTERNAL_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { name, email, phone, password, role } = req.body;
+  if (!name || !email || !phone) {
+    return res.status(400).json({ error: 'name, email, and phone are required' });
+  }
+
+  try {
+    const { sequelize } = require('./config/database');
+    const bcrypt = require('bcryptjs');
+    const crypto = require('crypto');
+
+    const [existing] = await sequelize.query(
+      `SELECT id FROM users WHERE email = $1 LIMIT 1`,
+      { bind: [email] }
+    );
+    if (existing.length > 0) {
+      await sequelize.query(
+        `UPDATE users SET phone = $1, name = $2 WHERE email = $3`,
+        { bind: [phone, name, email] }
+      );
+      const [updated] = await sequelize.query(
+        `SELECT id, name, email, phone, role, status FROM users WHERE email = $1`,
+        { bind: [email] }
+      );
+      return res.json({ success: true, action: 'updated', user: updated[0] });
+    }
+
+    const hashedPassword = await bcrypt.hash(password || 'Educare2025!', 12);
+    const userId = crypto.randomUUID();
+    const userRole = role || 'parent';
+
+    await sequelize.query(
+      `INSERT INTO users (id, name, email, phone, password, role, status, email_verified, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6::\"enum_users_role\", 'active'::\"enum_users_status\", true, NOW(), NOW())`,
+      { bind: [userId, name, email, phone, hashedPassword, userRole] }
+    );
+
+    try {
+      const profileId = crypto.randomUUID();
+      await sequelize.query(
+        `INSERT INTO profiles (id, user_id, full_name, created_at, updated_at)
+         VALUES ($1, $2, $3, NOW(), NOW())`,
+        { bind: [profileId, userId, name] }
+      );
+    } catch (profileErr) {
+      // Profile creation is optional for WhatsApp flow
+    }
+
+    const [created] = await sequelize.query(
+      `SELECT id, name, email, phone, role, status FROM users WHERE id = $1`,
+      { bind: [userId] }
+    );
+
+    res.json({ success: true, action: 'created', user: created[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Fix missing DB columns using regular connection (tries without superuser)
+app.post('/api/admin/fix-schema', async (req, res) => {
+  const apiKey = req.query.api_key || req.headers['x-api-key'];
+  if (!apiKey || apiKey !== process.env.EXTERNAL_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  try {
+    const { sequelize } = require('./config/database');
+    const log = [];
+
+    const columnsToAdd = [
+      { table: 'profiles', column: 'preferences', type: "JSONB DEFAULT '{}'::jsonb" },
+      { table: 'profiles', column: 'phone', type: 'VARCHAR(20)' },
+      { table: 'profiles', column: 'avatar_url', type: 'VARCHAR(500)' },
+      { table: 'profiles', column: 'bio', type: 'TEXT' },
+      { table: 'profiles', column: 'address', type: 'TEXT' },
+      { table: 'profiles', column: 'city', type: 'VARCHAR(100)' },
+      { table: 'profiles', column: 'state', type: 'VARCHAR(50)' },
+      { table: 'profiles', column: 'zip_code', type: 'VARCHAR(20)' },
+      { table: 'profiles', column: 'country', type: 'VARCHAR(50)' },
+    ];
+
+    for (const { table, column, type } of columnsToAdd) {
+      try {
+        const [cols] = await sequelize.query(
+          `SELECT 1 FROM information_schema.columns WHERE table_name = $1 AND column_name = $2`,
+          { bind: [table, column] }
+        );
+        if (cols.length === 0) {
+          await sequelize.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
+          log.push(`Added ${table}.${column}`);
+        } else {
+          log.push(`${table}.${column} exists`);
+        }
+      } catch (colErr) {
+        log.push(`FAILED ${table}.${column}: ${colErr.message}`);
+      }
+    }
+
+    res.json({ success: true, log });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // List users (admin diagnostic, protected by EXTERNAL_API_KEY)
 app.get('/api/admin/list-users', async (req, res) => {
   const apiKey = req.query.api_key || req.headers['x-api-key'];
