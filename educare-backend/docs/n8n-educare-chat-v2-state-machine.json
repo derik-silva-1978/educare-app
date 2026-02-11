@@ -1339,7 +1339,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Global Constants v2.1 — Static values + Phone 9th digit normalization\nconst item = $input.item;\nlet phone = item.json.phone || \"\";\n\n// Brazilian phone 9th digit fix: 559891628206 (12 digits) → 5598991628206 (13 digits)\n// Evolution API sometimes drops the 9th digit from mobile numbers\nif (phone) {\n  const digits = phone.replace(/\\D/g, \"\");\n  if (digits.length === 12 && digits.startsWith(\"55\")) {\n    const ddd = digits.substring(2, 4);\n    const localNumber = digits.substring(4);\n    // Mobile numbers should have 9 digits (starting with 9)\n    if (localNumber.length === 8 && !localNumber.startsWith(\"9\")) {\n      // Add the 9th digit\n      phone = digits.substring(0, 4) + \"9\" + localNumber;\n    } else if (localNumber.length === 8) {\n      phone = digits.substring(0, 4) + \"9\" + localNumber;\n    }\n  }\n}\n\nreturn [{\n  json: {\n    ...item.json,\n    phone,\n    phone_original: item.json.phone || \"\",\n    EDUCARE_API_URL: \"https://educareapp.com.br\",\n    EDUCARE_API_KEY: \"educare_external_api_key_2025\",\n    EVOLUTION_API_URL: \"https://api.educareapp.com.br\",\n    EVOLUTION_INSTANCE: \"educare-chat\",\n    EVOLUTION_API_KEY: \"0C7951B425D6-458B-B662-1FF1EFDE0AFF\",\n    CHATWOOT_API_URL: \"https://chatwoot.educareapp.com.br\",\n    CHATWOOT_API_TOKEN: \"\"\n  }\n}];"
+        "jsCode": "// Global Constants v2.2 — Static values (phone passed as-is)\nconst item = $input.item;\n\nreturn [{\n  json: {\n    ...item.json,\n    EDUCARE_API_URL: \"https://educareapp.com.br\",\n    EDUCARE_API_KEY: \"educare_external_api_key_2025\",\n    EVOLUTION_API_URL: \"https://api.educareapp.com.br\",\n    EVOLUTION_INSTANCE: \"educare-chat\",\n    EVOLUTION_API_KEY: \"0C7951B425D6-458B-B662-1FF1EFDE0AFF\",\n    CHATWOOT_API_URL: \"https://chatwoot.educareapp.com.br\",\n    CHATWOOT_API_TOKEN: \"\"\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
@@ -1493,7 +1493,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"number\": \"{{ $json.phone || $node[\"State Router\"].json.phone }}\",\n  \"options\": { \"delay\": 300, \"presence\": \"composing\" },\n  \"buttonMessage\": {\n    \"text\": \"Sobre o que você quer falar agora? 💬\",\n    \"buttons\": [\n      { \"type\": \"reply\", \"reply\": { \"id\": \"ctx_child\", \"title\": \"👶 Sobre meu bebê\" } },\n      { \"type\": \"reply\", \"reply\": { \"id\": \"ctx_mother\", \"title\": \"💚 Sobre mim\" } }\n    ],\n    \"footerText\": \"TitiNauta 🚀\"\n  }\n}",
+        "jsonBody": "={\n  \"number\": \"{{ $json.phone || $node[\"State Router\"].json.phone }}\",\n  \"title\": \"TitiNauta 🚀\",\n  \"description\": \"Sobre o que você quer falar agora? 💬\",\n  \"footer\": \"Escolha uma opção\",\n  \"buttons\": [\n    { \"type\": \"reply\", \"displayText\": \"👶 Sobre meu bebê\", \"id\": \"ctx_child\" },\n    { \"type\": \"reply\", \"displayText\": \"💚 Sobre mim\", \"id\": \"ctx_mother\" }\n  ]\n}",
         "options": {
           "allowUnauthorizedCerts": true,
           "timeout": 10000
@@ -1702,7 +1702,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"number\": \"{{ $json.phone }}\",\n  \"options\": { \"delay\": 1500, \"presence\": \"composing\" },\n  \"buttonMessage\": {\n    \"text\": \"Como foi sua experiência até agora? ⭐\",\n    \"buttons\": [\n      { \"type\": \"reply\", \"reply\": { \"id\": \"fb_1\", \"title\": \"⭐ 1-2 estrelas\" } },\n      { \"type\": \"reply\", \"reply\": { \"id\": \"fb_3\", \"title\": \"⭐⭐⭐ 3 estrelas\" } },\n      { \"type\": \"reply\", \"reply\": { \"id\": \"fb_5\", \"title\": \"⭐⭐⭐⭐⭐ 4-5 estrelas\" } }\n    ],\n    \"footerText\": \"TitiNauta 🚀\"\n  }\n}",
+        "jsonBody": "={\n  \"number\": \"{{ $json.phone }}\",\n  \"title\": \"TitiNauta 🚀\",\n  \"description\": \"Como foi sua experiência até agora? ⭐\",\n  \"footer\": \"Sua opinião nos ajuda a melhorar\",\n  \"buttons\": [\n    { \"type\": \"reply\", \"displayText\": \"⭐ 1-2 estrelas\", \"id\": \"fb_1\" },\n    { \"type\": \"reply\", \"displayText\": \"⭐⭐⭐ 3 estrelas\", \"id\": \"fb_3\" },\n    { \"type\": \"reply\", \"displayText\": \"⭐⭐⭐⭐⭐ 4-5 estrelas\", \"id\": \"fb_5\" }\n  ]\n}",
         "options": {
           "allowUnauthorizedCerts": true,
           "timeout": 10000
@@ -1847,7 +1847,9 @@
         "options": {
           "allowUnauthorizedCerts": true,
           "timeout": 10000
-        }
+        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"phone\": \"{{ $json.phone }}\",\n  \"button_id\": \"{{ $json.button_id }}\"\n}"
       },
       "id": "resolve-button-001",
       "name": "API: Resolve Button",
@@ -1894,7 +1896,9 @@
         "options": {
           "allowUnauthorizedCerts": true,
           "timeout": 10000
-        }
+        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"phone\": \"{{ $node[\"State Router\"].json.phone }}\",\n  \"message\": \"{{ $node[\"State Router\"].json.message }}\"\n}"
       },
       "id": "buffer-add-01",
       "name": "API: Add To Buffer",
@@ -1973,7 +1977,9 @@
         "options": {
           "allowUnauthorizedCerts": true,
           "timeout": 10000
-        }
+        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.phone }}\",\n  \"options\": { \"delay\": 200, \"presence\": \"composing\" },\n  \"text\": \"{{ $json.buffer_prompt || 'Oi 😊\\nMe conta um pouquinho mais pra eu conseguir te ajudar melhor.' }}\"\n}"
       },
       "id": "buffer-wait-01",
       "name": "Buffer: Send Wait Prompt",
@@ -2007,7 +2013,9 @@
         "options": {
           "allowUnauthorizedCerts": true,
           "timeout": 10000
-        }
+        },
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"phone\": \"{{ $node[\"Buffer Decision\"].json.phone }}\"\n}"
       },
       "id": "buffer-consume-01",
       "name": "API: Consume Buffer",
