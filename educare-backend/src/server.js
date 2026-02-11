@@ -358,9 +358,9 @@ app.post('/api/admin/superuser-migrate', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const superuserPassword = process.env.POSTGRES_SUPERUSER_PASSWORD;
+  const superuserPassword = (req.body && req.body.superuser_password) || process.env.POSTGRES_SUPERUSER_PASSWORD;
   if (!superuserPassword) {
-    return res.status(500).json({ error: 'POSTGRES_SUPERUSER_PASSWORD not configured' });
+    return res.status(500).json({ error: 'POSTGRES_SUPERUSER_PASSWORD not configured. Pass superuser_password in request body.' });
   }
 
   const { Sequelize } = require('sequelize');
@@ -406,6 +406,34 @@ app.post('/api/admin/superuser-migrate', async (req, res) => {
       log.push('Created index on users.phone');
     } catch (idxErr) {
       log.push('Index creation skipped: ' + idxErr.message);
+    }
+
+    const [profilesCols] = await superSequelize.query(
+      "SELECT column_name FROM information_schema.columns WHERE table_name = 'profiles'"
+    );
+    const profileExistingCols = profilesCols.map(c => c.column_name);
+
+    const profileMissingCols = {
+      'preferences': "JSONB DEFAULT '{}'::jsonb",
+      'phone': 'VARCHAR(20)',
+      'avatar_url': 'VARCHAR(500)',
+      'bio': 'TEXT',
+      'address': 'TEXT',
+      'city': 'VARCHAR(100)',
+      'state': 'VARCHAR(50)',
+      'zip_code': 'VARCHAR(20)',
+      'country': 'VARCHAR(50)',
+    };
+
+    for (const [col, type] of Object.entries(profileMissingCols)) {
+      if (!profileExistingCols.includes(col)) {
+        try {
+          await superSequelize.query(`ALTER TABLE profiles ADD COLUMN ${col} ${type}`);
+          log.push(`Added ${col} column to profiles table`);
+        } catch (colErr) {
+          log.push(`Skipped profiles.${col}: ${colErr.message}`);
+        }
+      }
     }
 
     const dbUser = process.env.DB_USERNAME || 'educareapp';
