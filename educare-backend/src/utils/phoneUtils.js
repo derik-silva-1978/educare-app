@@ -54,6 +54,14 @@ const extractPhoneVariants = (phone) => {
       variants.add('+55' + without9);
       variants.add('55' + without9);
     }
+    if (localWithDDD.length === 10) {
+      const ddd = localWithDDD.substring(0, 2);
+      const localNumber = localWithDDD.substring(2);
+      const with9 = ddd + '9' + localNumber;
+      variants.add(with9);
+      variants.add('+55' + with9);
+      variants.add('55' + with9);
+    }
   }
   else if (digitsOnly.length === 10 || digitsOnly.length === 11) {
     const withCountry = '55' + digitsOnly;
@@ -67,6 +75,14 @@ const extractPhoneVariants = (phone) => {
       variants.add(without9);
       variants.add('+55' + without9);
       variants.add('55' + without9);
+    }
+    if (digitsOnly.length === 10) {
+      const ddd = digitsOnly.substring(0, 2);
+      const localNumber = digitsOnly.substring(2);
+      const with9 = ddd + '9' + localNumber;
+      variants.add(with9);
+      variants.add('+55' + with9);
+      variants.add('55' + with9);
     }
   }
   else if (digitsOnly.length === 8 || digitsOnly.length === 9) {

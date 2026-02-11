@@ -53,6 +53,8 @@ The frontend utilizes React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Ta
 - **External API Key**: `EXTERNAL_API_KEY` env var required for external API access (e.g., n8n webhooks).
 - **Production Bug Fix (Feb 2026)**: URL shortener import made safe with try/catch fallback to prevent auth controller crash when utility not deployed.
 - **Production DB Fix (Feb 11, 2026)**: Fixed WhatsApp user lookup by adding admin endpoints for schema fixes and user management. Added `preferences` and `avatar_url` columns to profiles table. Rewrote n8n user lookup to use raw SQL with multi-layer fallback (users.phone → profiles.phone → email). Admin endpoints: `/api/admin/fix-schema`, `/api/admin/create-user`, `/api/admin/set-user-phone`, `/api/admin/list-users`, `/api/admin/db-status`. Security: TODO - remove superuser_password body parameter, add rate limiting and IP allowlist to admin endpoints.
+- **Phone 9th Digit Fix (Feb 11, 2026)**: Evolution API sometimes sends Brazilian mobile numbers without the 9th digit (e.g., `559891628206` instead of `5598991628206`). Updated `extractPhoneVariants()` in phoneUtils.js to generate variants with the 9th digit added (DDD + 9 + 8-digit number) in addition to the existing removal logic. This enables bidirectional phone format matching.
+- **Lead CRM n8n Fix (Feb 11, 2026)**: Fixed "No session ID found" error in Lead CRM subflow. Added `sessionId: contato` (phone number) to the Code node output before AI Agent1/Postgres Chat Memory. The fix was applied directly via n8n REST API.
 - **GitHub Repo**: `derik-silva-1978/educare-app` (main branch)
 - **Deploy Process**: GitHub Actions builds Docker image → Portainer pulls and redeploys on Contabo VPS
 
