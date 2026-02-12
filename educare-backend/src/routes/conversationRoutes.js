@@ -2,12 +2,41 @@ const express = require('express');
 const router = express.Router();
 const conversationController = require('../controllers/conversationController');
 const apiKeyMiddleware = require('../middlewares/apiKey');
+const jwt = require('jsonwebtoken');
+const authConfig = require('../config/auth');
+const { User } = require('../models');
+
+const apiKeyOrOwnerJwt = async (req, res, next) => {
+  const apiKey = req.query.api_key || req.headers['x-api-key'];
+  const validApiKey = process.env.EXTERNAL_API_KEY;
+  if (apiKey && validApiKey && apiKey === validApiKey) {
+    return next();
+  }
+
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const parts = authHeader.split(' ');
+    if (parts.length === 2 && /^Bearer$/i.test(parts[0])) {
+      try {
+        const decoded = jwt.verify(parts[1], authConfig.secret, { issuer: authConfig.issuer, audience: authConfig.audience });
+        const user = await User.findByPk(decoded.id);
+        if (user && user.isActive !== false && user.role === 'owner') {
+          req.userId = decoded.id;
+          req.userRole = user.role;
+          return next();
+        }
+      } catch (e) {}
+    }
+  }
+
+  return res.status(401).json({ success: false, error: 'Autenticação necessária (API key ou Owner JWT)' });
+};
 
 router.get('/health', conversationController.healthCheck);
 
 router.get('/report-image/:phone', conversationController.getReportImage);
 
-router.use(apiKeyMiddleware.validateApiKey);
+router.use(apiKeyOrOwnerJwt);
 
 router.get('/state', conversationController.getState);
 router.put('/state', conversationController.updateState);

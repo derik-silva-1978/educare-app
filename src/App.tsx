@@ -55,6 +55,7 @@ import ContentManagement from "./pages/admin/ContentManagement";
 import FAQAnalyticsDashboard from "./pages/admin/FAQAnalyticsDashboard";
 import MilestonesCuration from "./pages/admin/MilestonesCuration";
 import PromptManagement from "./pages/admin/PromptManagement";
+import ConversationSandbox from "./pages/admin/ConversationSandbox";
 import CommunicationPage from "./pages/educare-app/CommunicationPage";
 import SubscriptionPage from "./pages/SubscriptionPage";
 import DevelopmentJourneyHub from "./pages/educare-app/DevelopmentJourneyHub";
@@ -200,6 +201,7 @@ const App = () => (
                 <Route path="admin/trainings" element={<TrainingsAdmin />} />
                 <Route path="owner/welcome" element={<AdminWelcomeHub />} />
                 <Route path="owner/trainings" element={<TrainingsAdmin />} />
+                <Route path="owner/conversation-sandbox" element={<ConversationSandbox />} />
                 
                 {/* Professional Routes - Gestão de Crianças */}
                 <Route path="professional/children" element={

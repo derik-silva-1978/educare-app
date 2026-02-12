@@ -170,6 +170,11 @@ const getNavigationItems = (userRole?: string): NavigationItem[] => {
         icon: Bot,
       },
       {
+        title: "Sandbox Conversacional",
+        url: "/educare-app/owner/conversation-sandbox",
+        icon: MessageCircle,
+      },
+      {
         title: "Portal Profissional",
         url: "/educare-app/professional/welcome",
         icon: BookOpen,
