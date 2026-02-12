@@ -156,8 +156,8 @@ const SmartPEILandingPage: React.FC = () => {
             >
               <div className="aspect-video md:aspect-square relative max-w-md mx-auto">
                 <img 
-                  src="/lovable-uploads/a8bdb0da-122c-450a-8bb6-30e87ff7cce0.png" 
-                  alt="Smart PEI Preview" 
+                  src="/images/hero/familia-caminhando.png" 
+                  alt="Educare+ Smart PEI Preview" 
                   className="object-cover rounded-3xl shadow-2xl"
                 />
                 <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-lg">
