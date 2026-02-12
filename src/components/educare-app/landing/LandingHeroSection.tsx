@@ -116,7 +116,7 @@ const LandingHeroSection: React.FC = () => {
                 className="space-y-3"
               >
                 <p className="text-sm md:text-base text-gray-600 font-medium">
-                  Baseado em OMS e SBP • +10.000 famílias • 100% gratuito para começar
+                  Baseado em OMS e SBP • Tecnologia exclusiva • 100% gratuito para começar
                 </p>
               </motion.div>
             </motion.div>

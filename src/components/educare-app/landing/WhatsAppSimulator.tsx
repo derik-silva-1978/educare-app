@@ -24,156 +24,85 @@ type SceneStep =
 type Scene = {
   day: string;
   label: string;
+  icon: string;
   steps: SceneStep[];
 };
 
-const CHART_DATA = [
-  { label: "Motor", pct: 85, color: "#6366f1", icon: "🏃" },
-  { label: "Cognitivo", pct: 72, color: "#8b5cf6", icon: "🧠" },
-  { label: "Social", pct: 90, color: "#10b981", icon: "🤝" },
-  { label: "Linguagem", pct: 65, color: "#3b82f6", icon: "🗣️" },
-];
-
-const TIMELINE_WEEKS = [
-  { week: 30, label: "7m", done: true },
-  { week: 31, label: "", done: true },
-  { week: 32, label: "8m", current: true },
-  { week: 33, label: "" },
-  { week: 34, label: "" },
+const DOMAIN_DATA = [
+  { label: "Motor", pct: 75, color: "#4285f4" },
+  { label: "Linguagem", pct: 62, color: "#34a853" },
+  { label: "Cognitivo", pct: 88, color: "#f9ab00" },
+  { label: "Social", pct: 54, color: "#7b61ff" },
+  { label: "Sensorial", pct: 70, color: "#ea4335" },
 ];
 
 const DevelopmentReport = () => (
-  <div className="space-y-2 animate-sim-slide-up">
+  <div className="space-y-1.5 animate-sim-slide-up">
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       <div
-        className="px-3 py-2 flex items-center gap-2"
+        className="px-3 py-1.5 flex items-center gap-2"
         style={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)" }}
       >
-        <div className="w-5 h-5 rounded bg-white/20 flex items-center justify-center">
-          <span className="text-white text-[8px] font-black">E+</span>
-        </div>
-        <span className="text-white text-[11px] font-semibold">Relatório Semanal — TitiNauta</span>
+        <span className="text-[10px]">📊</span>
+        <span className="text-white text-[10px] font-semibold">Progresso por Domínio</span>
+        <span className="text-white/60 text-[8px] ml-auto">Sem. 32</span>
       </div>
 
-      <div className="px-3 pt-2.5 pb-1">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[9px] text-gray-400 font-medium uppercase tracking-wider">Jornada do Desenvolvimento</span>
-        </div>
-        <div className="flex items-center gap-0 mb-2.5">
-          {TIMELINE_WEEKS.map((w, i) => (
-            <div key={w.week} className="flex items-center flex-1">
-              <div className="flex flex-col items-center flex-1">
-                <div
-                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold border-2 transition-all ${
-                    w.current
-                      ? "bg-indigo-500 text-white border-indigo-500 scale-110 shadow-sm"
-                      : w.done
-                        ? "bg-indigo-100 text-indigo-600 border-indigo-300"
-                        : "bg-gray-50 text-gray-400 border-gray-200"
-                  }`}
-                >
-                  {w.week}
-                </div>
-                {(w.label || w.current) && (
-                  <span className={`text-[7px] mt-0.5 font-medium ${w.current ? "text-indigo-600" : "text-gray-400"}`}>
-                    {w.current ? "atual" : w.label}
-                  </span>
-                )}
-              </div>
-              {i < TIMELINE_WEEKS.length - 1 && (
-                <div className={`h-[2px] w-full ${w.done ? "bg-indigo-300" : "bg-gray-200"}`} />
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="px-3 pb-2 border-t border-gray-50 pt-2">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[9px] text-gray-400 font-medium uppercase tracking-wider">Marcos — Semana 32</span>
-          <span className="text-[9px] text-indigo-500 font-bold">78%</span>
-        </div>
-        {CHART_DATA.map((item) => (
-          <div key={item.label} className="flex items-center gap-1.5 mb-1.5">
-            <span className="text-[9px] w-3 text-center">{item.icon}</span>
-            <span className="text-[9px] text-gray-600 font-medium w-16">{item.label}</span>
-            <div className="flex-1 h-[6px] bg-gray-100 rounded-full overflow-hidden">
+      <div className="px-3 py-2 space-y-1.5">
+        {DOMAIN_DATA.map((d) => (
+          <div key={d.label} className="flex items-center gap-2">
+            <span className="text-[9px] text-gray-500 font-medium w-14 text-right">{d.label}</span>
+            <div className="flex-1 h-[7px] bg-gray-100 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full"
-                style={{
-                  width: `${item.pct}%`,
-                  background: `linear-gradient(90deg, ${item.color}, ${item.color}bb)`,
-                }}
+                style={{ width: `${d.pct}%`, backgroundColor: d.color }}
               />
             </div>
-            <span className="text-[8px] font-semibold w-6 text-right" style={{ color: item.color }}>{item.pct}%</span>
+            <span className="text-[8px] font-bold w-7 text-right" style={{ color: d.color }}>{d.pct}%</span>
           </div>
         ))}
       </div>
 
-      <div className="px-3 pb-2 border-t border-gray-50 pt-2">
-        <div className="flex items-center gap-1 mb-1.5">
-          <span className="text-[9px]">⚠️</span>
-          <span className="text-[9px] text-amber-600 font-semibold uppercase tracking-wider">Pontos de Atenção</span>
+      <div className="px-3 py-1.5 border-t border-gray-50 space-y-1">
+        <div className="flex items-start gap-1.5">
+          <span className="text-[9px]">💪</span>
+          <p className="text-[9px] text-gray-600"><span className="font-semibold text-amber-600">Cognitivo em 88%</span> — excelente progresso!</p>
         </div>
-        <div className="space-y-1">
-          <div className="flex items-start gap-1.5 bg-amber-50 rounded-lg px-2 py-1.5">
-            <span className="text-[9px] mt-0.5">🗣️</span>
-            <div>
-              <p className="text-[9px] text-gray-700 font-medium">Linguagem em 65%</p>
-              <p className="text-[8px] text-gray-500">Leitura interativa e conversas narradas podem estimular este marco</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-1.5 bg-violet-50 rounded-lg px-2 py-1.5">
-            <span className="text-[9px] mt-0.5">🧠</span>
-            <div>
-              <p className="text-[9px] text-gray-700 font-medium">Cognitivo em 72%</p>
-              <p className="text-[8px] text-gray-500">Brinquedos de causa-efeito e esconde-esconde ajudam</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-3 pb-2 border-t border-gray-50 pt-2">
-        <div className="flex items-center gap-1 mb-1.5">
+        <div className="flex items-start gap-1.5">
           <span className="text-[9px]">🎯</span>
-          <span className="text-[9px] text-emerald-600 font-semibold uppercase tracking-wider">Atividades da Semana 33</span>
+          <p className="text-[9px] text-gray-600"><span className="font-semibold text-violet-600">Social em 54%</span> — brincadeiras em grupo ajudam</p>
         </div>
-        <div className="space-y-1">
-          <div className="flex items-start gap-1.5">
-            <div className="w-3.5 h-3.5 rounded bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
-              <span className="text-[7px] text-emerald-700 font-bold">1</span>
+      </div>
+
+      <div className="px-3 py-1.5 border-t border-gray-50">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <div className="w-3 h-3 rounded-full bg-green-100 flex items-center justify-center">
+              <span className="text-[6px]">✓</span>
             </div>
-            <p className="text-[9px] text-gray-600">Leia em voz alta apontando figuras — 10min/dia</p>
+            <div className="h-[2px] w-4 bg-green-200" />
           </div>
-          <div className="flex items-start gap-1.5">
-            <div className="w-3.5 h-3.5 rounded bg-indigo-100 flex items-center justify-center shrink-0 mt-0.5">
-              <span className="text-[7px] text-indigo-700 font-bold">2</span>
+          <div className="flex-1 border border-indigo-200 bg-indigo-50 rounded px-1.5 py-0.5">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[7px] text-indigo-600 font-bold">Linguagem</span>
+                <span className="text-[7px] text-gray-400 ml-1">9-12m</span>
+              </div>
+              <span className="text-[7px] bg-indigo-500 text-white px-1 rounded font-medium">Atual</span>
             </div>
-            <p className="text-[9px] text-gray-600">Brincar de "cadê? achou!" com objetos</p>
+            <p className="text-[7px] text-gray-500">Primeiras Palavras</p>
           </div>
-          <div className="flex items-start gap-1.5">
-            <div className="w-3.5 h-3.5 rounded bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
-              <span className="text-[7px] text-blue-700 font-bold">3</span>
+          <div className="flex items-center gap-1">
+            <div className="h-[2px] w-4 bg-gray-200" />
+            <div className="w-3 h-3 rounded-full bg-gray-100 flex items-center justify-center">
+              <span className="text-[6px] text-gray-400">?</span>
             </div>
-            <p className="text-[9px] text-gray-600">Oferecer alimentos em pedaços para treinar pinça</p>
           </div>
         </div>
       </div>
 
-      <div className="px-3 pb-2 pt-1 border-t border-gray-100">
-        <div className="flex items-center gap-1.5">
-          <svg className="w-3 h-3 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-          <span className="text-[8px] text-gray-400">Marcos baseados na OMS e SBP</span>
-        </div>
-        <div className="flex items-center gap-1.5 mt-0.5">
-          <svg className="w-3 h-3 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          <span className="text-[8px] text-gray-400">Gráficos completos e histórico no painel Educare+</span>
-        </div>
+      <div className="px-3 py-1.5 bg-gray-50/80">
+        <p className="text-[7px] text-gray-400 text-center">* Dados de exemplo. Cadastre-se para acompanhar seu bebê.</p>
       </div>
     </div>
     <p className="text-[9px] text-gray-400 text-right pr-1">agora</p>
@@ -183,15 +112,16 @@ const DevelopmentReport = () => (
 const SCENES: Scene[] = [
   {
     day: "SEG",
-    label: "Boas-vindas",
+    label: "Conteúdo",
+    icon: "📖",
     steps: [
-      { type: "typing", duration: 1400, delay: 800 },
+      { type: "typing", duration: 1800, delay: 1000 },
       {
         type: "bot",
-        text: "Olá! 👋 Eu sou o TitiNauta, seu assistente inteligente no Educare+.\n\nEstou aqui para acompanhar o desenvolvimento do seu bebê com orientações baseadas na OMS e SBP. 🚀",
+        text: "Olá! 👋 Eu sou o TitiNauta, seu assistente no Educare+ Ch@t.\n\nEstou aqui para acompanhar o desenvolvimento do seu bebê com orientações baseadas na OMS e SBP. 🚀",
         delay: 0,
       },
-      { type: "typing", duration: 1000, delay: 3000 },
+      { type: "typing", duration: 1200, delay: 3800 },
       {
         type: "bot",
         text: "Sobre o que você quer falar agora? 💬",
@@ -203,33 +133,34 @@ const SCENES: Scene[] = [
           { text: "👶 Sobre meu bebê", id: "ctx_child" },
           { text: "💚 Sobre mim", id: "ctx_mother" },
         ],
-        delay: 1200,
+        delay: 1500,
       },
-      { type: "button_select", buttonId: "ctx_child", delay: 3000 },
-      { type: "user", text: "👶 Sobre meu bebê", delay: 600 },
-      { type: "typing", duration: 1200, delay: 1000 },
+      { type: "button_select", buttonId: "ctx_child", delay: 3800 },
+      { type: "user", text: "👶 Sobre meu bebê", delay: 800 },
+      { type: "typing", duration: 1500, delay: 1200 },
       {
         type: "bot",
-        text: "Ótimo! 💜 Agora estou no modo Bebê.\n\nPode me perguntar qualquer coisa sobre desenvolvimento, marcos, alimentação, sono...\n\nEstou aqui pra te ajudar!",
+        text: "Ótimo! 💜 Agora estou no modo Bebê.\n\nPode me perguntar qualquer coisa sobre desenvolvimento, marcos, alimentação, sono...",
         delay: 0,
       },
     ],
   },
   {
     day: "TER",
-    label: "Conteúdo Semanal",
+    label: "Quiz Bebê",
+    icon: "🧩",
     steps: [
       { type: "clear", delay: 0 },
-      { type: "typing", duration: 1400, delay: 800 },
+      { type: "typing", duration: 1500, delay: 1000 },
       {
         type: "bot",
-        text: "🌟 Conteúdo da Semana 32!\n\nSeu bebê está com aproximadamente 8 meses. Nesta fase, ele pode estar:\n\n✅ Sentando sem apoio\n✅ Tentando engatinhar\n✅ Respondendo ao próprio nome\n✅ Pegando objetos com pinça",
+        text: "🌟 Conteúdo da Semana 32!\n\nSeu bebê está com 8 meses. Nesta fase:\n\n✅ Sentando sem apoio\n✅ Tentando engatinhar\n✅ Respondendo ao próprio nome\n✅ Pegando objetos com pinça",
         delay: 0,
       },
-      { type: "typing", duration: 1000, delay: 3500 },
+      { type: "typing", duration: 1200, delay: 4200 },
       {
         type: "bot",
-        text: "💡 Atividade da semana:\n\nColoque brinquedos coloridos um pouco à frente do bebê para estimular o engatinhar. Fique por perto encorajando! 🎯",
+        text: "💡 Atividade da semana:\n\nColoque brinquedos coloridos à frente do bebê para estimular o engatinhar. Fique por perto encorajando! 🎯",
         delay: 0,
       },
       {
@@ -238,30 +169,31 @@ const SCENES: Scene[] = [
           { text: "📖 Ver mais detalhes", id: "content_more" },
           { text: "▶️ Próximo tema", id: "content_next" },
         ],
-        delay: 2000,
+        delay: 2500,
       },
-      { type: "button_select", buttonId: "content_more", delay: 3000 },
-      { type: "user", text: "📖 Ver mais detalhes", delay: 600 },
-      { type: "typing", duration: 1200, delay: 1000 },
+      { type: "button_select", buttonId: "content_more", delay: 3800 },
+      { type: "user", text: "📖 Ver mais detalhes", delay: 800 },
+      { type: "typing", duration: 1500, delay: 1200 },
       {
         type: "bot",
-        text: "Aos 8 meses, a motricidade grossa está a todo vapor! 🏃‍♂️\n\nAlguns bebês pulam o engatinhar e vão direto para ficar em pé — isso também é normal.\n\nO importante é oferecer estímulos adequados e um ambiente seguro para explorar.",
+        text: "Aos 8 meses, a motricidade grossa está a todo vapor! 🏃‍♂️\n\nAlguns bebês pulam o engatinhar — isso também é normal.\n\nO importante é estímulos adequados e ambiente seguro.",
         delay: 0,
       },
     ],
   },
   {
     day: "QUA",
-    label: "Quiz Interativo",
+    label: "Quiz Mãe",
+    icon: "💚",
     steps: [
       { type: "clear", delay: 0 },
-      { type: "typing", duration: 1200, delay: 800 },
+      { type: "typing", duration: 1500, delay: 1000 },
       {
         type: "bot",
-        text: "🧩 Quiz da Semana!\n\nVamos verificar alguns marcos do desenvolvimento do seu bebê?\n\nPergunta 1 de 3:",
+        text: "🧩 Quiz da Semana!\n\nVamos verificar alguns marcos do desenvolvimento?\n\nPergunta 1 de 3:",
         delay: 0,
       },
-      { type: "typing", duration: 1000, delay: 2500 },
+      { type: "typing", duration: 1200, delay: 3200 },
       {
         type: "bot",
         text: "Seu bebê já consegue transferir objetos de uma mão para a outra?",
@@ -274,51 +206,52 @@ const SCENES: Scene[] = [
           { text: "🔄 Às vezes", id: "quiz_sometimes" },
           { text: "❌ Ainda não", id: "quiz_no" },
         ],
-        delay: 1500,
+        delay: 2000,
       },
-      { type: "button_select", buttonId: "quiz_yes", delay: 3500 },
-      { type: "user", text: "✅ Sim, faz isso!", delay: 600 },
-      { type: "typing", duration: 1400, delay: 1000 },
+      { type: "button_select", buttonId: "quiz_yes", delay: 4000 },
+      { type: "user", text: "✅ Sim, faz isso!", delay: 800 },
+      { type: "typing", duration: 1800, delay: 1200 },
       {
         type: "bot",
-        text: "Excelente! 🎉 Esse é um marco importante da coordenação motora fina, esperado entre 6-9 meses.\n\nSeu bebê está no caminho certo! Continue oferecendo objetos variados para manipulação.\n\n📊 Progresso: 1/3 marcos verificados",
+        text: "Excelente! 🎉 Marco importante da coordenação motora fina, esperado entre 6-9 meses.\n\nSeu bebê está no caminho certo!\n\n📊 Progresso: 1/3 marcos verificados",
         delay: 0,
       },
     ],
   },
   {
     day: "QUI",
-    label: "Conversa Livre",
+    label: "Assistente",
+    icon: "🤖",
     steps: [
       { type: "clear", delay: 0 },
       {
         type: "user",
         text: "Meu bebê acorda muito à noite, é normal?",
-        delay: 1200,
+        delay: 1500,
         typewriter: true,
       },
-      { type: "typing", duration: 1800, delay: 1200 },
+      { type: "typing", duration: 2200, delay: 1500 },
       {
         type: "bot",
-        text: "É uma dúvida muito comum! 🌙\n\nAos 8 meses, é normal que o sono sofra alterações. Isso pode acontecer por:\n\n• Ansiedade de separação (marco emocional)\n• Saltos de desenvolvimento\n• Nascimento de dentes\n• Mudanças na rotina",
+        text: "É uma dúvida muito comum! 🌙\n\nAos 8 meses, é normal que o sono sofra alterações:\n\n• Ansiedade de separação\n• Saltos de desenvolvimento\n• Nascimento de dentes\n• Mudanças na rotina",
         delay: 0,
       },
-      { type: "typing", duration: 1200, delay: 3500 },
+      { type: "typing", duration: 1500, delay: 4200 },
       {
         type: "bot",
-        text: "💤 Dicas para ajudar:\n\n1. Mantenha uma rotina de sono consistente\n2. Crie um ritual relaxante antes de dormir\n3. Ofereça segurança sem criar dependência\n4. Seja paciente — essa fase passa!\n\nQuer saber mais sobre algum desses pontos?",
+        text: "💤 Dicas para ajudar:\n\n1. Rotina de sono consistente\n2. Ritual relaxante antes de dormir\n3. Segurança sem criar dependência\n4. Paciência — essa fase passa!",
         delay: 0,
       },
       {
         type: "user",
         text: "Muito obrigada! Me ajudou bastante 💜",
-        delay: 4000,
+        delay: 5000,
         typewriter: true,
       },
-      { type: "typing", duration: 1000, delay: 1000 },
+      { type: "typing", duration: 1200, delay: 1200 },
       {
         type: "bot",
-        text: "Fico feliz em ajudar! 😊 Lembre-se: você está fazendo um ótimo trabalho. Estou sempre aqui quando precisar! 💜",
+        text: "Fico feliz em ajudar! 😊 Lembre-se: você está fazendo um ótimo trabalho. Estou sempre aqui! 💜",
         delay: 0,
       },
     ],
@@ -326,20 +259,21 @@ const SCENES: Scene[] = [
   {
     day: "SEX",
     label: "Relatório",
+    icon: "📊",
     steps: [
       { type: "clear", delay: 0 },
-      { type: "typing", duration: 1200, delay: 800 },
+      { type: "typing", duration: 1500, delay: 1000 },
       {
         type: "bot",
-        text: "📋 Seu relatório semanal está pronto!\n\nPreparei um resumo completo com os marcos, pontos de atenção e atividades recomendadas para a próxima semana. 👇",
+        text: "📋 Seu relatório semanal está pronto!\n\nPreparei um resumo com os marcos, pontos de atenção e próximos passos. 👇",
         delay: 0,
       },
-      { type: "typing", duration: 1800, delay: 3000 },
+      { type: "typing", duration: 2000, delay: 3800 },
       {
         type: "bot_report",
         delay: 0,
       },
-      { type: "typing", duration: 1000, delay: 6000 },
+      { type: "typing", duration: 1200, delay: 7000 },
       {
         type: "bot",
         text: "Como foi sua experiência esta semana? ⭐",
@@ -350,16 +284,15 @@ const SCENES: Scene[] = [
         buttons: [
           { text: "⭐⭐⭐⭐⭐ Adorei!", id: "fb_5" },
           { text: "⭐⭐⭐ Razoável", id: "fb_3" },
-          { text: "⭐ Precisa melhorar", id: "fb_1" },
         ],
-        delay: 1500,
+        delay: 2000,
       },
-      { type: "button_select", buttonId: "fb_5", delay: 3500 },
-      { type: "user", text: "⭐⭐⭐⭐⭐ Adorei!", delay: 600 },
-      { type: "typing", duration: 1200, delay: 1000 },
+      { type: "button_select", buttonId: "fb_5", delay: 4000 },
+      { type: "user", text: "⭐⭐⭐⭐⭐ Adorei!", delay: 800 },
+      { type: "typing", duration: 1500, delay: 1200 },
       {
         type: "bot",
-        text: "Obrigado pelo feedback! 🙏💜\n\nNa próxima semana teremos novos conteúdos sobre alimentação complementar e mais quizzes!\n\nBom fim de semana! 🌈\n\n— TitiNauta 🚀",
+        text: "Obrigado! 🙏💜 Na próxima semana: alimentação complementar e novos quizzes!\n\nBom fim de semana! 🌈\n\n— TitiNauta 🚀",
         delay: 0,
       },
     ],
@@ -369,18 +302,25 @@ const SCENES: Scene[] = [
 const TypingIndicator = () => (
   <div className="flex items-end mb-2 animate-sim-slide-up">
     <div className="bg-white rounded-xl px-4 py-3 max-w-[80%] flex gap-1.5 items-center shadow-sm">
-      <span
-        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-        style={{ animationDelay: "0ms" }}
-      />
-      <span
-        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-        style={{ animationDelay: "150ms" }}
-      />
-      <span
-        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-        style={{ animationDelay: "300ms" }}
-      />
+      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+    </div>
+  </div>
+);
+
+const TransitionCard = ({ icon, label }: { icon: string; label: string }) => (
+  <div className="absolute inset-0 flex items-center justify-center z-10 animate-sim-fade-in" style={{ backgroundColor: "#ECE5DD" }}>
+    <div className="flex flex-col items-center gap-2">
+      <div className="w-14 h-14 rounded-2xl bg-white shadow-lg flex items-center justify-center animate-sim-bounce-in">
+        <span className="text-2xl">{icon}</span>
+      </div>
+      <span className="text-sm font-semibold text-gray-700 animate-sim-slide-up">{label}</span>
+      <div className="flex gap-1 mt-1">
+        <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse" />
+        <span className="w-1.5 h-1.5 bg-indigo-300 rounded-full animate-pulse" style={{ animationDelay: "200ms" }} />
+        <span className="w-1.5 h-1.5 bg-indigo-200 rounded-full animate-pulse" style={{ animationDelay: "400ms" }} />
+      </div>
     </div>
   </div>
 );
@@ -393,8 +333,9 @@ const WhatsAppSimulator = () => {
   const [typewriterText, setTypewriterText] = useState("");
   const [showTypewriter, setShowTypewriter] = useState(false);
   const [currentScene, setCurrentScene] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const [showTransitionCard, setShowTransitionCard] = useState(false);
+  const [nextSceneInfo, setNextSceneInfo] = useState<{ icon: string; label: string } | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const intervalsRef = useRef<ReturnType<typeof setInterval>[]>([]);
@@ -431,6 +372,8 @@ const WhatsAppSimulator = () => {
       setTypewriterText("");
       setShowTypewriter(false);
       setShowReport(false);
+      setShowTransitionCard(false);
+      setNextSceneInfo(null);
 
       const scene = SCENES[sceneIndex];
       if (!scene) return;
@@ -466,7 +409,7 @@ const WhatsAppSimulator = () => {
             schedule(() => {
               setMessages((prev) => [...prev, { id, text, sender: "bot" }]);
             }, cumulativeDelay);
-            cumulativeDelay += 500;
+            cumulativeDelay += 600;
             break;
           }
 
@@ -475,7 +418,7 @@ const WhatsAppSimulator = () => {
             schedule(() => {
               setShowReport(true);
             }, cumulativeDelay);
-            cumulativeDelay += 500;
+            cumulativeDelay += 600;
             break;
           }
 
@@ -497,21 +440,21 @@ const WhatsAppSimulator = () => {
                   if (i >= text.length) {
                     clearInterval(interval);
                   }
-                }, 50);
+                }, 55);
                 intervalsRef.current.push(interval);
               }, twDelay);
-              cumulativeDelay += text.length * 50 + 500;
+              cumulativeDelay += text.length * 55 + 600;
               schedule(() => {
                 setShowTypewriter(false);
                 setTypewriterText("");
                 setMessages((prev) => [...prev, { id, text, sender: "user" }]);
               }, cumulativeDelay);
-              cumulativeDelay += 400;
+              cumulativeDelay += 500;
             } else {
               schedule(() => {
                 setMessages((prev) => [...prev, { id, text, sender: "user" }]);
               }, cumulativeDelay);
-              cumulativeDelay += 400;
+              cumulativeDelay += 500;
             }
             break;
           }
@@ -522,7 +465,7 @@ const WhatsAppSimulator = () => {
               setButtons(btns);
               setSelectedButton(null);
             }, cumulativeDelay);
-            cumulativeDelay += 300;
+            cumulativeDelay += 400;
             break;
           }
 
@@ -531,7 +474,7 @@ const WhatsAppSimulator = () => {
             schedule(() => {
               setSelectedButton(btnId);
             }, cumulativeDelay);
-            cumulativeDelay += 700;
+            cumulativeDelay += 800;
             schedule(() => {
               setButtons([]);
               setSelectedButton(null);
@@ -541,15 +484,19 @@ const WhatsAppSimulator = () => {
         }
       });
 
-      const sceneEndDelay = cumulativeDelay + 4000;
+      const sceneEndDelay = cumulativeDelay + 5000;
       schedule(() => {
-        setTransitioning(true);
+        const nextScene = (sceneIndex + 1) % SCENES.length;
+        const next = SCENES[nextScene];
+        setNextSceneInfo({ icon: next.icon, label: next.label });
+        setShowTransitionCard(true);
+
         schedule(() => {
-          const nextScene = (sceneIndex + 1) % SCENES.length;
           setCurrentScene(nextScene);
-          setTransitioning(false);
+          setShowTransitionCard(false);
+          setNextSceneInfo(null);
           runScene(nextScene);
-        }, 800);
+        }, 1800);
       }, sceneEndDelay);
     },
     [clearTimers, schedule]
@@ -581,7 +528,15 @@ const WhatsAppSimulator = () => {
           to { opacity: 1; }
         }
         .animate-sim-fade-in {
-          animation: simFadeIn 0.4s ease-out forwards;
+          animation: simFadeIn 0.35s ease-out forwards;
+        }
+        @keyframes simBounceIn {
+          0% { opacity: 0; transform: scale(0.6); }
+          60% { transform: scale(1.08); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-sim-bounce-in {
+          animation: simBounceIn 0.5s ease-out forwards;
         }
       `}</style>
       <div className="max-w-sm mx-auto rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
@@ -589,40 +544,37 @@ const WhatsAppSimulator = () => {
           className="flex items-center gap-3 px-4 py-3"
           style={{ backgroundColor: "#075E54" }}
         >
-          <svg
-            className="w-5 h-5 text-white/80"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
+          <svg className="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center shadow-inner"
-            style={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%)" }}
-          >
-            <span className="text-white text-[10px] font-black tracking-tight">E+</span>
+          <div className="w-9 h-9 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-inner">
+            <img
+              src="/assets/images/educare-chat-logo.png"
+              alt="Educare+ Ch@t"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent) {
+                  parent.style.background = 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)';
+                  parent.innerHTML = '<span class="text-white text-[10px] font-black">E+</span>';
+                }
+              }}
+            />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1">
-              <p className="text-white text-sm font-semibold">Educare+</p>
-              <span className="text-emerald-300 text-[10px] font-medium">Chat</span>
+              <p className="text-white text-sm font-semibold">Educare+ Ch@t</p>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-2 h-2 bg-green-300 rounded-full" />
               <span className="text-green-200 text-xs">online</span>
             </div>
           </div>
-          <div className="flex flex-col items-end">
-            <svg className="w-4 h-4 text-white/50" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-            </svg>
-          </div>
+          <svg className="w-4 h-4 text-white/40" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+          </svg>
         </div>
 
         <div className="flex items-center justify-center gap-1 py-2 px-3 bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-100 dark:border-emerald-900/50">
@@ -651,101 +603,98 @@ const WhatsAppSimulator = () => {
 
         <div
           ref={chatRef}
-          className={`px-3 py-3 space-y-2 overflow-y-auto transition-opacity duration-700 ${transitioning ? "opacity-0" : "opacity-100"}`}
+          className="px-3 py-3 space-y-2 overflow-y-auto relative"
           style={{
             backgroundColor: "#ECE5DD",
             maxHeight: "340px",
             minHeight: "340px",
           }}
         >
-          <div className="flex justify-center mb-2">
-            <span className="text-[10px] bg-white/80 text-gray-500 px-3 py-1 rounded-full shadow-sm">
-              {scene?.label} — Semana Educare+
-            </span>
-          </div>
-
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"} animate-sim-slide-up`}
-            >
-              <div
-                className={`rounded-xl px-3 py-2 max-w-[82%] shadow-sm ${
-                  msg.sender === "user" ? "rounded-tr-sm" : "rounded-tl-sm"
-                }`}
-                style={{
-                  backgroundColor:
-                    msg.sender === "user" ? "#DCF8C6" : "#FFFFFF",
-                }}
-              >
-                <p className="text-[13px] text-gray-800 whitespace-pre-line leading-relaxed">
-                  {msg.text}
-                </p>
-                <p className="text-[9px] text-gray-400 text-right mt-0.5">
-                  agora
-                </p>
-              </div>
-            </div>
-          ))}
-
-          {showReport && <DevelopmentReport />}
-
-          {buttons.length > 0 && (
-            <div className="animate-sim-slide-up">
-              <div className="bg-white rounded-xl px-3 py-2 shadow-sm mb-1">
-                <p className="text-[10px] text-gray-400 mb-1.5">
-                  Educare+ Chat 🚀
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {buttons.map((btn) => (
-                    <span
-                      key={btn.id}
-                      className={`text-[12px] border rounded-full px-3 py-1.5 transition-all duration-300 cursor-default ${
-                        selectedButton === btn.id
-                          ? "bg-emerald-600 text-white border-emerald-600 scale-105"
-                          : "border-emerald-600 text-emerald-700"
-                      }`}
-                    >
-                      {btn.text}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
+          {showTransitionCard && nextSceneInfo && (
+            <TransitionCard icon={nextSceneInfo.icon} label={nextSceneInfo.label} />
           )}
 
-          {showTyping && <TypingIndicator />}
-
-          {showTypewriter && (
-            <div className="flex justify-end animate-sim-slide-up">
-              <div
-                className="rounded-xl rounded-tr-sm px-3 py-2 max-w-[82%] shadow-sm"
-                style={{ backgroundColor: "#DCF8C6" }}
-              >
-                <p className="text-[13px] text-gray-800">
-                  {typewriterText}
-                  <span className="animate-pulse text-gray-500">|</span>
-                </p>
+          {!showTransitionCard && (
+            <>
+              <div className="flex justify-center mb-2">
+                <span className="text-[10px] bg-white/80 text-gray-500 px-3 py-1 rounded-full shadow-sm">
+                  {scene?.icon} {scene?.label} — Semana Educare+
+                </span>
               </div>
-            </div>
+
+              {messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"} animate-sim-slide-up`}
+                >
+                  <div
+                    className={`rounded-xl px-3 py-2 max-w-[82%] shadow-sm ${
+                      msg.sender === "user" ? "rounded-tr-sm" : "rounded-tl-sm"
+                    }`}
+                    style={{
+                      backgroundColor: msg.sender === "user" ? "#DCF8C6" : "#FFFFFF",
+                    }}
+                  >
+                    <p className="text-[13px] text-gray-800 whitespace-pre-line leading-relaxed">
+                      {msg.text}
+                    </p>
+                    <p className="text-[9px] text-gray-400 text-right mt-0.5">agora</p>
+                  </div>
+                </div>
+              ))}
+
+              {showReport && <DevelopmentReport />}
+
+              {buttons.length > 0 && (
+                <div className="animate-sim-slide-up">
+                  <div className="bg-white rounded-xl px-3 py-2 shadow-sm mb-1">
+                    <p className="text-[10px] text-gray-400 mb-1.5">Educare+ Ch@t 🚀</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {buttons.map((btn) => (
+                        <span
+                          key={btn.id}
+                          className={`text-[12px] border rounded-full px-3 py-1.5 transition-all duration-300 cursor-default ${
+                            selectedButton === btn.id
+                              ? "bg-emerald-600 text-white border-emerald-600 scale-105"
+                              : "border-emerald-600 text-emerald-700"
+                          }`}
+                        >
+                          {btn.text}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {showTyping && <TypingIndicator />}
+
+              {showTypewriter && (
+                <div className="flex justify-end animate-sim-slide-up">
+                  <div
+                    className="rounded-xl rounded-tr-sm px-3 py-2 max-w-[82%] shadow-sm"
+                    style={{ backgroundColor: "#DCF8C6" }}
+                  >
+                    <p className="text-[13px] text-gray-800">
+                      {typewriterText}
+                      <span className="animate-pulse text-gray-500">|</span>
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
         <div className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
           <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-2">
-            <p className="text-[11px] text-gray-400">
-              Digite uma mensagem...
-            </p>
+            <p className="text-[11px] text-gray-400">Digite uma mensagem...</p>
           </div>
           <div
             className="w-9 h-9 rounded-full flex items-center justify-center"
             style={{ backgroundColor: "#075E54" }}
           >
-            <svg
-              className="w-4 h-4 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
             </svg>
           </div>
