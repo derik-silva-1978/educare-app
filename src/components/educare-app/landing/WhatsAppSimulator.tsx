@@ -36,131 +36,197 @@ const DOMAIN_DATA = [
   { label: "Sensorial", pct: 70, color: "#ea4335" },
 ];
 
-const DevelopmentReport = () => (
-  <div className="space-y-1.5 animate-sim-slide-up">
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-      <div
-        className="px-3 py-1.5 flex items-center gap-2"
-        style={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)" }}
-      >
-        <span className="text-[10px]">📊</span>
-        <span className="text-white text-[10px] font-semibold">Progresso por Domínio</span>
-        <span className="text-white/60 text-[8px] ml-auto">Sem. 32</span>
-      </div>
+const MILESTONES = [
+  { domain: "Social", range: "0-2m", title: "Sorriso Social", desc: "Responde com sorrisos ao interagir com adultos.", status: "done", color: "#7b61ff" },
+  { domain: "Motor", range: "3-4m", title: "Sustenta a Cabeça", desc: "Mantém a cabeça firme quando está no colo.", status: "done", color: "#4285f4" },
+  { domain: "Motor", range: "5-6m", title: "Rola Sozinho", desc: "Consegue rolar de barriga para cima e para baixo.", status: "done", color: "#4285f4" },
+  { domain: "Cognitivo", range: "6-7m", title: "Permanência do Objeto", desc: "Procura objetos escondidos parcialmente.", status: "done", color: "#f9ab00" },
+  { domain: "Linguagem", range: "9-12m", title: "Primeiras Palavras", desc: "Fala \"mama\" ou \"papa\" com significado.", status: "current", color: "#34a853" },
+  { domain: "Motor", range: "12-15m", title: "Primeiros Passos", desc: "Caminha com apoio ou independentemente.", status: "next", color: "#4285f4" },
+];
 
-      <div className="px-3 py-2 space-y-1.5">
-        {DOMAIN_DATA.map((d) => (
-          <div key={d.label} className="flex items-center gap-2">
-            <span className="text-[9px] text-gray-500 font-medium w-14 text-right">{d.label}</span>
-            <div className="flex-1 h-[7px] bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full"
-                style={{ width: `${d.pct}%`, backgroundColor: d.color }}
-              />
-            </div>
-            <span className="text-[8px] font-bold w-7 text-right" style={{ color: d.color }}>{d.pct}%</span>
-          </div>
-        ))}
-      </div>
+const INSIGHTS = [
+  { icon: "💪", text: "Cognitivo em 88%", detail: "Excelente progresso na permanência do objeto!", color: "text-amber-600" },
+  { icon: "🎯", text: "Social em 54%", detail: "Brincadeiras em grupo ajudam o Thiago.", color: "text-violet-600" },
+  { icon: "📈", text: "Motor avançando", detail: "Thiago já rola sozinho — próximo: engatinhar!", color: "text-blue-600" },
+  { icon: "🌟", text: "Linguagem progredindo", detail: "Balbucia sílabas — \"mama\" está chegando!", color: "text-green-600" },
+];
 
-      <div className="px-3 py-1.5 border-t border-gray-50 space-y-1">
-        <div className="flex items-start gap-1.5">
-          <span className="text-[9px]">💪</span>
-          <p className="text-[9px] text-gray-600"><span className="font-semibold text-amber-600">Cognitivo em 88%</span> — excelente progresso!</p>
+const ReportSlide0 = () => (
+  <div className="px-3 py-2 space-y-1.5">
+    {DOMAIN_DATA.map((d) => (
+      <div key={d.label} className="flex items-center gap-2">
+        <span className="text-[9px] text-gray-500 font-medium w-14 text-right">{d.label}</span>
+        <div className="flex-1 h-[7px] bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${d.pct}%`, backgroundColor: d.color }} />
         </div>
-        <div className="flex items-start gap-1.5">
-          <span className="text-[9px]">🎯</span>
-          <p className="text-[9px] text-gray-600"><span className="font-semibold text-violet-600">Social em 54%</span> — brincadeiras em grupo ajudam</p>
-        </div>
+        <span className="text-[8px] font-bold w-7 text-right" style={{ color: d.color }}>{d.pct}%</span>
       </div>
-
-      <div className="px-3 py-1.5 border-t border-gray-50">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-green-100 flex items-center justify-center">
-              <span className="text-[6px]">✓</span>
-            </div>
-            <div className="h-[2px] w-4 bg-green-200" />
-          </div>
-          <div className="flex-1 border border-indigo-200 bg-indigo-50 rounded px-1.5 py-0.5">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[7px] text-indigo-600 font-bold">Linguagem</span>
-                <span className="text-[7px] text-gray-400 ml-1">9-12m</span>
-              </div>
-              <span className="text-[7px] bg-indigo-500 text-white px-1 rounded font-medium">Atual</span>
-            </div>
-            <p className="text-[7px] text-gray-500">Primeiras Palavras</p>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="h-[2px] w-4 bg-gray-200" />
-            <div className="w-3 h-3 rounded-full bg-gray-100 flex items-center justify-center">
-              <span className="text-[6px] text-gray-400">?</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-3 py-1.5 bg-gray-50/80">
-        <p className="text-[7px] text-gray-400 text-center">* Dados de exemplo. Cadastre-se para acompanhar seu bebê.</p>
-      </div>
-    </div>
-    <p className="text-[9px] text-gray-400 text-right pr-1">agora</p>
+    ))}
   </div>
 );
 
+const ReportSlide1 = () => (
+  <div className="px-3 py-2 space-y-1.5">
+    {INSIGHTS.map((ins, i) => (
+      <div key={i} className="flex items-start gap-1.5">
+        <span className="text-[10px]">{ins.icon}</span>
+        <p className="text-[9px] text-gray-600">
+          <span className={`font-semibold ${ins.color}`}>{ins.text}</span> — {ins.detail}
+        </p>
+      </div>
+    ))}
+  </div>
+);
+
+const ReportSlide2 = () => (
+  <div className="px-3 py-2">
+    <div className="relative pl-4">
+      <div className="absolute left-[7px] top-0 bottom-0 w-[2px] bg-gray-200" />
+      {MILESTONES.map((m, i) => (
+        <div key={i} className="relative flex items-start gap-2 mb-1.5 last:mb-0">
+          <div className={`absolute left-[-13px] top-[2px] w-3.5 h-3.5 rounded-full flex items-center justify-center border-2 ${
+            m.status === "done" ? "bg-green-100 border-green-400" : m.status === "current" ? "bg-indigo-100 border-indigo-400" : "bg-gray-100 border-gray-300"
+          }`}>
+            {m.status === "done" && <span className="text-[6px] text-green-600">✓</span>}
+            {m.status === "current" && <span className="text-[6px] text-indigo-600">●</span>}
+            {m.status === "next" && <span className="text-[6px] text-gray-400">?</span>}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1 flex-wrap">
+              <span className="text-[7px] font-bold px-1 py-0.5 rounded" style={{ backgroundColor: m.color + "20", color: m.color }}>{m.domain}</span>
+              <span className="text-[7px] text-gray-400">{m.range}</span>
+              {m.status === "current" && <span className="text-[6px] bg-indigo-500 text-white px-1 rounded font-medium">Atual</span>}
+              {m.status === "done" && <span className="text-[6px] bg-green-500 text-white px-1 rounded font-medium">Alcançado</span>}
+            </div>
+            <p className="text-[8px] font-medium text-gray-700">{m.title}</p>
+            <p className="text-[7px] text-gray-400 truncate">{m.desc}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const SLIDE_TITLES = ["Progresso por Domínio", "Insights do Thiago", "Marcos do Desenvolvimento"];
+const SLIDE_ICONS = ["📊", "💡", "🏆"];
+
+const DevelopmentReport = () => {
+  const [slide, setSlide] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSlide((s) => (s + 1) % 3);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="space-y-1.5 animate-sim-slide-up">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="px-3 py-1.5 flex items-center gap-2" style={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)" }}>
+          <span className="text-[10px]">{SLIDE_ICONS[slide]}</span>
+          <span className="text-white text-[10px] font-semibold">{SLIDE_TITLES[slide]}</span>
+          <span className="text-white/60 text-[8px] ml-auto">Sem. 32</span>
+        </div>
+
+        <div className="min-h-[120px]">
+          {slide === 0 && <ReportSlide0 />}
+          {slide === 1 && <ReportSlide1 />}
+          {slide === 2 && <ReportSlide2 />}
+        </div>
+
+        <div className="flex items-center justify-center gap-1.5 py-1.5 border-t border-gray-50">
+          {[0, 1, 2].map((i) => (
+            <button key={i} onClick={() => setSlide(i)} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === slide ? "bg-indigo-500 w-4" : "bg-gray-300"}`} />
+          ))}
+        </div>
+
+        <div className="px-3 py-1.5 bg-indigo-50/80 border-t border-indigo-100">
+          <p className="text-[7px] text-indigo-500 text-center font-medium">📱 Relatório completo disponível na plataforma Educare+</p>
+        </div>
+      </div>
+      <p className="text-[9px] text-gray-400 text-right pr-1">agora</p>
+    </div>
+  );
+};
+
 const SCENES: Scene[] = [
   {
-    day: "SEG",
-    label: "Conteúdo",
-    icon: "📖",
+    day: "👋",
+    label: "Início",
+    icon: "🚀",
     steps: [
-      { type: "typing", duration: 1800, delay: 1000 },
+      { type: "typing", duration: 2000, delay: 1000 },
       {
         type: "bot",
-        text: "Olá! 👋 Eu sou o TitiNauta, seu assistente no Educare+ Ch@t.\n\nEstou aqui para acompanhar o desenvolvimento do seu bebê com orientações baseadas na OMS e SBP. 🚀",
+        text: "Olá! 👋 Eu sou o TitiNauta, seu assistente inteligente no Educare+ Ch@t.\n\nEstou aqui para acompanhar o desenvolvimento do seu bebê e também cuidar da sua saúde, mamãe! 💜🚀",
         delay: 0,
       },
-      { type: "typing", duration: 1200, delay: 3800 },
+      { type: "typing", duration: 1500, delay: 4500 },
       {
         type: "bot",
-        text: "Sobre o que você quer falar agora? 💬",
+        text: "Para personalizar sua experiência, preciso conhecer seu bebê! 👶\n\nQual é o nome dele(a)?",
+        delay: 0,
+      },
+      {
+        type: "user",
+        text: "Thiago",
+        delay: 4500,
+        typewriter: true,
+      },
+      { type: "typing", duration: 1500, delay: 1200 },
+      {
+        type: "bot",
+        text: "Que lindo nome! 💙 Thiago!\n\nE o Thiago é menino ou menina?",
         delay: 0,
       },
       {
         type: "buttons",
         buttons: [
-          { text: "👶 Sobre meu bebê", id: "ctx_child" },
-          { text: "💚 Sobre mim", id: "ctx_mother" },
+          { text: "👦 Menino", id: "boy" },
+          { text: "👧 Menina", id: "girl" },
         ],
-        delay: 1500,
+        delay: 2500,
       },
-      { type: "button_select", buttonId: "ctx_child", delay: 3800 },
-      { type: "user", text: "👶 Sobre meu bebê", delay: 800 },
-      { type: "typing", duration: 1500, delay: 1200 },
+      { type: "button_select", buttonId: "boy", delay: 3500 },
+      { type: "user", text: "👦 Menino", delay: 800 },
+      { type: "typing", duration: 1200, delay: 1200 },
       {
         type: "bot",
-        text: "Ótimo! 💜 Agora estou no modo Bebê.\n\nPode me perguntar qualquer coisa sobre desenvolvimento, marcos, alimentação, sono...",
+        text: "Perfeito! 👦 E quando o Thiago nasceu?",
+        delay: 0,
+      },
+      {
+        type: "user",
+        text: "15/06/2025",
+        delay: 3000,
+        typewriter: true,
+      },
+      { type: "typing", duration: 1800, delay: 1200 },
+      {
+        type: "bot",
+        text: "Pronto, Ana! ✅ O Thiago tem 8 meses.\n\nAgora vou acompanhar cada fase do desenvolvimento dele e também cuidar da sua saúde.\n\nVamos começar! 🌟",
         delay: 0,
       },
     ],
   },
   {
-    day: "TER",
-    label: "Quiz Bebê",
-    icon: "🧩",
+    day: "SEG",
+    label: "Conteúdo",
+    icon: "📖",
     steps: [
       { type: "clear", delay: 0 },
-      { type: "typing", duration: 1500, delay: 1000 },
+      { type: "typing", duration: 1800, delay: 1000 },
       {
         type: "bot",
-        text: "🌟 Conteúdo da Semana 32!\n\nSeu bebê está com 8 meses. Nesta fase:\n\n✅ Sentando sem apoio\n✅ Tentando engatinhar\n✅ Respondendo ao próprio nome\n✅ Pegando objetos com pinça",
+        text: "Bom dia, Ana! ☀️\n\n🌟 Conteúdo da Semana 32 do Thiago!\n\nCom 8 meses, ele já deve estar:\n\n✅ Sentando sem apoio\n✅ Tentando engatinhar\n✅ Respondendo ao próprio nome\n✅ Pegando objetos com pinça",
         delay: 0,
       },
-      { type: "typing", duration: 1200, delay: 4200 },
+      { type: "typing", duration: 1200, delay: 4800 },
       {
         type: "bot",
-        text: "💡 Atividade da semana:\n\nColoque brinquedos coloridos à frente do bebê para estimular o engatinhar. Fique por perto encorajando! 🎯",
+        text: "💡 Atividade da semana para o Thiago:\n\nColoque brinquedos coloridos à frente dele para estimular o engatinhar. Fique por perto encorajando! 🎯",
         delay: 0,
       },
       {
@@ -176,27 +242,27 @@ const SCENES: Scene[] = [
       { type: "typing", duration: 1500, delay: 1200 },
       {
         type: "bot",
-        text: "Aos 8 meses, a motricidade grossa está a todo vapor! 🏃‍♂️\n\nAlguns bebês pulam o engatinhar — isso também é normal.\n\nO importante é estímulos adequados e ambiente seguro.",
+        text: "Aos 8 meses, a motricidade do Thiago está a todo vapor! 🏃‍♂️\n\nAlguns bebês pulam o engatinhar — e isso é normal.\n\nO importante é estímulo adequado e ambiente seguro para ele explorar.",
         delay: 0,
       },
     ],
   },
   {
-    day: "QUA",
-    label: "Quiz Mãe",
-    icon: "💚",
+    day: "TER",
+    label: "Quiz",
+    icon: "🧩",
     steps: [
       { type: "clear", delay: 0 },
       { type: "typing", duration: 1500, delay: 1000 },
       {
         type: "bot",
-        text: "🧩 Quiz da Semana!\n\nVamos verificar alguns marcos do desenvolvimento?\n\nPergunta 1 de 3:",
+        text: "🧩 Quiz da Semana, Ana!\n\nVamos verificar os marcos de desenvolvimento do Thiago?\n\nPergunta 1 de 3:",
         delay: 0,
       },
-      { type: "typing", duration: 1200, delay: 3200 },
+      { type: "typing", duration: 1200, delay: 3500 },
       {
         type: "bot",
-        text: "Seu bebê já consegue transferir objetos de uma mão para a outra?",
+        text: "O Thiago já consegue transferir objetos de uma mão para a outra?",
         delay: 0,
       },
       {
@@ -213,7 +279,37 @@ const SCENES: Scene[] = [
       { type: "typing", duration: 1800, delay: 1200 },
       {
         type: "bot",
-        text: "Excelente! 🎉 Marco importante da coordenação motora fina, esperado entre 6-9 meses.\n\nSeu bebê está no caminho certo!\n\n📊 Progresso: 1/3 marcos verificados",
+        text: "Excelente, Ana! 🎉 Esse é um marco importante da coordenação motora fina, esperado entre 6-9 meses.\n\nO Thiago está no caminho certo!\n\n📊 Progresso: 1/3 marcos verificados",
+        delay: 0,
+      },
+    ],
+  },
+  {
+    day: "QUA",
+    label: "Saúde Mãe",
+    icon: "💚",
+    steps: [
+      { type: "clear", delay: 0 },
+      { type: "typing", duration: 1500, delay: 1000 },
+      {
+        type: "bot",
+        text: "Oi, Ana! 💚 Agora é a sua vez.\n\nAlém de acompanhar o Thiago, também estou aqui para cuidar de você.\n\nSobre o que você quer falar? 💬",
+        delay: 0,
+      },
+      {
+        type: "buttons",
+        buttons: [
+          { text: "😴 Cansaço e sono", id: "tired" },
+          { text: "🧠 Saúde emocional", id: "emotional" },
+        ],
+        delay: 3000,
+      },
+      { type: "button_select", buttonId: "tired", delay: 3800 },
+      { type: "user", text: "😴 Cansaço e sono", delay: 800 },
+      { type: "typing", duration: 2000, delay: 1200 },
+      {
+        type: "bot",
+        text: "Entendo, Ana. O cansaço no pós-parto é muito real. 🫂\n\n💤 Algumas dicas:\n\n1. Durma quando o Thiago dormir\n2. Peça ajuda — você não precisa dar conta de tudo sozinha\n3. Hidrate-se bem\n4. Reserve 15min só pra você por dia\n\nSe precisar, posso sugerir profissionais na plataforma. 💜",
         delay: 0,
       },
     ],
@@ -226,20 +322,20 @@ const SCENES: Scene[] = [
       { type: "clear", delay: 0 },
       {
         type: "user",
-        text: "Meu bebê acorda muito à noite, é normal?",
+        text: "O Thiago acorda muito à noite, é normal?",
         delay: 1500,
         typewriter: true,
       },
       { type: "typing", duration: 2200, delay: 1500 },
       {
         type: "bot",
-        text: "É uma dúvida muito comum! 🌙\n\nAos 8 meses, é normal que o sono sofra alterações:\n\n• Ansiedade de separação\n• Saltos de desenvolvimento\n• Nascimento de dentes\n• Mudanças na rotina",
+        text: "Ótima pergunta, Ana! 🌙\n\nAos 8 meses, é normal que o sono do Thiago sofra alterações:\n\n• Ansiedade de separação\n• Saltos de desenvolvimento\n• Nascimento de dentes\n• Mudanças na rotina",
         delay: 0,
       },
-      { type: "typing", duration: 1500, delay: 4200 },
+      { type: "typing", duration: 1500, delay: 4500 },
       {
         type: "bot",
-        text: "💤 Dicas para ajudar:\n\n1. Rotina de sono consistente\n2. Ritual relaxante antes de dormir\n3. Segurança sem criar dependência\n4. Paciência — essa fase passa!",
+        text: "💤 Dicas para ajudar o Thiago:\n\n1. Rotina de sono consistente\n2. Ritual relaxante antes de dormir\n3. Segurança sem criar dependência\n4. Paciência — essa fase passa!\n\nVocê está fazendo um ótimo trabalho! 💜",
         delay: 0,
       },
       {
@@ -251,7 +347,7 @@ const SCENES: Scene[] = [
       { type: "typing", duration: 1200, delay: 1200 },
       {
         type: "bot",
-        text: "Fico feliz em ajudar! 😊 Lembre-se: você está fazendo um ótimo trabalho. Estou sempre aqui! 💜",
+        text: "Sempre que precisar, Ana! 😊\n\nEstou aqui para você e para o Thiago. 💜🚀",
         delay: 0,
       },
     ],
@@ -265,18 +361,15 @@ const SCENES: Scene[] = [
       { type: "typing", duration: 1500, delay: 1000 },
       {
         type: "bot",
-        text: "📋 Seu relatório semanal está pronto!\n\nPreparei um resumo com os marcos, pontos de atenção e próximos passos. 👇",
+        text: "📋 Ana, o relatório semanal do Thiago está pronto!\n\nPreparei um resumo com os marcos, progresso e próximos passos. 👇",
         delay: 0,
       },
       { type: "typing", duration: 2000, delay: 3800 },
-      {
-        type: "bot_report",
-        delay: 0,
-      },
-      { type: "typing", duration: 1200, delay: 7000 },
+      { type: "bot_report", delay: 0 },
+      { type: "typing", duration: 1200, delay: 14000 },
       {
         type: "bot",
-        text: "Como foi sua experiência esta semana? ⭐",
+        text: "Ana, como foi sua experiência esta semana com o Educare+? ⭐",
         delay: 0,
       },
       {
@@ -292,15 +385,19 @@ const SCENES: Scene[] = [
       { type: "typing", duration: 1500, delay: 1200 },
       {
         type: "bot",
-        text: "Obrigado! 🙏💜 Na próxima semana: alimentação complementar e novos quizzes!\n\nBom fim de semana! 🌈\n\n— TitiNauta 🚀",
+        text: "Obrigado, Ana! 🙏💜\n\nNa próxima semana: alimentação complementar e novos quizzes para o Thiago!\n\nBom fim de semana para vocês! 🌈\n\n— TitiNauta 🚀",
         delay: 0,
       },
     ],
   },
 ];
 
+const BOT_AVATAR = "/assets/images/educare-chat-logo.png";
+const MOM_AVATAR = "/assets/images/mom-avatar.png";
+
 const TypingIndicator = () => (
-  <div className="flex items-end mb-2 animate-sim-slide-up">
+  <div className="flex items-end gap-1.5 mb-2 animate-sim-slide-up">
+    <img src={BOT_AVATAR} alt="" className="w-5 h-5 rounded-full object-cover shadow-sm flex-shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
     <div className="bg-white rounded-xl px-4 py-3 max-w-[80%] flex gap-1.5 items-center shadow-sm">
       <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
       <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -322,6 +419,26 @@ const TransitionCard = ({ icon, label }: { icon: string; label: string }) => (
         <span className="w-1.5 h-1.5 bg-indigo-200 rounded-full animate-pulse" style={{ animationDelay: "400ms" }} />
       </div>
     </div>
+  </div>
+);
+
+const BotMessage = ({ text }: { text: string }) => (
+  <div className="flex items-end gap-1.5 animate-sim-slide-up">
+    <img src={BOT_AVATAR} alt="TitiNauta" className="w-5 h-5 rounded-full object-cover shadow-sm flex-shrink-0" onError={(e) => { const t = e.target as HTMLImageElement; t.style.display = 'none'; }} />
+    <div className="rounded-xl rounded-tl-sm px-3 py-2 max-w-[78%] shadow-sm" style={{ backgroundColor: "#FFFFFF" }}>
+      <p className="text-[13px] text-gray-800 whitespace-pre-line leading-relaxed">{text}</p>
+      <p className="text-[9px] text-gray-400 text-right mt-0.5">agora</p>
+    </div>
+  </div>
+);
+
+const UserMessage = ({ text }: { text: string }) => (
+  <div className="flex items-end gap-1.5 justify-end animate-sim-slide-up">
+    <div className="rounded-xl rounded-tr-sm px-3 py-2 max-w-[78%] shadow-sm" style={{ backgroundColor: "#DCF8C6" }}>
+      <p className="text-[13px] text-gray-800 whitespace-pre-line leading-relaxed">{text}</p>
+      <p className="text-[9px] text-gray-400 text-right mt-0.5">agora</p>
+    </div>
+    <img src={MOM_AVATAR} alt="Ana" className="w-5 h-5 rounded-full object-cover shadow-sm flex-shrink-0" onError={(e) => { const t = e.target as HTMLImageElement; t.style.background = '#DCF8C6'; t.style.display = 'none'; }} />
   </div>
 );
 
@@ -520,36 +637,27 @@ const WhatsAppSimulator = () => {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        .animate-sim-slide-up {
-          animation: simSlideUp 0.3s ease-out forwards;
-        }
+        .animate-sim-slide-up { animation: simSlideUp 0.3s ease-out forwards; }
         @keyframes simFadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        .animate-sim-fade-in {
-          animation: simFadeIn 0.35s ease-out forwards;
-        }
+        .animate-sim-fade-in { animation: simFadeIn 0.35s ease-out forwards; }
         @keyframes simBounceIn {
           0% { opacity: 0; transform: scale(0.6); }
           60% { transform: scale(1.08); }
           100% { opacity: 1; transform: scale(1); }
         }
-        .animate-sim-bounce-in {
-          animation: simBounceIn 0.5s ease-out forwards;
-        }
+        .animate-sim-bounce-in { animation: simBounceIn 0.5s ease-out forwards; }
       `}</style>
       <div className="max-w-sm mx-auto rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
-        <div
-          className="flex items-center gap-3 px-4 py-3"
-          style={{ backgroundColor: "#075E54" }}
-        >
+        <div className="flex items-center gap-3 px-4 py-3" style={{ backgroundColor: "#075E54" }}>
           <svg className="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           <div className="w-9 h-9 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-inner">
             <img
-              src="/assets/images/educare-chat-logo.png"
+              src={BOT_AVATAR}
               alt="Educare+ Ch@t"
               className="w-full h-full object-cover"
               onError={(e) => {
@@ -564,9 +672,7 @@ const WhatsAppSimulator = () => {
             />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1">
-              <p className="text-white text-sm font-semibold">Educare+ Ch@t</p>
-            </div>
+            <p className="text-white text-sm font-semibold">Educare+ Ch@t</p>
             <div className="flex items-center gap-1">
               <span className="w-2 h-2 bg-green-300 rounded-full" />
               <span className="text-green-200 text-xs">online</span>
@@ -577,11 +683,11 @@ const WhatsAppSimulator = () => {
           </svg>
         </div>
 
-        <div className="flex items-center justify-center gap-1 py-2 px-3 bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-100 dark:border-emerald-900/50">
+        <div className="flex items-center justify-center gap-0.5 py-2 px-2 bg-emerald-50 dark:bg-emerald-950/30 border-b border-emerald-100 dark:border-emerald-900/50 overflow-x-auto">
           {SCENES.map((s, i) => (
             <button
-              key={s.day}
-              className={`flex flex-col items-center px-2 py-1 rounded-lg transition-all duration-300 min-w-[48px] ${
+              key={i}
+              className={`flex flex-col items-center px-1.5 py-1 rounded-lg transition-all duration-300 min-w-[40px] ${
                 i === currentScene
                   ? "bg-emerald-600 text-white shadow-sm scale-105"
                   : i < currentScene
@@ -589,13 +695,9 @@ const WhatsAppSimulator = () => {
                     : "text-gray-400 dark:text-gray-500"
               }`}
             >
-              <span className="text-[9px] font-bold leading-tight">
-                {s.day}
-              </span>
-              <span
-                className={`text-[7px] leading-tight ${i === currentScene ? "text-emerald-100" : ""}`}
-              >
-                {s.label.length > 8 ? s.label.slice(0, 8) + "…" : s.label}
+              <span className="text-[8px] leading-tight">{s.icon}</span>
+              <span className={`text-[6px] leading-tight ${i === currentScene ? "text-emerald-100" : ""}`}>
+                {s.label.length > 7 ? s.label.slice(0, 7) + "…" : s.label}
               </span>
             </button>
           ))}
@@ -604,11 +706,7 @@ const WhatsAppSimulator = () => {
         <div
           ref={chatRef}
           className="px-3 py-3 space-y-2 overflow-y-auto relative"
-          style={{
-            backgroundColor: "#ECE5DD",
-            maxHeight: "340px",
-            minHeight: "340px",
-          }}
+          style={{ backgroundColor: "#ECE5DD", maxHeight: "340px", minHeight: "340px" }}
         >
           {showTransitionCard && nextSceneInfo && (
             <TransitionCard icon={nextSceneInfo.icon} label={nextSceneInfo.label} />
@@ -623,24 +721,9 @@ const WhatsAppSimulator = () => {
               </div>
 
               {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"} animate-sim-slide-up`}
-                >
-                  <div
-                    className={`rounded-xl px-3 py-2 max-w-[82%] shadow-sm ${
-                      msg.sender === "user" ? "rounded-tr-sm" : "rounded-tl-sm"
-                    }`}
-                    style={{
-                      backgroundColor: msg.sender === "user" ? "#DCF8C6" : "#FFFFFF",
-                    }}
-                  >
-                    <p className="text-[13px] text-gray-800 whitespace-pre-line leading-relaxed">
-                      {msg.text}
-                    </p>
-                    <p className="text-[9px] text-gray-400 text-right mt-0.5">agora</p>
-                  </div>
-                </div>
+                msg.sender === "bot"
+                  ? <BotMessage key={msg.id} text={msg.text} />
+                  : <UserMessage key={msg.id} text={msg.text} />
               ))}
 
               {showReport && <DevelopmentReport />}
@@ -670,16 +753,14 @@ const WhatsAppSimulator = () => {
               {showTyping && <TypingIndicator />}
 
               {showTypewriter && (
-                <div className="flex justify-end animate-sim-slide-up">
-                  <div
-                    className="rounded-xl rounded-tr-sm px-3 py-2 max-w-[82%] shadow-sm"
-                    style={{ backgroundColor: "#DCF8C6" }}
-                  >
+                <div className="flex items-end gap-1.5 justify-end animate-sim-slide-up">
+                  <div className="rounded-xl rounded-tr-sm px-3 py-2 max-w-[78%] shadow-sm" style={{ backgroundColor: "#DCF8C6" }}>
                     <p className="text-[13px] text-gray-800">
                       {typewriterText}
                       <span className="animate-pulse text-gray-500">|</span>
                     </p>
                   </div>
+                  <img src={MOM_AVATAR} alt="Ana" className="w-5 h-5 rounded-full object-cover shadow-sm flex-shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                 </div>
               )}
             </>
@@ -690,10 +771,7 @@ const WhatsAppSimulator = () => {
           <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full px-4 py-2">
             <p className="text-[11px] text-gray-400">Digite uma mensagem...</p>
           </div>
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "#075E54" }}
-          >
+          <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "#075E54" }}>
             <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
             </svg>
