@@ -418,7 +418,10 @@ Considere o tipo do recurso (${resource_type}) para adequar a descricao.`;
 
       let finalMetaPrompt = fallbackMetaPrompt;
       try {
-        const centralPrompt = await promptService.getProcessedPrompt('media_metadata');
+        const centralPrompt = await promptService.getProcessedPrompt('media_metadata', {
+          resource_title: title,
+          resource_type: resource_type
+        });
         if (centralPrompt) {
           finalMetaPrompt = centralPrompt.systemPrompt;
         }
@@ -435,7 +438,7 @@ Considere o tipo do recurso (${resource_type}) para adequar a descricao.`;
           },
           {
             role: 'user',
-            content: `Gere metadados para o recurso: "${title}" (tipo: ${resource_type})`
+            content: `Gere metadados para o recurso com titulo: "${title}" (tipo: ${resource_type}). Retorne APENAS JSON valido com description, category e tags baseados no titulo informado.`
           }
         ],
         temperature: 0.7,

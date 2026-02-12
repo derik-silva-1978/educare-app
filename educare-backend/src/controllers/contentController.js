@@ -483,7 +483,12 @@ Retorne APENAS um JSON valido (sem markdown, sem code blocks) com a seguinte est
 
     let finalSystemPrompt = fallbackSystemPrompt;
     try {
-      const centralPrompt = await promptService.getProcessedPrompt('content_generator');
+      const centralPrompt = await promptService.getProcessedPrompt('content_generator', {
+        content_type: typeLabels[type],
+        target_audience: audienceLabels[target_audience],
+        topic: topic || '',
+        language
+      });
       if (centralPrompt) {
         finalSystemPrompt = centralPrompt.systemPrompt;
       }
@@ -491,11 +496,21 @@ Retorne APENAS um JSON valido (sem markdown, sem code blocks) com a seguinte est
       console.warn('[ContentGen] Fallback para prompt local:', err.message);
     }
 
+    const userMessageParts = [
+      `Tipo de conteudo: ${typeLabels[type]}.`,
+      `Publico-alvo: ${audienceLabels[target_audience]}.`,
+      `Idioma: ${language}.`
+    ];
+    if (topic) {
+      userMessageParts.push(`Tema solicitado: "${topic}".`);
+    }
+    userMessageParts.push('Gere o conteudo seguindo rigorosamente as instrucoes do sistema e os parametros acima. Retorne APENAS JSON valido.');
+
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: finalSystemPrompt },
-        { role: 'user', content: `Gere o conteudo conforme as instrucoes do sistema.` }
+        { role: 'user', content: userMessageParts.join('\n') }
       ],
       temperature: 0.8,
       max_tokens: 2000

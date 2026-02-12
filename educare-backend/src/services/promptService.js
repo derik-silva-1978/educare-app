@@ -63,7 +63,13 @@ function replaceVariables(promptText, context = {}) {
       month: 'long', 
       day: 'numeric' 
     }),
-    professional_specialty: context.professionalSpecialty || context.professional_specialty || 'profissional de saúde'
+    professional_specialty: context.professionalSpecialty || context.professional_specialty || 'profissional de saúde',
+    content_type: context.content_type || context.contentType || '',
+    target_audience: context.target_audience || context.targetAudience || '',
+    topic: context.topic || '',
+    resource_title: context.resource_title || context.title || '',
+    resource_type: context.resource_type || context.resourceType || '',
+    language: context.language || 'pt-BR'
   };
 
   for (const [key, value] of Object.entries(variables)) {
