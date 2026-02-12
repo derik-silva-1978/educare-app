@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MessageSquare, MessageCircle, Brain, Bot, Rocket } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { MessageSquare, MessageCircle, Brain, Bot, ArrowRight, Sparkles } from "lucide-react";
 import WhatsAppSimulator from "./WhatsAppSimulator";
 
 const steps = [
@@ -66,13 +65,30 @@ const LandingHowItWorks = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
               viewport={{ once: true }}
-              className="pt-4"
+              className="pt-6"
             >
-              <Link to="/educare-app/auth?action=register">
-                <Button size="lg" className="gap-2">
-                  <Rocket className="w-5 h-5" />
-                  Experimentar Gratuitamente
-                </Button>
+              <Link
+                to="/educare-app/auth?action=register"
+                className="group inline-flex flex-col items-start"
+              >
+                <div
+                  className="relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-white font-semibold text-lg shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:scale-[1.02] overflow-hidden"
+                  style={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%)" }}
+                >
+                  <div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #c4b5fd 100%)" }}
+                  />
+                  <Sparkles className="w-5 h-5 relative z-10" />
+                  <span className="relative z-10">Experimentar Gratuitamente</span>
+                  <ArrowRight className="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
+                <span className="text-xs text-muted-foreground mt-2.5 ml-2 flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  100% gratuito para começar — sem cartão de crédito
+                </span>
               </Link>
             </motion.div>
           </div>

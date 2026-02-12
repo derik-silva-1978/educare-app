@@ -14,7 +14,7 @@ type ButtonType = {
 
 type SceneStep =
   | { type: "bot"; text: string; delay: number }
-  | { type: "bot_chart"; text: string; delay: number }
+  | { type: "bot_report"; delay: number }
   | { type: "user"; text: string; delay: number; typewriter?: boolean }
   | { type: "buttons"; buttons: ButtonType[]; delay: number }
   | { type: "button_select"; buttonId: string; delay: number }
@@ -28,53 +28,155 @@ type Scene = {
 };
 
 const CHART_DATA = [
-  { label: "Motor", pct: 85, color: "#6366f1" },
-  { label: "Cognitivo", pct: 72, color: "#8b5cf6" },
-  { label: "Social", pct: 90, color: "#10b981" },
-  { label: "Linguagem", pct: 65, color: "#3b82f6" },
+  { label: "Motor", pct: 85, color: "#6366f1", icon: "🏃" },
+  { label: "Cognitivo", pct: 72, color: "#8b5cf6", icon: "🧠" },
+  { label: "Social", pct: 90, color: "#10b981", icon: "🤝" },
+  { label: "Linguagem", pct: 65, color: "#3b82f6", icon: "🗣️" },
 ];
 
-const MilestoneChart = () => (
-  <div className="bg-white rounded-xl shadow-sm overflow-hidden animate-sim-slide-up">
-    <div
-      className="px-3 py-2 flex items-center gap-2"
-      style={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)" }}
-    >
-      <div className="w-5 h-5 rounded bg-white/20 flex items-center justify-center">
-        <span className="text-white text-[8px] font-black">E+</span>
+const TIMELINE_WEEKS = [
+  { week: 30, label: "7m", done: true },
+  { week: 31, label: "", done: true },
+  { week: 32, label: "8m", current: true },
+  { week: 33, label: "" },
+  { week: 34, label: "" },
+];
+
+const DevelopmentReport = () => (
+  <div className="space-y-2 animate-sim-slide-up">
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div
+        className="px-3 py-2 flex items-center gap-2"
+        style={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)" }}
+      >
+        <div className="w-5 h-5 rounded bg-white/20 flex items-center justify-center">
+          <span className="text-white text-[8px] font-black">E+</span>
+        </div>
+        <span className="text-white text-[11px] font-semibold">Relatório Semanal — TitiNauta</span>
       </div>
-      <span className="text-white text-[11px] font-semibold">Marcos do Desenvolvimento</span>
-    </div>
-    <div className="px-3 py-2.5 space-y-2">
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] text-gray-500 font-medium">Semana 32 — 8 meses</span>
-        <span className="text-[9px] text-indigo-500 font-semibold">78% geral</span>
+
+      <div className="px-3 pt-2.5 pb-1">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[9px] text-gray-400 font-medium uppercase tracking-wider">Jornada do Desenvolvimento</span>
+        </div>
+        <div className="flex items-center gap-0 mb-2.5">
+          {TIMELINE_WEEKS.map((w, i) => (
+            <div key={w.week} className="flex items-center flex-1">
+              <div className="flex flex-col items-center flex-1">
+                <div
+                  className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold border-2 transition-all ${
+                    w.current
+                      ? "bg-indigo-500 text-white border-indigo-500 scale-110 shadow-sm"
+                      : w.done
+                        ? "bg-indigo-100 text-indigo-600 border-indigo-300"
+                        : "bg-gray-50 text-gray-400 border-gray-200"
+                  }`}
+                >
+                  {w.week}
+                </div>
+                {(w.label || w.current) && (
+                  <span className={`text-[7px] mt-0.5 font-medium ${w.current ? "text-indigo-600" : "text-gray-400"}`}>
+                    {w.current ? "atual" : w.label}
+                  </span>
+                )}
+              </div>
+              {i < TIMELINE_WEEKS.length - 1 && (
+                <div className={`h-[2px] w-full ${w.done ? "bg-indigo-300" : "bg-gray-200"}`} />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
-      {CHART_DATA.map((item) => (
-        <div key={item.label} className="space-y-0.5">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-gray-600 font-medium">{item.label}</span>
-            <span className="text-[9px] font-semibold" style={{ color: item.color }}>{item.pct}%</span>
+
+      <div className="px-3 pb-2 border-t border-gray-50 pt-2">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[9px] text-gray-400 font-medium uppercase tracking-wider">Marcos — Semana 32</span>
+          <span className="text-[9px] text-indigo-500 font-bold">78%</span>
+        </div>
+        {CHART_DATA.map((item) => (
+          <div key={item.label} className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-[9px] w-3 text-center">{item.icon}</span>
+            <span className="text-[9px] text-gray-600 font-medium w-16">{item.label}</span>
+            <div className="flex-1 h-[6px] bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${item.pct}%`,
+                  background: `linear-gradient(90deg, ${item.color}, ${item.color}bb)`,
+                }}
+              />
+            </div>
+            <span className="text-[8px] font-semibold w-6 text-right" style={{ color: item.color }}>{item.pct}%</span>
           </div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-1000 ease-out"
-              style={{
-                width: `${item.pct}%`,
-                background: `linear-gradient(90deg, ${item.color}, ${item.color}cc)`,
-              }}
-            />
+        ))}
+      </div>
+
+      <div className="px-3 pb-2 border-t border-gray-50 pt-2">
+        <div className="flex items-center gap-1 mb-1.5">
+          <span className="text-[9px]">⚠️</span>
+          <span className="text-[9px] text-amber-600 font-semibold uppercase tracking-wider">Pontos de Atenção</span>
+        </div>
+        <div className="space-y-1">
+          <div className="flex items-start gap-1.5 bg-amber-50 rounded-lg px-2 py-1.5">
+            <span className="text-[9px] mt-0.5">🗣️</span>
+            <div>
+              <p className="text-[9px] text-gray-700 font-medium">Linguagem em 65%</p>
+              <p className="text-[8px] text-gray-500">Leitura interativa e conversas narradas podem estimular este marco</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-1.5 bg-violet-50 rounded-lg px-2 py-1.5">
+            <span className="text-[9px] mt-0.5">🧠</span>
+            <div>
+              <p className="text-[9px] text-gray-700 font-medium">Cognitivo em 72%</p>
+              <p className="text-[8px] text-gray-500">Brinquedos de causa-efeito e esconde-esconde ajudam</p>
+            </div>
           </div>
         </div>
-      ))}
-      <div className="flex items-center gap-1.5 pt-1 border-t border-gray-100 mt-1">
-        <svg className="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-        </svg>
-        <span className="text-[9px] text-gray-400">Baseado em OMS e SBP</span>
+      </div>
+
+      <div className="px-3 pb-2 border-t border-gray-50 pt-2">
+        <div className="flex items-center gap-1 mb-1.5">
+          <span className="text-[9px]">🎯</span>
+          <span className="text-[9px] text-emerald-600 font-semibold uppercase tracking-wider">Atividades da Semana 33</span>
+        </div>
+        <div className="space-y-1">
+          <div className="flex items-start gap-1.5">
+            <div className="w-3.5 h-3.5 rounded bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-[7px] text-emerald-700 font-bold">1</span>
+            </div>
+            <p className="text-[9px] text-gray-600">Leia em voz alta apontando figuras — 10min/dia</p>
+          </div>
+          <div className="flex items-start gap-1.5">
+            <div className="w-3.5 h-3.5 rounded bg-indigo-100 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-[7px] text-indigo-700 font-bold">2</span>
+            </div>
+            <p className="text-[9px] text-gray-600">Brincar de "cadê? achou!" com objetos</p>
+          </div>
+          <div className="flex items-start gap-1.5">
+            <div className="w-3.5 h-3.5 rounded bg-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-[7px] text-blue-700 font-bold">3</span>
+            </div>
+            <p className="text-[9px] text-gray-600">Oferecer alimentos em pedaços para treinar pinça</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-3 pb-2 pt-1 border-t border-gray-100">
+        <div className="flex items-center gap-1.5">
+          <svg className="w-3 h-3 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          <span className="text-[8px] text-gray-400">Marcos baseados na OMS e SBP</span>
+        </div>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <svg className="w-3 h-3 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span className="text-[8px] text-gray-400">Gráficos completos e histórico no painel Educare+</span>
+        </div>
       </div>
     </div>
-    <p className="text-[9px] text-gray-400 text-right px-3 pb-1.5">agora</p>
+    <p className="text-[9px] text-gray-400 text-right pr-1">agora</p>
   </div>
 );
 
@@ -223,22 +325,21 @@ const SCENES: Scene[] = [
   },
   {
     day: "SEX",
-    label: "Feedback",
+    label: "Relatório",
     steps: [
       { type: "clear", delay: 0 },
       { type: "typing", duration: 1200, delay: 800 },
       {
         type: "bot",
-        text: "✨ Resumo da sua semana:\n\n📖 1 conteúdo semanal recebido\n🧩 1 quiz completado\n💬 2 conversas realizadas\n\nVocê está acompanhando o desenvolvimento do seu bebê de forma incrível! 🌟",
+        text: "📋 Seu relatório semanal está pronto!\n\nPreparei um resumo completo com os marcos, pontos de atenção e atividades recomendadas para a próxima semana. 👇",
         delay: 0,
       },
-      { type: "typing", duration: 1400, delay: 3500 },
+      { type: "typing", duration: 1800, delay: 3000 },
       {
-        type: "bot_chart",
-        text: "__CHART__",
+        type: "bot_report",
         delay: 0,
       },
-      { type: "typing", duration: 1000, delay: 4500 },
+      { type: "typing", duration: 1000, delay: 6000 },
       {
         type: "bot",
         text: "Como foi sua experiência esta semana? ⭐",
@@ -293,7 +394,7 @@ const WhatsAppSimulator = () => {
   const [showTypewriter, setShowTypewriter] = useState(false);
   const [currentScene, setCurrentScene] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
-  const [showChart, setShowChart] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const intervalsRef = useRef<ReturnType<typeof setInterval>[]>([]);
@@ -318,7 +419,7 @@ const WhatsAppSimulator = () => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
-  }, [messages, buttons, showTyping, typewriterText, showChart]);
+  }, [messages, buttons, showTyping, typewriterText, showReport]);
 
   const runScene = useCallback(
     (sceneIndex: number) => {
@@ -329,7 +430,7 @@ const WhatsAppSimulator = () => {
       setShowTyping(false);
       setTypewriterText("");
       setShowTypewriter(false);
-      setShowChart(false);
+      setShowReport(false);
 
       const scene = SCENES[sceneIndex];
       if (!scene) return;
@@ -346,7 +447,7 @@ const WhatsAppSimulator = () => {
               setMessages([]);
               setButtons([]);
               setSelectedButton(null);
-              setShowChart(false);
+              setShowReport(false);
             }, cumulativeDelay);
             break;
 
@@ -369,10 +470,10 @@ const WhatsAppSimulator = () => {
             break;
           }
 
-          case "bot_chart": {
+          case "bot_report": {
             msgCounter++;
             schedule(() => {
-              setShowChart(true);
+              setShowReport(true);
             }, cumulativeDelay);
             cumulativeDelay += 500;
             break;
@@ -587,7 +688,7 @@ const WhatsAppSimulator = () => {
             </div>
           ))}
 
-          {showChart && <MilestoneChart />}
+          {showReport && <DevelopmentReport />}
 
           {buttons.length > 0 && (
             <div className="animate-sim-slide-up">
