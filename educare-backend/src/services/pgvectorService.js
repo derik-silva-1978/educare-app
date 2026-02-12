@@ -156,6 +156,30 @@ async function ensureTables() {
     `);
 
     await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS conversation_state_config (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        state VARCHAR(30) NOT NULL UNIQUE,
+        display_name VARCHAR(100) NOT NULL,
+        description TEXT,
+        message_template TEXT NOT NULL,
+        buttons JSONB DEFAULT '[]',
+        transitions JSONB DEFAULT '[]',
+        agent_module_types JSONB DEFAULT '[]',
+        onboarding_config JSONB DEFAULT NULL,
+        color VARCHAR(20) DEFAULT '#3B82F6',
+        icon VARCHAR(30) DEFAULT 'circle',
+        is_active BOOLEAN DEFAULT TRUE,
+        version INTEGER DEFAULT 1,
+        updated_by UUID,
+        metadata JSONB DEFAULT '{}',
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+    await sequelize.query(`CREATE INDEX IF NOT EXISTS idx_csc_state ON conversation_state_config (state);`);
+    await sequelize.query(`CREATE INDEX IF NOT EXISTS idx_csc_active ON conversation_state_config (is_active);`);
+
+    await sequelize.query(`
       CREATE TABLE IF NOT EXISTS ux_feedback (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_phone VARCHAR(20) NOT NULL,
@@ -195,10 +219,173 @@ async function ensureTables() {
 
     tablesReady = true;
     console.log('[PgVector] All tables and indexes created successfully');
+
+    await seedStateConfigs();
+
     return true;
   } catch (error) {
     console.error('[PgVector] Error creating tables:', error.message);
     throw error;
+  }
+}
+
+const DEFAULT_STATE_CONFIGS = [
+  {
+    state: 'ENTRY',
+    display_name: 'Entrada',
+    description: 'Ponto de entrada — identifica o usuário e direciona para onboarding ou seleção de contexto',
+    message_template: 'Olá! 😊 Sou o TitiNauta, seu assistente no Educare+.\n\nSobre o que você quer falar agora? 💬',
+    buttons: [{ id: 'ctx_child', text: '👶 Sobre meu bebê' }, { id: 'ctx_mother', text: '💚 Sobre mim' }],
+    transitions: ['ONBOARDING', 'CONTEXT_SELECTION'],
+    agent_module_types: [],
+    color: '#3B82F6',
+    icon: 'log-in'
+  },
+  {
+    state: 'ONBOARDING',
+    display_name: 'Onboarding',
+    description: 'Coleta nome, gênero e data de nascimento do bebê para personalizar a jornada',
+    message_template: 'Oi! Eu sou o TitiNauta 🚀👶\nVou te acompanhar na jornada de desenvolvimento do seu bebê!\n\nPra começar, me conta: *qual o nome do seu bebê?*',
+    buttons: [],
+    transitions: ['CONTEXT_SELECTION', 'PAUSE', 'EXIT'],
+    agent_module_types: [],
+    onboarding_config: {
+      steps: [
+        { id: 'ASKING_NAME', message: 'Oi! Eu sou o TitiNauta 🚀👶\nVou te acompanhar na jornada de desenvolvimento do seu bebê!\n\nPra começar, me conta: *qual o nome do seu bebê?*', validation: 'name' },
+        { id: 'ASKING_GENDER', message_template: 'Que nome lindo! 💙\nO {{baby_name}} é menino ou menina?', buttons: [{ id: 'gender_male', text: '👦 Menino' }, { id: 'gender_female', text: '👧 Menina' }], validation: 'gender' },
+        { id: 'ASKING_BIRTHDATE', message_template: 'Perfeito! 💙\nQuando o {{baby_name}} nasceu?\nMe manda a data assim: *DD/MM/AAAA*', validation: 'date' },
+        { id: 'COMPLETE', message_template: 'Maravilha! O {{baby_name}} tem {{age_text}} 🎉\nJá preparei tudo pra acompanhar o desenvolvimento {{gender_pronoun}}!' }
+      ]
+    },
+    color: '#14B8A6',
+    icon: 'user-plus'
+  },
+  {
+    state: 'CONTEXT_SELECTION',
+    display_name: 'Seleção de Contexto',
+    description: 'Escolha entre acompanhar o bebê ou a saúde materna (botões interativos)',
+    message_template: 'Sobre o que você quer falar agora? 💬',
+    buttons: [{ id: 'ctx_child', text: '👶 Sobre meu bebê' }, { id: 'ctx_mother', text: '💚 Sobre mim' }],
+    transitions: ['FREE_CONVERSATION', 'CONTENT_FLOW', 'QUIZ_FLOW', 'LOG_FLOW'],
+    agent_module_types: [],
+    color: '#8B5CF6',
+    icon: 'git-fork'
+  },
+  {
+    state: 'FREE_CONVERSATION',
+    display_name: 'Conversa Livre',
+    description: 'Conversa livre com TitiNauta usando RAG e memória vetorial de longo prazo',
+    message_template: 'Pode me contar sua dúvida! Estou aqui para ajudar. 💜',
+    buttons: [{ id: 'action_quiz', text: '📝 Fazer quiz' }, { id: 'action_content', text: '📚 Ver conteúdos' }, { id: 'action_change', text: '🔄 Mudar contexto' }, { id: 'action_exit', text: '👋 Sair' }],
+    transitions: ['CONTEXT_SELECTION', 'CONTENT_FLOW', 'QUIZ_FLOW', 'LOG_FLOW', 'SUPPORT', 'FEEDBACK', 'PAUSE', 'EXIT'],
+    agent_module_types: ['baby', 'mother'],
+    color: '#22C55E',
+    icon: 'message-circle'
+  },
+  {
+    state: 'CONTENT_FLOW',
+    display_name: 'Conteúdo da Jornada',
+    description: 'Exibição de conteúdo educativo da Jornada V2 personalizado por semana',
+    message_template: 'Separei um conteúdo especial para esta semana 🌱\nÉ rapidinho e pode te ajudar bastante.',
+    buttons: [{ id: 'content_view', text: '▶️ Ver conteúdo' }, { id: 'content_quiz', text: '🧩 Fazer um quiz' }, { id: 'content_pause', text: '⏸️ Voltar depois' }],
+    transitions: ['FREE_CONVERSATION', 'CONTEXT_SELECTION', 'QUIZ_FLOW', 'PAUSE'],
+    agent_module_types: ['content_generator'],
+    color: '#F59E0B',
+    icon: 'book-open'
+  },
+  {
+    state: 'QUIZ_FLOW',
+    display_name: 'Quiz Interativo',
+    description: 'Quiz interativo sobre desenvolvimento do bebê ou saúde materna',
+    message_template: 'Vamos lá! 🧩\nVou te fazer algumas perguntas rápidas.\n\nNão existe resposta certa ou errada 💙',
+    buttons: [],
+    transitions: ['FREE_CONVERSATION', 'CONTEXT_SELECTION', 'FEEDBACK', 'PAUSE'],
+    agent_module_types: ['quiz_baby', 'quiz_mother'],
+    color: '#F97316',
+    icon: 'help-circle'
+  },
+  {
+    state: 'LOG_FLOW',
+    display_name: 'Registro de Dados',
+    description: 'Registro de biometria (peso/altura), sono, vacinas e consultas médicas',
+    message_template: 'Vamos anotar isso rapidinho 📝\nO que você gostaria de registrar?',
+    buttons: [{ id: 'log_biometrics', text: '📏 Peso/altura' }, { id: 'log_sleep', text: '🌙 Sono' }, { id: 'log_vaccine', text: '💉 Vacina' }],
+    transitions: ['FREE_CONVERSATION', 'CONTEXT_SELECTION', 'PAUSE'],
+    agent_module_types: ['nlp_biometric', 'nlp_sleep', 'nlp_vaccine', 'nlp_appointment'],
+    color: '#6366F1',
+    icon: 'clipboard-list'
+  },
+  {
+    state: 'SUPPORT',
+    display_name: 'Suporte',
+    description: 'Solicitação de suporte humano ou reporte de problemas técnicos',
+    message_template: 'Se algo não funcionou como esperado, você pode me contar 🛠️',
+    buttons: [{ id: 'support_problem', text: '⚠️ Reportar problema' }, { id: 'support_suggestion', text: '💡 Sugerir melhoria' }, { id: 'support_back', text: '↩️ Voltar' }],
+    transitions: ['CONTEXT_SELECTION', 'FEEDBACK', 'EXIT'],
+    agent_module_types: [],
+    color: '#EF4444',
+    icon: 'life-buoy'
+  },
+  {
+    state: 'FEEDBACK',
+    display_name: 'Feedback',
+    description: 'Coleta de feedback do usuário (1-5 estrelas + comentário opcional)',
+    message_template: 'Antes de você sair, como foi sua experiência até agora? ⭐',
+    buttons: [{ id: 'fb_1', text: '⭐ 1-2 estrelas' }, { id: 'fb_3', text: '⭐⭐⭐ 3 estrelas' }, { id: 'fb_5', text: '⭐⭐⭐⭐⭐ 4-5' }],
+    transitions: ['CONTEXT_SELECTION', 'FREE_CONVERSATION', 'EXIT'],
+    agent_module_types: [],
+    color: '#EC4899',
+    icon: 'star'
+  },
+  {
+    state: 'PAUSE',
+    display_name: 'Pausado',
+    description: 'Sessão pausada — o usuário pode retornar ao último estado ativo',
+    message_template: 'Tudo bem 💙\nQuando quiser, é só me chamar.',
+    buttons: [],
+    transitions: ['CONTEXT_SELECTION', 'FREE_CONVERSATION', 'ONBOARDING'],
+    agent_module_types: [],
+    color: '#6B7280',
+    icon: 'pause'
+  },
+  {
+    state: 'EXIT',
+    display_name: 'Saída',
+    description: 'Encerramento da sessão com resumo da interação e mensagem de despedida',
+    message_template: 'Estarei por aqui sempre que precisar 🌷',
+    buttons: [],
+    transitions: ['ENTRY'],
+    agent_module_types: [],
+    color: '#334155',
+    icon: 'log-out'
+  }
+];
+
+async function seedStateConfigs() {
+  try {
+    for (const config of DEFAULT_STATE_CONFIGS) {
+      await sequelize.query(`
+        INSERT INTO conversation_state_config (state, display_name, description, message_template, buttons, transitions, agent_module_types, onboarding_config, color, icon)
+        VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb, $7::jsonb, $8::jsonb, $9, $10)
+        ON CONFLICT (state) DO NOTHING
+      `, {
+        bind: [
+          config.state,
+          config.display_name,
+          config.description,
+          config.message_template,
+          JSON.stringify(config.buttons || []),
+          JSON.stringify(config.transitions || []),
+          JSON.stringify(config.agent_module_types || []),
+          config.onboarding_config ? JSON.stringify(config.onboarding_config) : null,
+          config.color,
+          config.icon
+        ]
+      });
+    }
+    console.log('[PgVector] State configs seeded successfully');
+  } catch (error) {
+    console.error('[PgVector] Error seeding state configs:', error.message);
   }
 }
 

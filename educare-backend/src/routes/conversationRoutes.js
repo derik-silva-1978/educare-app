@@ -38,6 +38,10 @@ router.get('/report-image/:phone', conversationController.getReportImage);
 
 router.use(apiKeyOrOwnerJwt);
 
+router.get('/state-config', conversationController.getStateConfigs);
+router.get('/state-config/:state', conversationController.getStateConfig);
+router.put('/state-config/:state', conversationController.updateStateConfig);
+
 router.get('/state', conversationController.getState);
 router.put('/state', conversationController.updateState);
 router.post('/state/transition', conversationController.transitionState);

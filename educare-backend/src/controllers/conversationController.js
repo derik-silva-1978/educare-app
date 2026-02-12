@@ -18,6 +18,83 @@ const sanitizePhone = (phone) => {
 };
 
 const conversationController = {
+  async getStateConfigs(req, res) {
+    try {
+      const { sequelize } = require('../models');
+      const [configs] = await sequelize.query(
+        'SELECT * FROM conversation_state_config ORDER BY ARRAY_POSITION(ARRAY[\'ENTRY\',\'ONBOARDING\',\'CONTEXT_SELECTION\',\'FREE_CONVERSATION\',\'CONTENT_FLOW\',\'QUIZ_FLOW\',\'LOG_FLOW\',\'SUPPORT\',\'FEEDBACK\',\'PAUSE\',\'EXIT\'], state)'
+      );
+      return res.json({ success: true, data: configs });
+    } catch (error) {
+      console.error('[StateConfig] getAll error:', error);
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  },
+
+  async getStateConfig(req, res) {
+    try {
+      const { state } = req.params;
+      const { sequelize } = require('../models');
+      const [configs] = await sequelize.query(
+        'SELECT * FROM conversation_state_config WHERE state = :state',
+        { replacements: { state: state.toUpperCase() } }
+      );
+      if (!configs.length) {
+        return res.status(404).json({ success: false, error: 'Estado não encontrado' });
+      }
+      return res.json({ success: true, data: configs[0] });
+    } catch (error) {
+      console.error('[StateConfig] get error:', error);
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  },
+
+  async updateStateConfig(req, res) {
+    try {
+      const { state } = req.params;
+      const { message_template, buttons, transitions, agent_module_types, onboarding_config, description, display_name, color, icon, is_active } = req.body;
+      const { sequelize } = require('../models');
+
+      const updates = [];
+      const replacements = { state: state.toUpperCase() };
+
+      if (message_template !== undefined) { updates.push('message_template = :message_template'); replacements.message_template = message_template; }
+      if (buttons !== undefined) { updates.push('buttons = :buttons'); replacements.buttons = JSON.stringify(buttons); }
+      if (transitions !== undefined) { updates.push('transitions = :transitions'); replacements.transitions = JSON.stringify(transitions); }
+      if (agent_module_types !== undefined) { updates.push('agent_module_types = :agent_module_types'); replacements.agent_module_types = JSON.stringify(agent_module_types); }
+      if (onboarding_config !== undefined) { updates.push('onboarding_config = :onboarding_config'); replacements.onboarding_config = JSON.stringify(onboarding_config); }
+      if (description !== undefined) { updates.push('description = :description'); replacements.description = description; }
+      if (display_name !== undefined) { updates.push('display_name = :display_name'); replacements.display_name = display_name; }
+      if (color !== undefined) { updates.push('color = :color'); replacements.color = color; }
+      if (icon !== undefined) { updates.push('icon = :icon'); replacements.icon = icon; }
+      if (is_active !== undefined) { updates.push('is_active = :is_active'); replacements.is_active = is_active; }
+
+      if (updates.length === 0) {
+        return res.status(400).json({ success: false, error: 'Nenhum campo para atualizar' });
+      }
+
+      updates.push('version = version + 1');
+      updates.push('updated_at = NOW()');
+      if (req.userId) { updates.push('updated_by = :updated_by'); replacements.updated_by = req.userId; }
+
+      const sql = `UPDATE conversation_state_config SET ${updates.join(', ')} WHERE state = :state RETURNING *`;
+      const [result] = await sequelize.query(sql, { replacements });
+
+      if (!result.length) {
+        return res.status(404).json({ success: false, error: 'Estado não encontrado' });
+      }
+
+      if (stateMachineService.invalidateConfigCache) {
+        stateMachineService.invalidateConfigCache();
+      }
+
+      return res.json({ success: true, data: result[0] });
+    } catch (error) {
+      console.error('[StateConfig] update error:', error);
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  },
+
   async getState(req, res) {
     try {
       const { phone } = req.query;

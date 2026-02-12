@@ -1,6 +1,10 @@
 const crypto = require('crypto');
 const pgvectorService = require('./pgvectorService');
 
+let configCache = null;
+let configCacheTimestamp = 0;
+const CONFIG_CACHE_TTL = 60000;
+
 const VALID_STATES = [
   'ENTRY',
   'ONBOARDING',
@@ -122,6 +126,32 @@ const ONBOARDING_MESSAGES = {
   }
 };
 
+async function loadStateConfigs() {
+  const now = Date.now();
+  if (configCache && (now - configCacheTimestamp) < CONFIG_CACHE_TTL) {
+    return configCache;
+  }
+  try {
+    const { sequelize } = require('../models');
+    const [configs] = await sequelize.query('SELECT * FROM conversation_state_config WHERE is_active = true');
+    if (configs && configs.length > 0) {
+      const configMap = {};
+      configs.forEach(c => { configMap[c.state] = c; });
+      configCache = configMap;
+      configCacheTimestamp = now;
+      return configMap;
+    }
+  } catch (e) {
+    console.error('[StateMachine] Error loading state configs from DB:', e.message);
+  }
+  return null;
+}
+
+function invalidateConfigCache() {
+  configCache = null;
+  configCacheTimestamp = 0;
+}
+
 function isValidTransition(fromState, toState) {
   if (!TRANSITIONS[fromState]) return false;
   return TRANSITIONS[fromState].includes(toState);
@@ -132,6 +162,18 @@ function getValidTransitions(currentState) {
 }
 
 function getStateMessage(state) {
+  return CONTEXT_MESSAGES[state] || null;
+}
+
+async function getStateMessageFromConfig(state) {
+  const configs = await loadStateConfigs();
+  if (configs && configs[state]) {
+    const c = configs[state];
+    return {
+      text: c.message_template,
+      buttons: typeof c.buttons === 'string' ? JSON.parse(c.buttons) : (c.buttons || [])
+    };
+  }
   return CONTEXT_MESSAGES[state] || null;
 }
 
@@ -193,7 +235,7 @@ async function transition(userPhone, toState, additionalUpdates = {}) {
     return result;
   }
 
-  const stateMessage = getStateMessage(toState);
+  const stateMessage = await getStateMessageFromConfig(toState);
 
   return {
     success: true,
@@ -370,6 +412,9 @@ module.exports = {
   isValidTransition,
   getValidTransitions,
   getStateMessage,
+  getStateMessageFromConfig,
+  loadStateConfigs,
+  invalidateConfigCache,
   transition,
   resolveContextSelection,
   resolveFeedbackScore,
