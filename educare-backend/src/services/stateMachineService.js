@@ -32,14 +32,14 @@ const CONTEXT_MESSAGES = {
     text: 'Olá! 😊 Sou o TitiNauta, seu assistente no Educare+.\n\nSobre o que você quer falar agora? 💬',
     buttons: [
       { id: 'ctx_child', text: '👶 Sobre meu bebê' },
-      { id: 'ctx_mother', text: '💚 Sobre mim (saúde)' }
+      { id: 'ctx_mother', text: '💚 Sobre mim' }
     ]
   },
   CONTEXT_SELECTION: {
     text: 'Sobre o que você quer falar agora? 💬',
     buttons: [
       { id: 'ctx_child', text: '👶 Sobre meu bebê' },
-      { id: 'ctx_mother', text: '💚 Sobre mim (saúde)' }
+      { id: 'ctx_mother', text: '💚 Sobre mim' }
     ]
   },
   FREE_CONVERSATION: {
