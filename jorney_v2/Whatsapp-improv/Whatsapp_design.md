@@ -1,8 +1,8 @@
 Perfeito. Seguindo exatamente o combinado — um documento por vez, focado em execução, e deixando o “como implementar” para o Replit + MCP do n8n — abaixo está o arquivo .md de UX Design Conversacional para WhatsApp, já estruturado como especificação, não como texto solto.
 
 Este documento é o que orienta botões, listas, emojis, fluxos e microcopy, e pode ser usado tanto por:
-  •	quem desenha a UX
-  •	quanto pelo Replit para materializar no fluxo n8n / Evolution API
+  •     quem desenha a UX
+  •     quanto pelo Replit para materializar no fluxo n8n / Evolution API
 
 ⸻
 
@@ -65,24 +65,69 @@ A experiência no WhatsApp segue este padrão:
 
 ---
 
-## 4. Boas-vindas e Início da Conversa
+## 4. Onboarding Personalizado (Primeira Interação)
 
-### 4.1 Primeira Interação
+### 4.1 Boas-vindas + Coleta de Nome
 
 **Mensagem**
 
 Oi! Eu sou o TitiNauta 🚀👶
-Vou te acompanhar na jornada de desenvolvimento, passo a passo.
+Vou te acompanhar na jornada de desenvolvimento do seu bebê, passo a passo.
+
+Pra começar, me conta: *qual o nome do seu bebê?*
+
+---
+
+### 4.2 Confirmação de Nome + Gênero
+
+**Mensagem** (após receber nome)
+
+Que nome lindo! 💙
+O {nome} é menino ou menina?
+
+**Botões**
+- 👦 Menino
+- 👧 Menina
+
+---
+
+### 4.3 Data de Nascimento
+
+**Mensagem** (após seleção de gênero)
+
+Perfeito! 💙
+Quando o {nome} nasceu?
+Me manda a data assim: *DD/MM/AAAA*
+
+---
+
+### 4.4 Confirmação do Onboarding
+
+**Mensagem** (após validar data)
+
+Maravilha! O {nome} tem {idade} 🎉
+Já preparei tudo pra acompanhar o desenvolvimento {dele/dela}!
 
 Aqui você pode:
 ✨ acompanhar o desenvolvimento
 ✨ responder quizzes rápidos
 ✨ receber dicas personalizadas
 
-Pra começar, me conta:
-
 **Botões**
 - 👶 Sobre meu bebê
+- 💚 Sobre mim
+
+---
+
+### 4.5 Retorno de Usuário com Onboarding Completo
+
+**Mensagem**
+
+Oi, {nome_mãe}! 💙
+O {nome_bebê} está com {idade} agora!
+
+**Botões**
+- 👶 Sobre o {nome_bebê}
 - 💚 Sobre mim
 
 ---
@@ -133,17 +178,32 @@ Exibir menu quando:
 
 ---
 
-### 7.2 Menu Padrão
+### 7.2 Menu Padrão (List Message)
 
-Como posso te ajudar agora? ✨
+Como o menu tem 6+ opções, usar **List Message** ao invés de botões:
+
+**Header:** Como posso te ajudar agora? ✨
+
+| Seção | Opção | Descrição | rowId |
+|---|---|---|---|
+| Jornada | 📚 Conteúdos da semana | Ver o conteúdo desta semana | `content_weekly` |
+| Jornada | 🧩 Quiz rápido | Responder quiz interativo | `quiz_start` |
+| Registros | 📝 Registrar informações | Biometria, sono, vacinas | `log_start` |
+| Registros | 📊 Ver progresso | Relatório de desenvolvimento | `report_view` |
+| Suporte | 🛠️ Reportar problema | Relatar um problema | `support_problem` |
+| Suporte | ⭐ Avaliar experiência | Dar sua avaliação | `feedback_start` |
+
+**buttonText:** "Ver opções"  
+**footerText:** "Educare+ • TitiNauta 🚀"
+
+### 7.3 Menu Simplificado (Botões)
+
+Para situações com poucas opções (≤3):
 
 **Botões**
-- 📚 Ver conteúdos da jornada
-- 🧩 Responder um quiz
-- 📝 Registrar informações
+- 📚 Ver conteúdos
+- 🧩 Fazer quiz
 - 📊 Ver progresso
-- 🛠️ Reportar um problema
-- ⭐ Avaliar experiência
 
 ---
 
@@ -295,15 +355,66 @@ Estarei por aqui sempre que precisar 🌷
 
 ---
 
-## 16. Regras de Ouro da UX no WhatsApp
+## 16. Relatório Visual de Progresso (Novo)
 
-1. Nunca mais de 3–4 botões por mensagem
-2. Menu é exceção, não regra
-3. Emojis sempre com função
-4. Feedback sempre positivo
-5. Nenhuma resposta deve soar como avaliação ou julgamento
+### 16.1 Relatório como Imagem
+
+Quando o usuário selecionar "Ver progresso", enviar uma imagem PNG gerada com:
+- Header com logo, nome e idade do bebê
+- Barras de progresso por domínio (Cognitivo, Linguagem, Motor, Social, Criativo)
+- Insights personalizados
+- Timeline de marcos desde o nascimento
+- CTA para plataforma
+
+**Caption da imagem:**
+
+📊 Relatório semanal do {nome} — Semana {semana}
+
+### 16.2 Relatório como Texto (Fallback ASCII)
+
+Quando a imagem não puder ser enviada, usar barras ASCII:
+
+```
+📊 *Progresso do {nome} — Semana {semana}*
+
+🧠 Cognitivo    ████████░░ 80%
+🗣️ Linguagem   ██████░░░░ 60%
+🏃 Motor       █████████░ 90%
+💚 Social      ███████░░░ 70%
+🎨 Criativo    ██████░░░░ 60%
+
+💡 _{nome} está se destacando em habilidades motoras!_
+
+🏆 *Marcos alcançados:*
+✅ Social 0-2m • Sorriso social
+✅ Motor 3-4m • Sustenta a cabeça
+✅ Linguagem 9-12m • Primeiras palavras
+⏳ Motor 12-15m • Primeiros passos
+
+📱 _Relatório completo disponível na plataforma Educare+_
+```
+
+### 16.3 CTA pós-relatório
+
+**Botões**
+- 🧩 Fazer quiz da semana
+- 📚 Ver conteúdo
+- 💬 Conversar com TitiNauta
+
+---
+
+## 17. Regras de Ouro da UX no WhatsApp (Atualizado)
+
+1. Nunca mais de 3 botões por mensagem
+2. **List Messages para 4+ opções** (menu contextual, seleção de conteúdo)
+3. Menu é exceção, não regra
+4. Emojis sempre com função
+5. Feedback sempre positivo
+6. Nenhuma resposta deve soar como avaliação ou julgamento
+7. **Dados do bebê (nome) devem ser usados em todas as interações**
+8. **Relatório visual como imagem quando possível, ASCII como fallback**
+9. **Onboarding é obrigatório na primeira interação**
 
 ---
 
 **Documento de UX conversacional pronto para orientar design e implementação no WhatsApp via n8n + Evolution API.**
-⸻

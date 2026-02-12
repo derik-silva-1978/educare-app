@@ -1153,6 +1153,158 @@ const conversationController = {
         timestamp: new Date().toISOString()
       });
     }
+  },
+
+  async processOnboarding(req, res) {
+    try {
+      const { phone, message } = req.body;
+      if (!phone) {
+        return res.status(400).json({ success: false, error: 'Phone é obrigatório' });
+      }
+
+      const stateResult = await pgvectorService.getConversationState(phone);
+      if (!stateResult.success || !stateResult.state) {
+        return res.status(404).json({ success: false, error: 'Estado não encontrado' });
+      }
+
+      const currentState = stateResult.state;
+      if (currentState.state !== 'ONBOARDING') {
+        return res.status(400).json({ success: false, error: 'Usuário não está em ONBOARDING', current_state: currentState.state });
+      }
+
+      const onboardingStep = currentState.onboarding_step || 'ASKING_NAME';
+      const result = stateMachineService.resolveOnboardingStep(onboardingStep, message);
+
+      if (!result.valid) {
+        return res.json({
+          success: true,
+          onboarding_step: onboardingStep,
+          retry: true,
+          message: result.error
+        });
+      }
+
+      const updates = {
+        ...result.updates,
+        onboarding_step: result.next_step
+      };
+
+      if (result.next_step === 'COMPLETE') {
+        const genderPronoun = result.updates?.baby_gender === 'female' ? 'dela' : (currentState.baby_gender === 'female' ? 'dela' : 'dele');
+        const babyName = result.updates?.baby_name || currentState.baby_name || 'bebê';
+        const completeMsg = stateMachineService.getOnboardingMessage('COMPLETE', {
+          baby_name: babyName,
+          baby_gender: result.updates?.baby_gender || currentState.baby_gender,
+          age_text: result.age_text
+        });
+
+        await pgvectorService.updateConversationState(phone, {
+          ...updates,
+          state: 'CONTEXT_SELECTION',
+          onboarding_step: null
+        });
+
+        return res.json({
+          success: true,
+          onboarding_step: 'COMPLETE',
+          onboarding_completed: true,
+          message: completeMsg?.text,
+          next_state: 'CONTEXT_SELECTION',
+          baby_data: {
+            name: babyName,
+            gender: result.updates?.baby_gender || currentState.baby_gender,
+            birthdate: result.updates?.baby_birthdate || currentState.baby_birthdate,
+            age_text: result.age_text,
+            age_weeks: result.age_weeks,
+            age_months: result.age_months
+          },
+          context_selection: stateMachineService.getStateMessage('CONTEXT_SELECTION')
+        });
+      }
+
+      await pgvectorService.updateConversationState(phone, updates);
+
+      const nextMsg = stateMachineService.getOnboardingMessage(result.next_step, {
+        ...currentState,
+        ...result.updates
+      });
+
+      return res.json({
+        success: true,
+        onboarding_step: result.next_step,
+        message: nextMsg?.text,
+        buttons: nextMsg?.buttons || [],
+        baby_data: {
+          name: result.updates?.baby_name || currentState.baby_name,
+          gender: result.updates?.baby_gender || currentState.baby_gender
+        }
+      });
+    } catch (error) {
+      console.error('[Conversation] processOnboarding error:', error);
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  },
+
+  async getOnboardingStatus(req, res) {
+    try {
+      const phone = req.query.phone;
+      if (!phone) {
+        return res.status(400).json({ success: false, error: 'Phone é obrigatório' });
+      }
+      const stateResult = await pgvectorService.getConversationState(phone);
+      if (!stateResult.success || !stateResult.state) {
+        return res.json({ success: true, onboarding_completed: false, needs_onboarding: true });
+      }
+      const state = stateResult.state;
+      return res.json({
+        success: true,
+        onboarding_completed: !!state.onboarding_completed,
+        needs_onboarding: !state.onboarding_completed && state.state === 'ENTRY',
+        current_step: state.state === 'ONBOARDING' ? (state.onboarding_step || 'ASKING_NAME') : null,
+        baby_data: state.onboarding_completed ? {
+          name: state.baby_name,
+          gender: state.baby_gender,
+          birthdate: state.baby_birthdate
+        } : null
+      });
+    } catch (error) {
+      console.error('[Conversation] getOnboardingStatus error:', error);
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  },
+
+  async getReportImage(req, res) {
+    try {
+      const phone = req.params.phone;
+      if (!phone) {
+        return res.status(400).json({ success: false, error: 'Phone é obrigatório' });
+      }
+      const reportImageService = require('../services/reportImageService');
+
+      const stateResult = await pgvectorService.getConversationState(phone);
+      let reportData;
+      if (stateResult.success && stateResult.state && stateResult.state.baby_name) {
+        const state = stateResult.state;
+        const ageWeeks = state.journey_week || 0;
+        reportData = reportImageService.getDefaultReportData(state.baby_name, state.baby_gender, ageWeeks);
+      } else {
+        reportData = reportImageService.getDefaultReportData('Bebê', 'male', 16);
+      }
+
+      const format = req.query.format;
+      if (format === 'ascii') {
+        const ascii = reportImageService.generateAsciiReport(reportData);
+        return res.json({ success: true, report: ascii });
+      }
+
+      const imageBuffer = await reportImageService.generateReportImage(reportData);
+      res.set('Content-Type', 'image/png');
+      res.set('Cache-Control', 'no-cache');
+      return res.send(imageBuffer);
+    } catch (error) {
+      console.error('[Conversation] getReportImage error:', error);
+      return res.status(500).json({ success: false, error: error.message });
+    }
   }
 };
 

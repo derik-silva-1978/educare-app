@@ -29,6 +29,8 @@ Este documento define a **máquina de estados conversacionais** do Educare App, 
 
 [ENTRY]
 ↓
+[ONBOARDING] ← NOVO (primeira interação)
+↓
 [CONTEXT_SELECTION]
 ↓
 [FREE_CONVERSATION]
@@ -62,8 +64,66 @@ Webhook / Start node do **Educare app-chat**
 - Carregar contexto ativo (se existir)
 
 **Transições**
-- Novo usuário → `CONTEXT_SELECTION`
+- Novo usuário (sem dados do bebê) → `ONBOARDING`
+- Novo usuário (com dados do bebê) → `CONTEXT_SELECTION`
 - Usuário conhecido → estado salvo ou `FREE_CONVERSATION`
+
+---
+
+### STATE 00.5 — `ONBOARDING` (Novo)
+
+**Descrição**  
+Coleta personalizada dos dados do bebê na primeira interação. Garante que toda a jornada subsequente seja personalizada com nome, gênero e idade.
+
+**Sub-estados**
+
+| Sub-estado | Pergunta | Tipo de Input | Validação |
+|---|---|---|---|
+| `ASKING_NAME` | "Qual o nome do seu bebê?" | Texto livre | Min 2 caracteres, sem números |
+| `ASKING_GENDER` | "O {nome} é menino ou menina?" | Botões interativos | 👦 Menino / 👧 Menina |
+| `ASKING_BIRTHDATE` | "Quando o {nome} nasceu?" | Texto livre | Formato DD/MM/AAAA, data válida no passado |
+
+**UX — Fluxo Completo**
+
+```
+TitiNauta: Oi! Eu sou o TitiNauta 🚀👶
+           Vou te acompanhar na jornada de desenvolvimento do seu bebê!
+           Pra começar, me conta: qual o nome do seu bebê?
+
+Mãe: Thiago
+
+TitiNauta: Que nome lindo! 💙
+           O Thiago é menino ou menina?
+           [👦 Menino] [👧 Menina]
+
+Mãe: [👦 Menino]
+
+TitiNauta: Perfeito! 💙
+           Quando o Thiago nasceu?
+           Me manda a data assim: DD/MM/AAAA
+
+Mãe: 15/10/2025
+
+TitiNauta: Maravilha! O Thiago tem 4 meses 🎉
+           Já preparei tudo pra acompanhar o desenvolvimento dele!
+```
+
+**Dados Persistidos**
+
+```json
+{
+  "phone": "551199999999",
+  "state": "ONBOARDING",
+  "onboarding_step": "ASKING_NAME | ASKING_GENDER | ASKING_BIRTHDATE",
+  "baby_name": "Thiago",
+  "baby_gender": "male",
+  "baby_birthdate": "2025-10-15"
+}
+```
+
+**Transições**
+- Onboarding completo → `CONTEXT_SELECTION` (com saudação personalizada usando nome do bebê)
+- Abandono → `PAUSE` (retorna ao sub-estado pendente na próxima interação)
 
 ---
 
@@ -269,28 +329,95 @@ Estarei por aqui sempre que precisar 🌷
   "phone": "551199999999",
   "state": "FREE_CONVERSATION",
   "active_context": "child",
-  "last_interaction": "timestamp"
+  "last_interaction": "timestamp",
+  "onboarding_step": null,
+  "baby_name": "Thiago",
+  "baby_gender": "male",
+  "baby_birthdate": "2025-10-15",
+  "onboarding_completed": true
 }
+```
 
+---
 
-⸻
+## 5. Tipos de Mensagem Interativa
 
-5. Regras de Ouro
-  1.	Nunca trocar assistente sem trocar contexto
-  2.	Nunca acionar LLM para log estruturado
-  3.	Menu é fallback, não padrão
-  4.	Estado organiza, LLM conversa, UX acolhe
+### 5.1 Botões (até 3 opções)
 
-⸻
+Usar para escolhas simples e diretas. Formato Evolution API v2 flat:
 
-6. Objetivo Final do Mapa
+```json
+{
+  "title": "Título da mensagem",
+  "description": "Corpo da mensagem",
+  "footer": "Educare+ • TitiNauta 🚀",
+  "buttons": [
+    { "type": "reply", "displayText": "👶 Sobre meu bebê", "id": "context_child" },
+    { "type": "reply", "displayText": "💚 Sobre mim", "id": "context_mother" }
+  ]
+}
+```
+
+### 5.2 List Messages (4+ opções)
+
+Usar para menus com múltiplas opções organizadas em seções:
+
+```json
+{
+  "listMessage": {
+    "title": "Menu Educare+",
+    "description": "Escolha uma opção:",
+    "buttonText": "Ver opções",
+    "footerText": "Educare+ • TitiNauta 🚀",
+    "sections": [
+      {
+        "title": "Jornada",
+        "rows": [
+          { "title": "📚 Conteúdo da semana", "description": "Ver o conteúdo desta semana", "rowId": "content_weekly" },
+          { "title": "🧩 Quiz rápido", "description": "Responder quiz interativo", "rowId": "quiz_start" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### 5.3 Imagem de Relatório
+
+Envio de imagem gerada (PNG) como mídia via Evolution API:
+
+```json
+{
+  "number": "5511999999999",
+  "mediatype": "image",
+  "media": "https://educareapp.com.br/api/conversation/report-image/5511999999999",
+  "caption": "📊 Relatório semanal do Thiago — Semana 16"
+}
+```
+
+---
+
+## 6. Regras de Ouro
+
+1. Nunca trocar assistente sem trocar contexto
+2. Nunca acionar LLM para log estruturado
+3. Menu é fallback, não padrão
+4. Estado organiza, LLM conversa, UX acolhe
+5. **Onboarding é obrigatório antes de CONTEXT_SELECTION** (primeiro contato)
+6. **List Messages para 4+ opções, Botões para 2-3 opções**
+7. **Dados do bebê (nome/gênero/nascimento) devem personalizar todas as respostas**
+
+---
+
+## 7. Objetivo Final do Mapa
 
 Garantir que o Educare App funcione como:
-  •	um sistema conversacional previsível
-  •	humano para o usuário
-  •	controlável tecnicamente
-  •	escalável sem caos
+- um sistema conversacional previsível
+- humano para o usuário
+- controlável tecnicamente
+- escalável sem caos
+- **personalizado desde o primeiro contato**
 
-⸻
+---
 
 Documento pronto para implementação direta no n8n usando Switch Nodes, Routers e persistência leve de estado.

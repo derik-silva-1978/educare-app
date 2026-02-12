@@ -157,6 +157,28 @@ async function sendListMessage(phone, bodyText, sections, options = {}) {
   }
 }
 
+function formatOnboardingGenderButtons(phone, babyName) {
+  const buttons = [
+    { id: 'gender_male', text: '👦 Menino' },
+    { id: 'gender_female', text: '👧 Menina' }
+  ];
+  return formatButtonMessage(
+    phone,
+    `Que nome lindo! 💙\nO ${babyName} é menino ou menina?`,
+    buttons,
+    { footer: 'Onboarding Educare+' }
+  );
+}
+
+function formatOnboardingWelcome(phone) {
+  return formatButtonMessage(
+    phone,
+    'Oi! Eu sou o TitiNauta 🚀👶\nVou te acompanhar na jornada de desenvolvimento do seu bebê!\n\nPra começar, me conta: *qual o nome do seu bebê?*',
+    [],
+    { footer: 'Onboarding Educare+' }
+  );
+}
+
 module.exports = {
   formatButtonMessage,
   formatListMessage,
@@ -164,6 +186,8 @@ module.exports = {
   formatFeedbackButtons,
   formatContextSelectionButtons,
   formatMenuButtons,
+  formatOnboardingGenderButtons,
+  formatOnboardingWelcome,
   sendButtonMessage,
   sendListMessage
 };

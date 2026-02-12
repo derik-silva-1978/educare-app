@@ -1,9 +1,9 @@
 Perfeito. Abaixo está o PROMPT MESTRE PARA O REPLIT, 100% em .md, escrito para execução real, assumindo explicitamente que:
-  •	o Replit tem acesso ao MCP do n8n
-  •	o Replit consegue ler, entender e modificar fluxos existentes
-  •	o Replit possui skills de n8n, WhatsApp (Evolution API) e ElevenLabs
-  •	o Replit deve decidir tecnicamente como implementar, sem overengineering
-  •	o Replit deve respeitar integralmente os fluxos já existentes
+  •     o Replit tem acesso ao MCP do n8n
+  •     o Replit consegue ler, entender e modificar fluxos existentes
+  •     o Replit possui skills de n8n, WhatsApp (Evolution API) e ElevenLabs
+  •     o Replit deve decidir tecnicamente como implementar, sem overengineering
+  •     o Replit deve respeitar integralmente os fluxos já existentes
 
 Este prompt é o documento final de handoff entre produto → execução.
 
@@ -89,6 +89,7 @@ WhatsApp
 Implemente os estados conforme o documento **Mapa de Estados Conversacionais** já fornecido:
 
 - ENTRY
+- **ONBOARDING** ← NOVO (primeira interação, coleta nome/gênero/nascimento do bebê)
 - CONTEXT_SELECTION
 - FREE_CONVERSATION
 - CONTENT_FLOW
@@ -103,6 +104,13 @@ Implemente os estados conforme o documento **Mapa de Estados Conversacionais** j
 - persistidos por usuário
 - consultados no início de cada interação
 - controlados pelo n8n (Switch / Router nodes)
+
+📌 **ONBOARDING** possui sub-estados:
+- `ASKING_NAME` — texto livre, min 2 chars
+- `ASKING_GENDER` — botões interativos (👦 Menino / 👧 Menina)
+- `ASKING_BIRTHDATE` — texto livre, formato DD/MM/AAAA
+- Dados salvos: `baby_name`, `baby_gender`, `baby_birthdate`
+- Transição: onboarding completo → `CONTEXT_SELECTION`
 
 ---
 
@@ -192,8 +200,33 @@ Regras:
 ## 11. WhatsApp (Evolution API)
 
 Use sempre que possível:
-- `interactive.buttons`
-- `interactive.list`
+- `interactive.buttons` — para 2-3 opções (formato flat v2: `buttons[].displayText`)
+- `interactive.list` — **NOVO** para 4+ opções (menus contextuais com seções)
+- `media.image` — **NOVO** para relatórios visuais (imagem PNG gerada)
+
+### 11.1 List Messages (Novo)
+
+Usar para menus com múltiplas opções organizadas em seções:
+
+```json
+{
+  "number": "phone",
+  "listMessage": {
+    "title": "Título",
+    "description": "Descrição",
+    "buttonText": "Ver opções",
+    "footerText": "Educare+ • TitiNauta 🚀",
+    "sections": [{ "title": "Seção", "rows": [{ "title": "Opção", "description": "Desc", "rowId": "id" }] }]
+  }
+}
+```
+
+### 11.2 Relatório Visual (Novo)
+
+Enviar imagem PNG do relatório de desenvolvimento:
+- Gerada por `reportImageService.js` usando `canvas` (node-canvas)
+- Endpoint: `GET /api/conversation/report-image/:phone`
+- Fallback: barras ASCII em texto (████░░░░ 50%)
 
 Fallback automático para texto simples caso:
 - botões não sejam suportados
@@ -260,15 +293,20 @@ Implemente ou preserve:
 
 ---
 
-## 17. Critérios de Aceite
+## 17. Critérios de Aceite (Atualizado)
 
 Considere a missão concluída quando:
 
 - Estados conversacionais funcionam corretamente
+- **ONBOARDING coleta nome, gênero e nascimento do bebê**
+- **Dados do bebê personalizam todas as respostas**
 - Contexto ativo nunca é ambíguo
 - RAG responde com histórico e personalização
 - Quiz e logs persistem corretamente
 - UX no WhatsApp é fluida e humana
+- **List Messages funcionam para menus com 4+ opções**
+- **Relatório visual é gerado como imagem PNG e enviado no WhatsApp**
+- **Barras ASCII de fallback são formatadas corretamente**
 - Feedback do usuário é coletado
 - Nenhum fluxo existente foi quebrado
 

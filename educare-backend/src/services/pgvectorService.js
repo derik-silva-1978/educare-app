@@ -136,6 +136,26 @@ async function ensureTables() {
     await sequelize.query(`CREATE INDEX IF NOT EXISTS idx_cs_state ON conversation_states (state);`);
 
     await sequelize.query(`
+      DO $$ BEGIN
+        ALTER TABLE conversation_states DROP CONSTRAINT IF EXISTS conversation_states_state_check;
+        ALTER TABLE conversation_states ADD CONSTRAINT conversation_states_state_check 
+          CHECK (state IN ('ENTRY', 'ONBOARDING', 'CONTEXT_SELECTION', 'FREE_CONVERSATION', 'CONTENT_FLOW', 'QUIZ_FLOW', 'LOG_FLOW', 'SUPPORT', 'FEEDBACK', 'PAUSE', 'EXIT'));
+      EXCEPTION WHEN OTHERS THEN NULL;
+      END $$;
+    `);
+
+    await sequelize.query(`
+      DO $$ BEGIN
+        ALTER TABLE conversation_states ADD COLUMN IF NOT EXISTS onboarding_step VARCHAR(20);
+        ALTER TABLE conversation_states ADD COLUMN IF NOT EXISTS baby_name VARCHAR(100);
+        ALTER TABLE conversation_states ADD COLUMN IF NOT EXISTS baby_gender VARCHAR(10);
+        ALTER TABLE conversation_states ADD COLUMN IF NOT EXISTS baby_birthdate DATE;
+        ALTER TABLE conversation_states ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN DEFAULT FALSE;
+      EXCEPTION WHEN OTHERS THEN NULL;
+      END $$;
+    `);
+
+    await sequelize.query(`
       CREATE TABLE IF NOT EXISTS ux_feedback (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_phone VARCHAR(20) NOT NULL,

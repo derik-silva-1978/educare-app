@@ -5,12 +5,17 @@ const apiKeyMiddleware = require('../middlewares/apiKey');
 
 router.get('/health', conversationController.healthCheck);
 
+router.get('/report-image/:phone', conversationController.getReportImage);
+
 router.use(apiKeyMiddleware.validateApiKey);
 
 router.get('/state', conversationController.getState);
 router.put('/state', conversationController.updateState);
 router.post('/state/transition', conversationController.transitionState);
 router.get('/state-machine', conversationController.getStateMachine);
+
+router.post('/onboarding', conversationController.processOnboarding);
+router.get('/onboarding/status', conversationController.getOnboardingStatus);
 
 router.post('/memory', conversationController.saveMemory);
 router.post('/memory/search', conversationController.searchMemory);

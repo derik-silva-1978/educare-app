@@ -91,8 +91,11 @@ Atualmente não há mecanismo sistemático para:
    - Copy UX consistente
    - Buffer de mensagens
    - Botões interativos
+   - **List Messages** para menus com múltiplas opções
 5. Coletar feedback contínuo da experiência do usuário.
 6. Preparar o sistema para recomendações personalizadas de conteúdos, cursos e treinamentos.
+7. **Onboarding personalizado** — coletar dados do bebê (nome, gênero, data de nascimento) na primeira interação para personalizar toda a jornada.
+8. **Relatório visual semanal** — gerar imagem PNG com barras de progresso por domínio, insights personalizados e timeline de marcos desde o nascimento, enviada via WhatsApp.
 
 ---
 
@@ -325,19 +328,144 @@ Permitir melhoria contínua sem quebrar a experiência.
 
 ---
 
-## 16. Critérios de Sucesso
+## 16. Onboarding Personalizado (Novo)
+
+### 16.1 Objetivo
+
+Coletar dados essenciais do bebê na primeira interação para personalizar toda a jornada conversacional.
+
+### 16.2 Dados Coletados
+
+- **Nome do bebê** — usado em todas as interações subsequentes
+- **Gênero** — adapta linguagem (ele/ela, seu filho/sua filha)
+- **Data de nascimento** — calcula idade em semanas/meses, define semana da jornada
+
+### 16.3 Fluxo
+
+1. Primeiro contato → estado `ONBOARDING`
+2. Sub-estados sequenciais: `ASKING_NAME` → `ASKING_GENDER` → `ASKING_BIRTHDATE`
+3. Dados salvos no perfil do usuário
+4. Transição para `CONTEXT_SELECTION` com saudação personalizada
+
+### 16.4 Implementação
+
+- Estado `ONBOARDING` adicionado à state machine (entre ENTRY e CONTEXT_SELECTION)
+- Sub-estados controlados por campo `onboarding_step` no estado persistido
+- Validação de data (formato brasileiro DD/MM/AAAA)
+- Botões interativos para gênero (👦 Menino / 👧 Menina)
+
+---
+
+## 17. List Messages (Novo)
+
+### 17.1 Objetivo
+
+Utilizar mensagens do tipo lista (List Messages) do WhatsApp para menus com múltiplas opções, melhorando a UX em comparação com botões limitados a 3 opções.
+
+### 17.2 Casos de Uso
+
+- **Menu contextual** — quando há mais de 3 opções disponíveis
+- **Seleção de conteúdo** — escolha de tópicos da jornada semanal
+- **Opções de quiz** — perguntas com mais de 3 alternativas
+- **Relatórios disponíveis** — seleção de tipo de relatório
+
+### 17.3 Formato Evolution API v2
+
+```json
+{
+  "number": "5511999999999",
+  "options": {
+    "delay": 1200,
+    "presence": "composing"
+  },
+  "listMessage": {
+    "title": "Menu Educare+",
+    "description": "Escolha uma opção:",
+    "buttonText": "Ver opções",
+    "footerText": "Educare+ • TitiNauta 🚀",
+    "sections": [
+      {
+        "title": "Jornada",
+        "rows": [
+          { "title": "📚 Conteúdo da semana", "description": "Ver o conteúdo desta semana", "rowId": "content_weekly" },
+          { "title": "🧩 Quiz rápido", "description": "Responder quiz interativo", "rowId": "quiz_start" }
+        ]
+      },
+      {
+        "title": "Registros",
+        "rows": [
+          { "title": "📊 Ver progresso", "description": "Relatório de desenvolvimento", "rowId": "report_view" },
+          { "title": "📝 Registrar dados", "description": "Biometria, sono, vacinas", "rowId": "log_start" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+---
+
+## 18. Relatório Visual Semanal (Novo)
+
+### 18.1 Objetivo
+
+Gerar uma imagem PNG com o relatório de desenvolvimento do bebê, enviada diretamente no WhatsApp como mídia, proporcionando uma experiência visual rica.
+
+### 18.2 Conteúdo da Imagem
+
+1. **Header** — Logo Educare+, nome do bebê, idade em semanas/meses
+2. **Barras de progresso** — uma por domínio de desenvolvimento:
+   - 🧠 Cognitivo
+   - 🗣️ Linguagem
+   - 🏃 Motor
+   - 💚 Social-Emocional
+   - 🎨 Criativo
+3. **Insights personalizados** — 2-3 observações baseadas nos dados recentes
+4. **Timeline de marcos** — marcos alcançados desde o nascimento (ex: Social 0-2m ✓, Motor 3-4m ✓, Linguagem 9-12m ✓)
+5. **CTA** — "Relatório completo disponível na plataforma Educare+"
+
+### 18.3 Implementação
+
+- Serviço `reportImageService.js` usando `canvas` (node-canvas) para gerar PNG
+- Endpoint `GET /api/conversation/report-image/:phone` retorna a imagem
+- Imagem enviada via Evolution API como mensagem de mídia
+- Fallback: relatório em texto com barras ASCII (ex: `████░░░░ 50%`)
+
+### 18.4 Barras ASCII (Fallback)
+
+Para dispositivos ou situações onde a imagem não é possível:
+
+```
+📊 *Progresso do Thiago — Semana 16*
+
+🧠 Cognitivo    ████████░░ 80%
+🗣️ Linguagem   ██████░░░░ 60%
+🏃 Motor       █████████░ 90%
+💚 Social      ███████░░░ 70%
+🎨 Criativo    ██████░░░░ 60%
+
+💡 _Thiago está se destacando em habilidades motoras!_
+```
+
+---
+
+## 19. Critérios de Sucesso (Atualizado)
 
 - Conversas livres geram memória vetorial
 - RAG utiliza histórico real do usuário
 - Assistente correto assume no momento adequado
 - Quiz grava respostas corretamente
 - Botões interativos funcionam no WhatsApp
+- **List Messages funcionam para menus com +3 opções**
+- **Onboarding coleta nome, gênero e nascimento do bebê**
+- **Relatório visual é gerado como imagem PNG e enviado no WhatsApp**
+- **Barras ASCII de fallback são formatadas corretamente**
 - Feedback de UX é coletado de forma natural
 - Sistema evolui continuamente com base no uso real
 
 ---
 
-## 17. Fora de Escopo
+## 20. Fora de Escopo
 
 - UI Web detalhada dos dashboards
 - Modelagem financeira de planos
