@@ -186,6 +186,8 @@ function formatContextForPrompt(context) {
 
   if (context.user) {
     parts.push(`USUÁRIO: ${context.user.name || 'Não identificado'} (${context.user.role || 'parent'})`);
+  } else {
+    parts.push(`USUÁRIO: Contato WhatsApp (sem cadastro no app)`);
   }
 
   if (context.child) {

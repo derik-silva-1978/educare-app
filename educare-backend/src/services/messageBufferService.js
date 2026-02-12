@@ -11,7 +11,8 @@ const CLEAR_INTENT_PATTERNS = [
   /^(sair|exit|quit|parar|menu|ajuda|help)$/i,
   /^[1-5]$/,
   /^(ctx_child|ctx_mother|fb_\d|action_\w+)$/,
-  /\?$/
+  /\?$/,
+  /^.*(sobre meu beb|sobre mim|👶|💚).*/i
 ];
 
 function hasClearIntent(text) {

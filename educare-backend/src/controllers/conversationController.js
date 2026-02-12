@@ -451,7 +451,16 @@ const conversationController = {
 
       const contextResult = stateMachineService.resolveContextSelection(button_id);
       if (contextResult) {
-        const transitionResult = await stateMachineService.transition(phone, 'FREE_CONVERSATION', contextResult);
+        const currentState = await pgvectorService.getConversationState(phone);
+        const currentStateName = currentState.success ? currentState.state?.state : 'ENTRY';
+
+        let transitionResult;
+        if (currentStateName === 'ENTRY') {
+          await stateMachineService.transition(phone, 'CONTEXT_SELECTION');
+          transitionResult = await stateMachineService.transition(phone, 'FREE_CONVERSATION', contextResult);
+        } else {
+          transitionResult = await stateMachineService.transition(phone, 'FREE_CONVERSATION', contextResult);
+        }
         return res.json({ ...transitionResult, action: 'context_selected', context: contextResult });
       }
 

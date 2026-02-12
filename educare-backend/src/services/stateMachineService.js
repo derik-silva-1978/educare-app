@@ -181,7 +181,16 @@ function resolveContextSelection(buttonId) {
     '1': { active_context: 'child', assistant_name: 'TitiNauta' },
     '2': { active_context: 'mother', assistant_name: 'TitiNauta Materna' }
   };
-  return mapping[buttonId] || null;
+  if (mapping[buttonId]) return mapping[buttonId];
+
+  const normalized = (buttonId || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  if (normalized.includes('bebe') || normalized.includes('bebê') || normalized.includes('child') || normalized.includes('crianca')) {
+    return mapping.ctx_child;
+  }
+  if (normalized.includes('mae') || normalized.includes('mãe') || normalized.includes('mother') || normalized.includes('sobre mim') || normalized.includes('saude') || normalized.includes('materna')) {
+    return mapping.ctx_mother;
+  }
+  return null;
 }
 
 function resolveFeedbackScore(buttonId) {
@@ -211,7 +220,35 @@ function resolveActionButton(buttonId) {
     support_suggestion: { action: 'collect_report', report_type: 'suggestion' },
     support_back: { to_state: 'FREE_CONVERSATION' }
   };
-  return mapping[buttonId] || null;
+  if (mapping[buttonId]) return mapping[buttonId];
+
+  const normalized = (buttonId || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const textMapping = {
+    'quiz': mapping.action_quiz,
+    'conteudo': mapping.action_content,
+    'conteúdo': mapping.action_content,
+    'trocar': mapping.action_change,
+    'mudar contexto': mapping.action_change,
+    'sair': mapping.action_exit,
+    'pausar': mapping.action_exit,
+    'registro': mapping.action_log,
+    'suporte': mapping.action_support,
+    'ajuda': mapping.action_support,
+    'continuar': mapping.action_continue,
+    'biometria': mapping.log_biometrics,
+    'peso': mapping.log_biometrics,
+    'altura': mapping.log_biometrics,
+    'sono': mapping.log_sleep,
+    'dormir': mapping.log_sleep,
+    'vacina': mapping.log_vaccine,
+    'problema': mapping.support_problem,
+    'sugestao': mapping.support_suggestion,
+    'voltar': mapping.support_back
+  };
+  for (const [keyword, result] of Object.entries(textMapping)) {
+    if (normalized.includes(keyword)) return result;
+  }
+  return null;
 }
 
 module.exports = {
