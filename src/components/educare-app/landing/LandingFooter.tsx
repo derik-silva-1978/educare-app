@@ -8,7 +8,7 @@ const LandingFooter: React.FC = () => {
   return (
     <footer className="bg-muted/50 border-t border-border">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
@@ -26,7 +26,6 @@ const LandingFooter: React.FC = () => {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>contato@educaremais.com.br</li>
               <li>www.educareapp.com.br</li>
-              <li>São Luís, MA</li>
             </ul>
           </div>
 
@@ -52,24 +51,6 @@ const LandingFooter: React.FC = () => {
                 <button onClick={() => openPolicy('cookies')} className="text-muted-foreground hover:text-foreground transition-colors">
                   Política de Cookies
                 </button>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-sm mb-4">Status do Produto</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-yellow-500" />
-                Produto em construção
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-500" />
-                MVP ativo
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-blue-500" />
-                Lista VIP ativa
               </li>
             </ul>
           </div>
