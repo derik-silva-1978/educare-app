@@ -1171,15 +1171,33 @@ const conversationController = {
 
   async healthCheck(req, res) {
     try {
-      const { sequelize } = require('../config/database');
+      const { sequelize, getPoolStatus, getAuthStatus, isAuthError } = require('../config/database');
       const services = {};
 
       try {
         await sequelize.query('SELECT 1');
         services.database = { status: 'ok' };
       } catch (err) {
-        services.database = { status: 'error', detail: err.message };
+        const authFail = isAuthError(err);
+        services.database = {
+          status: 'error',
+          detail: err.message,
+          is_auth_error: authFail,
+          hint: authFail ? 'Senha do DB_PASSWORD pode estar incorreta ou dessincronizada. Verifique no Portainer (Stack Editor).' : undefined
+        };
       }
+
+      const authStatus = getAuthStatus();
+      services.auth = {
+        status: authStatus.auth_healthy ? 'ok' : 'warning',
+        db_user: authStatus.db_user,
+        db_name: authStatus.db_name,
+        db_host: authStatus.db_host,
+        auth_failure_count: authStatus.auth_failure_count,
+        last_auth_failure: authStatus.last_auth_failure,
+      };
+
+      services.pool = getPoolStatus();
 
       try {
         const [stateTable] = await sequelize.query(
@@ -1206,6 +1224,43 @@ const conversationController = {
       }
 
       try {
+        const [pgvResult] = await sequelize.query(
+          `SELECT 1 FROM pg_extension WHERE extname = 'vector'`
+        );
+        services.pgvector = {
+          status: pgvResult.length > 0 ? 'ok' : 'unavailable',
+          detail: pgvResult.length > 0 ? 'pgvector extension active (uses same DB connection)' : 'pgvector extension not installed',
+          same_credentials_as_db: true
+        };
+      } catch (err) {
+        services.pgvector = { status: 'error', detail: err.message, same_credentials_as_db: true };
+      }
+
+      try {
+        const qdrantUrl = process.env.QDRANT_URL;
+        const qdrantKey = process.env.QDRANT_API_KEY;
+        if (qdrantUrl && qdrantKey) {
+          services.qdrant = {
+            status: 'configured',
+            detail: 'Qdrant is an external vector DB (separate credentials from PostgreSQL)',
+            url_set: true,
+            api_key_set: true,
+            separate_from_postgres: true
+          };
+        } else {
+          services.qdrant = {
+            status: 'not_configured',
+            detail: 'QDRANT_URL or QDRANT_API_KEY not set',
+            url_set: !!qdrantUrl,
+            api_key_set: !!qdrantKey,
+            separate_from_postgres: true
+          };
+        }
+      } catch (err) {
+        services.qdrant = { status: 'error', detail: err.message };
+      }
+
+      try {
         const configured = elevenLabsService.isConfigured();
         services.tts = {
           status: configured ? 'ok' : 'error',
@@ -1217,8 +1272,20 @@ const conversationController = {
 
       services.buffer = { status: 'ok', detail: 'Message buffer service available' };
 
+      services.credential_map = {
+        postgresql: 'DB_USERNAME + DB_PASSWORD (Sequelize)',
+        pgvector: 'Same as PostgreSQL (extension in same DB)',
+        qdrant: 'QDRANT_URL + QDRANT_API_KEY (external service)',
+        n8n_workflow: 'All API calls use EDUCARE_API_KEY header (no direct DB access from n8n)',
+        n8n_internal_db: 'DB_POSTGRESDB_USER + DB_POSTGRESDB_PASSWORD (separate n8n database)',
+      };
+
+      const hasErrors = Object.values(services).some(s => s?.status === 'error');
+      const hasWarnings = Object.values(services).some(s => s?.status === 'warning');
+
       return res.json({
         success: true,
+        overall: hasErrors ? 'degraded' : hasWarnings ? 'warning' : 'healthy',
         services,
         timestamp: new Date().toISOString()
       });

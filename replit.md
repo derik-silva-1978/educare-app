@@ -46,9 +46,26 @@ The frontend utilizes React 18, TypeScript, Vite, and `shadcn/ui` (Radix UI + Ta
 - **GitHub Repo**: `derik-silva-1978/educare-app` (main branch)
 - **Deploy Process**: GitHub Actions builds Docker image → Portainer pulls and redeploys on Contabo VPS
 
+### Database & Credential Architecture
+The system uses multiple data stores with distinct credential paths:
+
+| Service | Type | Credentials | Notes |
+|---------|------|-------------|-------|
+| PostgreSQL (Educare) | Primary DB | `DB_USERNAME` + `DB_PASSWORD` (Sequelize) | Stores all app data, state machine, conversation memory |
+| pgvector | Extension | Same as PostgreSQL (extension in same `educare` DB) | Knowledge embeddings table `knowledge_embeddings` |
+| Qdrant | External Vector DB | `QDRANT_URL` + `QDRANT_API_KEY` | Completely separate from PostgreSQL |
+| n8n Internal DB | Separate PG DB | `DB_POSTGRESDB_USER` + `DB_POSTGRESDB_PASSWORD` | n8n's own database, different credentials possible |
+| n8n → Educare API | HTTP API | `EDUCARE_API_KEY` header (`x-api-key`) | n8n never accesses PostgreSQL directly; all via API |
+| n8n Sub-workflows | May have PG nodes | Stored in n8n credential manager | "Lead CRM" and "Inactive User Reactivation" may have separate Postgres credentials |
+
+**Known Issue (Intermittent):** PostgreSQL auth failures occur when containers (backend, n8n) send different passwords for the same `postgres` user. The recommended fix is to create dedicated users (`educare_app`, `n8n_app`) per service. See `educare-backend/docs/postgres-fix/03-GUIA-CORRECAO-COMPLETO.md` for step-by-step instructions.
+
+**Resilience:** The backend has exponential backoff retry (5 attempts) on DB connection, auth-error detection with failure counting, and connection pool keep-alive. The health check endpoint (`/api/conversation/health`) reports auth status, pool status, pgvector availability, and Qdrant configuration.
+
 ## External Dependencies
 
-- **Database**: PostgreSQL (with pgvector)
+- **Database**: PostgreSQL (with pgvector extension for embeddings)
+- **Vector Database**: Qdrant (external, separate credentials)
 - **Automation Platform**: n8n Workflow
 - **Messaging**: WhatsApp (via Evolution API)
 - **Payment Gateway**: Stripe
