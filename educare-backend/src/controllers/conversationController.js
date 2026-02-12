@@ -1449,7 +1449,175 @@ const conversationController = {
       console.error('[Conversation] getReportImage error:', error);
       return res.status(500).json({ success: false, error: error.message });
     }
-  }
+  },
+
+  async diagnosticN8nCredentials(req, res) {
+    try {
+      const n8nApiKey = process.env.N8N_REST_API_KEY;
+      const n8nBaseUrl = process.env.N8N_API_URL || 'https://n8n.educareapp.com.br';
+
+      if (!n8nApiKey) {
+        return res.json({
+          success: false,
+          error: 'N8N_REST_API_KEY not configured',
+          manual_check_required: true,
+          credential_map: getStaticCredentialMap()
+        });
+      }
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+
+      let workflows = [];
+      try {
+        const workflowsRes = await globalThis.fetch(`${n8nBaseUrl}/api/v1/workflows?limit=50`, {
+          headers: { 'X-N8N-API-KEY': n8nApiKey },
+          signal: controller.signal
+        });
+        if (!workflowsRes.ok) {
+          clearTimeout(timeout);
+          return res.json({
+            success: false,
+            error: `n8n API returned ${workflowsRes.status}: ${workflowsRes.statusText}`,
+            hint: 'Check N8N_REST_API_KEY and n8n availability',
+            credential_map: getStaticCredentialMap()
+          });
+        }
+        const workflowsData = await workflowsRes.json();
+        workflows = workflowsData.data || [];
+      } catch (fetchErr) {
+        clearTimeout(timeout);
+        return res.json({
+          success: false,
+          error: `Cannot reach n8n API: ${fetchErr.message}`,
+          hint: 'n8n may be down or N8N_REST_API_KEY is invalid',
+          credential_map: getStaticCredentialMap()
+        });
+      }
+
+      const credentialUsage = {};
+      const workflowSummaries = [];
+      const errors = [];
+
+      for (const wf of workflows) {
+        try {
+          const wfRes = await globalThis.fetch(`${n8nBaseUrl}/api/v1/workflows/${wf.id}`, {
+            headers: { 'X-N8N-API-KEY': n8nApiKey },
+            signal: controller.signal
+          });
+          if (!wfRes.ok) {
+            errors.push(`Failed to fetch workflow ${wf.name} (${wf.id}): ${wfRes.status}`);
+            continue;
+          }
+          const wfData = await wfRes.json();
+          const nodes = wfData.nodes || [];
+
+          const pgNodes = nodes.filter(n =>
+            n.type?.toLowerCase().includes('postgres') ||
+            n.type?.toLowerCase().includes('pgvector')
+          );
+
+          if (pgNodes.length > 0) {
+            const wfInfo = {
+              id: wf.id,
+              name: wf.name,
+              active: wf.active,
+              pg_nodes: pgNodes.map(n => {
+                const allCreds = n.credentials || {};
+                const cred = allCreds.postgres || allCreds.postgresql || allCreds.pgvector || Object.values(allCreds).find(c => c?.id) || {};
+                const credKey = cred.id || 'unknown';
+
+                if (!credentialUsage[credKey]) {
+                  credentialUsage[credKey] = {
+                    credential_id: cred.id,
+                    credential_name: cred.name,
+                    workflows_using: [],
+                    node_count: 0
+                  };
+                }
+                if (!credentialUsage[credKey].workflows_using.includes(wf.name)) {
+                  credentialUsage[credKey].workflows_using.push(wf.name);
+                }
+                credentialUsage[credKey].node_count++;
+
+                return {
+                  node_name: n.name,
+                  node_type: n.type,
+                  credential_id: cred.id,
+                  credential_name: cred.name,
+                  credential_key_used: Object.keys(allCreds).find(k => allCreds[k]?.id === cred.id) || 'unknown'
+                };
+              })
+            };
+            workflowSummaries.push(wfInfo);
+          }
+        } catch (wfErr) {
+          errors.push(`Error fetching workflow ${wf.name}: ${wfErr.message}`);
+        }
+      }
+
+      clearTimeout(timeout);
+
+      const { sequelize, getAuthStatus } = require('../config/database');
+      let backendDbTest = null;
+      try {
+        const [result] = await sequelize.query('SELECT current_database(), current_user, inet_server_addr()::text AS server_ip');
+        backendDbTest = { status: 'ok', ...result[0] };
+      } catch (err) {
+        backendDbTest = { status: 'error', detail: err.message };
+      }
+
+      return res.json({
+        success: true,
+        summary: {
+          total_workflows: workflows.length,
+          workflows_with_postgres: workflowSummaries.length,
+          unique_credentials: Object.keys(credentialUsage).length,
+          total_pg_nodes: Object.values(credentialUsage).reduce((sum, c) => sum + c.node_count, 0),
+        },
+        backend_connection: {
+          ...backendDbTest,
+          auth_status: getAuthStatus(),
+          env_vars_used: ['DB_USERNAME', 'DB_PASSWORD', 'DB_HOST', 'DB_PORT', 'DB_DATABASE'],
+        },
+        n8n_credentials: credentialUsage,
+        workflows_detail: workflowSummaries,
+        errors: errors.length > 0 ? errors : undefined,
+        important_notes: [
+          'pgvector is an extension inside PostgreSQL - uses SAME credentials as DB',
+          'Qdrant is EXTERNAL - uses QDRANT_URL + QDRANT_API_KEY (completely separate)',
+          'n8n REST API does NOT expose credential values (password/host/user) for security',
+          'To verify n8n credential values, check directly in n8n UI: Settings > Credentials',
+          'If auth failures occur, ensure all credentials point to the same host with matching passwords',
+        ],
+        action_required: [
+          'Verify credential "Postgres_n8n" (GOPEUe1LAiJGNq6A) in n8n UI matches production DB credentials',
+          'Verify credential "Postgres RAG (pgvector)" (QR6UfUfQc6ZJoZMA) points to correct DB with pgvector extension',
+          'Ensure lead_context, lead_journey, etc tables exist in the target database',
+        ]
+      });
+    } catch (error) {
+      console.error('[Conversation] diagnosticN8nCredentials error:', error.message);
+      return res.status(500).json({ success: false, error: error.message });
+    }
+  },
 };
+
+function getStaticCredentialMap() {
+  return {
+    'GOPEUe1LAiJGNq6A': {
+      name: 'Postgres_n8n',
+      used_by: ['Lead CRM', 'SUB | Inactive User Reactivation'],
+      tables: ['lead_context', 'lead_journey', 'lead_summary', 'inactive_context', 'inactive_journey', 'inactive_summary', 'mem_short', 'mem_long_events', 'followup_queue', 'wa_dedup'],
+      node_count: 19
+    },
+    'QR6UfUfQc6ZJoZMA': {
+      name: 'Postgres RAG (pgvector)',
+      used_by: ['Educare+ Ingestion Flow', 'Memória Longa - Teste'],
+      tables: ['kb_document_chunks', 'kb_documents', 'documents'],
+      node_count: 10
+    }
+  };
+}
 
 module.exports = conversationController;

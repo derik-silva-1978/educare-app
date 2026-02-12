@@ -38,6 +38,8 @@ router.get('/report-image/:phone', conversationController.getReportImage);
 
 router.use(apiKeyOrOwnerJwt);
 
+router.get('/diagnostic/n8n-credentials', conversationController.diagnosticN8nCredentials);
+
 router.get('/state-config', conversationController.getStateConfigs);
 router.get('/state-config/:state', conversationController.getStateConfig);
 router.put('/state-config/:state', conversationController.updateStateConfig);
