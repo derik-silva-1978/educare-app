@@ -191,6 +191,18 @@ async function transition(userPhone, toState, additionalUpdates = {}) {
     ? currentStateResult.state.state
     : null;
 
+  if (currentState === toState) {
+    const stateMessage = await getStateMessageFromConfig(toState);
+    return {
+      success: true,
+      previous_state: currentState,
+      current_state: toState,
+      idempotent: true,
+      state_message: stateMessage,
+      state_data: currentStateResult.state
+    };
+  }
+
   if (currentState && !isValidTransition(currentState, toState)) {
     return {
       success: false,
