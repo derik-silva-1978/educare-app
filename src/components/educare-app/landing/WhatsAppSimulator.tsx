@@ -31,13 +31,13 @@ const SCENES: Scene[] = [
     day: "SEG",
     label: "Boas-vindas",
     steps: [
-      { type: "typing", duration: 800, delay: 400 },
+      { type: "typing", duration: 1400, delay: 800 },
       {
         type: "bot",
         text: "Olá! 👋 Eu sou o TitiNauta, seu assistente inteligente no Educare+.\n\nEstou aqui para acompanhar o desenvolvimento do seu bebê com orientações baseadas na OMS e SBP. 🚀",
         delay: 0,
       },
-      { type: "typing", duration: 600, delay: 1200 },
+      { type: "typing", duration: 1000, delay: 3000 },
       {
         type: "bot",
         text: "Sobre o que você quer falar agora? 💬",
@@ -49,11 +49,11 @@ const SCENES: Scene[] = [
           { text: "👶 Sobre meu bebê", id: "ctx_child" },
           { text: "💚 Sobre mim", id: "ctx_mother" },
         ],
-        delay: 400,
+        delay: 1200,
       },
-      { type: "button_select", buttonId: "ctx_child", delay: 2000 },
-      { type: "user", text: "👶 Sobre meu bebê", delay: 300 },
-      { type: "typing", duration: 800, delay: 400 },
+      { type: "button_select", buttonId: "ctx_child", delay: 3000 },
+      { type: "user", text: "👶 Sobre meu bebê", delay: 600 },
+      { type: "typing", duration: 1200, delay: 1000 },
       {
         type: "bot",
         text: "Ótimo! 💜 Agora estou no modo Bebê.\n\nPode me perguntar qualquer coisa sobre desenvolvimento, marcos, alimentação, sono...\n\nEstou aqui pra te ajudar!",
@@ -66,13 +66,13 @@ const SCENES: Scene[] = [
     label: "Conteúdo Semanal",
     steps: [
       { type: "clear", delay: 0 },
-      { type: "typing", duration: 600, delay: 400 },
+      { type: "typing", duration: 1400, delay: 800 },
       {
         type: "bot",
         text: "🌟 Conteúdo da Semana 32!\n\nSeu bebê está com aproximadamente 8 meses. Nesta fase, ele pode estar:\n\n✅ Sentando sem apoio\n✅ Tentando engatinhar\n✅ Respondendo ao próprio nome\n✅ Pegando objetos com pinça",
         delay: 0,
       },
-      { type: "typing", duration: 500, delay: 1500 },
+      { type: "typing", duration: 1000, delay: 3500 },
       {
         type: "bot",
         text: "💡 Atividade da semana:\n\nColoque brinquedos coloridos um pouco à frente do bebê para estimular o engatinhar. Fique por perto encorajando! 🎯",
@@ -84,11 +84,11 @@ const SCENES: Scene[] = [
           { text: "📖 Ver mais detalhes", id: "content_more" },
           { text: "▶️ Próximo tema", id: "content_next" },
         ],
-        delay: 800,
+        delay: 2000,
       },
-      { type: "button_select", buttonId: "content_more", delay: 1800 },
-      { type: "user", text: "📖 Ver mais detalhes", delay: 300 },
-      { type: "typing", duration: 700, delay: 400 },
+      { type: "button_select", buttonId: "content_more", delay: 3000 },
+      { type: "user", text: "📖 Ver mais detalhes", delay: 600 },
+      { type: "typing", duration: 1200, delay: 1000 },
       {
         type: "bot",
         text: "Aos 8 meses, a motricidade grossa está a todo vapor! 🏃‍♂️\n\nAlguns bebês pulam o engatinhar e vão direto para ficar em pé — isso também é normal.\n\nO importante é oferecer estímulos adequados e um ambiente seguro para explorar.",
@@ -101,13 +101,13 @@ const SCENES: Scene[] = [
     label: "Quiz Interativo",
     steps: [
       { type: "clear", delay: 0 },
-      { type: "typing", duration: 600, delay: 400 },
+      { type: "typing", duration: 1200, delay: 800 },
       {
         type: "bot",
         text: "🧩 Quiz da Semana!\n\nVamos verificar alguns marcos do desenvolvimento do seu bebê?\n\nPergunta 1 de 3:",
         delay: 0,
       },
-      { type: "typing", duration: 500, delay: 1200 },
+      { type: "typing", duration: 1000, delay: 2500 },
       {
         type: "bot",
         text: "Seu bebê já consegue transferir objetos de uma mão para a outra?",
@@ -120,11 +120,11 @@ const SCENES: Scene[] = [
           { text: "🔄 Às vezes", id: "quiz_sometimes" },
           { text: "❌ Ainda não", id: "quiz_no" },
         ],
-        delay: 600,
+        delay: 1500,
       },
-      { type: "button_select", buttonId: "quiz_yes", delay: 2000 },
-      { type: "user", text: "✅ Sim, faz isso!", delay: 300 },
-      { type: "typing", duration: 700, delay: 400 },
+      { type: "button_select", buttonId: "quiz_yes", delay: 3500 },
+      { type: "user", text: "✅ Sim, faz isso!", delay: 600 },
+      { type: "typing", duration: 1400, delay: 1000 },
       {
         type: "bot",
         text: "Excelente! 🎉 Esse é um marco importante da coordenação motora fina, esperado entre 6-9 meses.\n\nSeu bebê está no caminho certo! Continue oferecendo objetos variados para manipulação.\n\n📊 Progresso: 1/3 marcos verificados",
@@ -140,16 +140,16 @@ const SCENES: Scene[] = [
       {
         type: "user",
         text: "Meu bebê acorda muito à noite, é normal?",
-        delay: 600,
+        delay: 1200,
         typewriter: true,
       },
-      { type: "typing", duration: 1000, delay: 600 },
+      { type: "typing", duration: 1800, delay: 1200 },
       {
         type: "bot",
         text: "É uma dúvida muito comum! 🌙\n\nAos 8 meses, é normal que o sono sofra alterações. Isso pode acontecer por:\n\n• Ansiedade de separação (marco emocional)\n• Saltos de desenvolvimento\n• Nascimento de dentes\n• Mudanças na rotina",
         delay: 0,
       },
-      { type: "typing", duration: 600, delay: 1500 },
+      { type: "typing", duration: 1200, delay: 3500 },
       {
         type: "bot",
         text: "💤 Dicas para ajudar:\n\n1. Mantenha uma rotina de sono consistente\n2. Crie um ritual relaxante antes de dormir\n3. Ofereça segurança sem criar dependência\n4. Seja paciente — essa fase passa!\n\nQuer saber mais sobre algum desses pontos?",
@@ -158,10 +158,10 @@ const SCENES: Scene[] = [
       {
         type: "user",
         text: "Muito obrigada! Me ajudou bastante 💜",
-        delay: 2000,
+        delay: 4000,
         typewriter: true,
       },
-      { type: "typing", duration: 500, delay: 500 },
+      { type: "typing", duration: 1000, delay: 1000 },
       {
         type: "bot",
         text: "Fico feliz em ajudar! 😊 Lembre-se: você está fazendo um ótimo trabalho. Estou sempre aqui quando precisar! 💜",
@@ -174,13 +174,13 @@ const SCENES: Scene[] = [
     label: "Feedback",
     steps: [
       { type: "clear", delay: 0 },
-      { type: "typing", duration: 600, delay: 400 },
+      { type: "typing", duration: 1200, delay: 800 },
       {
         type: "bot",
         text: "✨ Resumo da sua semana:\n\n📖 1 conteúdo semanal recebido\n🧩 1 quiz completado\n💬 2 conversas realizadas\n\nVocê está acompanhando o desenvolvimento do seu bebê de forma incrível! 🌟",
         delay: 0,
       },
-      { type: "typing", duration: 500, delay: 1500 },
+      { type: "typing", duration: 1000, delay: 3500 },
       {
         type: "bot",
         text: "Como foi sua experiência esta semana? ⭐",
@@ -193,11 +193,11 @@ const SCENES: Scene[] = [
           { text: "⭐⭐⭐ Razoável", id: "fb_3" },
           { text: "⭐ Precisa melhorar", id: "fb_1" },
         ],
-        delay: 600,
+        delay: 1500,
       },
-      { type: "button_select", buttonId: "fb_5", delay: 2000 },
-      { type: "user", text: "⭐⭐⭐⭐⭐ Adorei!", delay: 300 },
-      { type: "typing", duration: 600, delay: 400 },
+      { type: "button_select", buttonId: "fb_5", delay: 3500 },
+      { type: "user", text: "⭐⭐⭐⭐⭐ Adorei!", delay: 600 },
+      { type: "typing", duration: 1200, delay: 1000 },
       {
         type: "bot",
         text: "Obrigado pelo feedback! 🙏💜\n\nNa próxima semana teremos novos conteúdos sobre alimentação complementar e mais quizzes!\n\nBom fim de semana! 🌈\n\n— TitiNauta 🚀",
@@ -304,7 +304,7 @@ const WhatsAppSimulator = () => {
             schedule(() => {
               setMessages((prev) => [...prev, { id, text, sender: "bot" }]);
             }, cumulativeDelay);
-            cumulativeDelay += 300;
+            cumulativeDelay += 500;
             break;
           }
 
@@ -326,21 +326,21 @@ const WhatsAppSimulator = () => {
                   if (i >= text.length) {
                     clearInterval(interval);
                   }
-                }, 35);
+                }, 50);
                 intervalsRef.current.push(interval);
               }, twDelay);
-              cumulativeDelay += text.length * 35 + 300;
+              cumulativeDelay += text.length * 50 + 500;
               schedule(() => {
                 setShowTypewriter(false);
                 setTypewriterText("");
                 setMessages((prev) => [...prev, { id, text, sender: "user" }]);
               }, cumulativeDelay);
-              cumulativeDelay += 200;
+              cumulativeDelay += 400;
             } else {
               schedule(() => {
                 setMessages((prev) => [...prev, { id, text, sender: "user" }]);
               }, cumulativeDelay);
-              cumulativeDelay += 200;
+              cumulativeDelay += 400;
             }
             break;
           }
@@ -351,7 +351,7 @@ const WhatsAppSimulator = () => {
               setButtons(btns);
               setSelectedButton(null);
             }, cumulativeDelay);
-            cumulativeDelay += 200;
+            cumulativeDelay += 300;
             break;
           }
 
@@ -360,7 +360,7 @@ const WhatsAppSimulator = () => {
             schedule(() => {
               setSelectedButton(btnId);
             }, cumulativeDelay);
-            cumulativeDelay += 400;
+            cumulativeDelay += 700;
             schedule(() => {
               setButtons([]);
               setSelectedButton(null);
@@ -370,7 +370,7 @@ const WhatsAppSimulator = () => {
         }
       });
 
-      const sceneEndDelay = cumulativeDelay + 2500;
+      const sceneEndDelay = cumulativeDelay + 4000;
       schedule(() => {
         setTransitioning(true);
         schedule(() => {
@@ -378,7 +378,7 @@ const WhatsAppSimulator = () => {
           setCurrentScene(nextScene);
           setTransitioning(false);
           runScene(nextScene);
-        }, 600);
+        }, 800);
       }, sceneEndDelay);
     },
     [clearTimers, schedule]
@@ -472,7 +472,7 @@ const WhatsAppSimulator = () => {
 
         <div
           ref={chatRef}
-          className={`px-3 py-3 space-y-2 overflow-y-auto transition-opacity duration-500 ${transitioning ? "opacity-0" : "opacity-100"}`}
+          className={`px-3 py-3 space-y-2 overflow-y-auto transition-opacity duration-700 ${transitioning ? "opacity-0" : "opacity-100"}`}
           style={{
             backgroundColor: "#ECE5DD",
             maxHeight: "340px",
