@@ -9,6 +9,8 @@ import EducareRegisterForm from '@/components/educare-app/auth/EducareRegisterFo
 import AuthSlideshow from '@/components/educare-app/auth/AuthSlideshow';
 import { Separator } from '@/components/ui/separator';
 import GoogleLoginButton from '@/components/educare-app/auth/GoogleLoginButton';
+import { usePolicies } from '@/hooks/usePolicies';
+import PolicyModal from '@/components/PolicyModal';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const isGoogleConfigured = Boolean(GOOGLE_CLIENT_ID);
@@ -17,6 +19,7 @@ const EducareAuth: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isLoading, isInitialized } = useAuth();
+  const { isOpen, currentPolicy, openPolicy, closeModal } = usePolicies();
   
   const queryParams = new URLSearchParams(location.search);
   const actionParam = queryParams.get('action');
@@ -176,18 +179,23 @@ const EducareAuth: React.FC = () => {
             <div className="text-center text-xs text-muted-foreground">
               <p>
                 Ao utilizar o Educare, você concorda com nossos{' '}
-                <a href="#" className="font-medium text-primary hover:underline">
-                  Termos de Serviço
-                </a>{' '}
-                e{' '}
-                <a href="#" className="font-medium text-primary hover:underline">
+                <button onClick={() => openPolicy('terms')} className="font-medium text-primary hover:underline">
+                  Termos de Uso
+                </button>
+                ,{' '}
+                <button onClick={() => openPolicy('privacy')} className="font-medium text-primary hover:underline">
                   Política de Privacidade
-                </a>
+                </button>{' '}
+                e{' '}
+                <button onClick={() => openPolicy('lgpd')} className="font-medium text-primary hover:underline">
+                  Conformidade LGPD
+                </button>
               </p>
             </div>
           </motion.div>
         </div>
       </main>
+      <PolicyModal isOpen={isOpen} onClose={closeModal} policy={currentPolicy} />
     </>
   );
 };

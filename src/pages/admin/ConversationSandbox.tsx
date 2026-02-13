@@ -1042,7 +1042,7 @@ const SimulatorPanel: React.FC<{
             stateLabel: content.badge,
           }
         );
-      }, 600);
+      }, 2800);
 
       setTimeout(() => {
         addMessage(
@@ -1056,8 +1056,8 @@ const SimulatorPanel: React.FC<{
             stateLabel: 'Conteúdo Educacional',
           }
         );
-      }, 1200);
-    }, 500);
+      }, 4500);
+    }, 1200);
   }, [addMessage]);
 
   const handleQuizStart = useCallback(() => {
@@ -1078,7 +1078,7 @@ const SimulatorPanel: React.FC<{
           stateLabel: 'Quiz Interativo',
         }
       );
-    }, 400);
+    }, 1000);
   }, [context, addMessage]);
 
   const handleQuizAnswer = useCallback((optionIndex: number, optionText: string) => {
@@ -1102,7 +1102,7 @@ const SimulatorPanel: React.FC<{
           stateLabel: 'Resultado do Quiz',
         }
       );
-    }, 500);
+    }, 1200);
   }, [context, quizAnswered, addMessage]);
 
   const handleFreeConversation = useCallback(() => {
@@ -1119,7 +1119,7 @@ const SimulatorPanel: React.FC<{
         agentLabel: context === 'mother' ? 'TitiNauta Materna' : 'TitiNauta (Bebê)',
         stateLabel: 'Conversa Livre',
       });
-    }, 400);
+    }, 1000);
 
     setTimeout(() => {
       addMessage(
@@ -1133,7 +1133,7 @@ const SimulatorPanel: React.FC<{
           stateLabel: 'Conversa Livre',
         }
       );
-    }, 1000);
+    }, 2500);
   }, [context, addMessage]);
 
   const handleShowReport = useCallback(() => {
@@ -1141,18 +1141,31 @@ const SimulatorPanel: React.FC<{
     setDemoStep(6);
 
     const reportContent = context === 'mother'
-      ? `*📊 Resumo do Desenvolvimento — Semana 5*\n\n🧘 *Autocuidado:* 3/5 metas alcançadas\n💤 *Sono:* Média 5h/noite\n🍎 *Nutrição:* Hidratação em dia\n💊 *Suplementos:* Ácido fólico OK\n❤️ *Saúde Mental:* Acompanhamento ativo\n\n_Continue cuidando de você! Cada dia conta._`
-      : `*📊 Resumo do Desenvolvimento — Semana 5*\n\n🧠 *Cognitivo:* Acompanha objetos ✅\n🤲 *Motor:* Tummy Time iniciado ✅\n👀 *Sensorial:* Foca rostos 20-30cm ✅\n😊 *Social:* Sorriso social emergindo 🔄\n🗣️ *Linguagem:* Responde a sons ✅\n\n🏅 *Badges conquistados:* 3\n📈 *Progresso geral:* 72%\n\n_Parabéns! O Bebê está se desenvolvendo muito bem!_`;
+      ? `*📊 Resumo Semanal — Saúde da Mãe*\n\n🧘 *Autocuidado:* 3/5 metas alcançadas\n💤 *Sono:* Média 5h/noite\n🍎 *Nutrição:* Hidratação em dia\n💊 *Suplementos:* Ácido fólico OK\n❤️ *Saúde Mental:* Acompanhamento ativo\n\n📈 *Progresso:* 68%`
+      : `*📊 Resumo Semanal — Desenvolvimento*\n\n🧠 *Cognitivo:* Acompanha objetos ✅\n🤲 *Motor:* Tummy Time iniciado ✅\n👀 *Sensorial:* Foca rostos 20-30cm ✅\n😊 *Social:* Sorriso social emergindo 🔄\n🗣️ *Linguagem:* Responde a sons ✅\n\n🏅 *Badges:* 3  |  📈 *Progresso:* 72%`;
 
     setTimeout(() => {
       addMessage(reportContent, 'bot', {
-        buttons: [
-          { id: 'restart_demo', text: '🔄 Recomeçar Demo' },
-        ],
         agentLabel: 'Relatório de Desenvolvimento',
-        stateLabel: 'Relatório',
+        stateLabel: 'Relatório Semanal',
       });
-    }, 500);
+    }, 1200);
+
+    setTimeout(() => {
+      addMessage(
+        `*⭐ Sua opinião importa!*\n\nComo foi a experiência até aqui?\nSua avaliação nos ajuda a melhorar o Educare+.`,
+        'bot',
+        {
+          buttons: [
+            { id: 'fb_great', text: '⭐⭐⭐⭐⭐ Adorei!' },
+            { id: 'fb_good', text: '⭐⭐⭐ Bom' },
+            { id: 'fb_improve', text: '⭐⭐ Pode melhorar' },
+          ],
+          agentLabel: 'Feedback',
+          stateLabel: 'Avaliação',
+        }
+      );
+    }, 3000);
   }, [context, addMessage]);
 
   const handleButtonClick = useCallback((btnId: string, btnText: string) => {
@@ -1179,6 +1192,23 @@ const SimulatorPanel: React.FC<{
     }
     if (btnId === 'go_report') {
       handleShowReport();
+      return;
+    }
+    if (btnId.startsWith('fb_')) {
+      addMessage(btnText, 'user');
+      setTimeout(() => {
+        addMessage(
+          `*Obrigada pela avaliação! 💜*\n\nSua opinião foi registrada e nos ajuda a melhorar cada vez mais.\n\n_Essa foi a demo interativa do Educare+. Na versão real, todas as interações são personalizadas com IA!_`,
+          'bot',
+          {
+            buttons: [
+              { id: 'restart_demo', text: '🔄 Recomeçar Demo' },
+            ],
+            agentLabel: 'Educare+',
+            stateLabel: 'Obrigada!',
+          }
+        );
+      }, 1000);
       return;
     }
     if (btnId === 'restart_demo') {
@@ -1216,7 +1246,7 @@ const SimulatorPanel: React.FC<{
           agentLabel: context === 'mother' ? 'TitiNauta Materna' : 'TitiNauta (Bebê)',
           stateLabel: 'Conversa Livre',
         });
-      }, 800);
+      }, 1500);
     } else {
       addMessage('Use os botões para navegar pelo fluxo da demo.', 'bot', {
         agentLabel: currentState ? getAgentLabel(currentState) || undefined : undefined,

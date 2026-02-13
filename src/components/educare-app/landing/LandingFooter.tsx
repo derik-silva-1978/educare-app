@@ -149,15 +149,15 @@ const LandingFooter: React.FC = () => {
               >
                 <span className="text-white font-bold text-[10px]">E+</span>
               </div>
-              <span className="text-slate-500 text-xs">
+              <span className="text-slate-300 text-xs">
                 © 2025 Educare+ Tech. Todos os direitos reservados.
               </span>
             </div>
-            <p className="text-slate-600 text-xs">
+            <p className="text-slate-300 text-xs">
               CNPJ: 60.347.906/0001-09
             </p>
           </div>
-          <p className="text-center text-slate-600 text-xs mt-4">
+          <p className="text-center text-slate-400 text-xs mt-4">
             Desenvolvido com <span className="text-purple-400">♥</span> para famílias brasileiras
           </p>
         </div>
