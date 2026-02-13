@@ -179,13 +179,13 @@ const SCENES: Scene[] = [
     label: "Início",
     icon: "🚀",
     steps: [
-      { type: "typing", duration: 2000, delay: 1000 },
+      { type: "typing", duration: 2500, delay: 1500 },
       {
         type: "bot",
         text: "Olá! 👋 Eu sou o TitiNauta, seu assistente inteligente no Educare+ Ch@t.\n\nEstou aqui para acompanhar o desenvolvimento do seu bebê e também cuidar da sua saúde, mamãe! 💜🚀",
         delay: 0,
       },
-      { type: "typing", duration: 1500, delay: 4500 },
+      { type: "typing", duration: 2000, delay: 6000 },
       {
         type: "bot",
         text: "Para personalizar sua experiência, preciso conhecer seu bebê! 👶\n\nQual é o nome dele(a)?",
@@ -194,10 +194,10 @@ const SCENES: Scene[] = [
       {
         type: "user",
         text: "Thiago",
-        delay: 4500,
+        delay: 5500,
         typewriter: true,
       },
-      { type: "typing", duration: 1500, delay: 1200 },
+      { type: "typing", duration: 2000, delay: 2000 },
       {
         type: "bot",
         text: "Que lindo nome! 💙 Thiago!\n\nE o Thiago é menino ou menina?",
@@ -209,11 +209,11 @@ const SCENES: Scene[] = [
           { text: "👦 Menino", id: "boy" },
           { text: "👧 Menina", id: "girl" },
         ],
-        delay: 2500,
+        delay: 3500,
       },
-      { type: "button_select", buttonId: "boy", delay: 3500 },
-      { type: "user", text: "👦 Menino", delay: 800 },
-      { type: "typing", duration: 1200, delay: 1200 },
+      { type: "button_select", buttonId: "boy", delay: 4500 },
+      { type: "user", text: "👦 Menino", delay: 1200 },
+      { type: "typing", duration: 1500, delay: 1800 },
       {
         type: "bot",
         text: "Perfeito! 👦 E quando o Thiago nasceu?",
@@ -222,10 +222,10 @@ const SCENES: Scene[] = [
       {
         type: "user",
         text: "02/01/2026",
-        delay: 3000,
+        delay: 4000,
         typewriter: true,
       },
-      { type: "typing", duration: 1800, delay: 1200 },
+      { type: "typing", duration: 2200, delay: 1800 },
       {
         type: "bot",
         text: "Pronto, Ana! ✅ O Thiago está na 6ª semana de vida.\n\nAgora vou acompanhar cada fase do desenvolvimento dele e também cuidar da sua saúde.\n\nVamos começar! 🌟",
@@ -239,32 +239,33 @@ const SCENES: Scene[] = [
     icon: "📖",
     steps: [
       { type: "clear", delay: 0 },
-      { type: "typing", duration: 1800, delay: 1000 },
+      { type: "typing", duration: 2200, delay: 1500 },
       {
         type: "bot",
-        text: "Bom dia, Ana! ☀️\n\n🎵 Semana 6 — Sensos em Ação\n\n📌 Marco Sensorial: Estímulos Visuais & Auditivos\n\nApresente padrões de alto contraste e mova lentamente para o Thiago acompanhar com o olhar. Narre atividades diárias em voz calma e cante. Estímulos naturais do lar já bastam — sem telas.",
+        text: "Bom dia, Ana! ☀️\n\n🎵 Semana 6 — Sensos em Ação\n\n📌 Marco Sensorial: Estímulos Visuais & Auditivos\n\nApresente padrões de alto contraste e mova lentamente para o Thiago acompanhar com o olhar. Narre atividades diárias em voz calma e cante.",
         delay: 0,
       },
-      { type: "typing", duration: 1200, delay: 4800 },
+      { type: "typing", duration: 1500, delay: 6000 },
       {
         type: "bot",
-        text: "👁️👂 Ver & Ouvir Melhor\n\n✅ Mostre contrastes (preto/branco)\n✅ Fale pausadamente e cante\n✅ Sons do lar como estímulo\n✅ Brinque de acompanhar com o olhar\n✅ Evite telas",
+        text: "👁️👂 Ver & Ouvir Melhor\n\n✅ Mostre contrastes (preto/branco)\n✅ Fale pausadamente e cante\n✅ Sons do lar como estímulo\n✅ Brinque de acompanhar com o olhar\n✅ Evite telas\n\n📚 Materiais disponíveis:\n🎧 Ouvir áudio narrado\n🎥 Assistir vídeo demonstrativo\n📄 Ler artigo completo",
         delay: 0,
       },
       {
         type: "buttons",
         buttons: [
-          { text: "📖 Ver mais detalhes", id: "content_more" },
-          { text: "▶️ Próximo tema", id: "content_next" },
+          { text: "🎧 Ouvir áudio", id: "content_audio" },
+          { text: "🎥 Ver vídeo", id: "content_video" },
+          { text: "📄 Ler artigo", id: "content_text" },
         ],
-        delay: 2500,
+        delay: 3500,
       },
-      { type: "button_select", buttonId: "content_more", delay: 3800 },
-      { type: "user", text: "📖 Ver mais detalhes", delay: 800 },
-      { type: "typing", duration: 1500, delay: 1200 },
+      { type: "button_select", buttonId: "content_audio", delay: 5000 },
+      { type: "user", text: "🎧 Ouvir áudio", delay: 1200 },
+      { type: "typing", duration: 2000, delay: 1800 },
       {
         type: "bot",
-        text: "📌 Marco Emocional: Choro & Consolo\n\nO choro comunica necessidades. Verifique fome, sono, fralda, temperatura e desconfortos.\n\n🤲 Acolher é Cuidar:\n• Contato pele a pele\n• Embalos suaves e voz calma\n• Pausa para arrotar\n• Cheque fralda/temperatura",
+        text: "🎧 Áudio: \"Estímulos Sensoriais na 6ª Semana\"\n⏱️ Duração: 3min 42s | Narrado por TitiNauta\n\n▶️ advancement ━━━━━━━━━━━━━ 3:42\n\n📌 Também disponível: Choro & Consolo 🤲\n• Contato pele a pele\n• Embalos suaves e voz calma\n• Cheque fralda/temperatura",
         delay: 0,
       },
     ],
@@ -275,13 +276,13 @@ const SCENES: Scene[] = [
     icon: "🧩",
     steps: [
       { type: "clear", delay: 0 },
-      { type: "typing", duration: 1500, delay: 1000 },
+      { type: "typing", duration: 2000, delay: 1500 },
       {
         type: "bot",
         text: "🧩 Quiz da Semana 6, Ana!\n\nVamos verificar os marcos de desenvolvimento do Thiago?\n\n📌 Marco Sensorial e Auditivo:",
         delay: 0,
       },
-      { type: "typing", duration: 1200, delay: 3500 },
+      { type: "typing", duration: 1500, delay: 5000 },
       {
         type: "bot",
         text: "👁️ O Thiago vira a cabeça na direção da sua voz ou de sons familiares?",
@@ -290,18 +291,18 @@ const SCENES: Scene[] = [
       {
         type: "buttons",
         buttons: [
-          { text: "✅ Sim, ele vira a cabeça rapidamente!", id: "quiz_yes" },
-          { text: "🔄 Às vezes, parece não notar.", id: "quiz_sometimes" },
-          { text: "❌ Não, ele não reage aos sons.", id: "quiz_no" },
+          { text: "✅ Sim, vira rápido!", id: "quiz_yes" },
+          { text: "🔄 Às vezes", id: "quiz_sometimes" },
+          { text: "❌ Ainda não", id: "quiz_no" },
         ],
-        delay: 2000,
+        delay: 3000,
       },
-      { type: "button_select", buttonId: "quiz_yes", delay: 4000 },
-      { type: "user", text: "✅ Sim, ele vira a cabeça rapidamente!", delay: 800 },
-      { type: "typing", duration: 1800, delay: 1200 },
+      { type: "button_select", buttonId: "quiz_yes", delay: 5500 },
+      { type: "user", text: "✅ Sim, vira rápido!", delay: 1200 },
+      { type: "typing", duration: 2200, delay: 1800 },
       {
         type: "bot",
-        text: "Maravilha, Ana! 🎉 Isso mostra que o Thiago reconhece sons importantes e o sistema auditivo está se desenvolvendo bem.\n\n🏅 +10 pontos — Badge: 🎵 Explorador Sensorial\n\n📊 Progresso: 1/3 marcos verificados",
+        text: "Maravilha, Ana! 🎉 Isso mostra que o Thiago reconhece sons importantes e o sistema auditivo está se desenvolvendo bem.\n\n🏅 +10 pontos — Badge: 🎵 Explorador Sensorial\n\n📊 Progresso: 1/3 marcos verificados\n\n📚 Quer saber mais?\n🎧 Ouça dicas em áudio\n🎥 Assista ao vídeo sobre estímulos",
         delay: 0,
       },
     ],
@@ -312,7 +313,7 @@ const SCENES: Scene[] = [
     icon: "💚",
     steps: [
       { type: "clear", delay: 0 },
-      { type: "typing", duration: 1500, delay: 1000 },
+      { type: "typing", duration: 2000, delay: 1500 },
       {
         type: "bot",
         text: "Oi, Ana! 💚 Agora é a sua vez.\n\n📌 Marco Materno: Saúde das Mamas\n\nComo estão suas mamas? Você sentiu dor intensa, notou áreas avermelhadas ou teve febre?",
@@ -324,14 +325,14 @@ const SCENES: Scene[] = [
           { text: "✅ Mamas estão bem!", id: "mama_ok" },
           { text: "⚠️ Sinto desconforto", id: "mama_pain" },
         ],
-        delay: 3000,
+        delay: 4500,
       },
-      { type: "button_select", buttonId: "mama_ok", delay: 3800 },
-      { type: "user", text: "✅ Mamas estão bem!", delay: 800 },
-      { type: "typing", duration: 2000, delay: 1200 },
+      { type: "button_select", buttonId: "mama_ok", delay: 5000 },
+      { type: "user", text: "✅ Mamas estão bem!", delay: 1200 },
+      { type: "typing", duration: 2500, delay: 1800 },
       {
         type: "bot",
-        text: "Ótimo, Ana! 🤱 Manter a pega correta e a livre demanda são os segredos para evitar problemas.\n\n💜 Dicas para a semana 6:\n\n1. Durma quando o Thiago dormir\n2. Peça ajuda — você não precisa dar conta de tudo sozinha\n3. Hidrate-se bem\n4. Reserve 15min só pra você por dia\n\nVocê está indo muito bem, mamãe! 💜",
+        text: "Ótimo, Ana! 🤱 Manter a pega correta e a livre demanda são os segredos para evitar problemas.\n\n💜 Dicas para a semana 6:\n\n1. Durma quando o Thiago dormir\n2. Peça ajuda — você não precisa dar conta de tudo sozinha\n3. Hidrate-se bem\n4. Reserve 15min só pra você por dia\n\n📚 Material de apoio:\n🎧 Áudio: \"Autocuidado no pós-parto\"\n📄 Artigo: \"Sinais de alerta nas mamas\"\n\nVocê está indo muito bem, mamãe! 💜",
         delay: 0,
       },
     ],
@@ -345,28 +346,28 @@ const SCENES: Scene[] = [
       {
         type: "user",
         text: "O Thiago chora muito, como posso acalmá-lo?",
-        delay: 1500,
+        delay: 2000,
         typewriter: true,
       },
-      { type: "typing", duration: 2200, delay: 1500 },
+      { type: "typing", duration: 2800, delay: 2000 },
       {
         type: "bot",
         text: "Ótima pergunta, Ana! 🤲\n\nNa 6ª semana, o choro é a principal forma de comunicação do Thiago. Ele pode estar dizendo:\n\n• 🍼 Estou com fome\n• 😴 Estou cansado\n• 🌡️ Estou desconfortável\n• 🤗 Quero colo",
         delay: 0,
       },
-      { type: "typing", duration: 1500, delay: 4500 },
+      { type: "typing", duration: 2000, delay: 6000 },
       {
         type: "bot",
-        text: "🤲 Técnicas para acalmar:\n\n1. Contato pele a pele\n2. Embalos suaves e voz calma\n3. Cheque fralda e temperatura\n4. Ofereça o peito — mesmo sem fome, o conforto ajuda\n\nVocê está fazendo um ótimo trabalho, Ana! 💜",
+        text: "🤲 Técnicas para acalmar:\n\n1. Contato pele a pele\n2. Embalos suaves e voz calma\n3. Cheque fralda e temperatura\n4. Ofereça o peito — o conforto ajuda\n\n📚 Conteúdo relacionado:\n🎧 Áudio: \"Sons que acalmam o bebê\"\n🎥 Vídeo: \"Técnicas de consolo\" (2min)\n📄 Guia: \"Decifrando o choro\"\n\nVocê está fazendo um ótimo trabalho, Ana! 💜",
         delay: 0,
       },
       {
         type: "user",
         text: "Muito obrigada! Me ajudou bastante 💜",
-        delay: 5000,
+        delay: 6500,
         typewriter: true,
       },
-      { type: "typing", duration: 1200, delay: 1200 },
+      { type: "typing", duration: 1500, delay: 1800 },
       {
         type: "bot",
         text: "Sempre que precisar, Ana! 😊\n\nEstou aqui para você e para o Thiago. 💜🚀",
@@ -380,31 +381,40 @@ const SCENES: Scene[] = [
     icon: "📊",
     steps: [
       { type: "clear", delay: 0 },
-      { type: "typing", duration: 1500, delay: 1000 },
+      { type: "typing", duration: 2000, delay: 1500 },
       {
         type: "bot",
         text: "📋 Ana, o relatório da Semana 6 do Thiago está pronto!\n\nPreparei um resumo com os marcos, progresso e próximos passos — incluindo o seu acompanhamento, mamãe! 👇",
         delay: 0,
       },
-      { type: "typing", duration: 2000, delay: 3800 },
+      { type: "typing", duration: 2500, delay: 5000 },
       { type: "bot_report", delay: 0 },
-      { type: "typing", duration: 1200, delay: 18000 },
+    ],
+  },
+  {
+    day: "⭐",
+    label: "Opinião",
+    icon: "💬",
+    steps: [
+      { type: "clear", delay: 0 },
+      { type: "typing", duration: 2000, delay: 1500 },
       {
         type: "bot",
-        text: "Ana, como foi sua experiência esta semana com o Educare+? ⭐",
+        text: "Ana, como foi sua experiência esta semana com o Educare+? ⭐\n\nSua opinião nos ajuda a melhorar cada vez mais!",
         delay: 0,
       },
       {
         type: "buttons",
         buttons: [
           { text: "⭐⭐⭐⭐⭐ Adorei!", id: "fb_5" },
+          { text: "⭐⭐⭐⭐ Muito bom", id: "fb_4" },
           { text: "⭐⭐⭐ Razoável", id: "fb_3" },
         ],
-        delay: 3000,
+        delay: 4000,
       },
-      { type: "button_select", buttonId: "fb_5", delay: 4000 },
-      { type: "user", text: "⭐⭐⭐⭐⭐ Adorei!", delay: 800 },
-      { type: "typing", duration: 1500, delay: 1200 },
+      { type: "button_select", buttonId: "fb_5", delay: 5500 },
+      { type: "user", text: "⭐⭐⭐⭐⭐ Adorei!", delay: 1200 },
+      { type: "typing", duration: 2000, delay: 1800 },
       {
         type: "bot",
         text: "Obrigado, Ana! 🙏💜\n\nNa Semana 7: Saúde em Dia — consultas, vacinas e novos quizzes para o Thiago!\n\nBom fim de semana para vocês! 🌈\n\n— TitiNauta 🚀",
@@ -548,7 +558,7 @@ const WhatsAppSimulator = () => {
             schedule(() => {
               setMessages((prev) => [...prev, { id, text, sender: "bot" }]);
             }, cumulativeDelay);
-            cumulativeDelay += 600;
+            cumulativeDelay += 900;
             break;
           }
 
@@ -557,7 +567,7 @@ const WhatsAppSimulator = () => {
             schedule(() => {
               setShowReport(true);
             }, cumulativeDelay);
-            cumulativeDelay += 600;
+            cumulativeDelay += 20000;
             break;
           }
 
@@ -623,7 +633,7 @@ const WhatsAppSimulator = () => {
         }
       });
 
-      const sceneEndDelay = cumulativeDelay + 5000;
+      const sceneEndDelay = cumulativeDelay + 7000;
       schedule(() => {
         const nextScene = (sceneIndex + 1) % SCENES.length;
         const next = SCENES[nextScene];
@@ -635,7 +645,7 @@ const WhatsAppSimulator = () => {
           setShowTransitionCard(false);
           setNextSceneInfo(null);
           runScene(nextScene);
-        }, 1800);
+        }, 2200);
       }, sceneEndDelay);
     },
     [clearTimers, schedule]
