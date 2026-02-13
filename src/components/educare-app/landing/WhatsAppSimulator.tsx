@@ -39,8 +39,8 @@ const DOMAIN_DATA = [
 const MILESTONES = [
   { domain: "Social", range: "0-6s", title: "Sorriso Social", desc: "Responde com sorrisos ao interagir com adultos.", status: "done", color: "#7b61ff" },
   { domain: "Motor", range: "4-6s", title: "Sustenta a Cabeça", desc: "Começa a manter a cabeça erguida no Tummy Time.", status: "current", color: "#4285f4" },
-  { domain: "Sensorial", range: "5-6s", title: "Acompanha Objetos", desc: "Segue objetos com o olhar em arco de 180°.", status: "current", color: "#ea4335" },
-  { domain: "Linguagem", range: "6-8s", title: "Primeiros Arrulhos", desc: "Emite sons guturais e vogais ao interagir.", status: "current", color: "#34a853" },
+  { domain: "Sensorial", range: "4-5s", title: "Foca Objetos Próximos", desc: "Foca em objetos a 20-30cm de distância.", status: "current", color: "#ea4335" },
+  { domain: "Linguagem", range: "5-8s", title: "Primeiros Arrulhos", desc: "Emite sons guturais e vogais ao interagir.", status: "next", color: "#34a853" },
   { domain: "Cognitivo", range: "8-12s", title: "Reconhece Rostos", desc: "Diferencia rostos familiares de estranhos.", status: "next", color: "#f9ab00" },
   { domain: "Motor", range: "12-16s", title: "Rola de Barriga", desc: "Consegue rolar de barriga para cima.", status: "next", color: "#4285f4" },
 ];
@@ -117,7 +117,7 @@ const ReportSlide2 = () => (
 
 const ReportSlide3 = () => (
   <div className="px-3 py-2 space-y-1.5">
-    <p className="text-[8px] font-bold text-pink-600 uppercase tracking-wide">Resumo da Mãe — Semana 6</p>
+    <p className="text-[8px] font-bold text-pink-600 uppercase tracking-wide">Resumo da Mãe — Semana 5</p>
     {MOTHER_SUMMARY.map((ins, i) => (
       <div key={i} className="flex items-start gap-1.5">
         <span className="text-[10px]">{ins.icon}</span>
@@ -148,7 +148,7 @@ const DevelopmentReport = () => {
         <div className="px-3 py-1.5 flex items-center gap-2" style={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)" }}>
           <span className="text-[10px]">{SLIDE_ICONS[slide]}</span>
           <span className="text-white text-[10px] font-semibold">{SLIDE_TITLES[slide]}</span>
-          <span className="text-white/60 text-[8px] ml-auto">Sem. 6</span>
+          <span className="text-white/60 text-[8px] ml-auto">Sem. 5</span>
         </div>
 
         <div className="min-h-[120px]">
@@ -221,20 +221,42 @@ const SCENES: Scene[] = [
       },
       {
         type: "user",
-        text: "02/01/2026",
+        text: "09/01/2026",
         delay: 4000,
         typewriter: true,
       },
       { type: "typing", duration: 2200, delay: 1800 },
       {
         type: "bot",
-        text: "Pronto, Ana! ✅ O Thiago está na 6ª semana de vida.\n\nAgora vou acompanhar cada fase do desenvolvimento dele e também cuidar da sua saúde.\n\nVamos começar! 🌟",
+        text: "Pronto, Ana! ✅ O Thiago está na 5ª semana de vida.\n\nVou acompanhar cada fase do desenvolvimento dele e também cuidar da sua saúde. 🌟",
+        delay: 0,
+      },
+      { type: "typing", duration: 1800, delay: 4500 },
+      {
+        type: "bot",
+        text: "Antes de começar, Ana — você pode interagir comigo por texto ou por áudio 🎙️\n\nComo prefere conversar?",
+        delay: 0,
+      },
+      {
+        type: "buttons",
+        buttons: [
+          { text: "⌨️ Prefiro texto", id: "pref_text" },
+          { text: "🎙️ Prefiro áudio", id: "pref_audio" },
+        ],
+        delay: 4000,
+      },
+      { type: "button_select", buttonId: "pref_text", delay: 5000 },
+      { type: "user", text: "⌨️ Prefiro texto", delay: 1200 },
+      { type: "typing", duration: 1500, delay: 1800 },
+      {
+        type: "bot",
+        text: "Perfeito! ⌨️ Vou interagir por texto. Mas fique à vontade para enviar áudio sempre que quiser — eu entendo os dois! 😊\n\nVamos começar! 🚀",
         delay: 0,
       },
     ],
   },
   {
-    day: "SEG",
+    day: "👶",
     label: "Conteúdo",
     icon: "📖",
     steps: [
@@ -242,13 +264,13 @@ const SCENES: Scene[] = [
       { type: "typing", duration: 2200, delay: 1500 },
       {
         type: "bot",
-        text: "Bom dia, Ana! ☀️\n\n🎵 Semana 6 — Sensos em Ação\n\n📌 Marco Sensorial: Estímulos Visuais & Auditivos\n\nApresente padrões de alto contraste e mova lentamente para o Thiago acompanhar com o olhar. Narre atividades diárias em voz calma e cante.",
+        text: "Bom dia, Ana! ☀️\n\n👶 Semana 5 — Conteúdo do Bebê\n\n📌 Marco Motor: Sustentação da Cabeça\n\nO Thiago está começando a firmar a cabecinha! O Tummy Time é essencial para fortalecer a musculatura do pescoço.",
         delay: 0,
       },
       { type: "typing", duration: 1500, delay: 6000 },
       {
         type: "bot",
-        text: "👁️👂 Ver & Ouvir Melhor\n\n✅ Mostre contrastes (preto/branco)\n✅ Fale pausadamente e cante\n✅ Sons do lar como estímulo\n✅ Brinque de acompanhar com o olhar\n✅ Evite telas\n\n📚 Materiais disponíveis:\n🎧 Ouvir áudio narrado\n🎥 Assistir vídeo demonstrativo\n📄 Ler artigo completo",
+        text: "💪 Tummy Time — Dicas Práticas\n\n✅ 3 a 5 min por sessão, 2-3x ao dia\n✅ Coloque brinquedos coloridos à frente\n✅ Fique de frente, converse com ele\n✅ Pare se o bebê demonstrar desconforto\n\n📚 Materiais disponíveis:\n🎧 Ouvir áudio narrado\n🎥 Assistir vídeo demonstrativo\n📄 Ler artigo completo",
         delay: 0,
       },
       {
@@ -265,81 +287,125 @@ const SCENES: Scene[] = [
       { type: "typing", duration: 2000, delay: 1800 },
       {
         type: "bot",
-        text: "🎧 Áudio: \"Estímulos Sensoriais na 6ª Semana\"\n⏱️ Duração: 3min 42s | Narrado por TitiNauta\n\n▶️ advancement ━━━━━━━━━━━━━ 3:42\n\n📌 Também disponível: Choro & Consolo 🤲\n• Contato pele a pele\n• Embalos suaves e voz calma\n• Cheque fralda/temperatura",
+        text: "🎧 Áudio: \"Tummy Time na 5ª Semana\"\n⏱️ Duração: 2min 58s | Narrado por TitiNauta\n\n▶️ advancement ━━━━━━━━━━━━━ 2:58\n\nÓtimo conteúdo para o Thiago! 💙",
         delay: 0,
       },
     ],
   },
   {
-    day: "TER",
-    label: "Quiz",
+    day: "🤱",
+    label: "Cont. Mãe",
+    icon: "💜",
+    steps: [
+      { type: "clear", delay: 0 },
+      { type: "typing", duration: 2200, delay: 1500 },
+      {
+        type: "bot",
+        text: "Agora é a sua vez, Ana! 💜\n\n🤱 Semana 5 — Conteúdo da Mãe\n\n📌 Recuperação Pós-Parto: Assoalho Pélvico\n\nNa 5ª semana, seu corpo está se recuperando. Exercícios leves para o assoalho pélvico ajudam na recuperação e bem-estar.",
+        delay: 0,
+      },
+      { type: "typing", duration: 1500, delay: 6000 },
+      {
+        type: "bot",
+        text: "🧘 Exercícios de Kegel — Primeiros Passos\n\n✅ Contraia os músculos por 5 segundos\n✅ Relaxe por 5 segundos\n✅ Repita 10x, 3 vezes ao dia\n✅ Pode fazer sentada ou deitada\n\n📚 Materiais disponíveis:\n🎧 Ouvir áudio guiado\n🎥 Assistir vídeo com exercícios\n📄 Ler artigo completo",
+        delay: 0,
+      },
+      {
+        type: "buttons",
+        buttons: [
+          { text: "🎧 Ouvir áudio", id: "mom_content_audio" },
+          { text: "🎥 Ver vídeo", id: "mom_content_video" },
+          { text: "📄 Ler artigo", id: "mom_content_text" },
+        ],
+        delay: 3500,
+      },
+      { type: "button_select", buttonId: "mom_content_audio", delay: 5000 },
+      { type: "user", text: "🎧 Ouvir áudio", delay: 1200 },
+      { type: "typing", duration: 2000, delay: 1800 },
+      {
+        type: "bot",
+        text: "🎧 Áudio: \"Recuperação Pélvica na 5ª Semana\"\n⏱️ Duração: 3min 15s | Narrado por TitiNauta\n\n▶️ ━━━━━━━━━━━━━━━ 3:15\n\nCuide de você também, Ana! 💜",
+        delay: 0,
+      },
+    ],
+  },
+  {
+    day: "👶",
+    label: "Quiz Bebê",
     icon: "🧩",
     steps: [
       { type: "clear", delay: 0 },
       { type: "typing", duration: 2000, delay: 1500 },
       {
         type: "bot",
-        text: "🧩 Quiz da Semana 6, Ana!\n\nVamos verificar os marcos de desenvolvimento do Thiago?\n\n📌 Marco Sensorial e Auditivo:",
+        text: "🧩 Quiz da Semana 5, Ana!\n\nVamos verificar um marco de desenvolvimento do Thiago?\n\n📌 Marco Motor:",
         delay: 0,
       },
       { type: "typing", duration: 1500, delay: 5000 },
       {
         type: "bot",
-        text: "👁️ O Thiago vira a cabeça na direção da sua voz ou de sons familiares?",
+        text: "💪 Quando o Thiago fica de bruços, ele consegue levantar a cabecinha por alguns segundos?",
         delay: 0,
       },
       {
         type: "buttons",
         buttons: [
-          { text: "✅ Sim, vira rápido!", id: "quiz_yes" },
+          { text: "✅ Sim, levanta!", id: "quiz_yes" },
           { text: "🔄 Às vezes", id: "quiz_sometimes" },
           { text: "❌ Ainda não", id: "quiz_no" },
         ],
         delay: 3000,
       },
       { type: "button_select", buttonId: "quiz_yes", delay: 5500 },
-      { type: "user", text: "✅ Sim, vira rápido!", delay: 1200 },
+      { type: "user", text: "✅ Sim, levanta!", delay: 1200 },
       { type: "typing", duration: 2200, delay: 1800 },
       {
         type: "bot",
-        text: "Maravilha, Ana! 🎉 Isso mostra que o Thiago reconhece sons importantes e o sistema auditivo está se desenvolvendo bem.\n\n🏅 +10 pontos — Badge: 🎵 Explorador Sensorial\n\n📊 Progresso: 1/3 marcos verificados\n\n📚 Quer saber mais?\n🎧 Ouça dicas em áudio\n🎥 Assista ao vídeo sobre estímulos",
+        text: "Maravilha, Ana! 🎉 O Thiago está fortalecendo a musculatura cervical — ótimo sinal de desenvolvimento motor!\n\n🏅 +10 pontos — Badge: 💪 Força no Pescocinho\n\n📊 Progresso: 1/3 marcos verificados",
         delay: 0,
       },
     ],
   },
   {
-    day: "QUA",
-    label: "Saúde Mãe",
-    icon: "💚",
+    day: "🤱",
+    label: "Quiz Mãe",
+    icon: "🩺",
     steps: [
       { type: "clear", delay: 0 },
       { type: "typing", duration: 2000, delay: 1500 },
       {
         type: "bot",
-        text: "Oi, Ana! 💚 Agora é a sua vez.\n\n📌 Marco Materno: Saúde das Mamas\n\nComo estão suas mamas? Você sentiu dor intensa, notou áreas avermelhadas ou teve febre?",
+        text: "🩺 Agora seu quiz, Ana!\n\nVamos verificar como está sua recuperação?\n\n📌 Saúde Materna — Semana 5:",
+        delay: 0,
+      },
+      { type: "typing", duration: 1500, delay: 5000 },
+      {
+        type: "bot",
+        text: "🤱 Você sentiu dor intensa nas mamas, notou áreas avermelhadas ou teve febre nos últimos dias?",
         delay: 0,
       },
       {
         type: "buttons",
         buttons: [
-          { text: "✅ Mamas estão bem!", id: "mama_ok" },
-          { text: "⚠️ Sinto desconforto", id: "mama_pain" },
+          { text: "✅ Está tudo bem!", id: "mom_quiz_ok" },
+          { text: "⚠️ Sinto desconforto", id: "mom_quiz_pain" },
+          { text: "🆘 Sim, tive sintomas", id: "mom_quiz_alert" },
         ],
-        delay: 4500,
+        delay: 3000,
       },
-      { type: "button_select", buttonId: "mama_ok", delay: 5000 },
-      { type: "user", text: "✅ Mamas estão bem!", delay: 1200 },
-      { type: "typing", duration: 2500, delay: 1800 },
+      { type: "button_select", buttonId: "mom_quiz_ok", delay: 5500 },
+      { type: "user", text: "✅ Está tudo bem!", delay: 1200 },
+      { type: "typing", duration: 2200, delay: 1800 },
       {
         type: "bot",
-        text: "Ótimo, Ana! 🤱 Manter a pega correta e a livre demanda são os segredos para evitar problemas.\n\n💜 Dicas para a semana 6:\n\n1. Durma quando o Thiago dormir\n2. Peça ajuda — você não precisa dar conta de tudo sozinha\n3. Hidrate-se bem\n4. Reserve 15min só pra você por dia\n\n📚 Material de apoio:\n🎧 Áudio: \"Autocuidado no pós-parto\"\n📄 Artigo: \"Sinais de alerta nas mamas\"\n\nVocê está indo muito bem, mamãe! 💜",
+        text: "Ótimo, Ana! 🤱 Mamas saudáveis são sinal de que a amamentação está indo bem.\n\n💜 Dica: mantenha a pega correta e a livre demanda.\n\n🏅 +10 pontos — Badge: 🤱 Mamãe Saudável\n\n📊 Progresso: 1/2 verificações maternas",
         delay: 0,
       },
     ],
   },
   {
-    day: "QUI",
-    label: "Assistente",
+    day: "👶",
+    label: "Chat Bebê",
     icon: "🤖",
     steps: [
       { type: "clear", delay: 0 },
@@ -352,31 +418,45 @@ const SCENES: Scene[] = [
       { type: "typing", duration: 2800, delay: 2000 },
       {
         type: "bot",
-        text: "Ótima pergunta, Ana! 🤲\n\nNa 6ª semana, o choro é a principal forma de comunicação do Thiago. Ele pode estar dizendo:\n\n• 🍼 Estou com fome\n• 😴 Estou cansado\n• 🌡️ Estou desconfortável\n• 🤗 Quero colo",
+        text: "Ótima pergunta, Ana! 🤲\n\nNa 5ª semana, o choro é a principal forma de comunicação do Thiago. Ele pode estar dizendo:\n\n• 🍼 Estou com fome\n• 😴 Estou cansado\n• 🌡️ Estou desconfortável\n• 🤗 Quero colo",
         delay: 0,
       },
       { type: "typing", duration: 2000, delay: 6000 },
       {
         type: "bot",
-        text: "🤲 Técnicas para acalmar:\n\n1. Contato pele a pele\n2. Embalos suaves e voz calma\n3. Cheque fralda e temperatura\n4. Ofereça o peito — o conforto ajuda\n\n📚 Conteúdo relacionado:\n🎧 Áudio: \"Sons que acalmam o bebê\"\n🎥 Vídeo: \"Técnicas de consolo\" (2min)\n📄 Guia: \"Decifrando o choro\"\n\nVocê está fazendo um ótimo trabalho, Ana! 💜",
-        delay: 0,
-      },
-      {
-        type: "user",
-        text: "Muito obrigada! Me ajudou bastante 💜",
-        delay: 6500,
-        typewriter: true,
-      },
-      { type: "typing", duration: 1500, delay: 1800 },
-      {
-        type: "bot",
-        text: "Sempre que precisar, Ana! 😊\n\nEstou aqui para você e para o Thiago. 💜🚀",
+        text: "🤲 Técnicas para acalmar:\n\n1. Contato pele a pele\n2. Embalos suaves e voz calma\n3. Cheque fralda e temperatura\n4. Ofereça o peito — o conforto ajuda\n\nVocê está fazendo um ótimo trabalho, Ana! 💜",
         delay: 0,
       },
     ],
   },
   {
-    day: "SEX",
+    day: "🤱",
+    label: "Chat Mãe",
+    icon: "💬",
+    steps: [
+      { type: "clear", delay: 0 },
+      {
+        type: "user",
+        text: "Estou muito cansada, é normal sentir isso?",
+        delay: 2000,
+        typewriter: true,
+      },
+      { type: "typing", duration: 2800, delay: 2000 },
+      {
+        type: "bot",
+        text: "Totalmente normal, Ana! 💜\n\nNa 5ª semana pós-parto, o cansaço é muito comum. Seu corpo ainda está se recuperando e as noites interrompidas pesam.\n\n😴 O que pode ajudar:\n\n• Durma quando o Thiago dormir\n• Peça ajuda — divida tarefas\n• Hidrate-se bem ao longo do dia\n• Reserve 15 min só pra você",
+        delay: 0,
+      },
+      { type: "typing", duration: 2000, delay: 6000 },
+      {
+        type: "bot",
+        text: "⚠️ Fique atenta a sinais como:\n• Tristeza persistente por mais de 2 semanas\n• Dificuldade de criar vínculo com o bebê\n• Choro frequente sem motivo\n\nSe sentir algo assim, converse com seu médico. Não precisa enfrentar sozinha! 💜\n\nEstou aqui para você, Ana! 🤗",
+        delay: 0,
+      },
+    ],
+  },
+  {
+    day: "📊",
     label: "Relatório",
     icon: "📊",
     steps: [
@@ -384,7 +464,7 @@ const SCENES: Scene[] = [
       { type: "typing", duration: 2000, delay: 1500 },
       {
         type: "bot",
-        text: "📋 Ana, o relatório da Semana 6 do Thiago está pronto!\n\nPreparei um resumo com os marcos, progresso e próximos passos — incluindo o seu acompanhamento, mamãe! 👇",
+        text: "📋 Ana, o relatório da Semana 5 do Thiago está pronto!\n\nPreparei um resumo com os marcos, progresso e próximos passos — incluindo o seu acompanhamento, mamãe! 👇",
         delay: 0,
       },
       { type: "typing", duration: 2500, delay: 5000 },
@@ -417,7 +497,7 @@ const SCENES: Scene[] = [
       { type: "typing", duration: 2000, delay: 1800 },
       {
         type: "bot",
-        text: "Obrigado, Ana! 🙏💜\n\nNa Semana 7: Saúde em Dia — consultas, vacinas e novos quizzes para o Thiago!\n\nBom fim de semana para vocês! 🌈\n\n— TitiNauta 🚀",
+        text: "Obrigado, Ana! 🙏💜\n\nNa Semana 6 teremos: Sensos em Ação — estímulos visuais, auditivos e novos quizzes para o Thiago e pra você!\n\nBom fim de semana para vocês! 🌈\n\n— TitiNauta 🚀",
         delay: 0,
       },
     ],
