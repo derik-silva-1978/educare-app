@@ -17,7 +17,8 @@ import {
   Map, Play, Send, RefreshCw, Save, X, Plus, Trash2, ChevronUp, ChevronDown,
   Bot, Loader2, CheckCircle, XCircle, Eye,
   UserPlus, Star, MessageCircle, Sparkles, ChevronRight, Info,
-  ArrowRight, Zap, Settings2, Hash, Volume2, FileText, HelpCircle, Layers
+  ArrowRight, Zap, Settings2, Hash, Volume2, FileText, HelpCircle, Layers,
+  Share2
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -826,6 +827,92 @@ const CollapsibleSection: React.FC<{
 );
 
 
+const DEMO_CONTENT = {
+  child: {
+    title: "Sorriso Social & Vínculo",
+    acaoTexto: "Seu bebê está pronto(a) para sorrir de volta! Use voz suave, aproxime o rosto (20–30 cm) e aguarde a resposta. Imite os sons do bebê para iniciar 'turnos de conversa'. Esse jogo reforça vínculo, atenção e comunicação precoce.",
+    acaoAudio: "TitiNauta na escuta! Sorria, espere e responda. Transforme cada troca de olhares em diálogo com seu bebê. Simples, afetuoso e poderoso.",
+    microcard: { titulo: "😊 Sorriso que Conecta", itens: ["Converse olhando nos olhos", "Imite sons simples (agu/oh)", "Sorria e aguarde resposta", "Toque gentil e previsível", "Rotina diária de carinho"] },
+    badge: "😊 Sorriso Social",
+    quiz: {
+      title: "🤲 Motor",
+      question: "Nesta semana, seu bebê conseguiu levantar a cabeça por alguns segundos quando estava de bruços (Tummy Time)?",
+      options: ["Sim, levantou com facilidade!", "Sim, mas por poucos segundos.", "Não, ainda não levantou."],
+      feedback: { correct: "Ótimo! O Tummy Time está funcionando! Continue com sessões curtas.", encouraging: "Normal para essa fase. Continue tentando, cada segundo conta!" },
+    },
+  },
+  mother: {
+    title: "Autocuidado no 2º Mês",
+    acaoTexto: "Cuidar de si é cuidar do bebê. Reserve pelo menos 15 minutos por dia para algo que te faça bem: um banho mais demorado, uma caminhada curta, ou simplesmente respirar fundo. Sua saúde mental importa tanto quanto a física.",
+    acaoAudio: "Ei, mamãe! Pausa pra você. Respira fundo, bebe água. Você tá fazendo um trabalho incrível. Cuide de você também!",
+    microcard: { titulo: "🧘 Momento da Mamãe", itens: ["15 min diários para você", "Hidratação constante", "Peça ajuda quando precisar", "Sono quando o bebê dormir", "Exercícios leves"] },
+    badge: "🧘 Autocuidado",
+    quiz: {
+      title: "🧘‍♀️ Autocuidado Materno",
+      question: "Você conseguiu reservar ao menos alguns minutos por dia para descansar, se hidratar e se alimentar bem?",
+      options: ["Sim, sempre que posso!", "Às vezes, quero me dedicar mais.", "Não consegui ainda, mas vou tentar."],
+      feedback: { correct: "Maravilha! Cuidar de você é essencial.", encouraging: "Cada pequeno passo conta. Tente começar com 5 minutos amanhã." },
+    },
+  },
+};
+
+const AudioWaveAnimation: React.FC = () => (
+  <div className="flex items-center gap-[2px] h-4 px-1">
+    {[1, 2, 3, 4, 5].map(i => (
+      <div
+        key={i}
+        className="w-[3px] bg-[#075E54] dark:bg-emerald-400 rounded-full"
+        style={{
+          animation: `audioWave 0.8s ease-in-out infinite alternate`,
+          animationDelay: `${i * 0.1}s`,
+          height: '100%',
+        }}
+      />
+    ))}
+    <style>{`
+      @keyframes audioWave {
+        0% { transform: scaleY(0.3); }
+        100% { transform: scaleY(1); }
+      }
+    `}</style>
+  </div>
+);
+
+const MessageActionBar: React.FC<{
+  messageId: string;
+  isAudioPlaying: boolean;
+  audioMessageId: string | null;
+  onPlayAudio: (id: string) => void;
+  onShare: () => void;
+}> = ({ messageId, isAudioPlaying, audioMessageId, onPlayAudio, onShare }) => (
+  <div className="flex items-center gap-1 mt-1 ml-1">
+    <button
+      onClick={() => onPlayAudio(messageId)}
+      className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full bg-white dark:bg-[#202C33] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+    >
+      {isAudioPlaying && audioMessageId === messageId ? (
+        <AudioWaveAnimation />
+      ) : (
+        <>
+          <Volume2 className="h-2.5 w-2.5" />
+          <span>Ouvir</span>
+        </>
+      )}
+    </button>
+    <span className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400">
+      <FileText className="h-2.5 w-2.5" />
+      Texto
+    </span>
+    <button
+      onClick={onShare}
+      className="flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full bg-white dark:bg-[#202C33] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+    >
+      <Share2 className="h-2.5 w-2.5" />
+      Compartilhar
+    </button>
+  </div>
+);
+
 const SimulatorPanel: React.FC<{
   configMap: Record<string, StateConfig>;
   configs: StateConfig[];
@@ -838,6 +925,10 @@ const SimulatorPanel: React.FC<{
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [context, setContext] = useState<'child' | 'mother' | null>(null);
+  const [demoStep, setDemoStep] = useState(0);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [audioMessageId, setAudioMessageId] = useState<string | null>(null);
+  const [quizAnswered, setQuizAnswered] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -847,23 +938,39 @@ const SimulatorPanel: React.FC<{
   }, [messages]);
 
   const addMessage = useCallback((text: string, sender: 'user' | 'bot', extra?: Partial<ChatMessage>) => {
-    setMessages(prev => [...prev, {
+    const newMsg: ChatMessage = {
       id: Date.now().toString() + Math.random(),
       text, sender, timestamp: new Date(),
       ...extra,
-    }]);
+    };
+    setMessages(prev => [...prev, newMsg]);
+    return newMsg.id;
   }, []);
 
+  const handlePlayAudio = useCallback((msgId: string) => {
+    setIsAudioPlaying(true);
+    setAudioMessageId(msgId);
+    setTimeout(() => {
+      setIsAudioPlaying(false);
+      setAudioMessageId(null);
+    }, 3000);
+  }, []);
+
+  const handleShare = useCallback(() => {
+    toast({ title: '🔗 Link copiado!', description: 'O conteúdo foi copiado para a área de transferência.' });
+  }, [toast]);
+
   const getAgentLabel = useCallback((state: string): string | null => {
-    const cfg = configMap[state];
-    if (!cfg?.agent_module_types?.length) return null;
     if (state === 'FREE_CONVERSATION') {
-      if (context === 'child') return 'TitiNauta (Bebe)';
+      if (context === 'child') return 'TitiNauta (Bebê)';
       if (context === 'mother') return 'TitiNauta Materna';
     }
     if (state === 'QUIZ_FLOW') {
-      return context === 'mother' ? 'Quiz Mae' : 'Quiz Bebe';
+      return context === 'mother' ? 'Quiz Mãe' : 'Quiz Bebê';
     }
+    if (state === 'CONTENT_FLOW') return 'Conteúdo Semanal';
+    const cfg = configMap[state];
+    if (!cfg?.agent_module_types?.length) return null;
     const first = cfg.agent_module_types[0];
     return AGENT_META[first]?.name || first;
   }, [configMap, context]);
@@ -880,68 +987,205 @@ const SimulatorPanel: React.FC<{
     }
   }, [configMap, addMessage, getAgentLabel]);
 
-  const initConversation = useCallback(async () => {
+  const initConversation = useCallback(() => {
     if (!phone) return;
-    try {
-      setLoading(true);
-      await fetch(buildUrl('/api/conversation/state'), {
-        method: 'POST', headers: getHeaders(),
-        body: JSON.stringify({ phone, state: 'ENTRY' }),
-      });
-      setCurrentState('ENTRY');
-      setMessages([]);
-      setContext(null);
-      const cfg = configMap['ENTRY'];
-      if (cfg) {
-        addMessage(cfg.message_template || 'Bem-vindo ao TitiNauta!', 'bot', {
-          buttons: cfg.buttons?.length > 0 ? cfg.buttons : undefined,
-          agentLabel: getAgentLabel('ENTRY') || undefined,
-          stateLabel: cfg.display_name,
-        });
-      }
-      toast({ title: 'Conversa iniciada' });
-    } catch {
-      toast({ title: 'Erro ao iniciar', variant: 'destructive' });
-    } finally {
-      setLoading(false);
-    }
-  }, [phone, configMap, toast, addMessage, getAgentLabel]);
+    setCurrentState('ENTRY');
+    setMessages([]);
+    setContext(null);
+    setDemoStep(1);
+    setQuizAnswered(false);
 
-  const sendMessage = useCallback(async () => {
-    if (!message.trim() || !phone) return;
-    const msg = message.trim();
-    setMessage('');
-    addMessage(msg, 'user');
-
-    if (currentState === 'ONBOARDING') {
-      try {
-        setLoading(true);
-        const res = await fetch(buildUrl('/api/conversation/onboarding'), {
-          method: 'POST', headers: getHeaders(),
-          body: JSON.stringify({ phone, message: msg }),
-        });
-        const data = await res.json();
-        const reply = data.data?.reply || data.reply || data.message || JSON.stringify(data);
-        const newState = data.data?.state || data.state;
-        addMessage(reply, 'bot', {
-          agentLabel: getAgentLabel('ONBOARDING') || undefined,
-          stateLabel: configMap['ONBOARDING']?.display_name,
-        });
-        if (newState && newState !== currentState) setCurrentState(newState);
-      } catch {
-        addMessage('Erro ao processar mensagem', 'bot');
-      } finally {
-        setLoading(false);
+    addMessage(
+      "*Olá! 👋 Bem-vindo(a) ao Educare+*\n\nSou a TitiNauta, sua assistente de desenvolvimento infantil e saúde materna.\n\nVamos começar? Escolha o que deseja explorar:",
+      'bot',
+      {
+        buttons: [
+          { id: 'ctx_child', text: '👶 Desenvolvimento do Bebê' },
+          { id: 'ctx_mother', text: '🤰 Saúde da Mãe' },
+        ],
+        agentLabel: 'TitiNauta',
+        stateLabel: 'Boas-vindas',
       }
-    } else {
-      addMessage('Mensagem recebida. Use os botoes ou transicoes para navegar.', 'bot', {
-        agentLabel: currentState ? getAgentLabel(currentState) || undefined : undefined,
-        stateLabel: currentState ? configMap[currentState]?.display_name : undefined,
+    );
+    toast({ title: 'Conversa iniciada' });
+  }, [phone, addMessage, toast]);
+
+  const handleContextSelect = useCallback((selectedContext: 'child' | 'mother') => {
+    setContext(selectedContext);
+    setCurrentState('CONTEXT_SELECTION');
+    setDemoStep(2);
+
+    const label = selectedContext === 'child' ? '👶 Desenvolvimento do Bebê' : '🤰 Saúde da Mãe';
+    addMessage(label, 'user');
+
+    const content = DEMO_CONTENT[selectedContext];
+
+    setTimeout(() => {
+      setCurrentState('CONTENT_FLOW');
+      setDemoStep(3);
+
+      addMessage(
+        `*📚 Semana 5 — ${content.title}*\n\n${content.acaoTexto}`,
+        'bot',
+        {
+          agentLabel: 'Conteúdo Semanal',
+          stateLabel: 'Conteúdo Educacional',
+        }
+      );
+
+      setTimeout(() => {
+        addMessage(
+          `__MICROCARD__`,
+          'bot',
+          {
+            agentLabel: 'Conteúdo Semanal',
+            stateLabel: content.badge,
+          }
+        );
+      }, 600);
+
+      setTimeout(() => {
+        addMessage(
+          `🎧 *Versão áudio disponível:*\n"${content.acaoAudio}"`,
+          'bot',
+          {
+            buttons: [
+              { id: 'go_quiz', text: '📝 Ir para o Quiz' },
+            ],
+            agentLabel: 'Conteúdo Semanal',
+            stateLabel: 'Conteúdo Educacional',
+          }
+        );
+      }, 1200);
+    }, 500);
+  }, [addMessage]);
+
+  const handleQuizStart = useCallback(() => {
+    if (!context) return;
+    addMessage('📝 Ir para o Quiz', 'user');
+    setCurrentState('QUIZ_FLOW');
+    setDemoStep(4);
+
+    const quiz = DEMO_CONTENT[context].quiz;
+
+    setTimeout(() => {
+      addMessage(
+        `*${quiz.title} — Quiz da Semana 5*\n\n${quiz.question}`,
+        'bot',
+        {
+          buttons: quiz.options.map((opt, i) => ({ id: `quiz_opt_${i}`, text: opt })),
+          agentLabel: context === 'mother' ? 'Quiz Mãe' : 'Quiz Bebê',
+          stateLabel: 'Quiz Interativo',
+        }
+      );
+    }, 400);
+  }, [context, addMessage]);
+
+  const handleQuizAnswer = useCallback((optionIndex: number, optionText: string) => {
+    if (!context || quizAnswered) return;
+    setQuizAnswered(true);
+    addMessage(optionText, 'user');
+
+    const quiz = DEMO_CONTENT[context].quiz;
+    const isFirst = optionIndex === 0;
+    const feedback = isFirst ? quiz.feedback.correct : quiz.feedback.encouraging;
+
+    setTimeout(() => {
+      addMessage(
+        `${isFirst ? '✅' : '💪'} *${feedback}*\n\n🏅 +10 pontos adicionados ao seu perfil!`,
+        'bot',
+        {
+          buttons: [
+            { id: 'go_free', text: '💬 Falar com TitiNauta' },
+          ],
+          agentLabel: context === 'mother' ? 'Quiz Mãe' : 'Quiz Bebê',
+          stateLabel: 'Resultado do Quiz',
+        }
+      );
+    }, 500);
+  }, [context, quizAnswered, addMessage]);
+
+  const handleFreeConversation = useCallback(() => {
+    addMessage('💬 Falar com TitiNauta', 'user');
+    setCurrentState('FREE_CONVERSATION');
+    setDemoStep(5);
+
+    const greeting = context === 'mother'
+      ? "*Olá, mamãe! 💜*\n\nSou a TitiNauta Materna. Estou aqui para te ouvir e ajudar com qualquer dúvida sobre sua saúde, bem-estar e a relação com seu bebê.\n\nPode perguntar o que quiser!"
+      : "*Olá! 🚀 Sou a TitiNauta!*\n\nEstou aqui para ajudar no desenvolvimento do Bebê. Pode me perguntar sobre marcos do desenvolvimento, atividades estimulantes, alimentação e muito mais!\n\nDigite sua dúvida abaixo:";
+
+    setTimeout(() => {
+      addMessage(greeting, 'bot', {
+        agentLabel: context === 'mother' ? 'TitiNauta Materna' : 'TitiNauta (Bebê)',
+        stateLabel: 'Conversa Livre',
       });
-    }
-  }, [message, phone, currentState, addMessage, getAgentLabel, configMap]);
+    }, 400);
+
+    setTimeout(() => {
+      addMessage(
+        `*Dica:* Você pode perguntar coisas como:\n• "Meu bebê de 5 semanas dorme pouco, é normal?"\n• "Quais atividades posso fazer com ele?"\n• "Como estimular a visão?"`,
+        'bot',
+        {
+          buttons: [
+            { id: 'go_report', text: '📊 Ver Relatório' },
+          ],
+          agentLabel: context === 'mother' ? 'TitiNauta Materna' : 'TitiNauta (Bebê)',
+          stateLabel: 'Conversa Livre',
+        }
+      );
+    }, 1000);
+  }, [context, addMessage]);
+
+  const handleShowReport = useCallback(() => {
+    addMessage('📊 Ver Relatório', 'user');
+    setDemoStep(6);
+
+    const reportContent = context === 'mother'
+      ? `*📊 Resumo do Desenvolvimento — Semana 5*\n\n🧘 *Autocuidado:* 3/5 metas alcançadas\n💤 *Sono:* Média 5h/noite\n🍎 *Nutrição:* Hidratação em dia\n💊 *Suplementos:* Ácido fólico OK\n❤️ *Saúde Mental:* Acompanhamento ativo\n\n_Continue cuidando de você! Cada dia conta._`
+      : `*📊 Resumo do Desenvolvimento — Semana 5*\n\n🧠 *Cognitivo:* Acompanha objetos ✅\n🤲 *Motor:* Tummy Time iniciado ✅\n👀 *Sensorial:* Foca rostos 20-30cm ✅\n😊 *Social:* Sorriso social emergindo 🔄\n🗣️ *Linguagem:* Responde a sons ✅\n\n🏅 *Badges conquistados:* 3\n📈 *Progresso geral:* 72%\n\n_Parabéns! O Bebê está se desenvolvendo muito bem!_`;
+
+    setTimeout(() => {
+      addMessage(reportContent, 'bot', {
+        buttons: [
+          { id: 'restart_demo', text: '🔄 Recomeçar Demo' },
+        ],
+        agentLabel: 'Relatório de Desenvolvimento',
+        stateLabel: 'Relatório',
+      });
+    }, 500);
+  }, [context, addMessage]);
 
   const handleButtonClick = useCallback((btnId: string, btnText: string) => {
+    if (btnId === 'ctx_child') {
+      handleContextSelect('child');
+      return;
+    }
+    if (btnId === 'ctx_mother') {
+      handleContextSelect('mother');
+      return;
+    }
+    if (btnId === 'go_quiz') {
+      handleQuizStart();
+      return;
+    }
+    if (btnId.startsWith('quiz_opt_')) {
+      const idx = parseInt(btnId.replace('quiz_opt_', ''));
+      handleQuizAnswer(idx, btnText);
+      return;
+    }
+    if (btnId === 'go_free') {
+      handleFreeConversation();
+      return;
+    }
+    if (btnId === 'go_report') {
+      handleShowReport();
+      return;
+    }
+    if (btnId === 'restart_demo') {
+      initConversation();
+      return;
+    }
+
     addMessage(btnText, 'user');
     if (btnId.includes('baby') || btnId.includes('bebe') || btnId.includes('child')) setContext('child');
     else if (btnId.includes('mother') || btnId.includes('mae') || btnId.includes('materna')) setContext('mother');
@@ -951,11 +1195,55 @@ const SimulatorPanel: React.FC<{
       const matchedState = cfg.transitions.find(t => t.toLowerCase().includes(btnId.toLowerCase()));
       if (matchedState) { transitionTo(matchedState); return; }
     }
-    addMessage(`Botao "${btnText}" clicado.`, 'bot');
-  }, [addMessage, currentState, configMap, transitionTo]);
+    addMessage(`Botão "${btnText}" clicado.`, 'bot');
+  }, [addMessage, currentState, configMap, transitionTo, handleContextSelect, handleQuizStart, handleQuizAnswer, handleFreeConversation, handleShowReport, initConversation]);
+
+  const sendMessage = useCallback(() => {
+    if (!message.trim() || !phone) return;
+    const msg = message.trim();
+    setMessage('');
+    addMessage(msg, 'user');
+
+    if (currentState === 'FREE_CONVERSATION') {
+      setTimeout(() => {
+        const responses = [
+          `Ótima pergunta! 🌟\n\nNa semana 5, é completamente normal que o Bebê tenha padrões de sono irregulares. O importante é manter uma rotina calma antes de dormir.\n\n*Dica:* Banho morno + ambiente escuro + som suave ajudam muito!`,
+          `Entendo sua preocupação! 💛\n\nCada bebê tem seu próprio ritmo. O que você descreveu está dentro do esperado para essa fase.\n\nSe quiser, posso te explicar mais sobre os marcos de desenvolvimento da semana 5.`,
+          `Que bom que você está atenta a isso! 🙌\n\nVou anotar essa informação no perfil do Bebê. Continue observando e compartilhando comigo!`,
+        ];
+        const randomResp = responses[Math.floor(Math.random() * responses.length)];
+        addMessage(randomResp, 'bot', {
+          agentLabel: context === 'mother' ? 'TitiNauta Materna' : 'TitiNauta (Bebê)',
+          stateLabel: 'Conversa Livre',
+        });
+      }, 800);
+    } else {
+      addMessage('Use os botões para navegar pelo fluxo da demo.', 'bot', {
+        agentLabel: currentState ? getAgentLabel(currentState) || undefined : undefined,
+        stateLabel: currentState ? configMap[currentState]?.display_name : undefined,
+      });
+    }
+  }, [message, phone, currentState, addMessage, getAgentLabel, configMap, context]);
 
   const currentCfg = currentState ? configMap[currentState] : null;
   const currentTransitions = currentCfg?.transitions || [];
+
+  const renderMicrocard = (ctx: 'child' | 'mother') => {
+    const mc = DEMO_CONTENT[ctx].microcard;
+    return (
+      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-lg border border-emerald-200 dark:border-emerald-800 p-2.5 my-1">
+        <p className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 mb-1.5">{mc.titulo}</p>
+        <div className="space-y-1">
+          {mc.itens.map((item, i) => (
+            <div key={i} className="flex items-start gap-1.5">
+              <CheckCircle className="h-3 w-3 text-emerald-500 shrink-0 mt-0.5" />
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-300">{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <Card className="h-full border-0 shadow-sm bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col overflow-hidden">
@@ -968,11 +1256,20 @@ const SimulatorPanel: React.FC<{
           <div className="flex items-center gap-1.5">
             {currentState && currentCfg ? (
               <span className="text-[10px] text-white/80">{currentCfg.display_name}</span>
+            ) : currentState ? (
+              <span className="text-[10px] text-white/80">Demo Interativa &middot; Passo {demoStep}/6</span>
             ) : (
               <span className="text-[10px] text-white/60">Clique em Iniciar</span>
             )}
           </div>
         </div>
+        {demoStep > 0 && (
+          <div className="flex items-center gap-0.5 mr-1">
+            {[1,2,3,4,5,6].map(s => (
+              <div key={s} className={`w-1.5 h-1.5 rounded-full transition-colors ${s <= demoStep ? 'bg-white' : 'bg-white/30'}`} />
+            ))}
+          </div>
+        )}
         <Button variant="ghost" size="icon" onClick={initConversation} disabled={loading} className="h-7 w-7 text-white hover:bg-white/10">
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
         </Button>
@@ -1020,13 +1317,14 @@ const SimulatorPanel: React.FC<{
               <div>
                 <p className="text-sm font-medium text-muted-foreground/60">Simulador WhatsApp</p>
                 <p className="text-[11px] text-muted-foreground/40 mt-0.5">Digite um telefone e clique em Iniciar</p>
+                <p className="text-[10px] text-muted-foreground/30 mt-2">Demo interativa com conteúdo real da Semana 5</p>
               </div>
             </div>
           )}
           {messages.map((m) => (
             <div key={m.id}>
               <div className={`flex ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] rounded-lg px-2.5 py-1.5 text-xs shadow-sm ${
+                <div className={`max-w-[85%] rounded-lg px-2.5 py-1.5 text-xs shadow-sm ${
                   m.sender === 'user'
                     ? 'bg-[#DCF8C6] dark:bg-[#005C4B] text-foreground rounded-tr-none'
                     : 'bg-white dark:bg-[#202C33] text-foreground rounded-tl-none'
@@ -1037,20 +1335,33 @@ const SimulatorPanel: React.FC<{
                       {m.agentLabel && <span className="text-violet-500"> &middot; {m.agentLabel}</span>}
                     </p>
                   )}
-                  <div className="whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: formatWhatsApp(m.text) }} />
+                  {m.text === '__MICROCARD__' && context ? (
+                    renderMicrocard(context)
+                  ) : (
+                    <div className="whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: formatWhatsApp(m.text) }} />
+                  )}
                   <p className="text-[9px] text-muted-foreground mt-0.5 text-right">
                     {m.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
+              {m.sender === 'bot' && m.text !== '__MICROCARD__' && (
+                <MessageActionBar
+                  messageId={m.id}
+                  isAudioPlaying={isAudioPlaying}
+                  audioMessageId={audioMessageId}
+                  onPlayAudio={handlePlayAudio}
+                  onShare={handleShare}
+                />
+              )}
               {m.buttons && m.buttons.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-1 ml-1">
+                <div className="flex flex-col gap-1 mt-1.5 ml-1 max-w-[85%]">
                   {m.buttons.map((btn) => (
                     <Button
                       key={btn.id}
                       size="sm"
                       variant="outline"
-                      className="text-[10px] bg-white dark:bg-[#202C33] h-6 px-2"
+                      className="text-[11px] bg-white dark:bg-[#202C33] h-8 px-3 justify-center border-[#075E54]/30 text-[#075E54] dark:text-emerald-400 dark:border-emerald-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 w-full"
                       onClick={() => handleButtonClick(btn.id, btn.text)}
                     >
                       {btn.text}
@@ -1060,6 +1371,17 @@ const SimulatorPanel: React.FC<{
               )}
             </div>
           ))}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-white dark:bg-[#202C33] rounded-lg rounded-tl-none px-3 py-2 shadow-sm">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1093,7 +1415,7 @@ const SimulatorPanel: React.FC<{
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Digite uma mensagem..."
+          placeholder={currentState === 'FREE_CONVERSATION' ? 'Pergunte algo à TitiNauta...' : 'Digite uma mensagem...'}
           className="flex-1 h-8 text-xs"
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
         />
