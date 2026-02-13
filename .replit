@@ -5,7 +5,7 @@ integrations = ["javascript_openai:1.0.0", "stripe:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["jq", "libuuid"]
+packages = ["jq", "libuuid", "unzip"]
 
 [userenv]
 
